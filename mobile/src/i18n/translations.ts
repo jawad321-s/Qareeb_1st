@@ -174,6 +174,172 @@ export const translations = {
     'artisan.premiumDesc': 'Get more visibility & priority matching.',
     'artisan.income': 'Income',
     'artisan.totalMonth': 'Total this month',
+
+    // status
+    'status.PENDING': 'Pending',
+    'status.ACCEPTED': 'Accepted',
+    'status.ON_THE_WAY': 'On the way',
+    'status.WORKING': 'In progress',
+    'status.COMPLETED': 'Completed',
+    'status.CANCELLED': 'Cancelled',
+
+    // OTP
+    'otp.title': 'Verify your number',
+    'otp.sentTo': 'We sent a 4-digit code to',
+    'otp.yourPhone': 'your phone',
+    'otp.verify': 'Verify',
+    'otp.resendIn': 'Resend code in',
+    'otp.resend': 'Resend code',
+
+    // forgot password
+    'forgot.title': 'Reset password',
+    'forgot.subtitle': "Enter your email and we'll send you a reset link.",
+    'forgot.send': 'Send reset link',
+    'forgot.sentTitle': 'Check your inbox',
+    'forgot.sentDesc': "We've sent a password reset link to your email address.",
+    'forgot.backToSignIn': 'Back to sign in',
+
+    // request detail
+    'req.title': 'Request details',
+    'req.tracking': 'Order tracking',
+    'req.yourArtisan': 'Your artisan',
+    'req.chat': 'Chat',
+    'req.call': 'Call',
+    'req.offers': 'Offers',
+    'req.sortedByPrice': 'Sorted by price',
+    'req.rateExperience': 'Rate your experience',
+
+    // offer card
+    'offer.best': 'Best value',
+    'offer.accept': 'Accept',
+    'offer.reject': 'Reject',
+    'offer.accepted': 'Accepted',
+    'offer.rejected': 'Rejected',
+    'offer.min': 'min',
+
+    // tracking timeline
+    'track.PENDING.title': 'Request posted',
+    'track.PENDING.desc': 'Waiting for artisan offers',
+    'track.ACCEPTED.title': 'Offer accepted',
+    'track.ACCEPTED.desc': 'Artisan confirmed the job',
+    'track.ON_THE_WAY.title': 'On the way',
+    'track.ON_THE_WAY.desc': 'Artisan is heading to you',
+    'track.WORKING.title': 'In progress',
+    'track.WORKING.desc': 'Work is underway',
+    'track.COMPLETED.title': 'Completed',
+    'track.COMPLETED.desc': 'Job finished — leave a review',
+
+    // chat
+    'chat.message': 'Message…',
+
+    // artisan detail
+    'ad.about': 'About',
+    'ad.services': 'Services',
+    'ad.gallery': 'Work gallery',
+    'ad.reviews': 'Reviews',
+    'ad.request': 'Request this artisan',
+    'ad.jobs': 'Jobs',
+    'ad.radius': 'Radius',
+    'ad.verified': 'Verified',
+    'ad.premium': 'Premium',
+
+    // service detail
+    'sd.verifiedPros': 'Verified pros',
+    'sd.verifiedProsDesc': 'ID-checked & insured',
+    'sd.fastResponse': 'Fast response',
+    'sd.fastResponseDesc': 'Offers in minutes',
+    'sd.quality': 'Quality work',
+    'sd.qualityDesc': 'Rated by real customers',
+    'sd.startingFrom': 'Starting from',
+    'sd.available': 'Available artisans',
+    'sd.request': 'Request this service',
+
+    // review
+    'review.title': 'Leave a review',
+    'review.how': 'How was your experience?',
+    'review.commentPlaceholder': 'Share more about your experience (optional)…',
+    'review.submit': 'Submit review',
+    'review.tag.punctual': 'Punctual',
+    'review.tag.professional': 'Professional',
+    'review.tag.fairPrice': 'Fair price',
+    'review.tag.cleanWork': 'Clean work',
+    'review.tag.friendly': 'Friendly',
+    'review.tag.rehire': 'Would rehire',
+
+    // edit profile
+    'edit.title': 'Edit profile',
+    'edit.changePhoto': 'Change photo',
+    'edit.changePassword': 'Change password',
+
+    // change password
+    'cp.title': 'Change password',
+    'cp.subtitle': "Choose a strong password you don't use elsewhere.",
+    'cp.current': 'Current password',
+    'cp.new': 'New password',
+    'cp.confirm': 'Confirm new password',
+    'cp.update': 'Update password',
+
+    // help
+    'help.title': 'Help center',
+    'help.howHelp': 'How can we help?',
+    'help.browse': 'Browse common questions or reach our support team any time.',
+    'help.contact': 'Contact support',
+    'help.faq': 'Frequently asked',
+
+    // report
+    'report.title': 'Report a problem',
+    'report.subtitle': 'Tell us what went wrong. Reports are confidential.',
+    'report.reason': 'REASON',
+    'report.details': 'DETAILS',
+    'report.detailsPlaceholder': 'Describe what happened…',
+    'report.submit': 'Submit report',
+    'report.r1': 'Unprofessional behavior',
+    'report.r2': 'No-show / late',
+    'report.r3': 'Overcharged',
+    'report.r4': 'Poor quality work',
+    'report.r5': 'Safety concern',
+    'report.r6': 'Other',
+
+    // location permission
+    'loc.title': 'Enable location',
+    'loc.subtitle': 'Qareeb uses your location to connect you with the best nearby artisans.',
+    'loc.b1': 'Match with the closest available artisans',
+    'loc.b2': 'Get accurate arrival-time estimates',
+    'loc.b3': 'Track your artisan on the way in real time',
+    'loc.enable': 'Enable location',
+    'loc.notNow': 'Not now',
+
+    // favorites
+    'fav.title': 'Favorites',
+    'fav.empty': 'No favorites yet',
+    'fav.emptyDesc': 'Tap the heart on an artisan to save them here.',
+    'fav.saved': 'Saved artisan',
+
+    // artisan profile
+    'ap.verification': 'Identity verification',
+    'ap.gallery': 'Work gallery',
+    'ap.servicesPricing': 'Services & pricing',
+    'ap.radius': 'Service radius',
+    'ap.availability': 'Availability',
+    'ap.subscription': 'Subscription plan',
+    'ap.pending': 'Pending',
+
+    // artisan offers / jobs
+    'aOffers.title': 'My offers',
+    'aJobs.title': 'Nearby jobs',
+    'aJobs.subtitle': 'Requests within your service radius',
+    'aJobs.empty': 'No requests nearby',
+    'aJobs.emptyDesc': 'New jobs in your area will appear here in real time.',
+
+    // job detail
+    'job.title': 'Job details',
+    'job.sendQuote': 'Send your quotation',
+    'job.eta': 'ETA (min)',
+    'job.messageToCustomer': 'Message to customer',
+    'job.messagePlaceholder': "Introduce yourself and what's included…",
+    'job.submit': 'Submit offer',
+    'job.sent': 'Offer sent ✓',
+    'job.budget': 'Budget',
   },
 
   ar: {
@@ -346,6 +512,172 @@ export const translations = {
     'artisan.premiumDesc': 'ظهور أكبر وأولوية في المطابقة.',
     'artisan.income': 'الدخل',
     'artisan.totalMonth': 'إجمالي هذا الشهر',
+
+    // status
+    'status.PENDING': 'قيد الانتظار',
+    'status.ACCEPTED': 'مقبول',
+    'status.ON_THE_WAY': 'في الطريق',
+    'status.WORKING': 'قيد التنفيذ',
+    'status.COMPLETED': 'مكتمل',
+    'status.CANCELLED': 'ملغى',
+
+    // OTP
+    'otp.title': 'تأكيد رقمك',
+    'otp.sentTo': 'أرسلنا رمزاً من 4 أرقام إلى',
+    'otp.yourPhone': 'جوالك',
+    'otp.verify': 'تأكيد',
+    'otp.resendIn': 'إعادة الإرسال خلال',
+    'otp.resend': 'إعادة إرسال الرمز',
+
+    // forgot password
+    'forgot.title': 'إعادة تعيين كلمة المرور',
+    'forgot.subtitle': 'أدخل بريدك وسنرسل لك رابط إعادة التعيين.',
+    'forgot.send': 'إرسال الرابط',
+    'forgot.sentTitle': 'تحقّق من بريدك',
+    'forgot.sentDesc': 'أرسلنا رابط إعادة تعيين كلمة المرور إلى بريدك الإلكتروني.',
+    'forgot.backToSignIn': 'العودة لتسجيل الدخول',
+
+    // request detail
+    'req.title': 'تفاصيل الطلب',
+    'req.tracking': 'تتبّع الطلب',
+    'req.yourArtisan': 'الحرفي الخاص بك',
+    'req.chat': 'محادثة',
+    'req.call': 'اتصال',
+    'req.offers': 'العروض',
+    'req.sortedByPrice': 'مرتّبة حسب السعر',
+    'req.rateExperience': 'قيّم تجربتك',
+
+    // offer card
+    'offer.best': 'أفضل قيمة',
+    'offer.accept': 'قبول',
+    'offer.reject': 'رفض',
+    'offer.accepted': 'مقبول',
+    'offer.rejected': 'مرفوض',
+    'offer.min': 'دقيقة',
+
+    // tracking timeline
+    'track.PENDING.title': 'تم نشر الطلب',
+    'track.PENDING.desc': 'بانتظار عروض الحرفيين',
+    'track.ACCEPTED.title': 'تم قبول العرض',
+    'track.ACCEPTED.desc': 'أكّد الحرفي العمل',
+    'track.ON_THE_WAY.title': 'في الطريق',
+    'track.ON_THE_WAY.desc': 'الحرفي في طريقه إليك',
+    'track.WORKING.title': 'قيد التنفيذ',
+    'track.WORKING.desc': 'العمل جارٍ الآن',
+    'track.COMPLETED.title': 'مكتمل',
+    'track.COMPLETED.desc': 'انتهى العمل — اترك تقييماً',
+
+    // chat
+    'chat.message': 'رسالة…',
+
+    // artisan detail
+    'ad.about': 'نبذة',
+    'ad.services': 'الخدمات',
+    'ad.gallery': 'معرض الأعمال',
+    'ad.reviews': 'المراجعات',
+    'ad.request': 'اطلب هذا الحرفي',
+    'ad.jobs': 'عمل',
+    'ad.radius': 'النطاق',
+    'ad.verified': 'موثّق',
+    'ad.premium': 'مميّز',
+
+    // service detail
+    'sd.verifiedPros': 'حرفيون موثوقون',
+    'sd.verifiedProsDesc': 'موثّقون ومؤمّنون',
+    'sd.fastResponse': 'استجابة سريعة',
+    'sd.fastResponseDesc': 'عروض خلال دقائق',
+    'sd.quality': 'جودة عالية',
+    'sd.qualityDesc': 'مقيّمة من عملاء حقيقيين',
+    'sd.startingFrom': 'يبدأ من',
+    'sd.available': 'الحرفيون المتاحون',
+    'sd.request': 'اطلب هذه الخدمة',
+
+    // review
+    'review.title': 'اترك تقييماً',
+    'review.how': 'كيف كانت تجربتك؟',
+    'review.commentPlaceholder': 'شارك المزيد عن تجربتك (اختياري)…',
+    'review.submit': 'إرسال التقييم',
+    'review.tag.punctual': 'ملتزم بالوقت',
+    'review.tag.professional': 'محترف',
+    'review.tag.fairPrice': 'سعر عادل',
+    'review.tag.cleanWork': 'عمل نظيف',
+    'review.tag.friendly': 'ودود',
+    'review.tag.rehire': 'سأكرّر التعامل',
+
+    // edit profile
+    'edit.title': 'تعديل الملف الشخصي',
+    'edit.changePhoto': 'تغيير الصورة',
+    'edit.changePassword': 'تغيير كلمة المرور',
+
+    // change password
+    'cp.title': 'تغيير كلمة المرور',
+    'cp.subtitle': 'اختر كلمة مرور قوية لا تستخدمها في مكان آخر.',
+    'cp.current': 'كلمة المرور الحالية',
+    'cp.new': 'كلمة المرور الجديدة',
+    'cp.confirm': 'تأكيد كلمة المرور الجديدة',
+    'cp.update': 'تحديث كلمة المرور',
+
+    // help
+    'help.title': 'مركز المساعدة',
+    'help.howHelp': 'كيف يمكننا المساعدة؟',
+    'help.browse': 'تصفّح الأسئلة الشائعة أو تواصل مع فريق الدعم في أي وقت.',
+    'help.contact': 'تواصل مع الدعم',
+    'help.faq': 'الأسئلة الشائعة',
+
+    // report
+    'report.title': 'الإبلاغ عن مشكلة',
+    'report.subtitle': 'أخبرنا بما حدث. جميع البلاغات سرّية.',
+    'report.reason': 'السبب',
+    'report.details': 'التفاصيل',
+    'report.detailsPlaceholder': 'صف ما حدث…',
+    'report.submit': 'إرسال البلاغ',
+    'report.r1': 'سلوك غير محترف',
+    'report.r2': 'لم يحضر / تأخّر',
+    'report.r3': 'مبالغة في السعر',
+    'report.r4': 'جودة عمل ضعيفة',
+    'report.r5': 'مخاوف تتعلق بالسلامة',
+    'report.r6': 'أخرى',
+
+    // location permission
+    'loc.title': 'تفعيل الموقع',
+    'loc.subtitle': 'يستخدم قريب موقعك لربطك بأفضل الحرفيين القريبين منك.',
+    'loc.b1': 'الربط بأقرب الحرفيين المتاحين',
+    'loc.b2': 'تقديرات دقيقة لوقت الوصول',
+    'loc.b3': 'تتبّع الحرفي في الطريق مباشرةً',
+    'loc.enable': 'تفعيل الموقع',
+    'loc.notNow': 'ليس الآن',
+
+    // favorites
+    'fav.title': 'المفضّلة',
+    'fav.empty': 'لا توجد مفضّلة بعد',
+    'fav.emptyDesc': 'اضغط أيقونة القلب على حرفي لحفظه هنا.',
+    'fav.saved': 'حرفي محفوظ',
+
+    // artisan profile
+    'ap.verification': 'توثيق الهوية',
+    'ap.gallery': 'معرض الأعمال',
+    'ap.servicesPricing': 'الخدمات والأسعار',
+    'ap.radius': 'نطاق الخدمة',
+    'ap.availability': 'أوقات العمل',
+    'ap.subscription': 'باقة الاشتراك',
+    'ap.pending': 'قيد المراجعة',
+
+    // artisan offers / jobs
+    'aOffers.title': 'عروضي',
+    'aJobs.title': 'أعمال قريبة',
+    'aJobs.subtitle': 'طلبات ضمن نطاق خدمتك',
+    'aJobs.empty': 'لا توجد طلبات قريبة',
+    'aJobs.emptyDesc': 'ستظهر الأعمال الجديدة في منطقتك هنا فوراً.',
+
+    // job detail
+    'job.title': 'تفاصيل العمل',
+    'job.sendQuote': 'أرسل عرض سعرك',
+    'job.eta': 'الوصول (دقيقة)',
+    'job.messageToCustomer': 'رسالة للعميل',
+    'job.messagePlaceholder': 'عرّف بنفسك وما يشمله العرض…',
+    'job.submit': 'إرسال العرض',
+    'job.sent': 'تم إرسال العرض ✓',
+    'job.budget': 'الميزانية',
   },
 } as const;
 

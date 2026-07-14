@@ -8,6 +8,7 @@ import { Text } from '@/components/ui/Text';
 import { Button } from '@/components/ui/Button';
 import { useTheme } from '@/theme/ThemeProvider';
 import { useAuth } from '@/store/auth';
+import { useT } from '@/i18n';
 
 const LENGTH = 4;
 
@@ -15,6 +16,7 @@ export default function Otp() {
   const { colors } = useTheme();
   const { phone } = useLocalSearchParams<{ phone?: string }>();
   const signInAs = useAuth((s) => s.signInAs);
+  const { t } = useT();
   const [code, setCode] = useState<string[]>(Array(LENGTH).fill(''));
   const [seconds, setSeconds] = useState(45);
   const [loading, setLoading] = useState(false);
@@ -48,9 +50,9 @@ export default function Otp() {
     <Screen>
       <Header showBack />
       <Animated.View entering={FadeInDown.duration(400)} style={{ gap: 8, marginBottom: 32 }}>
-        <Text variant="h1">Verify your number</Text>
+        <Text variant="h1">{t('otp.title')}</Text>
         <Text variant="body" tone="muted">
-          We sent a 4-digit code to {phone ?? 'your phone'}.
+          {t('otp.sentTo')} {phone ?? t('otp.yourPhone')}
         </Text>
       </Animated.View>
 
@@ -84,17 +86,17 @@ export default function Otp() {
         ))}
       </View>
 
-      <Button label="Verify" onPress={verify} loading={loading} disabled={!filled} />
+      <Button label={t('otp.verify')} onPress={verify} loading={loading} disabled={!filled} />
 
       <View style={{ flexDirection: 'row', justifyContent: 'center', gap: 4, marginTop: 20 }}>
         {seconds > 0 ? (
           <Text variant="body" tone="muted">
-            Resend code in {seconds}s
+            {t('otp.resendIn')} {seconds}s
           </Text>
         ) : (
           <Pressable onPress={() => setSeconds(45)}>
             <Text variant="body" tone="primary" style={{ fontFamily: 'Inter_600SemiBold' }}>
-              Resend code
+              {t('otp.resend')}
             </Text>
           </Pressable>
         )}

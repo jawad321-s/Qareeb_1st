@@ -12,6 +12,7 @@ import { Badge } from '@/components/ui/Badge';
 import { useAuth } from '@/store/auth';
 import { useTheme } from '@/theme/ThemeProvider';
 import { useThemeStore } from '@/theme/ThemeProvider';
+import { useT } from '@/i18n';
 import { MOCK_ARTISAN_PROFILE } from '@/mock/data';
 
 export default function ArtisanProfile() {
@@ -19,17 +20,19 @@ export default function ArtisanProfile() {
   const user = useAuth((s) => s.user)!;
   const signOut = useAuth((s) => s.signOut);
   const { mode, setMode } = useThemeStore();
+  const { t, locale, toggle } = useT();
   const profile = MOCK_ARTISAN_PROFILE;
 
   const items: { icon: IconName; label: string; danger?: boolean; onPress?: () => void; route?: string }[] = [
-    { icon: 'shield', label: 'Identity verification', route: '/(shared)/settings' },
-    { icon: 'image', label: 'Work gallery', route: '/(shared)/settings' },
-    { icon: 'sliders', label: 'Services & pricing', route: '/(shared)/settings' },
-    { icon: 'map-pin', label: 'Service radius', route: '/(shared)/settings' },
-    { icon: 'calendar', label: 'Availability', route: '/(shared)/settings' },
-    { icon: 'award', label: 'Subscription plan', route: '/(shared)/subscription' },
-    { icon: isDark ? 'moon' : 'sun', label: `Theme: ${mode}`, onPress: () => setMode(mode === 'dark' ? 'light' : mode === 'light' ? 'system' : 'dark') },
-    { icon: 'log-out', label: 'Sign out', danger: true, onPress: () => { signOut(); router.replace('/(auth)/welcome'); } },
+    { icon: 'shield', label: t('ap.verification'), route: '/(shared)/settings' },
+    { icon: 'image', label: t('ap.gallery'), route: '/(shared)/settings' },
+    { icon: 'sliders', label: t('ap.servicesPricing'), route: '/(shared)/settings' },
+    { icon: 'map-pin', label: t('ap.radius'), route: '/(shared)/settings' },
+    { icon: 'calendar', label: t('ap.availability'), route: '/(shared)/settings' },
+    { icon: 'award', label: t('ap.subscription'), route: '/(shared)/subscription' },
+    { icon: 'globe', label: `${t('profile.language')}: ${locale === 'ar' ? 'العربية' : 'English'}`, onPress: toggle },
+    { icon: isDark ? 'moon' : 'sun', label: `${t('profile.theme')}: ${mode}`, onPress: () => setMode(mode === 'dark' ? 'light' : mode === 'light' ? 'system' : 'dark') },
+    { icon: 'log-out', label: t('profile.signOut'), danger: true, onPress: () => { signOut(); router.replace('/(auth)/welcome'); } },
   ];
 
   return (
@@ -44,13 +47,13 @@ export default function ArtisanProfile() {
                 {user.fullName}
               </Text>
               <View style={{ flexDirection: 'row', gap: 8 }}>
-                {profile.premium && <Badge label="Premium" variant="warning" icon="award" />}
-                <Badge label={profile.verificationStatus === 'approved' ? 'Verified' : 'Pending'} variant={profile.verificationStatus === 'approved' ? 'success' : 'warning'} icon="shield" />
+                {profile.premium && <Badge label={t('ad.premium')} variant="warning" icon="award" />}
+                <Badge label={profile.verificationStatus === 'approved' ? t('ad.verified') : t('ap.pending')} variant={profile.verificationStatus === 'approved' ? 'success' : 'warning'} icon="shield" />
               </View>
               <View style={{ flexDirection: 'row', gap: 28, marginTop: 8 }}>
-                <Stat value={String(profile.completedJobs)} label="Jobs" />
-                <Stat value={user.rating.toFixed(1)} label="Rating" />
-                <Stat value={`${profile.serviceRadiusKm}km`} label="Radius" />
+                <Stat value={String(profile.completedJobs)} label={t('ad.jobs')} />
+                <Stat value={user.rating.toFixed(1)} label={t('profile.rating')} />
+                <Stat value={`${profile.serviceRadiusKm}km`} label={t('ad.radius')} />
               </View>
             </View>
           </SafeAreaView>

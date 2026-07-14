@@ -19,10 +19,12 @@ import { useArtisan, useReviews } from '@/hooks/queries';
 import { categoryById } from '@/constants/categories';
 import { timeAgo } from '@/lib/format';
 import { useTheme } from '@/theme/ThemeProvider';
+import { useT } from '@/i18n';
 
 export default function ArtisanDetail() {
   const { colors, isDark } = useTheme();
   const { id } = useLocalSearchParams<{ id: string }>();
+  const { t, locale } = useT();
   const { data, isLoading } = useArtisan(id!);
   const reviews = useReviews(id!);
 
@@ -54,13 +56,13 @@ export default function ArtisanDetail() {
                 {user.fullName}
               </Text>
               <View style={{ flexDirection: 'row', gap: 8 }}>
-                {profile.premium && <Badge label="Premium" variant="warning" icon="award" />}
-                {user.verified && <Badge label="Verified" variant="success" icon="shield" />}
+                {profile.premium && <Badge label={t('ad.premium')} variant="warning" icon="award" />}
+                {user.verified && <Badge label={t('ad.verified')} variant="success" icon="shield" />}
               </View>
               <View style={{ flexDirection: 'row', gap: 28, marginTop: 12 }}>
-                <Stat value={user.rating.toFixed(1)} label="Rating" />
-                <Stat value={String(profile.completedJobs)} label="Jobs" />
-                <Stat value={`${profile.serviceRadiusKm}km`} label="Radius" />
+                <Stat value={user.rating.toFixed(1)} label={t('profile.rating')} />
+                <Stat value={String(profile.completedJobs)} label={t('ad.jobs')} />
+                <Stat value={`${profile.serviceRadiusKm}km`} label={t('ad.radius')} />
               </View>
             </View>
           </SafeAreaView>
@@ -69,7 +71,7 @@ export default function ArtisanDetail() {
         <View style={{ paddingHorizontal: 20, marginTop: 20, gap: 20 }}>
           <Animated.View entering={FadeInDown.duration(400)}>
             <Text variant="h3" style={{ marginBottom: 8 }}>
-              About
+              {t('ad.about')}
             </Text>
             <Text variant="body" tone="muted" style={{ lineHeight: 22 }}>
               {profile.bio}
@@ -79,12 +81,12 @@ export default function ArtisanDetail() {
           {/* Categories */}
           <View>
             <Text variant="h3" style={{ marginBottom: 10 }}>
-              Services
+              {t('ad.services')}
             </Text>
             <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
               {profile.categoryIds.map((cid) => {
                 const c = categoryById(cid);
-                return c ? <Badge key={cid} label={c.name.en} variant="primary" icon={c.icon as any} /> : null;
+                return c ? <Badge key={cid} label={c.name[locale]} variant="primary" icon={c.icon as any} /> : null;
               })}
             </View>
           </View>
@@ -93,7 +95,7 @@ export default function ArtisanDetail() {
           {profile.gallery.length > 0 && (
             <View>
               <Text variant="h3" style={{ marginBottom: 10 }}>
-                Work gallery
+                {t('ad.gallery')}
               </Text>
               <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 10 }}>
                 {profile.gallery.map((uri) => (
@@ -106,7 +108,7 @@ export default function ArtisanDetail() {
           {/* Reviews */}
           <View>
             <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
-              <Text variant="h3">Reviews</Text>
+              <Text variant="h3">{t('ad.reviews')}</Text>
               <Rating value={user.rating} count={user.ratingCount} size={14} showValue />
             </View>
             <View style={{ gap: 12 }}>
@@ -129,7 +131,7 @@ export default function ArtisanDetail() {
       </ScrollView>
 
       <View style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: 20, paddingBottom: 32, backgroundColor: colors.bg, borderTopWidth: 1, borderTopColor: colors.border }}>
-        <Button label="Request this artisan" iconRight="arrow-right" onPress={() => router.push('/(customer)/create')} />
+        <Button label={t('ad.request')} iconRight="arrow-right" onPress={() => router.push('/(customer)/create')} />
       </View>
     </View>
   );

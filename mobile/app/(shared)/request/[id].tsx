@@ -20,12 +20,14 @@ import { useToast } from '@/components/feedback/Toast';
 import { categoryById } from '@/constants/categories';
 import { formatMoney } from '@/lib/format';
 import { useTheme } from '@/theme/ThemeProvider';
+import { useT } from '@/i18n';
 import { MOCK_ARTISANS } from '@/mock/data';
 
 export default function RequestDetail() {
   const { colors } = useTheme();
   const { id } = useLocalSearchParams<{ id: string }>();
   const toast = useToast();
+  const { t } = useT();
   const { data: request, isLoading } = useRequest(id!);
   const offers = useOffers(id!);
   const accept = useAcceptOffer(id!);
@@ -35,7 +37,7 @@ export default function RequestDetail() {
   if (isLoading || !request) {
     return (
       <Screen scroll>
-        <Header showBack title="Request" />
+        <Header showBack title={t('req.title')} />
         <View style={{ gap: 12 }}>
           <CardSkeleton />
           <CardSkeleton />
@@ -63,7 +65,7 @@ export default function RequestDetail() {
 
   return (
     <Screen scroll>
-      <Header showBack title="Request details" rightIcon="more-horizontal" />
+      <Header showBack title={t('req.title')} rightIcon="more-horizontal" />
 
       <Animated.View entering={FadeInDown.duration(400)}>
         <Card style={{ gap: 14 }}>
@@ -104,7 +106,7 @@ export default function RequestDetail() {
       {!isPending && (
         <View style={{ marginTop: 20 }}>
           <Text variant="h3" style={{ marginBottom: 14 }}>
-            Order tracking
+            {t('req.tracking')}
           </Text>
           <Card>
             <TrackingTimeline status={request.status} />
@@ -116,7 +118,7 @@ export default function RequestDetail() {
       {acceptedArtisan && (
         <View style={{ marginTop: 20 }}>
           <Text variant="h3" style={{ marginBottom: 14 }}>
-            Your artisan
+            {t('req.yourArtisan')}
           </Text>
           <Card style={{ gap: 14 }}>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
@@ -128,10 +130,10 @@ export default function RequestDetail() {
             </View>
             <View style={{ flexDirection: 'row', gap: 10 }}>
               <View style={{ flex: 1 }}>
-                <Button label="Chat" iconLeft="message" variant="secondary" onPress={() => router.push(`/(shared)/chat/${request.id}`)} />
+                <Button label={t('req.chat')} iconLeft="message" variant="secondary" onPress={() => router.push(`/(shared)/chat/${request.id}`)} />
               </View>
               <View style={{ flex: 1 }}>
-                <Button label="Call" iconLeft="phone" onPress={() => {}} />
+                <Button label={t('req.call')} iconLeft="phone" onPress={() => {}} />
               </View>
             </View>
           </Card>
@@ -142,9 +144,9 @@ export default function RequestDetail() {
       {isPending && (
         <View style={{ marginTop: 24 }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
-            <Text variant="h3">Offers ({offers.data?.length ?? 0})</Text>
+            <Text variant="h3">{t('req.offers')} ({offers.data?.length ?? 0})</Text>
             <Text variant="caption" tone="muted">
-              Sorted by price
+              {t('req.sortedByPrice')}
             </Text>
           </View>
           <View style={{ gap: 18 }}>
@@ -170,7 +172,7 @@ export default function RequestDetail() {
       {/* Completed → review CTA */}
       {request.status === 'COMPLETED' && (
         <View style={{ marginTop: 20 }}>
-          <Button label="Rate your experience" iconLeft="star" onPress={() => router.push(`/(shared)/review/${request.id}`)} />
+          <Button label={t('req.rateExperience')} iconLeft="star" onPress={() => router.push(`/(shared)/review/${request.id}`)} />
         </View>
       )}
     </Screen>

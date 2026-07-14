@@ -11,9 +11,11 @@ import { Icon } from '@/components/ui/Icon';
 import { Text } from '@/components/ui/Text';
 import { useAuth } from '@/store/auth';
 import { useTheme } from '@/theme/ThemeProvider';
+import { useT } from '@/i18n';
 
 export default function EditProfile() {
   const { colors } = useTheme();
+  const { t } = useT();
   const user = useAuth((s) => s.user)!;
   const updateUser = useAuth((s) => s.updateUser);
   const [fullName, setFullName] = useState(user.fullName);
@@ -37,7 +39,7 @@ export default function EditProfile() {
 
   return (
     <Screen scroll>
-      <Header showBack title="Edit profile" />
+      <Header showBack title={t('edit.title')} />
       <View style={{ alignItems: 'center', marginBottom: 24 }}>
         <Pressable onPress={pick}>
           <Avatar uri={photo} name={fullName} size={96} />
@@ -46,16 +48,16 @@ export default function EditProfile() {
           </View>
         </Pressable>
         <Text variant="caption" tone="primary" style={{ marginTop: 8 }} onPress={pick}>
-          Change photo
+          {t('edit.changePhoto')}
         </Text>
       </View>
 
       <View style={{ gap: 16 }}>
-        <Input label="Full name" iconLeft="user" value={fullName} onChangeText={setFullName} />
-        <Input label="Email" iconLeft="mail" value={email} onChangeText={setEmail} autoCapitalize="none" keyboardType="email-address" />
-        <Input label="Phone" iconLeft="phone" value={phone} onChangeText={setPhone} keyboardType="phone-pad" />
-        <Button label="Save changes" onPress={save} loading={saving} style={{ marginTop: 8 }} />
-        <Button label="Change password" variant="ghost" iconLeft="lock" onPress={() => router.push('/(shared)/change-password')} />
+        <Input label={t('auth.fullName')} iconLeft="user" value={fullName} onChangeText={setFullName} />
+        <Input label={t('auth.email')} iconLeft="mail" value={email} onChangeText={setEmail} autoCapitalize="none" keyboardType="email-address" />
+        <Input label={t('auth.phone')} iconLeft="phone" value={phone} onChangeText={setPhone} keyboardType="phone-pad" />
+        <Button label={t('common.save')} onPress={save} loading={saving} style={{ marginTop: 8 }} />
+        <Button label={t('edit.changePassword')} variant="ghost" iconLeft="lock" onPress={() => router.push('/(shared)/change-password')} />
       </View>
     </Screen>
   );

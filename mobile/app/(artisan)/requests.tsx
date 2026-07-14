@@ -9,17 +9,19 @@ import { CardSkeleton } from '@/components/feedback/Skeleton';
 import { EmptyState } from '@/components/feedback/EmptyState';
 import { useNearbyRequests } from '@/hooks/queries';
 import { useAuth } from '@/store/auth';
+import { useT } from '@/i18n';
 
 export default function ArtisanRequests() {
   const user = useAuth((s) => s.user)!;
+  const { t } = useT();
   const { data, isLoading } = useNearbyRequests(user.uid);
 
   return (
     <Screen padded={false}>
       <View style={{ paddingHorizontal: 20, paddingTop: 8 }}>
-        <Text variant="h1">Nearby jobs</Text>
+        <Text variant="h1">{t('aJobs.title')}</Text>
         <Text variant="caption" tone="muted" style={{ marginTop: 4 }}>
-          Requests within your service radius
+          {t('aJobs.subtitle')}
         </Text>
       </View>
       <ScrollView contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 16, paddingBottom: 140, gap: 12 }} showsVerticalScrollIndicator={false}>
@@ -27,7 +29,7 @@ export default function ArtisanRequests() {
           [0, 1, 2].map((i) => <CardSkeleton key={i} />)
         ) : (data ?? []).length === 0 ? (
           <View style={{ marginTop: 60 }}>
-            <EmptyState icon="briefcase" title="No requests nearby" description="New jobs in your area will appear here in real time." />
+            <EmptyState icon="briefcase" title={t('aJobs.empty')} description={t('aJobs.emptyDesc')} />
           </View>
         ) : (
           (data ?? []).map((r) => (

@@ -17,12 +17,14 @@ import { config } from '@/lib/config';
 import { formatMoney } from '@/lib/format';
 import { useAuth } from '@/store/auth';
 import { useTheme } from '@/theme/ThemeProvider';
+import { useT } from '@/i18n';
 
 export default function JobDetail() {
   const { colors } = useTheme();
   const { id } = useLocalSearchParams<{ id: string }>();
   const user = useAuth((s) => s.user)!;
   const toast = useToast();
+  const { t } = useT();
   const { data: request, isLoading } = useRequest(id!);
   const submit = useSubmitOffer(id!);
 
@@ -34,7 +36,7 @@ export default function JobDetail() {
   if (isLoading || !request) {
     return (
       <Screen scroll>
-        <Header showBack title="Job" />
+        <Header showBack title={t('job.title')} />
         <CardSkeleton />
       </Screen>
     );
@@ -61,7 +63,7 @@ export default function JobDetail() {
 
   return (
     <Screen scroll>
-      <Header showBack title="Job details" />
+      <Header showBack title={t('job.title')} />
 
       <Animated.View entering={FadeInDown.duration(400)}>
         <Card style={{ gap: 14 }}>
@@ -90,7 +92,7 @@ export default function JobDetail() {
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
               <Icon name="wallet" size={16} color="#94A3B8" />
               <Text variant="caption" tone="muted">
-                Budget {formatMoney(request.budget.min)}–{formatMoney(request.budget.max)}
+                {t('job.budget')} {formatMoney(request.budget.min)}–{formatMoney(request.budget.max)}
               </Text>
             </View>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
@@ -105,7 +107,7 @@ export default function JobDetail() {
 
       {/* Offer form */}
       <Text variant="h3" style={{ marginTop: 24, marginBottom: 14 }}>
-        Send your quotation
+        {t('job.sendQuote')}
       </Text>
       <View style={{ gap: 16 }}>
         <View style={{ flexDirection: 'row', gap: 12 }}>
@@ -117,25 +119,25 @@ export default function JobDetail() {
           </View>
           <View style={{ flex: 1, gap: 6 }}>
             <Text variant="caption" tone="muted">
-              ETA (min)
+              {t('job.eta')}
             </Text>
             <TextInput value={eta} onChangeText={setEta} keyboardType="number-pad" placeholder="30" placeholderTextColor={colors.muted} style={inputStyle(colors)} />
           </View>
         </View>
         <View style={{ gap: 6 }}>
           <Text variant="caption" tone="muted">
-            Message to customer
+            {t('job.messageToCustomer')}
           </Text>
           <TextInput
             value={message}
             onChangeText={setMessage}
-            placeholder="Introduce yourself and what's included…"
+            placeholder={t('job.messagePlaceholder')}
             placeholderTextColor={colors.muted}
             multiline
             style={{ ...inputStyle(colors), minHeight: 100, height: undefined, textAlignVertical: 'top', paddingTop: 12 }}
           />
         </View>
-        <Button label={sent ? 'Offer sent ✓' : 'Submit offer'} iconRight={sent ? 'check-circle' : 'send'} onPress={send} loading={submit.isPending} disabled={!canSend} />
+        <Button label={sent ? t('job.sent') : t('job.submit')} iconRight={sent ? 'check-circle' : 'send'} onPress={send} loading={submit.isPending} disabled={!canSend} />
       </View>
     </Screen>
   );

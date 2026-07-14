@@ -10,6 +10,7 @@ import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
 import { Text } from '@/components/ui/Text';
 import { useToast } from '@/components/feedback/Toast';
+import { useT } from '@/i18n';
 
 const schema = z
   .object({
@@ -22,6 +23,7 @@ type Form = z.infer<typeof schema>;
 
 export default function ChangePassword() {
   const toast = useToast();
+  const { t } = useT();
   const [loading, setLoading] = useState(false);
   const { control, handleSubmit, formState: { errors } } = useForm<Form>({
     resolver: zodResolver(schema),
@@ -38,21 +40,21 @@ export default function ChangePassword() {
 
   return (
     <Screen scroll>
-      <Header showBack title="Change password" />
+      <Header showBack title={t('cp.title')} />
       <Text variant="body" tone="muted" style={{ marginBottom: 20 }}>
-        Choose a strong password you don't use elsewhere.
+        {t('cp.subtitle')}
       </Text>
       <View style={{ gap: 16 }}>
         <Controller control={control} name="current" render={({ field: { onChange, value, onBlur } }) => (
-          <Input label="Current password" iconLeft="lock" secure value={value} onChangeText={onChange} onBlur={onBlur} error={errors.current?.message} />
+          <Input label={t('cp.current')} iconLeft="lock" secure value={value} onChangeText={onChange} onBlur={onBlur} error={errors.current?.message} />
         )} />
         <Controller control={control} name="next" render={({ field: { onChange, value, onBlur } }) => (
-          <Input label="New password" iconLeft="lock" secure value={value} onChangeText={onChange} onBlur={onBlur} error={errors.next?.message} />
+          <Input label={t('cp.new')} iconLeft="lock" secure value={value} onChangeText={onChange} onBlur={onBlur} error={errors.next?.message} />
         )} />
         <Controller control={control} name="confirm" render={({ field: { onChange, value, onBlur } }) => (
-          <Input label="Confirm new password" iconLeft="lock" secure value={value} onChangeText={onChange} onBlur={onBlur} error={errors.confirm?.message} />
+          <Input label={t('cp.confirm')} iconLeft="lock" secure value={value} onChangeText={onChange} onBlur={onBlur} error={errors.confirm?.message} />
         )} />
-        <Button label="Update password" onPress={handleSubmit(onSubmit)} loading={loading} style={{ marginTop: 8 }} />
+        <Button label={t('cp.update')} onPress={handleSubmit(onSubmit)} loading={loading} style={{ marginTop: 8 }} />
       </View>
     </Screen>
   );

@@ -8,19 +8,13 @@ import { Button } from '@/components/ui/Button';
 import { Icon } from '@/components/ui/Icon';
 import { useToast } from '@/components/feedback/Toast';
 import { useTheme } from '@/theme/ThemeProvider';
-
-const REASONS = [
-  'Unprofessional behavior',
-  'No-show / late',
-  'Overcharged',
-  'Poor quality work',
-  'Safety concern',
-  'Other',
-];
+import { useT } from '@/i18n';
 
 export default function Report() {
   const { colors } = useTheme();
   const toast = useToast();
+  const { t } = useT();
+  const REASONS = [t('report.r1'), t('report.r2'), t('report.r3'), t('report.r4'), t('report.r5'), t('report.r6')];
   const [reason, setReason] = useState<string | null>(null);
   const [details, setDetails] = useState('');
   const [loading, setLoading] = useState(false);
@@ -35,13 +29,13 @@ export default function Report() {
 
   return (
     <Screen scroll>
-      <Header showBack title="Report a problem" />
+      <Header showBack title={t('report.title')} />
       <Text variant="body" tone="muted" style={{ marginBottom: 20 }}>
-        Tell us what went wrong. Reports are confidential.
+        {t('report.subtitle')}
       </Text>
 
       <Text variant="overline" tone="muted" style={{ marginBottom: 10, marginLeft: 4 }}>
-        REASON
+        {t('report.reason')}
       </Text>
       <View style={{ gap: 10, marginBottom: 20 }}>
         {REASONS.map((r) => {
@@ -60,18 +54,18 @@ export default function Report() {
       </View>
 
       <Text variant="overline" tone="muted" style={{ marginBottom: 10, marginLeft: 4 }}>
-        DETAILS
+        {t('report.details')}
       </Text>
       <TextInput
         value={details}
         onChangeText={setDetails}
-        placeholder="Describe what happened…"
+        placeholder={t('report.detailsPlaceholder')}
         placeholderTextColor={colors.muted}
         multiline
         style={{ minHeight: 120, borderRadius: 16, borderWidth: 1.5, borderColor: colors.border, backgroundColor: colors.surface, padding: 14, color: colors.fg, fontSize: 15, fontFamily: 'Inter_400Regular', textAlignVertical: 'top', marginBottom: 20 }}
       />
 
-      <Button label="Submit report" iconLeft="flag" variant="danger" onPress={submit} loading={loading} disabled={!reason} />
+      <Button label={t('report.submit')} iconLeft="flag" variant="danger" onPress={submit} loading={loading} disabled={!reason} />
     </Screen>
   );
 }

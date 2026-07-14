@@ -9,14 +9,18 @@ import { Button } from '@/components/ui/Button';
 import { Rating } from '@/components/ui/Rating';
 import { Avatar } from '@/components/ui/Avatar';
 import { useTheme } from '@/theme/ThemeProvider';
+import { useT } from '@/i18n';
 import { MOCK_ARTISANS } from '@/mock/data';
-
-const TAGS = ['Punctual', 'Professional', 'Fair price', 'Clean work', 'Friendly', 'Would rehire'];
 
 export default function ReviewScreen() {
   const { colors } = useTheme();
+  const { t } = useT();
   useLocalSearchParams<{ id: string }>();
   const artisan = MOCK_ARTISANS[3];
+  const TAGS = [
+    t('review.tag.punctual'), t('review.tag.professional'), t('review.tag.fairPrice'),
+    t('review.tag.cleanWork'), t('review.tag.friendly'), t('review.tag.rehire'),
+  ];
   const [rating, setRating] = useState(5);
   const [comment, setComment] = useState('');
   const [tags, setTags] = useState<string[]>([]);
@@ -33,12 +37,12 @@ export default function ReviewScreen() {
 
   return (
     <Screen scroll>
-      <Header showBack title="Leave a review" />
+      <Header showBack title={t('review.title')} />
       <Animated.View entering={FadeInDown.duration(400)} style={{ alignItems: 'center', gap: 12, marginVertical: 20 }}>
         <Avatar uri={artisan.photoUrl} name={artisan.fullName} size={80} verified />
         <Text variant="h3">{artisan.fullName}</Text>
         <Text variant="caption" tone="muted">
-          How was your experience?
+          {t('review.how')}
         </Text>
         <Rating value={rating} editable size={40} onChange={setRating} />
       </Animated.View>
@@ -62,13 +66,13 @@ export default function ReviewScreen() {
       <TextInput
         value={comment}
         onChangeText={setComment}
-        placeholder="Share more about your experience (optional)…"
+        placeholder={t('review.commentPlaceholder')}
         placeholderTextColor={colors.muted}
         multiline
         style={{ minHeight: 120, borderRadius: 16, borderWidth: 1.5, borderColor: colors.border, backgroundColor: colors.surface, padding: 14, color: colors.fg, fontSize: 15, fontFamily: 'Inter_400Regular', textAlignVertical: 'top', marginBottom: 20 }}
       />
 
-      <Button label="Submit review" iconRight="send" onPress={submit} loading={saving} />
+      <Button label={t('review.submit')} iconRight="send" onPress={submit} loading={saving} />
     </Screen>
   );
 }

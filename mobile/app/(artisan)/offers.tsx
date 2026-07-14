@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/Badge';
 import { Icon } from '@/components/ui/Icon';
 import { formatMoney, timeAgo } from '@/lib/format';
 import { MOCK_OFFERS, MOCK_REQUESTS } from '@/mock/data';
+import { useT } from '@/i18n';
 import type { OfferStatus } from '@/types';
 
 const STATUS_VARIANT: Record<OfferStatus, React.ComponentProps<typeof Badge>['variant']> = {
@@ -18,13 +19,14 @@ const STATUS_VARIANT: Record<OfferStatus, React.ComponentProps<typeof Badge>['va
 };
 
 export default function ArtisanOffers() {
+  const { t } = useT();
   // Present the current artisan's submitted offers with their request context.
   const offers = MOCK_OFFERS.map((o) => ({ ...o, request: MOCK_REQUESTS.find((r) => r.id === o.requestId) }));
 
   return (
     <Screen padded={false}>
       <View style={{ paddingHorizontal: 20, paddingTop: 8 }}>
-        <Text variant="h1">My offers</Text>
+        <Text variant="h1">{t('aOffers.title')}</Text>
       </View>
       <ScrollView contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 16, paddingBottom: 140, gap: 12 }} showsVerticalScrollIndicator={false}>
         {offers.map((o) => (

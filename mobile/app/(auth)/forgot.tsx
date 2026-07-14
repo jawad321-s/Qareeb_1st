@@ -11,6 +11,7 @@ import { Text } from '@/components/ui/Text';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
 import { EmptyState } from '@/components/feedback/EmptyState';
+import { useT } from '@/i18n';
 
 const schema = z.object({ email: z.string().email('Enter a valid email') });
 type Form = z.infer<typeof schema>;
@@ -18,6 +19,7 @@ type Form = z.infer<typeof schema>;
 export default function Forgot() {
   const [sent, setSent] = useState(false);
   const [loading, setLoading] = useState(false);
+  const { t } = useT();
   const { control, handleSubmit, formState: { errors } } = useForm<Form>({
     resolver: zodResolver(schema),
     defaultValues: { email: '' },
@@ -37,18 +39,18 @@ export default function Forgot() {
         <View style={{ marginTop: 40 }}>
           <EmptyState
             icon="mail"
-            title="Check your inbox"
-            description="We've sent a password reset link to your email address."
-            actionLabel="Back to sign in"
+            title={t('forgot.sentTitle')}
+            description={t('forgot.sentDesc')}
+            actionLabel={t('forgot.backToSignIn')}
             onAction={() => router.replace('/(auth)/login')}
           />
         </View>
       ) : (
         <>
           <Animated.View entering={FadeInDown.duration(400)} style={{ gap: 8, marginBottom: 28 }}>
-            <Text variant="h1">Reset password</Text>
+            <Text variant="h1">{t('forgot.title')}</Text>
             <Text variant="body" tone="muted">
-              Enter your email and we'll send you a reset link.
+              {t('forgot.subtitle')}
             </Text>
           </Animated.View>
           <View style={{ gap: 16 }}>
@@ -57,7 +59,7 @@ export default function Forgot() {
               name="email"
               render={({ field: { onChange, value, onBlur } }) => (
                 <Input
-                  label="Email"
+                  label={t('auth.email')}
                   placeholder="you@example.com"
                   iconLeft="mail"
                   autoCapitalize="none"
@@ -69,7 +71,7 @@ export default function Forgot() {
                 />
               )}
             />
-            <Button label="Send reset link" onPress={handleSubmit(onSubmit)} loading={loading} />
+            <Button label={t('forgot.send')} onPress={handleSubmit(onSubmit)} loading={loading} />
           </View>
         </>
       )}

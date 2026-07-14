@@ -11,17 +11,19 @@ import { Icon } from '@/components/ui/Icon';
 import { useLocation } from '@/hooks/useLocation';
 import { useToast } from '@/components/feedback/Toast';
 import { useAuth } from '@/store/auth';
-
-const BENEFITS = [
-  { icon: 'map-pin', text: 'Match with the closest available artisans' },
-  { icon: 'clock', text: 'Get accurate arrival-time estimates' },
-  { icon: 'navigation', text: 'Track your artisan on the way in real time' },
-] as const;
+import { useT } from '@/i18n';
 
 export default function LocationPermission() {
   const { request, loading } = useLocation();
   const toast = useToast();
   const updateUser = useAuth((s) => s.updateUser);
+  const { t } = useT();
+
+  const BENEFITS = [
+    { icon: 'map-pin', text: t('loc.b1') },
+    { icon: 'clock', text: t('loc.b2') },
+    { icon: 'navigation', text: t('loc.b3') },
+  ] as const;
 
   const enable = async () => {
     const geo = await request();
@@ -45,10 +47,10 @@ export default function LocationPermission() {
                 <Icon name="map-pin" size={54} color="#FFF" />
               </View>
               <Text variant="h1" tone="inverse" center>
-                Enable location
+                {t('loc.title')}
               </Text>
               <Text variant="body" center style={{ color: 'rgba(255,255,255,0.85)', maxWidth: 300 }}>
-                Qareeb uses your location to connect you with the best nearby artisans.
+                {t('loc.subtitle')}
               </Text>
             </Animated.View>
 
@@ -67,8 +69,8 @@ export default function LocationPermission() {
           </View>
 
           <View style={{ gap: 10, paddingBottom: 16 }}>
-            <Button label="Enable location" variant="secondary" iconLeft="navigation" onPress={enable} loading={loading} />
-            <Button label="Not now" variant="ghost" onPress={() => router.back()} />
+            <Button label={t('loc.enable')} variant="secondary" iconLeft="navigation" onPress={enable} loading={loading} />
+            <Button label={t('loc.notNow')} variant="ghost" onPress={() => router.back()} />
           </View>
         </SafeAreaView>
       </LinearGradient>

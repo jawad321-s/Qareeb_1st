@@ -14,17 +14,19 @@ import { CardSkeleton } from '@/components/feedback/Skeleton';
 import { useService, useRecommendedArtisans } from '@/hooks/queries';
 import { categoryById } from '@/constants/categories';
 import { formatMoney } from '@/lib/format';
-
-const HIGHLIGHTS = [
-  { icon: 'shield', title: 'Verified pros', desc: 'ID-checked & insured' },
-  { icon: 'clock', title: 'Fast response', desc: 'Offers in minutes' },
-  { icon: 'award', title: 'Quality work', desc: 'Rated by real customers' },
-] as const;
+import { useT } from '@/i18n';
 
 export default function ServiceDetail() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { data: service, isLoading } = useService(id!);
   const artisans = useRecommendedArtisans();
+  const { t, locale } = useT();
+
+  const HIGHLIGHTS = [
+    { icon: 'shield', title: t('sd.verifiedPros'), desc: t('sd.verifiedProsDesc') },
+    { icon: 'clock', title: t('sd.fastResponse'), desc: t('sd.fastResponseDesc') },
+    { icon: 'award', title: t('sd.quality'), desc: t('sd.qualityDesc') },
+  ] as const;
 
   if (isLoading || !service) {
     return (
@@ -52,14 +54,14 @@ export default function ServiceDetail() {
               <Icon name={service.icon as any} size={30} color="#FFF" />
             </View>
             <Text variant="h1" tone="inverse">
-              {service.name.en}
+              {service.name[locale]}
             </Text>
             <Text variant="body" style={{ color: 'rgba(255,255,255,0.9)' }}>
-              {service.description.en}
+              {service.description[locale]}
             </Text>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 4 }}>
               <Text variant="caption" style={{ color: 'rgba(255,255,255,0.8)' }}>
-                Starting from
+                {t('sd.startingFrom')}
               </Text>
               <Text variant="h3" tone="inverse">
                 {formatMoney(service.basePriceFrom)}
@@ -86,20 +88,20 @@ export default function ServiceDetail() {
         {/* Available artisans */}
         <View style={{ paddingHorizontal: 20, marginTop: 24 }}>
           <Text variant="h3" style={{ marginBottom: 12 }}>
-            Available artisans
+            {t('sd.available')}
           </Text>
           <View style={{ gap: 12 }}>
             {artisans.isLoading
               ? [0, 1, 2].map((i) => <CardSkeleton key={i} />)
               : (artisans.data ?? []).slice(0, 4).map((a) => (
-                  <ArtisanCard key={a.uid} artisan={a} subtitle={cat?.name.en} distanceKm={2.4} onPress={() => router.push(`/(shared)/artisan/${a.uid}`)} />
+                  <ArtisanCard key={a.uid} artisan={a} subtitle={cat?.name[locale]} distanceKm={2.4} onPress={() => router.push(`/(shared)/artisan/${a.uid}`)} />
                 ))}
           </View>
         </View>
       </Screen>
 
       <View style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: 20, paddingBottom: 32 }}>
-        <Button label="Request this service" iconRight="arrow-right" onPress={() => router.push({ pathname: '/(customer)/create', params: { category: service.categoryId } })} />
+        <Button label={t('sd.request')} iconRight="arrow-right" onPress={() => router.push({ pathname: '/(customer)/create', params: { category: service.categoryId } })} />
       </View>
     </View>
   );

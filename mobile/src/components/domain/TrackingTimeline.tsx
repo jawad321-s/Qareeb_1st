@@ -5,18 +5,20 @@ import { Icon } from '../ui/Icon';
 import { REQUEST_STEPS } from './StatusBadge';
 import type { RequestStatus } from '@/types';
 import { useTheme } from '@/theme/ThemeProvider';
+import { useT } from '@/i18n';
 
-const LABELS: Record<RequestStatus, { title: string; desc: string; icon: any }> = {
-  PENDING: { title: 'Request posted', desc: 'Waiting for artisan offers', icon: 'clock' },
-  ACCEPTED: { title: 'Offer accepted', desc: 'Artisan confirmed the job', icon: 'check-circle' },
-  ON_THE_WAY: { title: 'On the way', desc: 'Artisan is heading to you', icon: 'navigation' },
-  WORKING: { title: 'In progress', desc: 'Work is underway', icon: 'tools' },
-  COMPLETED: { title: 'Completed', desc: 'Job finished — leave a review', icon: 'award' },
-  CANCELLED: { title: 'Cancelled', desc: '', icon: 'x-circle' },
+const ICONS: Record<RequestStatus, any> = {
+  PENDING: 'clock',
+  ACCEPTED: 'check-circle',
+  ON_THE_WAY: 'navigation',
+  WORKING: 'tools',
+  COMPLETED: 'award',
+  CANCELLED: 'x-circle',
 };
 
 export function TrackingTimeline({ status }: { status: RequestStatus }) {
   const { colors } = useTheme();
+  const { t } = useT();
   if (status === 'CANCELLED') return null;
   const currentIndex = REQUEST_STEPS.indexOf(status);
 
@@ -25,8 +27,7 @@ export function TrackingTimeline({ status }: { status: RequestStatus }) {
       {REQUEST_STEPS.map((step, i) => {
         const done = i < currentIndex;
         const active = i === currentIndex;
-        const meta = LABELS[step];
-        const color = done || active ? colors.tint : colors.border;
+        const stepIcon = ICONS[step];
         return (
           <View key={step} style={{ flexDirection: 'row', gap: 14 }}>
             <View style={{ alignItems: 'center' }}>
@@ -42,7 +43,7 @@ export function TrackingTimeline({ status }: { status: RequestStatus }) {
                   borderColor: colors.tint,
                 }}
               >
-                <Icon name={done ? 'check' : meta.icon} size={16} color={done ? '#FFF' : active ? colors.tint : colors.muted} strokeWidth={done ? 3 : 2} />
+                <Icon name={done ? 'check' : stepIcon} size={16} color={done ? '#FFF' : active ? colors.tint : colors.muted} strokeWidth={done ? 3 : 2} />
               </View>
               {i < REQUEST_STEPS.length - 1 && (
                 <View style={{ width: 2, flex: 1, minHeight: 28, backgroundColor: i < currentIndex ? colors.tint : colors.border }} />
@@ -50,10 +51,10 @@ export function TrackingTimeline({ status }: { status: RequestStatus }) {
             </View>
             <View style={{ flex: 1, paddingBottom: 20 }}>
               <Text variant="bodyMedium" tone={active ? 'primary' : done ? 'default' : 'muted'}>
-                {meta.title}
+                {t(`track.${step}.title` as any)}
               </Text>
               <Text variant="caption" tone="muted">
-                {meta.desc}
+                {t(`track.${step}.desc` as any)}
               </Text>
             </View>
           </View>

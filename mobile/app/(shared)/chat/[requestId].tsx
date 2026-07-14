@@ -11,6 +11,7 @@ import { Avatar } from '@/components/ui/Avatar';
 import { useMessages, useSendMessage } from '@/hooks/queries';
 import { useAuth } from '@/store/auth';
 import { useTheme } from '@/theme/ThemeProvider';
+import { useT } from '@/i18n';
 import { timeAgo } from '@/lib/format';
 import { MOCK_ARTISANS } from '@/mock/data';
 
@@ -20,6 +21,7 @@ export default function Chat() {
   const me = useAuth((s) => s.user)!;
   const { data: messages } = useMessages(requestId!);
   const send = useSendMessage(requestId!);
+  const { t } = useT();
   const [text, setText] = useState('');
   const scrollRef = useRef<ScrollView>(null);
   const other = MOCK_ARTISANS[3];
@@ -38,7 +40,7 @@ export default function Chat() {
         <Header
           showBack
           title={other.fullName}
-          subtitle="Online now"
+          subtitle={t('common.online')}
           rightIcon="phone"
         />
       </View>
@@ -93,7 +95,7 @@ export default function Chat() {
             <TextInput
               value={text}
               onChangeText={setText}
-              placeholder="Message…"
+              placeholder={t('chat.message')}
               placeholderTextColor={colors.muted}
               multiline
               style={{ flex: 1, color: colors.fg, fontSize: 15, fontFamily: 'Inter_400Regular', maxHeight: 100, paddingVertical: 10 }}

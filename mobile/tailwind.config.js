@@ -2,6 +2,9 @@
 // Qareeb design tokens. Colors are exposed as CSS-variable-driven RGB so the
 // same class works in both light and dark themes (see global.css).
 module.exports = {
+  // Manual theme control (our ThemeProvider drives the scheme), so dark mode is
+  // class-based rather than the media default — required for programmatic toggling.
+  darkMode: 'class',
   content: ['./app/**/*.{js,jsx,ts,tsx}', './src/**/*.{js,jsx,ts,tsx}'],
   presets: [require('nativewind/preset')],
   theme: {

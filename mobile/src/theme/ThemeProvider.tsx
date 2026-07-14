@@ -37,9 +37,14 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const { mode, setMode } = useThemeStore();
   const scheme: 'light' | 'dark' = mode === 'system' ? system : mode;
 
-  // Keep NativeWind's runtime color scheme in sync with our store.
+  // Keep NativeWind's runtime color scheme in sync with our store. Guarded
+  // because some platforms reject manual set unless darkMode is class-based.
   useEffect(() => {
-    nwColorScheme.set(mode);
+    try {
+      nwColorScheme.set(mode);
+    } catch {
+      // no-op — theme still resolves via our own ThemeProvider context
+    }
   }, [mode]);
 
   const value = useMemo<ThemeContextValue>(

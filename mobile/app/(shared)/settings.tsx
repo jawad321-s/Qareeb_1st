@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { View, Switch, Pressable } from 'react-native';
+import { router } from 'expo-router';
 import { Screen } from '@/components/ui/Screen';
 import { Header } from '@/components/ui/Header';
 import { Text } from '@/components/ui/Text';
@@ -59,7 +60,7 @@ export default function Settings() {
       <Card padded={false}>
         <LinkRow icon="shield" label="Privacy policy" first />
         <LinkRow icon="info" label="Terms of service" />
-        <LinkRow icon="help-circle" label="Help center" />
+        <LinkRow icon="help-circle" label="Help center" onPress={() => router.push('/(shared)/help')} />
       </Card>
     </Screen>
   );
@@ -80,10 +81,10 @@ function ToggleRow({ icon, label, value, onChange, first }: { icon: IconName; la
   );
 }
 
-function LinkRow({ icon, label, first }: { icon: IconName; label: string; first?: boolean }) {
+function LinkRow({ icon, label, first, onPress }: { icon: IconName; label: string; first?: boolean; onPress?: () => void }) {
   const { colors } = useTheme();
   return (
-    <Pressable style={{ flexDirection: 'row', alignItems: 'center', gap: 12, padding: 16, borderTopWidth: first ? 0 : 1, borderTopColor: colors.border }}>
+    <Pressable onPress={onPress} style={{ flexDirection: 'row', alignItems: 'center', gap: 12, padding: 16, borderTopWidth: first ? 0 : 1, borderTopColor: colors.border }}>
       <View style={{ width: 34, height: 34, borderRadius: 10, backgroundColor: colors.surface2, alignItems: 'center', justifyContent: 'center' }}>
         <Icon name={icon} size={18} color={colors.tint} />
       </View>

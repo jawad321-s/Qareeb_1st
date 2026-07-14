@@ -70,7 +70,7 @@ export default function Home() {
                 <View style={{ position: 'absolute', top: 10, right: 12, width: 8, height: 8, borderRadius: 4, backgroundColor: '#EF4444' }} />
               </Pressable>
             </View>
-            <Pressable onPress={() => {}} style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+            <Pressable onPress={() => router.push('/(shared)/location-permission')} style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
               <Icon name="map-pin" size={14} color={colors.tint} />
               <Text variant="caption" tone="muted">
                 {user?.location?.address ?? 'Set your location'}

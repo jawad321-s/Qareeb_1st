@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/Button';
 import { Icon } from '@/components/ui/Icon';
 import { CardSkeleton } from '@/components/feedback/Skeleton';
 import { useRequest, useSubmitOffer } from '@/hooks/queries';
+import { useToast } from '@/components/feedback/Toast';
 import { categoryById } from '@/constants/categories';
 import { formatMoney } from '@/lib/format';
 import { useAuth } from '@/store/auth';
@@ -20,6 +21,7 @@ export default function JobDetail() {
   const { colors } = useTheme();
   const { id } = useLocalSearchParams<{ id: string }>();
   const user = useAuth((s) => s.user)!;
+  const toast = useToast();
   const { data: request, isLoading } = useRequest(id!);
   const submit = useSubmitOffer(id!);
 
@@ -50,6 +52,7 @@ export default function JobDetail() {
       artisan: { uid: user.uid, fullName: user.fullName, photoUrl: user.photoUrl, rating: user.rating, ratingCount: user.ratingCount },
     });
     setSent(true);
+    toast('success', 'Your offer was sent to the customer');
     setTimeout(() => router.back(), 900);
   };
 

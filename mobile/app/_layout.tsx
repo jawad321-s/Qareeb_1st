@@ -13,6 +13,7 @@ import {
   Inter_700Bold,
 } from '@expo-google-fonts/inter';
 import { ThemeProvider, useTheme } from '@/theme/ThemeProvider';
+import { ToastProvider } from '@/components/feedback/Toast';
 import { queryClient } from '@/lib/queryClient';
 import { useAuth } from '@/store/auth';
 
@@ -62,7 +63,9 @@ export default function RootLayout() {
       <SafeAreaProvider>
         <QueryClientProvider client={queryClient}>
           <ThemeProvider>
-            <RootNavigator />
+            <ToastProvider>
+              <RootNavigator />
+            </ToastProvider>
           </ThemeProvider>
         </QueryClientProvider>
       </SafeAreaProvider>

@@ -27,7 +27,7 @@ export default function ArtisanProfile() {
     { icon: 'sliders', label: 'Services & pricing', route: '/(shared)/settings' },
     { icon: 'map-pin', label: 'Service radius', route: '/(shared)/settings' },
     { icon: 'calendar', label: 'Availability', route: '/(shared)/settings' },
-    { icon: 'award', label: 'Subscription plan', route: '/(shared)/settings' },
+    { icon: 'award', label: 'Subscription plan', route: '/(shared)/subscription' },
     { icon: isDark ? 'moon' : 'sun', label: `Theme: ${mode}`, onPress: () => setMode(mode === 'dark' ? 'light' : mode === 'light' ? 'system' : 'dark') },
     { icon: 'log-out', label: 'Sign out', danger: true, onPress: () => { signOut(); router.replace('/(auth)/welcome'); } },
   ];

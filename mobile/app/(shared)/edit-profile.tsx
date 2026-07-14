@@ -55,7 +55,7 @@ export default function EditProfile() {
         <Input label="Email" iconLeft="mail" value={email} onChangeText={setEmail} autoCapitalize="none" keyboardType="email-address" />
         <Input label="Phone" iconLeft="phone" value={phone} onChangeText={setPhone} keyboardType="phone-pad" />
         <Button label="Save changes" onPress={save} loading={saving} style={{ marginTop: 8 }} />
-        <Button label="Change password" variant="ghost" iconLeft="lock" onPress={() => {}} />
+        <Button label="Change password" variant="ghost" iconLeft="lock" onPress={() => router.push('/(shared)/change-password')} />
       </View>
     </Screen>
   );

@@ -16,6 +16,7 @@ import { TrackingTimeline } from '@/components/domain/TrackingTimeline';
 import { OfferCard } from '@/components/domain/OfferCard';
 import { CardSkeleton } from '@/components/feedback/Skeleton';
 import { useRequest, useOffers, useAcceptOffer, useRejectOffer } from '@/hooks/queries';
+import { useToast } from '@/components/feedback/Toast';
 import { categoryById } from '@/constants/categories';
 import { formatMoney } from '@/lib/format';
 import { useTheme } from '@/theme/ThemeProvider';
@@ -24,6 +25,7 @@ import { MOCK_ARTISANS } from '@/mock/data';
 export default function RequestDetail() {
   const { colors } = useTheme();
   const { id } = useLocalSearchParams<{ id: string }>();
+  const toast = useToast();
   const { data: request, isLoading } = useRequest(id!);
   const offers = useOffers(id!);
   const accept = useAcceptOffer(id!);
@@ -51,6 +53,12 @@ export default function RequestDetail() {
     setAcceptingId(offerId);
     await accept.mutateAsync(offerId);
     setAcceptingId(null);
+    toast('success', 'Offer accepted — your artisan is on the way!');
+  };
+
+  const onReject = (offerId: string) => {
+    reject.mutate(offerId);
+    toast('info', 'Offer declined');
   };
 
   return (
@@ -150,7 +158,7 @@ export default function RequestDetail() {
                   best={o.price === bestPrice}
                   loading={acceptingId === o.id}
                   onAccept={() => onAccept(o.id)}
-                  onReject={() => reject.mutate(o.id)}
+                  onReject={() => onReject(o.id)}
                   onPressArtisan={() => router.push(`/(shared)/artisan/${o.artisanId}`)}
                 />
               ))

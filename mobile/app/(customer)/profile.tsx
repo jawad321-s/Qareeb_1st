@@ -48,8 +48,8 @@ export default function Profile() {
     {
       title: 'Support',
       items: [
-        { icon: 'help-circle', label: 'Help center', route: '/(shared)/settings' },
-        { icon: 'flag', label: 'Report a problem', route: '/(shared)/settings' },
+        { icon: 'help-circle', label: 'Help center', route: '/(shared)/help' },
+        { icon: 'flag', label: 'Report a problem', route: '/(shared)/report' },
         { icon: 'log-out', label: 'Sign out', danger: true, onPress: () => { signOut(); router.replace('/(auth)/welcome'); } },
       ],
     },

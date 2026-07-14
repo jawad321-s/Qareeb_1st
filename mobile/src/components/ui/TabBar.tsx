@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Pressable, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { BlurView } from 'expo-blur';
@@ -78,7 +78,9 @@ function TabItem({
   inactive: string;
 }) {
   const scale = useSharedValue(focused ? 1 : 0.9);
-  scale.value = withSpring(focused ? 1 : 0.9, { damping: 14 });
+  useEffect(() => {
+    scale.value = withSpring(focused ? 1 : 0.9, { damping: 14 });
+  }, [focused, scale]);
   const aStyle = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }));
 
   return (

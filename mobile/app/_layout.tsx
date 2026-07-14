@@ -5,6 +5,13 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
+import {
+  useFonts,
+  Inter_400Regular,
+  Inter_500Medium,
+  Inter_600SemiBold,
+  Inter_700Bold,
+} from '@expo-google-fonts/inter';
 import { ThemeProvider, useTheme } from '@/theme/ThemeProvider';
 import { queryClient } from '@/lib/queryClient';
 import { useAuth } from '@/store/auth';
@@ -15,14 +22,22 @@ function RootNavigator() {
   const { colors } = useTheme();
   const hydrate = useAuth((s) => s.hydrate);
   const hydrated = useAuth((s) => s.hydrated);
+  const [fontsLoaded] = useFonts({
+    Inter_400Regular,
+    Inter_500Medium,
+    Inter_600SemiBold,
+    Inter_700Bold,
+  });
 
   useEffect(() => {
     hydrate();
   }, [hydrate]);
 
   useEffect(() => {
-    if (hydrated) SplashScreen.hideAsync().catch(() => {});
-  }, [hydrated]);
+    if (hydrated && fontsLoaded) SplashScreen.hideAsync().catch(() => {});
+  }, [hydrated, fontsLoaded]);
+
+  if (!fontsLoaded) return null;
 
   return (
     <Stack

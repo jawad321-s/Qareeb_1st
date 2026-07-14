@@ -25,8 +25,21 @@ export const palette = {
   black: '#000000',
 } as const;
 
+export interface ThemeColors {
+  bg: string;
+  surface: string;
+  surface2: string;
+  card: string;
+  border: string;
+  fg: string;
+  muted: string;
+  tint: string;
+  tabInactive: string;
+  overlay: string;
+}
+
 // Semantic colors resolved per color scheme.
-export const themes = {
+export const themes: { light: ThemeColors; dark: ThemeColors } = {
   light: {
     bg: '#F8FAFC',
     surface: '#FFFFFF',
@@ -51,9 +64,7 @@ export const themes = {
     tabInactive: '#64748B',
     overlay: 'rgba(0,0,0,0.6)',
   },
-} as const;
-
-export type ThemeColors = typeof themes.light;
+};
 
 export const spacing = {
   xs: 4,

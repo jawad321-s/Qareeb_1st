@@ -6,8 +6,10 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Card, Button, StatusPill } from '@/components/ui/primitives';
 import { VERIFICATIONS, type VerificationItem } from '@/lib/mock-data';
 import { timeAgo } from '@/lib/utils';
+import { useT } from '@/lib/i18n';
 
 export default function ArtisansPage() {
+  const { t } = useT();
   const [items, setItems] = useState<VerificationItem[]>(VERIFICATIONS);
 
   const decide = (id: string, status: 'approved' | 'rejected') =>
@@ -19,11 +21,11 @@ export default function ArtisansPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Verification queue</h1>
-          <p className="text-sm text-muted">{pending.length} artisans awaiting identity review.</p>
+          <h1 className="text-2xl font-bold">{t('ver.title')}</h1>
+          <p className="text-sm text-muted">{pending.length} {t('ver.subtitle')}</p>
         </div>
         <span className="inline-flex items-center gap-2 rounded-xl bg-brand-500/10 px-3 py-2 text-sm font-medium text-brand-500">
-          <ShieldCheck className="h-4 w-4" /> {pending.length} pending
+          <ShieldCheck className="h-4 w-4" /> {pending.length} {t('ver.pending')}
         </span>
       </div>
 
@@ -39,14 +41,14 @@ export default function ArtisansPage() {
                     </div>
                     <div>
                       <p className="font-semibold">{v.name}</p>
-                      <p className="text-xs text-muted">{v.category} · submitted {timeAgo(v.submittedAt)}</p>
+                      <p className="text-xs text-muted">{v.category} · {t('ver.submitted')} {timeAgo(v.submittedAt)}</p>
                     </div>
                   </div>
                   <StatusPill status={v.status} />
                 </div>
 
                 <div className="mt-4 flex gap-2">
-                  {['ID front', 'ID back', 'Certificate'].map((doc) => (
+                  {[t('ver.idFront'), t('ver.idBack'), t('ver.certificate')].map((doc) => (
                     <div key={doc} className="flex flex-1 items-center gap-2 rounded-xl border border-base px-3 py-2 text-xs text-muted">
                       <FileText className="h-4 w-4" /> {doc}
                     </div>
@@ -56,10 +58,10 @@ export default function ArtisansPage() {
                 {v.status === 'pending' && (
                   <div className="mt-4 flex gap-2">
                     <Button variant="outline" className="flex-1" onClick={() => decide(v.id, 'rejected')}>
-                      <X className="h-4 w-4" /> Reject
+                      <X className="h-4 w-4" /> {t('ver.reject')}
                     </Button>
                     <Button className="flex-1" onClick={() => decide(v.id, 'approved')}>
-                      <Check className="h-4 w-4" /> Approve
+                      <Check className="h-4 w-4" /> {t('ver.approve')}
                     </Button>
                   </div>
                 )}

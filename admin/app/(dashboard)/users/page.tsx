@@ -7,13 +7,15 @@ import { DataTable } from '@/components/ui/data-table';
 import { Badge, StatusPill } from '@/components/ui/primitives';
 import { USERS, type AdminUser } from '@/lib/mock-data';
 import { timeAgo } from '@/lib/utils';
+import { useT } from '@/lib/i18n';
 
 export default function UsersPage() {
+  const { t } = useT();
   const columns = useMemo<ColumnDef<AdminUser, any>[]>(
     () => [
       {
         accessorKey: 'fullName',
-        header: 'User',
+        header: t('col.user'),
         cell: ({ row }) => (
           <div className="flex items-center gap-3">
             <div className="grid h-9 w-9 place-items-center rounded-full bg-gradient-to-br from-brand-400 to-accent-400 text-xs font-bold text-white">
@@ -28,46 +30,46 @@ export default function UsersPage() {
       },
       {
         accessorKey: 'role',
-        header: 'Role',
-        cell: ({ getValue }) => <Badge tone={getValue() === 'artisan' ? 'brand' : 'neutral'}>{getValue() as string}</Badge>,
+        header: t('col.role'),
+        cell: ({ getValue }) => <Badge tone={getValue() === 'artisan' ? 'brand' : 'neutral'}>{t(`role.${getValue()}` as any)}</Badge>,
       },
-      { accessorKey: 'city', header: 'City' },
+      { accessorKey: 'city', header: t('col.city') },
       {
         accessorKey: 'rating',
-        header: 'Rating',
+        header: t('col.rating'),
         cell: ({ getValue }) => (
           <span className="inline-flex items-center gap-1">
             <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" /> {getValue() as number}
           </span>
         ),
       },
-      { accessorKey: 'jobs', header: 'Jobs' },
+      { accessorKey: 'jobs', header: t('col.jobs') },
       {
         accessorKey: 'verified',
-        header: 'Verified',
+        header: t('col.verified'),
         cell: ({ getValue }) => (getValue() ? <CheckCircle2 className="h-4 w-4 text-emerald-500" /> : <span className="text-muted">—</span>),
       },
       {
         accessorKey: 'status',
-        header: 'Status',
+        header: t('col.status'),
         cell: ({ getValue }) => <StatusPill status={getValue() as string} />,
       },
       {
         accessorKey: 'joinedAt',
-        header: 'Joined',
+        header: t('col.joined'),
         cell: ({ getValue }) => <span className="text-muted">{timeAgo(getValue() as number)}</span>,
       },
     ],
-    [],
+    [t],
   );
 
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold">Users</h1>
-        <p className="text-sm text-muted">{USERS.length} total accounts — customers and artisans.</p>
+        <h1 className="text-2xl font-bold">{t('users.title')}</h1>
+        <p className="text-sm text-muted">{USERS.length} {t('users.subtitle')}</p>
       </div>
-      <DataTable columns={columns} data={USERS} searchPlaceholder="Search users…" />
+      <DataTable columns={columns} data={USERS} searchPlaceholder={t('users.search')} />
     </div>
   );
 }

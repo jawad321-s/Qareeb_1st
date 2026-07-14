@@ -1,4 +1,7 @@
+'use client';
+
 import { cn } from '@/lib/utils';
+import { useT, type TKey } from '@/lib/i18n';
 
 export function Card({ className, children }: { className?: string; children: React.ReactNode }) {
   return (
@@ -46,6 +49,7 @@ export function Button({
 }
 
 export function StatusPill({ status }: { status: string }) {
+  const { t } = useT();
   const map: Record<string, BadgeTone> = {
     PENDING: 'warning', ACCEPTED: 'info', ON_THE_WAY: 'info', WORKING: 'brand',
     COMPLETED: 'success', CANCELLED: 'danger',
@@ -53,5 +57,5 @@ export function StatusPill({ status }: { status: string }) {
     open: 'warning', reviewing: 'info', resolved: 'success',
     approved: 'success', rejected: 'danger',
   };
-  return <Badge tone={map[status] ?? 'neutral'}>{status.replace(/_/g, ' ').toLowerCase()}</Badge>;
+  return <Badge tone={map[status] ?? 'neutral'}>{t(`status.${status}` as TKey)}</Badge>;
 }

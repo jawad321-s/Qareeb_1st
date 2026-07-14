@@ -2,6 +2,14 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Self-hosted fonts (no external fetch). Cairo covers Arabic + Latin. */
+@font-face { font-family: 'Cairo'; src: url('/fonts/Cairo_400Regular.ttf') format('truetype'); font-weight: 400; font-display: swap; }
+@font-face { font-family: 'Cairo'; src: url('/fonts/Cairo_600SemiBold.ttf') format('truetype'); font-weight: 600; font-display: swap; }
+@font-face { font-family: 'Cairo'; src: url('/fonts/Cairo_700Bold.ttf') format('truetype'); font-weight: 700; font-display: swap; }
+@font-face { font-family: 'InterQ'; src: url('/fonts/Inter_400Regular.ttf') format('truetype'); font-weight: 400; font-display: swap; }
+@font-face { font-family: 'InterQ'; src: url('/fonts/Inter_600SemiBold.ttf') format('truetype'); font-weight: 600; font-display: swap; }
+@font-face { font-family: 'InterQ'; src: url('/fonts/Inter_700Bold.ttf') format('truetype'); font-weight: 700; font-display: swap; }
+
 :root {
   --bg: 248 250 252;
   --surface: 255 255 255;

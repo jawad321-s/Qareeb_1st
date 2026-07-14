@@ -13,7 +13,8 @@ const config: Config = {
         accent: { 400: '#22D3EE', 500: '#06B6D4', 600: '#0891B2' },
       },
       fontFamily: {
-        sans: ['var(--font-inter)', 'system-ui', 'sans-serif'],
+        // Cairo first — it renders Arabic beautifully and Latin cleanly.
+        sans: ['Cairo', 'InterQ', 'system-ui', 'sans-serif'],
       },
       borderRadius: { xl: '1rem', '2xl': '1.25rem' },
       keyframes: {

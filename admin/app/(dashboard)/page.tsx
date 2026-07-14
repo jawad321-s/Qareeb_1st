@@ -1,22 +1,33 @@
+'use client';
+
 import { ArrowDownRight, ArrowUpRight, Users, Wrench, ClipboardList, Wallet } from 'lucide-react';
 import { Card, StatusPill } from '@/components/ui/primitives';
 import { RevenueChart, CategoryPie } from '@/components/charts/charts';
 import { KPIS, REVENUE_SERIES, CATEGORY_SPLIT, ACTIVITY, VERIFICATIONS } from '@/lib/mock-data';
 import { formatMoney, formatNumber, timeAgo } from '@/lib/utils';
+import { useT } from '@/lib/i18n';
 
-const KPI_CARDS = [
-  { label: 'Total revenue', value: formatMoney(KPIS.revenue), delta: KPIS.revenueDelta, icon: Wallet, tint: 'from-brand-600 to-brand-400' },
-  { label: 'Total users', value: formatNumber(KPIS.users), delta: KPIS.usersDelta, icon: Users, tint: 'from-emerald-600 to-emerald-400' },
-  { label: 'Active artisans', value: formatNumber(KPIS.artisans), delta: KPIS.artisansDelta, icon: Wrench, tint: 'from-cyan-600 to-cyan-400' },
-  { label: 'Total requests', value: formatNumber(KPIS.requests), delta: KPIS.requestsDelta, icon: ClipboardList, tint: 'from-amber-600 to-amber-400' },
-];
+const ACTIVITY_AR: Record<number, string> = {
+  1: 'قدّم عمر خالد طلب توثيق جديد',
+  2: 'تم حل شكوى: نزاع مبالغة #c_2',
+  3: 'ترقية طارق منصور إلى باقة النخبة',
+  4: 'تم إنشاء 320 طلباً جديداً اليوم',
+  5: 'إضافة فئة "ستلايت" إلى الكتالوج',
+};
 
 export default function OverviewPage() {
+  const { t, locale } = useT();
+  const KPI_CARDS = [
+    { label: t('ov.totalRevenue'), value: formatMoney(KPIS.revenue), delta: KPIS.revenueDelta, icon: Wallet, tint: 'from-brand-600 to-brand-400' },
+    { label: t('ov.totalUsers'), value: formatNumber(KPIS.users), delta: KPIS.usersDelta, icon: Users, tint: 'from-emerald-600 to-emerald-400' },
+    { label: t('ov.activeArtisans'), value: formatNumber(KPIS.artisans), delta: KPIS.artisansDelta, icon: Wrench, tint: 'from-cyan-600 to-cyan-400' },
+    { label: t('ov.totalRequests'), value: formatNumber(KPIS.requests), delta: KPIS.requestsDelta, icon: ClipboardList, tint: 'from-amber-600 to-amber-400' },
+  ];
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold">Overview</h1>
-        <p className="text-sm text-muted">Welcome back — here's what's happening on Qareeb today.</p>
+        <h1 className="text-2xl font-bold">{t('ov.title')}</h1>
+        <p className="text-sm text-muted">{t('ov.welcome')}</p>
       </div>
 
       {/* KPI grid */}
@@ -47,15 +58,15 @@ export default function OverviewPage() {
         <Card className="p-5 lg:col-span-2">
           <div className="mb-4 flex items-center justify-between">
             <div>
-              <h2 className="font-semibold">Revenue</h2>
-              <p className="text-xs text-muted">Monthly gross revenue (₪)</p>
+              <h2 className="font-semibold">{t('ov.revenue')}</h2>
+              <p className="text-xs text-muted">{t('ov.monthlyGross')} (₪)</p>
             </div>
           </div>
           <RevenueChart data={REVENUE_SERIES} />
         </Card>
         <Card className="p-5">
-          <h2 className="font-semibold">Requests by category</h2>
-          <p className="text-xs text-muted mb-2">Distribution across services</p>
+          <h2 className="font-semibold">{t('ov.byCategory')}</h2>
+          <p className="text-xs text-muted mb-2">{t('ov.distribution')}</p>
           <CategoryPie data={CATEGORY_SPLIT} />
         </Card>
       </div>
@@ -63,13 +74,13 @@ export default function OverviewPage() {
       {/* Activity + verification queue */}
       <div className="grid gap-4 lg:grid-cols-3">
         <Card className="p-5 lg:col-span-2">
-          <h2 className="mb-4 font-semibold">Recent activity</h2>
+          <h2 className="mb-4 font-semibold">{t('ov.recentActivity')}</h2>
           <div className="space-y-4">
             {ACTIVITY.map((a) => (
               <div key={a.id} className="flex items-start gap-3">
                 <div className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-brand-500" />
                 <div className="min-w-0 flex-1">
-                  <p className="text-sm">{a.text}</p>
+                  <p className="text-sm">{locale === 'ar' ? ACTIVITY_AR[a.id] : a.text}</p>
                   <p className="text-xs text-muted">{timeAgo(a.time)}</p>
                 </div>
               </div>
@@ -77,7 +88,7 @@ export default function OverviewPage() {
           </div>
         </Card>
         <Card className="p-5">
-          <h2 className="mb-4 font-semibold">Pending verifications</h2>
+          <h2 className="mb-4 font-semibold">{t('ov.pendingVerifications')}</h2>
           <div className="space-y-3">
             {VERIFICATIONS.slice(0, 4).map((v) => (
               <div key={v.id} className="flex items-center justify-between gap-2">

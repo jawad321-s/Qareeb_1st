@@ -8,6 +8,7 @@ import {
 import { ChevronDown, ChevronLeft, ChevronRight, ChevronUp, Search } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from './primitives';
+import { useT } from '@/lib/i18n';
 
 interface DataTableProps<T> {
   columns: ColumnDef<T, any>[];
@@ -15,7 +16,8 @@ interface DataTableProps<T> {
   searchPlaceholder?: string;
 }
 
-export function DataTable<T>({ columns, data, searchPlaceholder = 'Search…' }: DataTableProps<T>) {
+export function DataTable<T>({ columns, data, searchPlaceholder }: DataTableProps<T>) {
+  const { t } = useT();
   const [sorting, setSorting] = useState<SortingState>([]);
   const [globalFilter, setGlobalFilter] = useState('');
 
@@ -39,8 +41,8 @@ export function DataTable<T>({ columns, data, searchPlaceholder = 'Search…' }:
         <input
           value={globalFilter}
           onChange={(e) => setGlobalFilter(e.target.value)}
-          placeholder={searchPlaceholder}
-          className="h-10 w-full rounded-xl border border-base bg-transparent pl-10 pr-4 text-sm outline-none focus:border-brand-500"
+          placeholder={searchPlaceholder ?? t('common.search')}
+          className="h-10 w-full rounded-xl border border-base bg-transparent ps-10 pe-4 text-sm outline-none focus:border-brand-500"
         />
       </div>
 
@@ -75,7 +77,7 @@ export function DataTable<T>({ columns, data, searchPlaceholder = 'Search…' }:
             {table.getRowModel().rows.length === 0 ? (
               <tr>
                 <td colSpan={columns.length} className="px-4 py-12 text-center text-muted">
-                  No results found.
+                  {t('common.noResults')}
                 </td>
               </tr>
             ) : (
@@ -95,14 +97,14 @@ export function DataTable<T>({ columns, data, searchPlaceholder = 'Search…' }:
 
       <div className="flex items-center justify-between">
         <p className="text-xs text-muted">
-          Page {table.getState().pagination.pageIndex + 1} of {table.getPageCount()} · {table.getFilteredRowModel().rows.length} rows
+          {t('common.page')} {table.getState().pagination.pageIndex + 1} {t('common.of')} {table.getPageCount()} · {table.getFilteredRowModel().rows.length} {t('common.rows')}
         </p>
         <div className="flex gap-2">
           <Button variant="outline" size="sm" onClick={() => table.previousPage()} disabled={!table.getCanPreviousPage()}>
-            <ChevronLeft className="h-4 w-4" /> Prev
+            <ChevronLeft className="h-4 w-4" /> {t('common.prev')}
           </Button>
           <Button variant="outline" size="sm" onClick={() => table.nextPage()} disabled={!table.getCanNextPage()}>
-            Next <ChevronRight className="h-4 w-4" />
+            {t('common.next')} <ChevronRight className="h-4 w-4" />
           </Button>
         </div>
       </div>

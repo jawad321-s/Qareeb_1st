@@ -8,6 +8,7 @@ import { Text } from '@/components/ui/Text';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Icon } from '@/components/ui/Icon';
+import { AnimatedNumber } from '@/components/ui/AnimatedNumber';
 import { formatMoney, timeAgo } from '@/lib/format';
 import { useTheme } from '@/theme/ThemeProvider';
 import { useT } from '@/i18n';
@@ -41,9 +42,7 @@ export default function Wallet() {
             </Text>
             <Icon name="wallet" size={22} color="#FFF" />
           </View>
-          <Text variant="display" tone="inverse">
-            {formatMoney(43000)}
-          </Text>
+          <AnimatedNumber value={43000} format={(n) => formatMoney(n)} variant="display" tone="inverse" />
           <View style={{ flexDirection: 'row', gap: 12, marginTop: 12 }}>
             <View style={{ flex: 1 }}>
               <Button label={t('wallet.topUp')} variant="secondary" size="sm" iconLeft="plus" onPress={() => {}} />

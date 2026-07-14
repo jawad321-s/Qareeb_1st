@@ -9,6 +9,7 @@ import { Avatar } from '@/components/ui/Avatar';
 import { Icon, type IconName } from '@/components/ui/Icon';
 import { Card } from '@/components/ui/Card';
 import { Rating } from '@/components/ui/Rating';
+import { FloatingBlobs } from '@/components/ui/FloatingBlobs';
 import { useAuth } from '@/store/auth';
 import { useThemeStore } from '@/theme/ThemeProvider';
 import { useTheme } from '@/theme/ThemeProvider';
@@ -61,7 +62,13 @@ export default function Profile() {
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
       <StatusBar style="light" />
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 140 }}>
-        <LinearGradient colors={['#4F46E5', '#06B6D4']} style={{ paddingBottom: 28 }}>
+        <LinearGradient colors={['#4F46E5', '#06B6D4']} style={{ paddingBottom: 28, overflow: 'hidden' }}>
+          <FloatingBlobs
+            blobs={[
+              { size: 200, colors: ['#818CF8', '#4F46E5'], top: -70, right: -40, range: 26 },
+              { size: 150, colors: ['#22D3EE', '#06B6D4'], bottom: -40, left: -30, delay: 1500, range: 20 },
+            ]}
+          />
           <SafeAreaView edges={['top']}>
             <View style={{ alignItems: 'center', gap: 12, paddingTop: 20, paddingHorizontal: 20 }}>
               <Avatar uri={user.photoUrl} name={user.fullName} size={92} verified={user.verified} />

@@ -8,6 +8,8 @@ import { StatusBar } from 'expo-status-bar';
 import { Text } from '@/components/ui/Text';
 import { Button } from '@/components/ui/Button';
 import { Icon } from '@/components/ui/Icon';
+import { FloatingBlobs } from '@/components/ui/FloatingBlobs';
+import { GlassView } from '@/components/ui/GlassView';
 import { useAuth } from '@/store/auth';
 import { useT } from '@/i18n';
 import { gradients } from '@/theme/tokens';
@@ -28,6 +30,13 @@ export default function Welcome() {
     <View style={{ flex: 1 }}>
       <StatusBar style="light" />
       <LinearGradient colors={['#312E81', '#4F46E5', '#06B6D4']} style={{ flex: 1 }}>
+        <FloatingBlobs
+          blobs={[
+            { size: 260, colors: ['#818CF8', '#4F46E5'], top: -60, right: -50, range: 34 },
+            { size: 200, colors: ['#22D3EE', '#06B6D4'], bottom: 120, left: -60, delay: 1400, range: 26 },
+            { size: 150, colors: ['#A78BFA', '#7C3AED'], top: 220, left: 30, delay: 2600, range: 20 },
+          ]}
+        />
         <SafeAreaView style={{ flex: 1, paddingHorizontal: 24, justifyContent: 'space-between' }}>
           <View style={{ flex: 1, justifyContent: 'center', gap: 28, paddingTop: height * 0.06 }}>
             <Animated.View entering={FadeIn.duration(600)} style={{ alignItems: 'center', gap: 16 }}>
@@ -53,38 +62,31 @@ export default function Welcome() {
 
             <View style={{ gap: 14, marginTop: 12 }}>
               {FEATURES.map((f, i) => (
-                <Animated.View
-                  key={f.title}
-                  entering={FadeInDown.delay(200 + i * 120).duration(500)}
-                  style={{
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                    gap: 14,
-                    backgroundColor: 'rgba(255,255,255,0.12)',
-                    borderRadius: 18,
-                    padding: 14,
-                  }}
-                >
-                  <View
-                    style={{
-                      width: 44,
-                      height: 44,
-                      borderRadius: 12,
-                      backgroundColor: 'rgba(255,255,255,0.18)',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                    }}
-                  >
-                    <Icon name={f.icon} size={22} color="#FFFFFF" />
-                  </View>
-                  <View style={{ flex: 1 }}>
-                    <Text variant="bodyMedium" tone="inverse">
-                      {f.title}
-                    </Text>
-                    <Text variant="caption" style={{ color: 'rgba(255,255,255,0.8)' }}>
-                      {f.desc}
-                    </Text>
-                  </View>
+                <Animated.View key={f.title} entering={FadeInDown.delay(200 + i * 120).duration(500)}>
+                  <GlassView radius={18}>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14, padding: 14 }}>
+                      <View
+                        style={{
+                          width: 44,
+                          height: 44,
+                          borderRadius: 12,
+                          backgroundColor: 'rgba(255,255,255,0.25)',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                        }}
+                      >
+                        <Icon name={f.icon} size={22} color="#FFFFFF" />
+                      </View>
+                      <View style={{ flex: 1 }}>
+                        <Text variant="bodyMedium" tone="inverse">
+                          {f.title}
+                        </Text>
+                        <Text variant="caption" style={{ color: 'rgba(255,255,255,0.85)' }}>
+                          {f.desc}
+                        </Text>
+                      </View>
+                    </View>
+                  </GlassView>
                 </Animated.View>
               ))}
             </View>

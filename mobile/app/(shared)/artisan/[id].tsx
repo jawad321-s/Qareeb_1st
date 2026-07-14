@@ -15,6 +15,7 @@ import { Avatar } from '@/components/ui/Avatar';
 import { Rating } from '@/components/ui/Rating';
 import { Badge } from '@/components/ui/Badge';
 import { CardSkeleton } from '@/components/feedback/Skeleton';
+import { FloatingBlobs } from '@/components/ui/FloatingBlobs';
 import { useArtisan, useReviews } from '@/hooks/queries';
 import { categoryById } from '@/constants/categories';
 import { timeAgo } from '@/lib/format';
@@ -45,7 +46,13 @@ export default function ArtisanDetail() {
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
       <StatusBar style="light" />
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 120 }}>
-        <LinearGradient colors={isDark ? ['#1E1B4B', '#0B1120'] : ['#4F46E5', '#06B6D4']} style={{ paddingBottom: 24 }}>
+        <LinearGradient colors={isDark ? ['#1E1B4B', '#0B1120'] : ['#4F46E5', '#06B6D4']} style={{ paddingBottom: 24, overflow: 'hidden' }}>
+          <FloatingBlobs
+            blobs={[
+              { size: 190, colors: ['#818CF8', '#4F46E5'], top: -60, right: -40, range: 24 },
+              { size: 140, colors: ['#22D3EE', '#06B6D4'], bottom: -30, left: -30, delay: 1400, range: 18 },
+            ]}
+          />
           <SafeAreaView edges={['top']}>
             <View style={{ paddingHorizontal: 20 }}>
               <Header showBack rightIcon="heart" transparent />

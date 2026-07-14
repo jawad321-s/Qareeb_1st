@@ -8,6 +8,7 @@ import { Text } from '@/components/ui/Text';
 import { Card } from '@/components/ui/Card';
 import { Icon } from '@/components/ui/Icon';
 import { BarChart } from '@/components/domain/BarChart';
+import { AnimatedNumber } from '@/components/ui/AnimatedNumber';
 import { formatMoney } from '@/lib/format';
 import { useT } from '@/i18n';
 
@@ -45,9 +46,7 @@ export default function Income() {
               </Text>
             </View>
           </View>
-          <Text variant="display" tone="inverse">
-            {formatMoney(1240000)}
-          </Text>
+          <AnimatedNumber value={1240000} format={(n) => formatMoney(n)} variant="display" tone="inverse" />
         </LinearGradient>
       </Animated.View>
 

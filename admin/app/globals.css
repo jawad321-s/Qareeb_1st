@@ -1,0 +1,39 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg: 248 250 252;
+  --surface: 255 255 255;
+  --border: 226 232 240;
+  --fg: 15 23 42;
+  --muted: 100 116 139;
+}
+.dark {
+  --bg: 8 11 22;
+  --surface: 17 24 39;
+  --border: 30 41 59;
+  --fg: 241 245 249;
+  --muted: 148 163 184;
+}
+
+body {
+  background: rgb(var(--bg));
+  color: rgb(var(--fg));
+  -webkit-font-smoothing: antialiased;
+}
+
+@layer utilities {
+  .surface { background: rgb(var(--surface)); }
+  .text-muted { color: rgb(var(--muted)); }
+  .border-base { border-color: rgb(var(--border)); }
+  .glass {
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(12px);
+  }
+  .dark .glass { background: rgba(17, 24, 39, 0.7); }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-thumb { background: rgb(var(--border)); border-radius: 4px; }

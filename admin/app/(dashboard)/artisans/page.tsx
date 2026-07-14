@@ -1,0 +1,73 @@
+'use client';
+
+import { useState } from 'react';
+import { Check, FileText, ShieldCheck, X } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Card, Button, StatusPill } from '@/components/ui/primitives';
+import { VERIFICATIONS, type VerificationItem } from '@/lib/mock-data';
+import { timeAgo } from '@/lib/utils';
+
+export default function ArtisansPage() {
+  const [items, setItems] = useState<VerificationItem[]>(VERIFICATIONS);
+
+  const decide = (id: string, status: 'approved' | 'rejected') =>
+    setItems((prev) => prev.map((v) => (v.id === id ? { ...v, status } : v)));
+
+  const pending = items.filter((v) => v.status === 'pending');
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold">Verification queue</h1>
+          <p className="text-sm text-muted">{pending.length} artisans awaiting identity review.</p>
+        </div>
+        <span className="inline-flex items-center gap-2 rounded-xl bg-brand-500/10 px-3 py-2 text-sm font-medium text-brand-500">
+          <ShieldCheck className="h-4 w-4" /> {pending.length} pending
+        </span>
+      </div>
+
+      <div className="grid gap-4 md:grid-cols-2">
+        <AnimatePresence>
+          {items.map((v) => (
+            <motion.div key={v.id} layout initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, scale: 0.97 }}>
+              <Card className="p-5">
+                <div className="flex items-start justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="grid h-11 w-11 place-items-center rounded-xl bg-gradient-to-br from-brand-400 to-accent-400 text-sm font-bold text-white">
+                      {v.name.split(' ').map((n) => n[0]).join('').slice(0, 2)}
+                    </div>
+                    <div>
+                      <p className="font-semibold">{v.name}</p>
+                      <p className="text-xs text-muted">{v.category} · submitted {timeAgo(v.submittedAt)}</p>
+                    </div>
+                  </div>
+                  <StatusPill status={v.status} />
+                </div>
+
+                <div className="mt-4 flex gap-2">
+                  {['ID front', 'ID back', 'Certificate'].map((doc) => (
+                    <div key={doc} className="flex flex-1 items-center gap-2 rounded-xl border border-base px-3 py-2 text-xs text-muted">
+                      <FileText className="h-4 w-4" /> {doc}
+                    </div>
+                  ))}
+                </div>
+
+                {v.status === 'pending' && (
+                  <div className="mt-4 flex gap-2">
+                    <Button variant="outline" className="flex-1" onClick={() => decide(v.id, 'rejected')}>
+                      <X className="h-4 w-4" /> Reject
+                    </Button>
+                    <Button className="flex-1" onClick={() => decide(v.id, 'approved')}>
+                      <Check className="h-4 w-4" /> Approve
+                    </Button>
+                  </div>
+                )}
+              </Card>
+            </motion.div>
+          ))}
+        </AnimatePresence>
+      </div>
+    </div>
+  );
+}

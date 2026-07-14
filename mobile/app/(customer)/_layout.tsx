@@ -13,7 +13,7 @@ const META = {
 export default function CustomerLayout() {
   return (
     <Tabs
-      screenOptions={{ headerShown: false }}
+      screenOptions={{ headerShown: false, animation: 'shift' }}
       tabBar={(props) => <TabBar {...props} meta={META} />}
     >
       <Tabs.Screen name="home" />

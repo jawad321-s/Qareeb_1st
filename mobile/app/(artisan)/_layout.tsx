@@ -12,7 +12,7 @@ const META = {
 
 export default function ArtisanLayout() {
   return (
-    <Tabs screenOptions={{ headerShown: false }} tabBar={(props) => <TabBar {...props} meta={META} />}>
+    <Tabs screenOptions={{ headerShown: false, animation: 'shift' }} tabBar={(props) => <TabBar {...props} meta={META} />}>
       <Tabs.Screen name="dashboard" />
       <Tabs.Screen name="requests" />
       <Tabs.Screen name="offers" />

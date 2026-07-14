@@ -1,5 +1,6 @@
 import '../global.css';
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
+import { View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { QueryClientProvider } from '@tanstack/react-query';
@@ -20,6 +21,7 @@ import {
 } from '@expo-google-fonts/cairo';
 import { ThemeProvider, useTheme } from '@/theme/ThemeProvider';
 import { ToastProvider } from '@/components/feedback/Toast';
+import { AnimatedSplash } from '@/components/AnimatedSplash';
 import { queryClient } from '@/lib/queryClient';
 import { useAuth } from '@/store/auth';
 
@@ -39,31 +41,38 @@ function RootNavigator() {
     Cairo_600SemiBold,
     Cairo_700Bold,
   });
+  const [splashDone, setSplashDone] = useState(false);
 
   useEffect(() => {
     hydrate();
   }, [hydrate]);
 
   useEffect(() => {
+    // Hand the native splash over to our animated splash as soon as we're ready.
     if (hydrated && fontsLoaded) SplashScreen.hideAsync().catch(() => {});
   }, [hydrated, fontsLoaded]);
 
   if (!fontsLoaded) return null;
 
   return (
-    <Stack
-      screenOptions={{
-        headerShown: false,
-        contentStyle: { backgroundColor: colors.bg },
-        animation: 'slide_from_right',
-      }}
-    >
-      <Stack.Screen name="index" />
-      <Stack.Screen name="(auth)" />
-      <Stack.Screen name="(customer)" />
-      <Stack.Screen name="(artisan)" />
-      <Stack.Screen name="(shared)" options={{ presentation: 'card' }} />
-    </Stack>
+    <View style={{ flex: 1 }}>
+      <Stack
+        screenOptions={{
+          headerShown: false,
+          contentStyle: { backgroundColor: colors.bg },
+          animation: 'slide_from_right',
+          animationDuration: 260,
+          gestureEnabled: true,
+        }}
+      >
+        <Stack.Screen name="index" options={{ animation: 'fade' }} />
+        <Stack.Screen name="(auth)" options={{ animation: 'fade' }} />
+        <Stack.Screen name="(customer)" options={{ animation: 'fade' }} />
+        <Stack.Screen name="(artisan)" options={{ animation: 'fade' }} />
+        <Stack.Screen name="(shared)" options={{ presentation: 'card', animation: 'slide_from_right' }} />
+      </Stack>
+      {!splashDone && <AnimatedSplash onFinish={() => setSplashDone(true)} />}
+    </View>
   );
 }
 

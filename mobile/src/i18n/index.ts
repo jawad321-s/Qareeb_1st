@@ -49,3 +49,15 @@ export function translate(key: TranslationKey): string {
   const locale = useLocaleStore.getState().locale;
   return translations[locale][key] ?? translations.en[key] ?? key;
 }
+
+/**
+ * Returns a mapper that swaps an Inter font family for its Cairo (Arabic)
+ * equivalent when the app is in Arabic. Use for raw <TextInput> fontFamily.
+ *   const font = useFont();
+ *   style={{ fontFamily: font('Inter_400Regular') }}
+ */
+export function useFont() {
+  const isRTL = useLocaleStore((s) => s.locale === 'ar');
+  return (family: string) =>
+    isRTL && family.startsWith('Inter') ? family.replace('Inter', 'Cairo') : family;
+}

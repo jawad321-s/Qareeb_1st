@@ -12,6 +12,12 @@ import {
   Inter_600SemiBold,
   Inter_700Bold,
 } from '@expo-google-fonts/inter';
+import {
+  Cairo_400Regular,
+  Cairo_500Medium,
+  Cairo_600SemiBold,
+  Cairo_700Bold,
+} from '@expo-google-fonts/cairo';
 import { ThemeProvider, useTheme } from '@/theme/ThemeProvider';
 import { ToastProvider } from '@/components/feedback/Toast';
 import { queryClient } from '@/lib/queryClient';
@@ -28,6 +34,10 @@ function RootNavigator() {
     Inter_500Medium,
     Inter_600SemiBold,
     Inter_700Bold,
+    Cairo_400Regular,
+    Cairo_500Medium,
+    Cairo_600SemiBold,
+    Cairo_700Bold,
   });
 
   useEffect(() => {

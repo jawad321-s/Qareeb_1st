@@ -340,6 +340,26 @@ export const translations = {
     'job.submit': 'Submit offer',
     'job.sent': 'Offer sent ✓',
     'job.budget': 'Budget',
+
+    // misc
+    'set.privacy': 'Privacy policy',
+    'set.terms': 'Terms of service',
+    'set.about': 'ABOUT',
+    'create.describePlaceholder': "Tell the artisan what's happening…",
+    'sort.popular': 'Popular',
+    'sort.price': 'Price',
+    'sort.name': 'Name',
+    'sub.free': 'Free',
+    'sub.cancelAnytime': 'Cancel anytime. Prices include VAT.',
+    'inc.last6': 'Last 6 months',
+    'inc.completedJobs': 'Completed jobs',
+    'inc.rejectedJobs': 'Rejected jobs',
+    'inc.avgResponse': 'Avg. response',
+    'inc.avgRating': 'Avg. rating',
+    'ostatus.PENDING': 'Pending',
+    'ostatus.ACCEPTED': 'Accepted',
+    'ostatus.REJECTED': 'Rejected',
+    'ostatus.WITHDRAWN': 'Withdrawn',
   },
 
   ar: {
@@ -678,6 +698,26 @@ export const translations = {
     'job.submit': 'إرسال العرض',
     'job.sent': 'تم إرسال العرض ✓',
     'job.budget': 'الميزانية',
+
+    // misc
+    'set.privacy': 'سياسة الخصوصية',
+    'set.terms': 'شروط الخدمة',
+    'set.about': 'حول',
+    'create.describePlaceholder': 'أخبر الحرفي بما يحدث…',
+    'sort.popular': 'الأكثر طلباً',
+    'sort.price': 'السعر',
+    'sort.name': 'الاسم',
+    'sub.free': 'مجاني',
+    'sub.cancelAnytime': 'يمكنك الإلغاء في أي وقت. الأسعار تشمل الضريبة.',
+    'inc.last6': 'آخر 6 أشهر',
+    'inc.completedJobs': 'أعمال مكتملة',
+    'inc.rejectedJobs': 'أعمال مرفوضة',
+    'inc.avgResponse': 'متوسط الاستجابة',
+    'inc.avgRating': 'متوسط التقييم',
+    'ostatus.PENDING': 'قيد الانتظار',
+    'ostatus.ACCEPTED': 'مقبول',
+    'ostatus.REJECTED': 'مرفوض',
+    'ostatus.WITHDRAWN': 'مسحوب',
   },
 } as const;
 

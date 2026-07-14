@@ -1,5 +1,5 @@
 import React from 'react';
-import { Text as RNText, type TextProps as RNTextProps } from 'react-native';
+import { Text as RNText, StyleSheet, type TextProps as RNTextProps } from 'react-native';
 import { typography } from '@/theme/tokens';
 import { useTheme } from '@/theme/ThemeProvider';
 import { useT } from '@/i18n';
@@ -12,6 +12,12 @@ interface TextProps extends RNTextProps {
   tone?: Tone;
   center?: boolean;
   children: React.ReactNode;
+}
+
+/** Map an Inter weight to its Cairo (Arabic) equivalent. */
+function arabicFont(family?: string) {
+  if (family && family.startsWith('Inter')) return family.replace('Inter', 'Cairo');
+  return family ?? 'Cairo_400Regular';
 }
 
 export function Text({
@@ -33,6 +39,12 @@ export function Text({
     inverse: '#FFFFFF',
   };
 
+  // Resolve the effective font family (respecting inline overrides), then swap
+  // to the Cairo family when rendering Arabic so glyphs look native and premium.
+  const flat = StyleSheet.flatten(style) as { fontFamily?: string } | undefined;
+  const baseFamily = flat?.fontFamily ?? typography[variant].fontFamily;
+  const fontFamily = isRTL ? arabicFont(baseFamily) : baseFamily;
+
   return (
     <RNText
       style={[
@@ -41,6 +53,7 @@ export function Text({
         isRTL && { writingDirection: 'rtl' },
         center ? { textAlign: 'center' } : isRTL ? { textAlign: 'right' } : null,
         style,
+        { fontFamily }, // final override wins for both LTR passthrough and RTL swap
       ]}
       {...rest}
     >

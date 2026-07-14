@@ -82,8 +82,8 @@ export default function Search() {
         </Text>
         {(['popular', 'price', 'name'] as SortKey[]).map((k) => (
           <Pressable key={k} onPress={() => setSort(k)}>
-            <Text variant="caption" tone={sort === k ? 'primary' : 'muted'} style={{ fontFamily: sort === k ? 'Inter_600SemiBold' : 'Inter_400Regular', textTransform: 'capitalize' }}>
-              {k}
+            <Text variant="caption" tone={sort === k ? 'primary' : 'muted'} style={{ fontFamily: sort === k ? 'Inter_600SemiBold' : 'Inter_400Regular' }}>
+              {t(`sort.${k}` as any)}
             </Text>
           </Pressable>
         ))}

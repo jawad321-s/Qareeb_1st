@@ -13,15 +13,23 @@ import { useTheme } from '@/theme/ThemeProvider';
 import { useT } from '@/i18n';
 import type { WalletTransaction } from '@/types';
 
-const TXNS: WalletTransaction[] = [
-  { id: 't1', type: 'debit', amount: 12000, reason: 'Plumbing — Omar Khalid', requestId: 'req_1', createdAt: Date.now() - 3 * 24 * 3600_000 },
-  { id: 't2', type: 'credit', amount: 5000, reason: 'Referral bonus', createdAt: Date.now() - 6 * 24 * 3600_000 },
-  { id: 't3', type: 'debit', amount: 32000, reason: 'Deep clean — Yousef Nasser', requestId: 'req_3', createdAt: Date.now() - 10 * 24 * 3600_000 },
-];
+const TXNS: Record<'en' | 'ar', WalletTransaction[]> = {
+  en: [
+    { id: 't1', type: 'debit', amount: 12000, reason: 'Plumbing — Omar Khalid', requestId: 'req_1', createdAt: Date.now() - 3 * 24 * 3600_000 },
+    { id: 't2', type: 'credit', amount: 5000, reason: 'Referral bonus', createdAt: Date.now() - 6 * 24 * 3600_000 },
+    { id: 't3', type: 'debit', amount: 32000, reason: 'Deep clean — Yousef Nasser', requestId: 'req_3', createdAt: Date.now() - 10 * 24 * 3600_000 },
+  ],
+  ar: [
+    { id: 't1', type: 'debit', amount: 12000, reason: 'سباكة — عمر خالد', requestId: 'req_1', createdAt: Date.now() - 3 * 24 * 3600_000 },
+    { id: 't2', type: 'credit', amount: 5000, reason: 'مكافأة إحالة', createdAt: Date.now() - 6 * 24 * 3600_000 },
+    { id: 't3', type: 'debit', amount: 32000, reason: 'تنظيف عميق — يوسف ناصر', requestId: 'req_3', createdAt: Date.now() - 10 * 24 * 3600_000 },
+  ],
+};
 
 export default function Wallet() {
   const { colors } = useTheme();
-  const { t } = useT();
+  const { t, locale } = useT();
+  const txns = TXNS[locale];
   return (
     <Screen scroll>
       <Header showBack title={t('wallet.title')} />
@@ -51,22 +59,22 @@ export default function Wallet() {
         {t('wallet.transactions')}
       </Text>
       <View style={{ gap: 10 }}>
-        {TXNS.map((t) => (
-          <Card key={t.id} style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
-            <View style={{ width: 42, height: 42, borderRadius: 12, backgroundColor: (t.type === 'credit' ? '#10B981' : '#EF4444') + '18', alignItems: 'center', justifyContent: 'center' }}>
-              <Icon name={t.type === 'credit' ? 'trending-up' : 'wallet'} size={20} color={t.type === 'credit' ? '#10B981' : '#EF4444'} />
+        {txns.map((tx) => (
+          <Card key={tx.id} style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+            <View style={{ width: 42, height: 42, borderRadius: 12, backgroundColor: (tx.type === 'credit' ? '#10B981' : '#EF4444') + '18', alignItems: 'center', justifyContent: 'center' }}>
+              <Icon name={tx.type === 'credit' ? 'trending-up' : 'wallet'} size={20} color={tx.type === 'credit' ? '#10B981' : '#EF4444'} />
             </View>
             <View style={{ flex: 1 }}>
               <Text variant="bodyMedium" numberOfLines={1}>
-                {t.reason}
+                {tx.reason}
               </Text>
               <Text variant="caption" tone="muted">
-                {timeAgo(t.createdAt)}
+                {timeAgo(tx.createdAt)}
               </Text>
             </View>
-            <Text variant="bodyMedium" tone={t.type === 'credit' ? 'success' : 'default'}>
-              {t.type === 'credit' ? '+' : '-'}
-              {formatMoney(t.amount)}
+            <Text variant="bodyMedium" tone={tx.type === 'credit' ? 'success' : 'default'}>
+              {tx.type === 'credit' ? '+' : '-'}
+              {formatMoney(tx.amount)}
             </Text>
           </Card>
         ))}

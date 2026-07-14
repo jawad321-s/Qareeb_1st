@@ -2,6 +2,7 @@ import React from 'react';
 import { Pressable, TextInput, View } from 'react-native';
 import { Icon } from './Icon';
 import { useTheme } from '@/theme/ThemeProvider';
+import { useFont } from '@/i18n';
 import { radius } from '@/theme/tokens';
 
 interface Props {
@@ -15,6 +16,7 @@ interface Props {
 
 export function SearchBar({ value, onChangeText, placeholder = 'Search servicesâ€¦', onPress, onFilter, autoFocus }: Props) {
   const { colors } = useTheme();
+  const font = useFont();
   const Wrapper: any = onPress ? Pressable : View;
 
   return (
@@ -35,7 +37,7 @@ export function SearchBar({ value, onChangeText, placeholder = 'Search servicesâ
       <Icon name="search" size={20} color={colors.muted} />
       {onPress ? (
         <View style={{ flex: 1 }}>
-          <TextInput editable={false} pointerEvents="none" placeholder={placeholder} placeholderTextColor={colors.muted} style={{ color: colors.fg, fontSize: 15, fontFamily: 'Inter_400Regular' }} />
+          <TextInput editable={false} pointerEvents="none" placeholder={placeholder} placeholderTextColor={colors.muted} style={{ color: colors.fg, fontSize: 15, fontFamily: font('Inter_400Regular') }} />
         </View>
       ) : (
         <TextInput
@@ -44,7 +46,7 @@ export function SearchBar({ value, onChangeText, placeholder = 'Search servicesâ
           placeholder={placeholder}
           placeholderTextColor={colors.muted}
           autoFocus={autoFocus}
-          style={{ flex: 1, color: colors.fg, fontSize: 15, fontFamily: 'Inter_400Regular' }}
+          style={{ flex: 1, color: colors.fg, fontSize: 15, fontFamily: font('Inter_400Regular') }}
         />
       )}
       {onFilter && (

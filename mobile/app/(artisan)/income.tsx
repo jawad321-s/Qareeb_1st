@@ -20,15 +20,14 @@ const MONTHLY = [
   { label: 'Jun', value: 12400 },
 ];
 
-const BREAKDOWN = [
-  { icon: 'check-circle' as const, label: 'Completed jobs', value: '214', color: '#10B981' },
-  { icon: 'x-circle' as const, label: 'Rejected jobs', value: '18', color: '#EF4444' },
-  { icon: 'clock' as const, label: 'Avg. response', value: '6 min', color: '#F59E0B' },
-  { icon: 'star' as const, label: 'Avg. rating', value: '4.8', color: '#6366F1' },
-];
-
 export default function Income() {
   const { t } = useT();
+  const BREAKDOWN = [
+    { icon: 'check-circle' as const, label: t('inc.completedJobs'), value: '214', color: '#10B981' },
+    { icon: 'x-circle' as const, label: t('inc.rejectedJobs'), value: '18', color: '#EF4444' },
+    { icon: 'clock' as const, label: t('inc.avgResponse'), value: '6 min', color: '#F59E0B' },
+    { icon: 'star' as const, label: t('inc.avgRating'), value: '4.8', color: '#6366F1' },
+  ];
   return (
     <Screen scroll>
       <Header title={t('artisan.income')} />
@@ -53,7 +52,7 @@ export default function Income() {
       </Animated.View>
 
       <Card style={{ marginTop: 20, gap: 16 }}>
-        <Text variant="h3">Last 6 months</Text>
+        <Text variant="h3">{t('inc.last6')}</Text>
         <BarChart data={MONTHLY} />
       </Card>
 

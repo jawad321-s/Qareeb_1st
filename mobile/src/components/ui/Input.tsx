@@ -4,6 +4,7 @@ import { Text } from './Text';
 import { Icon, type IconName } from './Icon';
 import { radius } from '@/theme/tokens';
 import { useTheme } from '@/theme/ThemeProvider';
+import { useFont } from '@/i18n';
 
 interface InputProps extends TextInputProps {
   label?: string;
@@ -23,6 +24,7 @@ export function Input({
   ...rest
 }: InputProps) {
   const { colors } = useTheme();
+  const font = useFont();
   const [focused, setFocused] = useState(false);
   const [hidden, setHidden] = useState(!!secure);
 
@@ -55,8 +57,9 @@ export function Input({
               flex: 1,
               color: colors.fg,
               fontSize: 15,
-              fontFamily: 'Inter_400Regular',
+              fontFamily: font('Inter_400Regular'),
               height: '100%',
+              textAlign: 'auto',
             },
             style,
           ]}

@@ -122,7 +122,7 @@ export default function CreateRequest() {
               <TextInput
                 value={description}
                 onChangeText={setDescription}
-                placeholder="Tell the artisan what's happening…"
+                placeholder={t('create.describePlaceholder')}
                 placeholderTextColor={colors.muted}
                 multiline
                 style={{ minHeight: 120, borderRadius: 16, borderWidth: 1.5, borderColor: colors.border, backgroundColor: colors.surface, padding: 14, color: colors.fg, fontSize: 15, fontFamily: 'Inter_400Regular', textAlignVertical: 'top' }}

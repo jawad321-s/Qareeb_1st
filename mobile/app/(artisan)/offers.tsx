@@ -35,7 +35,7 @@ export default function ArtisanOffers() {
               <Text variant="bodyMedium" style={{ flex: 1 }} numberOfLines={1}>
                 {o.request?.title ?? 'Request'}
               </Text>
-              <Badge label={o.status} variant={STATUS_VARIANT[o.status]} />
+              <Badge label={t(`ostatus.${o.status}` as any)} variant={STATUS_VARIANT[o.status]} />
             </View>
             <View style={{ flexDirection: 'row', gap: 20 }}>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>

@@ -13,17 +13,25 @@ import { useTheme } from '@/theme/ThemeProvider';
 import { useT } from '@/i18n';
 import { config } from '@/lib/config';
 
-const PLANS = [
-  { id: 'free', name: 'Starter', price: 0, period: 'forever', highlight: false, features: ['Receive nearby requests', 'Up to 10 offers / month', 'Standard support'] },
-  { id: 'pro', name: 'Pro', price: 49, period: 'month', highlight: true, features: ['Unlimited offers', 'Priority matching', 'Premium badge', 'Analytics dashboard', 'Faster payouts'] },
-  { id: 'elite', name: 'Elite', price: 99, period: 'month', highlight: false, features: ['Everything in Pro', 'Top of search results', 'Dedicated account manager', 'Featured on homepage'] },
-];
+const PLANS = {
+  en: [
+    { id: 'free', name: 'Starter', price: 0, highlight: false, features: ['Receive nearby requests', 'Up to 10 offers / month', 'Standard support'] },
+    { id: 'pro', name: 'Pro', price: 49, highlight: true, features: ['Unlimited offers', 'Priority matching', 'Premium badge', 'Analytics dashboard', 'Faster payouts'] },
+    { id: 'elite', name: 'Elite', price: 99, highlight: false, features: ['Everything in Pro', 'Top of search results', 'Dedicated account manager', 'Featured on homepage'] },
+  ],
+  ar: [
+    { id: 'free', name: 'المبتدئ', price: 0, highlight: false, features: ['استقبال الطلبات القريبة', 'حتى 10 عروض شهرياً', 'دعم قياسي'] },
+    { id: 'pro', name: 'المحترف', price: 49, highlight: true, features: ['عروض غير محدودة', 'أولوية في المطابقة', 'شارة مميّزة', 'لوحة تحليلات', 'دفعات أسرع'] },
+    { id: 'elite', name: 'النخبة', price: 99, highlight: false, features: ['كل مزايا المحترف', 'الظهور أعلى نتائج البحث', 'مدير حساب مخصّص', 'ظهور في الصفحة الرئيسية'] },
+  ],
+};
 
 export default function Subscription() {
   const { colors } = useTheme();
   const toast = useToast();
-  const { t } = useT();
+  const { t, locale } = useT();
   const [selected, setSelected] = useState('pro');
+  const plans = PLANS[locale];
 
   return (
     <Screen scroll>
@@ -38,7 +46,7 @@ export default function Subscription() {
       </View>
 
       <View style={{ gap: 14 }}>
-        {PLANS.map((plan, i) => {
+        {plans.map((plan, i) => {
           const active = selected === plan.id;
           return (
             <Animated.View key={plan.id} entering={FadeInDown.delay(i * 80).duration(400)}>
@@ -58,7 +66,7 @@ export default function Subscription() {
                   </View>
                   <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: 4 }}>
                     <Text variant="display" tone={plan.highlight ? 'inverse' : 'default'}>
-                      {plan.price === 0 ? 'Free' : `${plan.price}`}
+                      {plan.price === 0 ? t('sub.free') : `${plan.price}`}
                     </Text>
                     {plan.price > 0 && (
                       <Text variant="body" style={{ color: plan.highlight ? 'rgba(255,255,255,0.85)' : colors.muted, marginBottom: 6 }}>
@@ -85,12 +93,12 @@ export default function Subscription() {
 
       <View style={{ marginTop: 24 }}>
         <Button
-          label={`${t('sub.subscribe')} ${PLANS.find((p) => p.id === selected)?.name}`}
+          label={`${t('sub.subscribe')} ${plans.find((p) => p.id === selected)?.name}`}
           iconRight="arrow-right"
           onPress={() => toast('success', 'Subscription updated')}
         />
         <Text variant="caption" tone="muted" center style={{ marginTop: 12 }}>
-          Cancel anytime. Prices include VAT.
+          {t('sub.cancelAnytime')}
         </Text>
       </View>
     </Screen>

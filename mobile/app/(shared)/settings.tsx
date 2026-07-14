@@ -82,12 +82,12 @@ export default function Settings() {
       </Card>
 
       <Text variant="overline" tone="muted" style={{ marginBottom: 10, marginLeft: 4 }}>
-        ABOUT
+        {t('set.about')}
       </Text>
       <Card padded={false}>
-        <LinkRow icon="shield" label="Privacy policy" first />
-        <LinkRow icon="info" label="Terms of service" />
-        <LinkRow icon="help-circle" label="Help center" onPress={() => router.push('/(shared)/help')} />
+        <LinkRow icon="shield" label={t('set.privacy')} first />
+        <LinkRow icon="info" label={t('set.terms')} />
+        <LinkRow icon="help-circle" label={t('help.title')} onPress={() => router.push('/(shared)/help')} />
       </Card>
     </Screen>
   );

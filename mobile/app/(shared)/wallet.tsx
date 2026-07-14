@@ -1,0 +1,74 @@
+import React from 'react';
+import { View } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
+import Animated, { FadeInDown } from 'react-native-reanimated';
+import { Screen } from '@/components/ui/Screen';
+import { Header } from '@/components/ui/Header';
+import { Text } from '@/components/ui/Text';
+import { Card } from '@/components/ui/Card';
+import { Button } from '@/components/ui/Button';
+import { Icon } from '@/components/ui/Icon';
+import { formatMoney, timeAgo } from '@/lib/format';
+import { useTheme } from '@/theme/ThemeProvider';
+import type { WalletTransaction } from '@/types';
+
+const TXNS: WalletTransaction[] = [
+  { id: 't1', type: 'debit', amount: 12000, reason: 'Plumbing — Omar Khalid', requestId: 'req_1', createdAt: Date.now() - 3 * 24 * 3600_000 },
+  { id: 't2', type: 'credit', amount: 5000, reason: 'Referral bonus', createdAt: Date.now() - 6 * 24 * 3600_000 },
+  { id: 't3', type: 'debit', amount: 32000, reason: 'Deep clean — Yousef Nasser', requestId: 'req_3', createdAt: Date.now() - 10 * 24 * 3600_000 },
+];
+
+export default function Wallet() {
+  const { colors } = useTheme();
+  return (
+    <Screen scroll>
+      <Header showBack title="Wallet" />
+      <Animated.View entering={FadeInDown.duration(400)}>
+        <LinearGradient colors={['#4F46E5', '#06B6D4']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ borderRadius: 24, padding: 24, gap: 6 }}>
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+            <Text variant="caption" style={{ color: 'rgba(255,255,255,0.85)' }}>
+              Available balance
+            </Text>
+            <Icon name="wallet" size={22} color="#FFF" />
+          </View>
+          <Text variant="display" tone="inverse">
+            {formatMoney(43000)}
+          </Text>
+          <View style={{ flexDirection: 'row', gap: 12, marginTop: 12 }}>
+            <View style={{ flex: 1 }}>
+              <Button label="Top up" variant="secondary" size="sm" iconLeft="plus" onPress={() => {}} />
+            </View>
+            <View style={{ flex: 1 }}>
+              <Button label="Withdraw" variant="ghost" size="sm" iconLeft="arrow-right" onPress={() => {}} />
+            </View>
+          </View>
+        </LinearGradient>
+      </Animated.View>
+
+      <Text variant="h3" style={{ marginTop: 24, marginBottom: 12 }}>
+        Transactions
+      </Text>
+      <View style={{ gap: 10 }}>
+        {TXNS.map((t) => (
+          <Card key={t.id} style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+            <View style={{ width: 42, height: 42, borderRadius: 12, backgroundColor: (t.type === 'credit' ? '#10B981' : '#EF4444') + '18', alignItems: 'center', justifyContent: 'center' }}>
+              <Icon name={t.type === 'credit' ? 'trending-up' : 'wallet'} size={20} color={t.type === 'credit' ? '#10B981' : '#EF4444'} />
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text variant="bodyMedium" numberOfLines={1}>
+                {t.reason}
+              </Text>
+              <Text variant="caption" tone="muted">
+                {timeAgo(t.createdAt)}
+              </Text>
+            </View>
+            <Text variant="bodyMedium" tone={t.type === 'credit' ? 'success' : 'default'}>
+              {t.type === 'credit' ? '+' : '-'}
+              {formatMoney(t.amount)}
+            </Text>
+          </Card>
+        ))}
+      </View>
+    </Screen>
+  );
+}

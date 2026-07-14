@@ -1,0 +1,27 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Theme-aware color tokens. NativeWind maps :root / .dark automatically when the
+   colorScheme changes. Values are space-separated RGB channels for <alpha-value>. */
+@layer base {
+  :root {
+    --bg: 248 250 252;        /* slate-50  */
+    --surface: 255 255 255;   /* white     */
+    --surface-2: 241 245 249; /* slate-100 */
+    --card: 255 255 255;
+    --border: 226 232 240;    /* slate-200 */
+    --fg: 15 23 42;           /* slate-900 */
+    --muted: 100 116 139;     /* slate-500 */
+  }
+
+  .dark:root {
+    --bg: 11 17 32;           /* #0B1120  */
+    --surface: 17 24 39;      /* slate-900 */
+    --surface-2: 30 41 59;    /* slate-800 */
+    --card: 20 28 46;
+    --border: 42 52 74;
+    --fg: 241 245 249;        /* slate-100 */
+    --muted: 148 163 184;     /* slate-400 */
+  }
+}

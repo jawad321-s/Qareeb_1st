@@ -1,11 +1,20 @@
-import React from 'react';
-import { ActivityIndicator, Pressable, View, type ViewStyle } from 'react-native';
+import React, { useState } from 'react';
+import {
+  ActivityIndicator,
+  Pressable,
+  View,
+  type GestureResponderEvent,
+  type LayoutChangeEvent,
+  type ViewStyle,
+} from 'react-native';
 import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
   withSpring,
+  withTiming,
+  Easing,
 } from 'react-native-reanimated';
 import { Text } from './Text';
 import { Icon, type IconName } from './Icon';
@@ -44,14 +53,56 @@ export function Button({
 }: ButtonProps) {
   const { colors } = useTheme();
   const scale = useSharedValue(1);
+
+  // Ripple state — a circle grows out from the touch point and fades.
+  const rx = useSharedValue(0);
+  const ry = useSharedValue(0);
+  const rippleScale = useSharedValue(0);
+  const rippleOpacity = useSharedValue(0);
+  const [dims, setDims] = useState({ w: 0, h: 0 });
+
   const animatedStyle = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }));
 
   const isDisabled = disabled || loading;
   const height = HEIGHTS[size];
 
+  const onLayout = (e: LayoutChangeEvent) => {
+    const { width, height: h } = e.nativeEvent.layout;
+    setDims({ w: width, h });
+  };
+
+  const rippleDiameter = Math.max(dims.w, dims.h) * 2.2;
+
+  const rippleStyle = useAnimatedStyle(() => ({
+    position: 'absolute',
+    width: rippleDiameter,
+    height: rippleDiameter,
+    borderRadius: rippleDiameter / 2,
+    left: rx.value - rippleDiameter / 2,
+    top: ry.value - rippleDiameter / 2,
+    opacity: rippleOpacity.value,
+    transform: [{ scale: rippleScale.value }],
+  }));
+
+  const onPressIn = (e: GestureResponderEvent) => {
+    if (isDisabled) return;
+    rx.value = e.nativeEvent.locationX;
+    ry.value = e.nativeEvent.locationY;
+    rippleScale.value = 0;
+    rippleOpacity.value = 0.35;
+    rippleScale.value = withTiming(1, { duration: 480, easing: Easing.out(Easing.ease) });
+    rippleOpacity.value = withTiming(0, { duration: 520, easing: Easing.out(Easing.ease) });
+    // Deeper press
+    scale.value = withSpring(0.93, { damping: 16, stiffness: 320 });
+  };
+
+  const onPressOut = () => {
+    scale.value = withSpring(1, { damping: 12, stiffness: 200 });
+  };
+
   const press = () => {
     if (isDisabled) return;
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium).catch(() => {});
     onPress?.();
   };
 
@@ -64,6 +115,12 @@ export function Button({
 
   const contentColor =
     textTone === 'inverse' ? '#FFFFFF' : variant === 'secondary' ? colors.fg : colors.tint;
+
+  // Ripple tint: light over dark buttons, tinted over light ones.
+  const rippleColor =
+    variant === 'primary' || variant === 'danger'
+      ? 'rgba(255,255,255,0.45)'
+      : colors.tint + '55';
 
   const Content = (
     <View
@@ -97,21 +154,17 @@ export function Button({
     width: fullWidth ? '100%' : undefined,
   };
 
+  const Ripple = (
+    <Animated.View pointerEvents="none" style={[rippleStyle, { backgroundColor: rippleColor }]} />
+  );
+
   return (
     <Animated.View style={[animatedStyle, containerBase, style]}>
-      <Pressable
-        onPress={press}
-        onPressIn={() => (scale.value = withSpring(0.96, { damping: 15 }))}
-        onPressOut={() => (scale.value = withSpring(1, { damping: 15 }))}
-        disabled={isDisabled}
-      >
+      <Pressable onPress={press} onPressIn={onPressIn} onPressOut={onPressOut} onLayout={onLayout} disabled={isDisabled}>
         {variant === 'primary' ? (
-          <LinearGradient
-            colors={gradients.brand}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-          >
+          <LinearGradient colors={gradients.brand} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}>
             {Content}
+            {Ripple}
           </LinearGradient>
         ) : (
           <View
@@ -121,14 +174,13 @@ export function Button({
                   ? '#EF4444'
                   : variant === 'secondary'
                     ? colors.surface2
-                    : variant === 'outline'
-                      ? 'transparent'
-                      : 'transparent',
+                    : 'transparent',
               borderWidth: variant === 'outline' ? 1.5 : 0,
               borderColor: colors.tint,
             }}
           >
             {Content}
+            {Ripple}
           </View>
         )}
       </Pressable>

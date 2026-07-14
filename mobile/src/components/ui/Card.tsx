@@ -59,8 +59,8 @@ export function Card({
       <Animated.View style={animatedStyle}>
         <Pressable
           onPress={press}
-          onPressIn={() => (scale.value = withSpring(0.975, { damping: 18, stiffness: 300 }))}
-          onPressOut={() => (scale.value = withSpring(1, { damping: 15, stiffness: 220 }))}
+          onPressIn={() => (scale.value = withSpring(0.96, { damping: 18, stiffness: 320 }))}
+          onPressOut={() => (scale.value = withSpring(1, { damping: 13, stiffness: 200 }))}
           style={[base, glass && { padding: 0 }, style]}
           {...rest}
         >

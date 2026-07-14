@@ -11,9 +11,11 @@ import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
 import { loginSchema, type LoginInput } from '@/lib/validation';
 import { useAuth } from '@/store/auth';
+import { useT } from '@/i18n';
 
 export default function Login() {
   const signIn = useAuth((s) => s.signIn);
+  const { t } = useT();
   const [loading, setLoading] = useState(false);
   const { control, handleSubmit, formState: { errors } } = useForm<LoginInput>({
     resolver: zodResolver(loginSchema),
@@ -35,9 +37,9 @@ export default function Login() {
       <Header showBack />
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         <Animated.View entering={FadeInDown.duration(400)} style={{ gap: 6, marginBottom: 24 }}>
-          <Text variant="h1">Welcome back 👋</Text>
+          <Text variant="h1">{t('auth.welcomeBack')}</Text>
           <Text variant="body" tone="muted">
-            Sign in to continue to Qareeb.
+            {t('auth.signInSubtitle')}
           </Text>
         </Animated.View>
 
@@ -47,7 +49,7 @@ export default function Login() {
             name="email"
             render={({ field: { onChange, value, onBlur } }) => (
               <Input
-                label="Email"
+                label={t('auth.email')}
                 placeholder="you@example.com"
                 iconLeft="mail"
                 autoCapitalize="none"
@@ -64,7 +66,7 @@ export default function Login() {
             name="password"
             render={({ field: { onChange, value, onBlur } }) => (
               <Input
-                label="Password"
+                label={t('auth.password')}
                 placeholder="••••••••"
                 iconLeft="lock"
                 secure
@@ -81,14 +83,14 @@ export default function Login() {
             style={{ textAlign: 'right', fontFamily: 'Inter_500Medium' }}
             onPress={() => router.push('/(auth)/forgot')}
           >
-            Forgot password?
+            {t('auth.forgot')}
           </Text>
 
-          <Button label="Sign in" onPress={handleSubmit(onSubmit)} loading={loading} />
+          <Button label={t('auth.signIn')} onPress={handleSubmit(onSubmit)} loading={loading} />
 
           <View style={{ flexDirection: 'row', justifyContent: 'center', gap: 4, marginTop: 8 }}>
             <Text variant="body" tone="muted">
-              New to Qareeb?
+              {t('auth.newHere')}
             </Text>
             <Text
               variant="body"
@@ -96,7 +98,7 @@ export default function Login() {
               style={{ fontFamily: 'Inter_600SemiBold' }}
               onPress={() => router.replace('/(auth)/register')}
             >
-              Create account
+              {t('auth.createAccount')}
             </Text>
           </View>
         </View>

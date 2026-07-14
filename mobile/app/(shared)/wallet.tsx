@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/Button';
 import { Icon } from '@/components/ui/Icon';
 import { formatMoney, timeAgo } from '@/lib/format';
 import { useTheme } from '@/theme/ThemeProvider';
+import { useT } from '@/i18n';
 import type { WalletTransaction } from '@/types';
 
 const TXNS: WalletTransaction[] = [
@@ -20,14 +21,15 @@ const TXNS: WalletTransaction[] = [
 
 export default function Wallet() {
   const { colors } = useTheme();
+  const { t } = useT();
   return (
     <Screen scroll>
-      <Header showBack title="Wallet" />
+      <Header showBack title={t('wallet.title')} />
       <Animated.View entering={FadeInDown.duration(400)}>
         <LinearGradient colors={['#4F46E5', '#06B6D4']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ borderRadius: 24, padding: 24, gap: 6 }}>
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
             <Text variant="caption" style={{ color: 'rgba(255,255,255,0.85)' }}>
-              Available balance
+              {t('wallet.balance')}
             </Text>
             <Icon name="wallet" size={22} color="#FFF" />
           </View>
@@ -36,17 +38,17 @@ export default function Wallet() {
           </Text>
           <View style={{ flexDirection: 'row', gap: 12, marginTop: 12 }}>
             <View style={{ flex: 1 }}>
-              <Button label="Top up" variant="secondary" size="sm" iconLeft="plus" onPress={() => {}} />
+              <Button label={t('wallet.topUp')} variant="secondary" size="sm" iconLeft="plus" onPress={() => {}} />
             </View>
             <View style={{ flex: 1 }}>
-              <Button label="Withdraw" variant="ghost" size="sm" iconLeft="arrow-right" onPress={() => {}} />
+              <Button label={t('wallet.withdraw')} variant="ghost" size="sm" iconLeft="arrow-right" onPress={() => {}} />
             </View>
           </View>
         </LinearGradient>
       </Animated.View>
 
       <Text variant="h3" style={{ marginTop: 24, marginBottom: 12 }}>
-        Transactions
+        {t('wallet.transactions')}
       </Text>
       <View style={{ gap: 10 }}>
         {TXNS.map((t) => (

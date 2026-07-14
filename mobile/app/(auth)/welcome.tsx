@@ -9,18 +9,20 @@ import { Text } from '@/components/ui/Text';
 import { Button } from '@/components/ui/Button';
 import { Icon } from '@/components/ui/Icon';
 import { useAuth } from '@/store/auth';
+import { useT } from '@/i18n';
 import { gradients } from '@/theme/tokens';
 
 const { height } = Dimensions.get('window');
 
-const FEATURES = [
-  { icon: 'map-pin', title: 'Nearby & fast', desc: 'Matched with verified artisans around you' },
-  { icon: 'shield', title: 'Verified pros', desc: 'ID-checked, rated and reviewed' },
-  { icon: 'wallet', title: 'Fair offers', desc: 'Compare quotes, pick what fits you' },
-] as const;
-
 export default function Welcome() {
   const signInAs = useAuth((s) => s.signInAs);
+  const { t } = useT();
+
+  const FEATURES = [
+    { icon: 'map-pin', title: t('welcome.feature1.title'), desc: t('welcome.feature1.desc') },
+    { icon: 'shield', title: t('welcome.feature2.title'), desc: t('welcome.feature2.desc') },
+    { icon: 'wallet', title: t('welcome.feature3.title'), desc: t('welcome.feature3.desc') },
+  ] as const;
 
   return (
     <View style={{ flex: 1 }}>
@@ -45,7 +47,7 @@ export default function Welcome() {
                 Qareeb
               </Text>
               <Text variant="body" center style={{ color: 'rgba(255,255,255,0.85)', maxWidth: 300 }}>
-                Home services from trusted artisans, right around the corner.
+                {t('welcome.tagline')}
               </Text>
             </Animated.View>
 
@@ -89,8 +91,8 @@ export default function Welcome() {
           </View>
 
           <Animated.View entering={FadeInDown.delay(700).duration(500)} style={{ gap: 12, paddingBottom: 12 }}>
-            <Button label="Get started" variant="secondary" iconRight="arrow-right" onPress={() => router.push('/(auth)/register')} />
-            <Button label="I already have an account" variant="ghost" onPress={() => router.push('/(auth)/login')} />
+            <Button label={t('welcome.getStarted')} variant="secondary" iconRight="arrow-right" onPress={() => router.push('/(auth)/register')} />
+            <Button label={t('welcome.haveAccount')} variant="ghost" onPress={() => router.push('/(auth)/login')} />
             <View style={{ flexDirection: 'row', justifyContent: 'center', gap: 16, marginTop: 4 }}>
               <Text variant="caption" style={{ color: 'rgba(255,255,255,0.8)' }} onPress={() => signInAs('customer')}>
                 Demo: Customer

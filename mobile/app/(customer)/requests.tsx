@@ -10,6 +10,7 @@ import { EmptyState } from '@/components/feedback/EmptyState';
 import { useMyRequests } from '@/hooks/queries';
 import { useAuth } from '@/store/auth';
 import { useTheme } from '@/theme/ThemeProvider';
+import { useT } from '@/i18n';
 import type { RequestStatus } from '@/types';
 
 type Tab = 'active' | 'completed' | 'all';
@@ -17,6 +18,7 @@ const ACTIVE: RequestStatus[] = ['PENDING', 'ACCEPTED', 'ON_THE_WAY', 'WORKING']
 
 export default function Requests() {
   const { colors } = useTheme();
+  const { t } = useT();
   const user = useAuth((s) => s.user)!;
   const { data, isLoading, refetch } = useMyRequests(user.uid);
   const [tab, setTab] = useState<Tab>('active');
@@ -39,20 +41,20 @@ export default function Requests() {
     <Screen padded={false}>
       <View style={{ paddingHorizontal: 20, paddingTop: 8 }}>
         <Text variant="h1" style={{ marginBottom: 16 }}>
-          My orders
+          {t('orders.title')}
         </Text>
         {/* Segmented control */}
         <View style={{ flexDirection: 'row', backgroundColor: colors.surface2, borderRadius: 14, padding: 4 }}>
-          {(['active', 'completed', 'all'] as Tab[]).map((t) => {
-            const active = tab === t;
+          {(['active', 'completed', 'all'] as Tab[]).map((key) => {
+            const active = tab === key;
             return (
               <Pressable
-                key={t}
-                onPress={() => setTab(t)}
+                key={key}
+                onPress={() => setTab(key)}
                 style={{ flex: 1, paddingVertical: 10, borderRadius: 10, backgroundColor: active ? colors.surface : 'transparent', alignItems: 'center', ...(active ? { shadowColor: '#0F172A', shadowOpacity: 0.06, shadowRadius: 6, shadowOffset: { width: 0, height: 2 }, elevation: 2 } : {}) }}
               >
-                <Text variant="caption" tone={active ? 'default' : 'muted'} style={{ fontFamily: active ? 'Inter_600SemiBold' : 'Inter_400Regular', textTransform: 'capitalize' }}>
-                  {t}
+                <Text variant="caption" tone={active ? 'default' : 'muted'} style={{ fontFamily: active ? 'Inter_600SemiBold' : 'Inter_400Regular' }}>
+                  {t(`orders.${key}` as any)}
                 </Text>
               </Pressable>
             );
@@ -71,9 +73,9 @@ export default function Requests() {
           <View style={{ marginTop: 60 }}>
             <EmptyState
               icon="briefcase"
-              title={tab === 'active' ? 'No active orders' : 'Nothing here yet'}
-              description="When you create a request it will show up here so you can track it."
-              actionLabel="Create a request"
+              title={t('orders.empty')}
+              description={t('orders.emptyDesc')}
+              actionLabel={t('orders.createCta')}
               onAction={() => router.push('/(customer)/create')}
             />
           </View>

@@ -19,18 +19,20 @@ import { CATEGORIES } from '@/constants/categories';
 import { useServices, useRecommendedArtisans, useMyRequests } from '@/hooks/queries';
 import { useAuth } from '@/store/auth';
 import { useTheme } from '@/theme/ThemeProvider';
-
-function greeting() {
-  const h = new Date().getHours();
-  if (h < 12) return 'Good morning';
-  if (h < 18) return 'Good afternoon';
-  return 'Good evening';
-}
+import { useT } from '@/i18n';
 
 export default function Home() {
   const { colors, isDark } = useTheme();
   const user = useAuth((s) => s.user);
+  const { t, locale } = useT();
   const [refreshing, setRefreshing] = useState(false);
+
+  const greeting = () => {
+    const h = new Date().getHours();
+    if (h < 12) return t('home.morning');
+    if (h < 18) return t('home.afternoon');
+    return t('home.evening');
+  };
 
   const services = useServices();
   const artisans = useRecommendedArtisans();
@@ -73,11 +75,11 @@ export default function Home() {
             <Pressable onPress={() => router.push('/(shared)/location-permission')} style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
               <Icon name="map-pin" size={14} color={colors.tint} />
               <Text variant="caption" tone="muted">
-                {user?.location?.address ?? 'Set your location'}
+                {user?.location?.address ?? t('home.setLocation')}
               </Text>
               <Icon name="chevron-down" size={14} color={colors.muted} />
             </Pressable>
-            <SearchBar onPress={() => router.push('/(customer)/search')} onFilter={() => router.push('/(customer)/search')} />
+            <SearchBar placeholder={t('home.searchPlaceholder')} onPress={() => router.push('/(customer)/search')} onFilter={() => router.push('/(customer)/search')} />
           </View>
         </SafeAreaView>
       </LinearGradient>
@@ -85,14 +87,14 @@ export default function Home() {
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 120, paddingTop: 20 }}>
         {/* Categories */}
         <View style={{ paddingHorizontal: 20 }}>
-          <SectionHeader title="Categories" actionLabel="See all" onAction={() => router.push('/(customer)/search')} />
+          <SectionHeader title={t('home.categories')} actionLabel={t('common.seeAll')} onAction={() => router.push('/(customer)/search')} />
         </View>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingHorizontal: 16, gap: 8 }}>
           {CATEGORIES.map((cat, i) => (
             <Animated.View key={cat.id} entering={FadeInDown.delay(i * 40).duration(400)}>
               <CategoryTile
                 category={cat}
-                locale={user?.locale ?? 'en'}
+                locale={locale}
                 onPress={() => router.push({ pathname: '/(customer)/search', params: { category: cat.id } })}
               />
             </Animated.View>
@@ -109,10 +111,10 @@ export default function Home() {
           >
             <View style={{ flex: 1, gap: 4 }}>
               <Text variant="h3" tone="inverse">
-                Need help fast?
+                {t('home.promoTitle')}
               </Text>
               <Text variant="caption" style={{ color: 'rgba(255,255,255,0.85)' }}>
-                Post a request and get offers in minutes.
+                {t('home.promoDesc')}
               </Text>
             </View>
             <Pressable
@@ -120,7 +122,7 @@ export default function Home() {
               style={{ backgroundColor: 'rgba(255,255,255,0.2)', paddingHorizontal: 16, paddingVertical: 10, borderRadius: 14, flexDirection: 'row', alignItems: 'center', gap: 6 }}
             >
               <Text variant="bodyMedium" tone="inverse">
-                Request
+                {t('tab.request')}
               </Text>
               <Icon name="arrow-right" size={16} color="#FFFFFF" />
             </Pressable>
@@ -129,7 +131,7 @@ export default function Home() {
 
         {/* Popular services */}
         <View style={{ paddingHorizontal: 20, marginTop: 24 }}>
-          <SectionHeader title="Popular services" actionLabel="See all" onAction={() => router.push('/(customer)/search')} />
+          <SectionHeader title={t('home.popular')} actionLabel={t('common.seeAll')} onAction={() => router.push('/(customer)/search')} />
           <View style={{ gap: 12 }}>
             {services.isLoading
               ? [0, 1, 2].map((i) => <CardSkeleton key={i} />)
@@ -141,7 +143,7 @@ export default function Home() {
 
         {/* Recommended artisans */}
         <View style={{ paddingHorizontal: 20, marginTop: 24 }}>
-          <SectionHeader title="Top rated artisans" actionLabel="See all" onAction={() => router.push('/(customer)/search')} />
+          <SectionHeader title={t('home.topArtisans')} actionLabel={t('common.seeAll')} onAction={() => router.push('/(customer)/search')} />
         </View>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingHorizontal: 16, gap: 12 }}>
           {artisans.isLoading
@@ -154,7 +156,7 @@ export default function Home() {
         {/* Recent requests */}
         {recent.length > 0 && (
           <View style={{ paddingHorizontal: 20, marginTop: 24 }}>
-            <SectionHeader title="Your recent requests" actionLabel="View all" onAction={() => router.push('/(customer)/requests')} />
+            <SectionHeader title={t('home.recent')} actionLabel={t('common.viewAll')} onAction={() => router.push('/(customer)/requests')} />
             <View style={{ gap: 12 }}>
               {recent.map((r) => (
                 <RequestCard key={r.id} request={r} onPress={() => router.push(`/(shared)/request/${r.id}`)} />

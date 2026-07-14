@@ -29,7 +29,7 @@ export function RevenueChart({ data }: { data: { month: string; revenue: number 
         <CartesianGrid strokeDasharray="3 3" stroke={GRID} vertical={false} />
         <XAxis dataKey="month" tickLine={false} axisLine={false} tick={AXIS} />
         <YAxis tickLine={false} axisLine={false} tick={AXIS} tickFormatter={(v) => `${v / 1000}k`} />
-        <Tooltip contentStyle={tooltipStyle} formatter={(v: number) => [`${v.toLocaleString()} SAR`, 'Revenue']} />
+        <Tooltip contentStyle={tooltipStyle} formatter={(v: number) => [`${v.toLocaleString()} ₪`, 'Revenue']} />
         <Area type="monotone" dataKey="revenue" stroke="#6366F1" strokeWidth={2.5} fill="url(#rev)" />
       </AreaChart>
     </ResponsiveContainer>

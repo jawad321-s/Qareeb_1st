@@ -9,16 +9,19 @@ import type { BottomTabBarProps } from '@react-navigation/bottom-tabs';
 import { Text } from './Text';
 import { Icon, type IconName } from './Icon';
 import { useTheme } from '@/theme/ThemeProvider';
+import { useT } from '@/i18n';
+import type { TranslationKey } from '@/i18n/translations';
 import { gradients } from '@/theme/tokens';
 
 interface TabMeta {
   icon: IconName;
-  label: string;
+  label: TranslationKey;
 }
 
 /** Floating glass tab bar. Pass `meta` mapping route name → icon/label. */
 export function TabBar({ state, navigation, meta }: BottomTabBarProps & { meta: Record<string, TabMeta> }) {
   const { colors, isDark } = useTheme();
+  const { t } = useT();
   const insets = useSafeAreaInsets();
 
   return (
@@ -45,7 +48,7 @@ export function TabBar({ state, navigation, meta }: BottomTabBarProps & { meta: 
             <TabItem
               key={route.key}
               icon={m.icon}
-              label={m.label}
+              label={t(m.label)}
               focused={focused}
               onPress={() => {
                 Haptics.selectionAsync().catch(() => {});

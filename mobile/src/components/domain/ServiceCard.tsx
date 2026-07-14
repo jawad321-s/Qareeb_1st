@@ -8,6 +8,7 @@ import { Badge } from '../ui/Badge';
 import type { Service } from '@/types';
 import { categoryById } from '@/constants/categories';
 import { formatMoney } from '@/lib/format';
+import { useT } from '@/i18n';
 
 interface Props {
   service: Service;
@@ -18,6 +19,7 @@ interface Props {
 export function ServiceCard({ service, locale = 'en', onPress }: Props) {
   const cat = categoryById(service.categoryId);
   const color = cat?.colorHex ?? '#6366F1';
+  const { t } = useT();
 
   return (
     <Card onPress={onPress} style={{ flexDirection: 'row', alignItems: 'center', gap: 14 }}>
@@ -32,13 +34,13 @@ export function ServiceCard({ service, locale = 'en', onPress }: Props) {
           <Text variant="bodyMedium" numberOfLines={1} style={{ flex: 1 }}>
             {service.name[locale]}
           </Text>
-          {service.popular && <Badge label="Popular" variant="primary" icon="trending-up" />}
+          {service.popular && <Badge label={t('common.popular')} variant="primary" icon="trending-up" />}
         </View>
         <Text variant="caption" tone="muted" numberOfLines={1}>
           {service.description[locale]}
         </Text>
         <Text variant="caption" tone="primary" style={{ fontFamily: 'Inter_600SemiBold' }}>
-          From {formatMoney(service.basePriceFrom)}
+          {t('common.from')} {formatMoney(service.basePriceFrom)}
         </Text>
       </View>
       <Icon name="chevron-right" size={20} color="#94A3B8" />

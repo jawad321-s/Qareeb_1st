@@ -13,6 +13,7 @@ import { CardSkeleton } from '@/components/feedback/Skeleton';
 import { useRequest, useSubmitOffer } from '@/hooks/queries';
 import { useToast } from '@/components/feedback/Toast';
 import { categoryById } from '@/constants/categories';
+import { config } from '@/lib/config';
 import { formatMoney } from '@/lib/format';
 import { useAuth } from '@/store/auth';
 import { useTheme } from '@/theme/ThemeProvider';
@@ -110,7 +111,7 @@ export default function JobDetail() {
         <View style={{ flexDirection: 'row', gap: 12 }}>
           <View style={{ flex: 1, gap: 6 }}>
             <Text variant="caption" tone="muted">
-              Price (SAR)
+              Price ({config.currency})
             </Text>
             <TextInput value={price} onChangeText={setPrice} keyboardType="number-pad" placeholder="120" placeholderTextColor={colors.muted} style={inputStyle(colors)} />
           </View>

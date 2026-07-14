@@ -9,6 +9,7 @@ import { Card } from '@/components/ui/Card';
 import { Icon } from '@/components/ui/Icon';
 import { BarChart } from '@/components/domain/BarChart';
 import { formatMoney } from '@/lib/format';
+import { useT } from '@/i18n';
 
 const MONTHLY = [
   { label: 'Jan', value: 8200 },
@@ -27,15 +28,16 @@ const BREAKDOWN = [
 ];
 
 export default function Income() {
+  const { t } = useT();
   return (
     <Screen scroll>
-      <Header title="Income" />
+      <Header title={t('artisan.income')} />
 
       <Animated.View entering={FadeInDown.duration(400)}>
         <LinearGradient colors={['#10B981', '#06B6D4']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ borderRadius: 24, padding: 24, gap: 4 }}>
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
             <Text variant="caption" style={{ color: 'rgba(255,255,255,0.85)' }}>
-              Total this month
+              {t('artisan.totalMonth')}
             </Text>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: 'rgba(255,255,255,0.2)', paddingHorizontal: 8, paddingVertical: 3, borderRadius: 999 }}>
               <Icon name="trending-up" size={12} color="#FFF" />

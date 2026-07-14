@@ -3,11 +3,11 @@ import { Tabs } from 'expo-router';
 import { TabBar } from '@/components/ui/TabBar';
 
 const META = {
-  home: { icon: 'home' as const, label: 'Home' },
-  search: { icon: 'search' as const, label: 'Search' },
-  create: { icon: 'plus' as const, label: 'Request' },
-  requests: { icon: 'briefcase' as const, label: 'Orders' },
-  profile: { icon: 'user' as const, label: 'Profile' },
+  home: { icon: 'home' as const, label: 'tab.home' as const },
+  search: { icon: 'search' as const, label: 'tab.search' as const },
+  create: { icon: 'plus' as const, label: 'tab.request' as const },
+  requests: { icon: 'briefcase' as const, label: 'tab.orders' as const },
+  profile: { icon: 'user' as const, label: 'tab.profile' as const },
 };
 
 export default function CustomerLayout() {

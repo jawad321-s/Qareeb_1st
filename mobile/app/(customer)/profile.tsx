@@ -12,6 +12,7 @@ import { Rating } from '@/components/ui/Rating';
 import { useAuth } from '@/store/auth';
 import { useThemeStore } from '@/theme/ThemeProvider';
 import { useTheme } from '@/theme/ThemeProvider';
+import { useT } from '@/i18n';
 
 interface Item {
   icon: IconName;
@@ -26,31 +27,32 @@ export default function Profile() {
   const user = useAuth((s) => s.user)!;
   const signOut = useAuth((s) => s.signOut);
   const { mode, setMode } = useThemeStore();
+  const { t, locale, toggle } = useT();
 
   const sections: { title: string; items: Item[] }[] = [
     {
-      title: 'Account',
+      title: t('profile.account'),
       items: [
-        { icon: 'user', label: 'Edit profile', route: '/(shared)/edit-profile' },
-        { icon: 'wallet', label: 'Wallet & payments', route: '/(shared)/wallet' },
-        { icon: 'heart', label: 'Favorites', route: '/(shared)/favorites' },
-        { icon: 'bell', label: 'Notifications', route: '/(shared)/notifications' },
+        { icon: 'user', label: t('profile.editProfile'), route: '/(shared)/edit-profile' },
+        { icon: 'wallet', label: t('profile.wallet'), route: '/(shared)/wallet' },
+        { icon: 'heart', label: t('profile.favorites'), route: '/(shared)/favorites' },
+        { icon: 'bell', label: t('profile.notifications'), route: '/(shared)/notifications' },
       ],
     },
     {
-      title: 'Preferences',
+      title: t('profile.preferences'),
       items: [
-        { icon: isDark ? 'moon' : 'sun', label: `Theme: ${mode}`, onPress: () => setMode(mode === 'dark' ? 'light' : mode === 'light' ? 'system' : 'dark') },
-        { icon: 'globe', label: 'Language', route: '/(shared)/settings' },
-        { icon: 'settings', label: 'Settings', route: '/(shared)/settings' },
+        { icon: isDark ? 'moon' : 'sun', label: `${t('profile.theme')}: ${mode}`, onPress: () => setMode(mode === 'dark' ? 'light' : mode === 'light' ? 'system' : 'dark') },
+        { icon: 'globe', label: `${t('profile.language')}: ${locale === 'ar' ? 'العربية' : 'English'}`, onPress: toggle },
+        { icon: 'settings', label: t('profile.settings'), route: '/(shared)/settings' },
       ],
     },
     {
-      title: 'Support',
+      title: t('profile.support'),
       items: [
-        { icon: 'help-circle', label: 'Help center', route: '/(shared)/help' },
-        { icon: 'flag', label: 'Report a problem', route: '/(shared)/report' },
-        { icon: 'log-out', label: 'Sign out', danger: true, onPress: () => { signOut(); router.replace('/(auth)/welcome'); } },
+        { icon: 'help-circle', label: t('profile.help'), route: '/(shared)/help' },
+        { icon: 'flag', label: t('profile.report'), route: '/(shared)/report' },
+        { icon: 'log-out', label: t('profile.signOut'), danger: true, onPress: () => { signOut(); router.replace('/(auth)/welcome'); } },
       ],
     },
   ];
@@ -70,9 +72,9 @@ export default function Profile() {
                 {user.email}
               </Text>
               <View style={{ flexDirection: 'row', gap: 24, marginTop: 8 }}>
-                <Stat label="Orders" value="18" />
-                <Stat label="Rating" value={user.rating.toFixed(1)} />
-                <Stat label="Reviews" value={String(user.ratingCount)} />
+                <Stat label={t('profile.orders')} value="18" />
+                <Stat label={t('profile.rating')} value={user.rating.toFixed(1)} />
+                <Stat label={t('profile.reviews')} value={String(user.ratingCount)} />
               </View>
             </View>
           </SafeAreaView>

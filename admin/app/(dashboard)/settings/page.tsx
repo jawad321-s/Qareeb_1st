@@ -21,7 +21,7 @@ export default function SettingsPage() {
           {[
             { label: 'Platform name', value: 'Qareeb' },
             { label: 'Support email', value: 'support@qareeb.app' },
-            { label: 'Default currency', value: 'SAR' },
+            { label: 'Default currency', value: 'ILS (₪)' },
             { label: 'Commission rate', value: '12%' },
           ].map((f) => (
             <div key={f.label} className="grid grid-cols-3 items-center gap-4">

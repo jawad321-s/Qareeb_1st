@@ -10,6 +10,8 @@ import { Icon } from '@/components/ui/Icon';
 import { Badge } from '@/components/ui/Badge';
 import { useToast } from '@/components/feedback/Toast';
 import { useTheme } from '@/theme/ThemeProvider';
+import { useT } from '@/i18n';
+import { config } from '@/lib/config';
 
 const PLANS = [
   { id: 'free', name: 'Starter', price: 0, period: 'forever', highlight: false, features: ['Receive nearby requests', 'Up to 10 offers / month', 'Standard support'] },
@@ -20,17 +22,18 @@ const PLANS = [
 export default function Subscription() {
   const { colors } = useTheme();
   const toast = useToast();
+  const { t } = useT();
   const [selected, setSelected] = useState('pro');
 
   return (
     <Screen scroll>
-      <Header showBack title="Subscription" />
+      <Header showBack title={t('sub.title')} />
       <View style={{ alignItems: 'center', gap: 6, marginBottom: 20 }}>
         <Text variant="h1" center>
-          Grow your business
+          {t('sub.grow')}
         </Text>
         <Text variant="body" tone="muted" center style={{ maxWidth: 300 }}>
-          Unlock more visibility and win more jobs with a premium plan.
+          {t('sub.growDesc')}
         </Text>
       </View>
 
@@ -51,7 +54,7 @@ export default function Subscription() {
                     <Text variant="h3" tone={plan.highlight ? 'inverse' : 'default'}>
                       {plan.name}
                     </Text>
-                    {plan.highlight && <Badge label="Most popular" variant="warning" icon="award" />}
+                    {plan.highlight && <Badge label={t('sub.popular')} variant="warning" icon="award" />}
                   </View>
                   <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: 4 }}>
                     <Text variant="display" tone={plan.highlight ? 'inverse' : 'default'}>
@@ -59,7 +62,7 @@ export default function Subscription() {
                     </Text>
                     {plan.price > 0 && (
                       <Text variant="body" style={{ color: plan.highlight ? 'rgba(255,255,255,0.85)' : colors.muted, marginBottom: 6 }}>
-                        SAR / {plan.period}
+                        {config.currency} / {t('sub.month')}
                       </Text>
                     )}
                   </View>
@@ -82,7 +85,7 @@ export default function Subscription() {
 
       <View style={{ marginTop: 24 }}>
         <Button
-          label={selected === 'free' ? 'Continue with Starter' : `Subscribe to ${PLANS.find((p) => p.id === selected)?.name}`}
+          label={`${t('sub.subscribe')} ${PLANS.find((p) => p.id === selected)?.name}`}
           iconRight="arrow-right"
           onPress={() => toast('success', 'Subscription updated')}
         />

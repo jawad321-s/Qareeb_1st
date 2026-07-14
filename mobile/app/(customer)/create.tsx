@@ -15,14 +15,16 @@ import { CATEGORIES } from '@/constants/categories';
 import { useCreateRequest } from '@/hooks/queries';
 import { useAuth } from '@/store/auth';
 import { useTheme } from '@/theme/ThemeProvider';
+import { useT } from '@/i18n';
+import { config } from '@/lib/config';
 import { formatMoney } from '@/lib/format';
-
-const STEPS = ['Service', 'Details', 'Budget & time', 'Review'];
 
 export default function CreateRequest() {
   const { colors } = useTheme();
   const user = useAuth((s) => s.user)!;
+  const { t, locale } = useT();
   const create = useCreateRequest(user.uid);
+  const STEPS = [t('create.step.service'), t('create.step.details'), t('create.step.budget'), t('create.step.review')];
 
   const [step, setStep] = useState(0);
   const [categoryId, setCategoryId] = useState<string | null>(null);
@@ -66,7 +68,7 @@ export default function CreateRequest() {
   return (
     <Screen padded={false}>
       <View style={{ paddingHorizontal: 20 }}>
-        <Header title="New request" showBack={step === 0} />
+        <Header title={t('create.title')} showBack={step === 0} />
         {/* Progress bar */}
         <View style={{ flexDirection: 'row', gap: 6, marginBottom: 20 }}>
           {STEPS.map((s, i) => (
@@ -83,11 +85,11 @@ export default function CreateRequest() {
       <ScrollView contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 40 }} showsVerticalScrollIndicator={false}>
         {step === 0 && (
           <Animated.View entering={FadeIn} style={{ gap: 16 }}>
-            <Text variant="h3">What do you need help with?</Text>
+            <Text variant="h3">{t('create.whatNeed')}</Text>
             <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 12, justifyContent: 'space-between' }}>
               {CATEGORIES.map((c) => (
                 <View key={c.id} style={{ opacity: categoryId && categoryId !== c.id ? 0.5 : 1 }}>
-                  <CategoryTile category={c} locale={user.locale} size={80} onPress={() => setCategoryId(c.id)} />
+                  <CategoryTile category={c} locale={locale} size={80} onPress={() => setCategoryId(c.id)} />
                   {categoryId === c.id && (
                     <View style={{ position: 'absolute', top: -4, right: 8, backgroundColor: colors.tint, borderRadius: 999, padding: 3 }}>
                       <Icon name="check" size={12} color="#FFF" strokeWidth={3} />
@@ -103,19 +105,19 @@ export default function CreateRequest() {
           <Animated.View entering={FadeInDown} style={{ gap: 18 }}>
             <View style={{ gap: 6 }}>
               <Text variant="caption" tone="muted">
-                Title
+                {t('create.titleLabel')}
               </Text>
               <TextInput
                 value={title}
                 onChangeText={setTitle}
-                placeholder={`e.g. ${category?.name.en} issue in kitchen`}
+                placeholder={category?.name[locale]}
                 placeholderTextColor={colors.muted}
                 style={{ height: 54, borderRadius: 16, borderWidth: 1.5, borderColor: colors.border, backgroundColor: colors.surface, paddingHorizontal: 14, color: colors.fg, fontSize: 15, fontFamily: 'Inter_400Regular' }}
               />
             </View>
             <View style={{ gap: 6 }}>
               <Text variant="caption" tone="muted">
-                Describe the problem
+                {t('create.describe')}
               </Text>
               <TextInput
                 value={description}
@@ -128,7 +130,7 @@ export default function CreateRequest() {
             </View>
             <View style={{ gap: 8 }}>
               <Text variant="caption" tone="muted">
-                Photos (optional)
+                {t('create.photos')}
               </Text>
               <View style={{ flexDirection: 'row', gap: 10, flexWrap: 'wrap' }}>
                 {images.map((uri) => (
@@ -151,15 +153,15 @@ export default function CreateRequest() {
 
         {step === 2 && (
           <Animated.View entering={FadeInDown} style={{ gap: 20 }}>
-            <Text variant="h3">Your budget range</Text>
+            <Text variant="h3">{t('create.budgetRange')}</Text>
             <View style={{ flexDirection: 'row', gap: 12 }}>
               {[
-                { label: 'Min', v: budgetMin, set: setBudgetMin },
-                { label: 'Max', v: budgetMax, set: setBudgetMax },
+                { label: t('create.min'), v: budgetMin, set: setBudgetMin },
+                { label: t('create.max'), v: budgetMax, set: setBudgetMax },
               ].map((b) => (
                 <View key={b.label} style={{ flex: 1, gap: 6 }}>
                   <Text variant="caption" tone="muted">
-                    {b.label} (SAR)
+                    {b.label} ({config.currency})
                   </Text>
                   <TextInput
                     value={b.v}
@@ -171,13 +173,13 @@ export default function CreateRequest() {
               ))}
             </View>
             <Text variant="h3" style={{ marginTop: 8 }}>
-              When do you need it?
+              {t('create.when')}
             </Text>
             <View style={{ gap: 10 }}>
               {[
-                { key: 'asap' as const, label: 'As soon as possible', icon: 'zap' as const },
-                { key: 'today' as const, label: 'Later today', icon: 'clock' as const },
-                { key: 'tomorrow' as const, label: 'Tomorrow', icon: 'calendar' as const },
+                { key: 'asap' as const, label: t('create.asap'), icon: 'zap' as const },
+                { key: 'today' as const, label: t('create.today'), icon: 'clock' as const },
+                { key: 'tomorrow' as const, label: t('create.tomorrow'), icon: 'calendar' as const },
               ].map((o) => {
                 const active = when === o.key;
                 return (
@@ -200,14 +202,14 @@ export default function CreateRequest() {
 
         {step === 3 && (
           <Animated.View entering={FadeInDown} style={{ gap: 14 }}>
-            <Text variant="h3">Review your request</Text>
+            <Text variant="h3">{t('create.reviewTitle')}</Text>
             <Card style={{ gap: 14 }}>
-              <Row label="Service" value={category?.name.en ?? '—'} />
-              <Row label="Title" value={title} />
-              <Row label="Budget" value={`${formatMoney(Number(budgetMin) * 100)} – ${formatMoney(Number(budgetMax) * 100)}`} />
-              <Row label="Timing" value={when === 'asap' ? 'ASAP' : when === 'today' ? 'Later today' : 'Tomorrow'} />
-              <Row label="Location" value={user.location?.address ?? '—'} />
-              <Row label="Photos" value={`${images.length} attached`} />
+              <Row label={t('create.step.service')} value={category?.name[locale] ?? '—'} />
+              <Row label={t('create.titleLabel')} value={title} />
+              <Row label={t('create.step.budget')} value={`${formatMoney(Number(budgetMin) * 100)} – ${formatMoney(Number(budgetMax) * 100)}`} />
+              <Row label={t('create.when')} value={when === 'asap' ? t('create.asap') : when === 'today' ? t('create.today') : t('create.tomorrow')} />
+              <Row label={t('home.setLocation')} value={user.location?.address ?? '—'} />
+              <Row label={t('create.photos')} value={String(images.length)} />
             </Card>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, padding: 12, borderRadius: 12, backgroundColor: colors.tint + '12' }}>
               <Icon name="info" size={18} color={colors.tint} />
@@ -222,16 +224,16 @@ export default function CreateRequest() {
       <View style={{ flexDirection: 'row', gap: 12, paddingHorizontal: 20, paddingBottom: 24, paddingTop: 8 }}>
         {step > 0 && (
           <View style={{ width: 120 }}>
-            <Button label="Back" variant="secondary" onPress={() => setStep((s) => s - 1)} />
+            <Button label={t('common.back')} variant="secondary" onPress={() => setStep((s) => s - 1)} />
           </View>
         )}
         {step < STEPS.length - 1 ? (
           <View style={{ flex: 1 }}>
-            <Button label="Continue" iconRight="arrow-right" disabled={!canNext()} onPress={() => setStep((s) => s + 1)} />
+            <Button label={t('common.continue')} iconRight="arrow-right" disabled={!canNext()} onPress={() => setStep((s) => s + 1)} />
           </View>
         ) : (
           <View style={{ flex: 1 }}>
-            <Button label="Submit request" iconRight="send" loading={create.isPending} onPress={submit} />
+            <Button label={t('create.submit')} iconRight="send" loading={create.isPending} onPress={submit} />
           </View>
         )}
       </View>

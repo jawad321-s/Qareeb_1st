@@ -10,14 +10,14 @@ import { CardSkeleton } from '@/components/feedback/Skeleton';
 import { EmptyState } from '@/components/feedback/EmptyState';
 import { CATEGORIES } from '@/constants/categories';
 import { useServices } from '@/hooks/queries';
-import { useAuth } from '@/store/auth';
 import { useTheme } from '@/theme/ThemeProvider';
+import { useT } from '@/i18n';
 
 type SortKey = 'popular' | 'price' | 'name';
 
 export default function Search() {
   const { colors } = useTheme();
-  const locale = useAuth((s) => s.user?.locale ?? 'en');
+  const { t, locale } = useT();
   const params = useLocalSearchParams<{ category?: string }>();
   const [query, setQuery] = useState('');
   const [category, setCategory] = useState<string | null>(params.category ?? null);
@@ -52,15 +52,15 @@ export default function Search() {
   return (
     <Screen padded={false}>
       <View style={{ paddingHorizontal: 20, paddingTop: 8, gap: 14 }}>
-        <Text variant="h1">Search</Text>
-        <SearchBar value={query} onChangeText={setQuery} placeholder="Search services or artisans…" autoFocus={!params.category} />
+        <Text variant="h1">{t('search.title')}</Text>
+        <SearchBar value={query} onChangeText={setQuery} placeholder={t('search.placeholder')} autoFocus={!params.category} />
       </View>
 
       {/* Category filter chips */}
       <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingHorizontal: 20, gap: 8, paddingVertical: 14 }}>
         <Pressable onPress={() => setCategory(null)} style={chip(!category)}>
           <Text variant="caption" style={{ color: !category ? '#FFF' : colors.fg, fontFamily: 'Inter_500Medium' }}>
-            All
+            {t('search.all')}
           </Text>
         </Pressable>
         {CATEGORIES.map((c) => {
@@ -78,7 +78,7 @@ export default function Search() {
       {/* Sort row */}
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, paddingHorizontal: 20, marginBottom: 8 }}>
         <Text variant="caption" tone="muted">
-          Sort:
+          {t('search.sort')}
         </Text>
         {(['popular', 'price', 'name'] as SortKey[]).map((k) => (
           <Pressable key={k} onPress={() => setSort(k)}>
@@ -89,7 +89,7 @@ export default function Search() {
         ))}
         <View style={{ flex: 1 }} />
         <Text variant="caption" tone="muted">
-          {results.length} results
+          {results.length} {t('common.results')}
         </Text>
       </View>
 
@@ -98,7 +98,7 @@ export default function Search() {
           [0, 1, 2, 3].map((i) => <CardSkeleton key={i} />)
         ) : results.length === 0 ? (
           <View style={{ marginTop: 40 }}>
-            <EmptyState icon="search" title="No results" description="Try a different search term or category filter." />
+            <EmptyState icon="search" title={t('search.noResults')} description={t('search.noResultsDesc')} />
           </View>
         ) : (
           results.map((s) => (

@@ -16,18 +16,20 @@ import { CardSkeleton } from '@/components/feedback/Skeleton';
 import { useNearbyRequests } from '@/hooks/queries';
 import { useAuth } from '@/store/auth';
 import { useTheme } from '@/theme/ThemeProvider';
+import { useT } from '@/i18n';
 import { formatMoney } from '@/lib/format';
 
 export default function ArtisanDashboard() {
   const { colors, isDark } = useTheme();
   const user = useAuth((s) => s.user)!;
+  const { t } = useT();
   const [online, setOnline] = useState(true);
   const nearby = useNearbyRequests(user.uid);
 
   const stats = [
-    { icon: 'wallet' as const, label: 'This month', value: formatMoney(1240000), color: '#6366F1' },
-    { icon: 'check-circle' as const, label: 'Completed', value: '214', color: '#10B981' },
-    { icon: 'star' as const, label: 'Rating', value: '4.8', color: '#F59E0B' },
+    { icon: 'wallet' as const, label: t('artisan.thisMonth'), value: formatMoney(1240000), color: '#6366F1' },
+    { icon: 'check-circle' as const, label: t('artisan.completed'), value: '214', color: '#10B981' },
+    { icon: 'star' as const, label: t('profile.rating'), value: '4.8', color: '#F59E0B' },
   ];
 
   return (
@@ -40,7 +42,7 @@ export default function ArtisanDashboard() {
               <Avatar uri={user.photoUrl} name={user.fullName} size={46} verified={user.verified} />
               <View style={{ flex: 1 }}>
                 <Text variant="caption" tone="muted">
-                  Welcome back,
+                  {t('artisan.welcome')}
                 </Text>
                 <Text variant="h3" numberOfLines={1}>
                   {user.fullName.split(' ')[0]}
@@ -58,9 +60,9 @@ export default function ArtisanDashboard() {
                   <Icon name={online ? 'zap' : 'moon'} size={22} color={online ? '#10B981' : '#94A3B8'} />
                 </View>
                 <View style={{ flex: 1 }}>
-                  <Text variant="bodyMedium">{online ? 'You are online' : 'You are offline'}</Text>
+                  <Text variant="bodyMedium">{online ? t('artisan.online') : t('artisan.offline')}</Text>
                   <Text variant="caption" tone="muted">
-                    {online ? 'Receiving nearby requests' : 'Tap to start receiving requests'}
+                    {online ? t('artisan.onlineDesc') : t('artisan.offlineDesc')}
                   </Text>
                 </View>
                 <View style={{ width: 52, height: 30, borderRadius: 15, backgroundColor: online ? '#10B981' : colors.border, padding: 3, justifyContent: 'center' }}>
@@ -90,7 +92,7 @@ export default function ArtisanDashboard() {
 
         {/* Nearby requests */}
         <View style={{ paddingHorizontal: 20, marginTop: 24 }}>
-          <SectionHeader title="Nearby requests" actionLabel="View all" onAction={() => router.push('/(artisan)/requests')} />
+          <SectionHeader title={t('artisan.nearby')} actionLabel={t('common.viewAll')} onAction={() => router.push('/(artisan)/requests')} />
           <View style={{ gap: 12 }}>
             {nearby.isLoading ? (
               [0, 1].map((i) => <CardSkeleton key={i} />)
@@ -108,13 +110,13 @@ export default function ArtisanDashboard() {
             <Icon name="award" size={32} color="#FFF" />
             <View style={{ flex: 1 }}>
               <Text variant="bodyMedium" tone="inverse">
-                Go Premium
+                {t('artisan.goPremium')}
               </Text>
               <Text variant="caption" style={{ color: 'rgba(255,255,255,0.9)' }}>
-                Get more visibility & priority matching.
+                {t('artisan.premiumDesc')}
               </Text>
             </View>
-            <Badge label="Upgrade" variant="warning" />
+            <Badge label="★" variant="warning" />
           </LinearGradient>
         </View>
       </ScrollView>

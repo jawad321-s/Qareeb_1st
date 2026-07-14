@@ -48,7 +48,7 @@ export default function OverviewPage() {
           <div className="mb-4 flex items-center justify-between">
             <div>
               <h2 className="font-semibold">Revenue</h2>
-              <p className="text-xs text-muted">Monthly gross revenue (SAR)</p>
+              <p className="text-xs text-muted">Monthly gross revenue (₪)</p>
             </div>
           </div>
           <RevenueChart data={REVENUE_SERIES} />

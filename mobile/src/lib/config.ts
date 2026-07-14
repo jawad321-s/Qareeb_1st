@@ -10,7 +10,8 @@ export const config = {
     appId: process.env.EXPO_PUBLIC_FIREBASE_APP_ID ?? '',
   },
   googleMapsApiKey: process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY ?? '',
-  currency: 'SAR',
+  currency: '₪', // Israeli new shekel (ILS)
+  currencyCode: 'ILS',
   currencyMinorPerMajor: 100,
   defaultLocale: 'ar' as const,
 } as const;

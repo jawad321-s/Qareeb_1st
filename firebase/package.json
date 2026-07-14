@@ -1,0 +1,14 @@
+{
+  "name": "qareeb-firebase",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "seed": "node seed/seed.mjs",
+    "deploy": "firebase deploy --only firestore:rules,firestore:indexes,storage",
+    "emulate": "firebase emulators:start"
+  },
+  "dependencies": {
+    "firebase-admin": "^13.0.0"
+  }
+}

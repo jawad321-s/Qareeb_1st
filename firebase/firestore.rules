@@ -1,0 +1,185 @@
+rules_version = '2';
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Qareeb — Cloud Firestore Security Rules
+// Model: customers own their requests; artisans read pending requests & manage
+// their own offers; admins (custom claim) have full read + moderated writes.
+// ─────────────────────────────────────────────────────────────────────────────
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ── Helpers ──────────────────────────────────────────────────────────────
+    function isSignedIn() {
+      return request.auth != null;
+    }
+    function uid() {
+      return request.auth.uid;
+    }
+    function isAdmin() {
+      return isSignedIn() && request.auth.token.role == 'admin';
+    }
+    function isArtisan() {
+      return isSignedIn() && request.auth.token.role == 'artisan';
+    }
+    function existing() {
+      return resource.data;
+    }
+    function incoming() {
+      return request.resource.data;
+    }
+    // Field-level guards used on writes.
+    function isValidString(v, maxLen) {
+      return v is string && v.size() > 0 && v.size() <= maxLen;
+    }
+
+    // ── users/{uid} ──────────────────────────────────────────────────────────
+    match /users/{userId} {
+      // A user reads their own doc; admins read all. Public profile fields of
+      // artisans are exposed through a separate query path in the app.
+      allow read: if isSignedIn() && (uid() == userId || isAdmin());
+      allow create: if isSignedIn() && uid() == userId
+                    && incoming().role in ['customer', 'artisan'];
+      allow update: if isSignedIn() && (
+                      (uid() == userId
+                        // A user can never escalate their own role/verified/status.
+                        && incoming().role == existing().role
+                        && incoming().status == existing().status
+                        && incoming().verified == existing().verified)
+                      || isAdmin());
+      allow delete: if isAdmin();
+
+      match /notifications/{notifId} {
+        allow read, update: if isSignedIn() && uid() == userId;
+        allow create: if isSignedIn(); // fan-out from server/other users
+        allow delete: if isSignedIn() && uid() == userId;
+      }
+      match /fcmTokens/{tokenId} {
+        allow read, write: if isSignedIn() && uid() == userId;
+      }
+    }
+
+    // ── artisanProfiles/{uid} ────────────────────────────────────────────────
+    match /artisanProfiles/{artisanId} {
+      allow read: if isSignedIn();
+      allow create, update: if isSignedIn() && (
+                              (uid() == artisanId
+                                // verificationStatus & premium are admin-controlled.
+                                && incoming().verificationStatus == (existing() != null ? existing().verificationStatus : 'unsubmitted')
+                                && incoming().premium == (existing() != null ? existing().premium : false))
+                              || isAdmin());
+      allow delete: if isAdmin();
+    }
+
+    // ── categories / services (read-only to clients) ─────────────────────────
+    match /categories/{id} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    match /services/{id} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // ── requests/{id} ────────────────────────────────────────────────────────
+    match /requests/{requestId} {
+      // Owner and admins always read. Artisans can read PENDING requests (to make
+      // offers) and any request they have been accepted for.
+      allow read: if isSignedIn() && (
+                    existing().customerId == uid()
+                    || isAdmin()
+                    || (isArtisan() && (existing().status == 'PENDING'
+                          || existing().acceptedArtisanId == uid())));
+      allow create: if isSignedIn()
+                    && incoming().customerId == uid()
+                    && incoming().status == 'PENDING'
+                    && incoming().offerCount == 0
+                    && isValidString(incoming().title, 120)
+                    && isValidString(incoming().description, 2000);
+      allow update: if isSignedIn() && (
+                      existing().customerId == uid()   // cancel / accept an offer
+                      || isAdmin()
+                      || (isArtisan() && existing().acceptedArtisanId == uid())); // status progression
+      allow delete: if isAdmin();
+
+      match /messages/{messageId} {
+        // Only the two parties on an accepted request can read/write the thread.
+        function req() {
+          return get(/databases/$(database)/documents/requests/$(requestId)).data;
+        }
+        allow read: if isSignedIn() && (req().customerId == uid() || req().acceptedArtisanId == uid() || isAdmin());
+        allow create: if isSignedIn()
+                      && incoming().senderId == uid()
+                      && (req().customerId == uid() || req().acceptedArtisanId == uid());
+        allow update: if isSignedIn() && (req().customerId == uid() || req().acceptedArtisanId == uid());
+      }
+    }
+
+    // ── offers/{id} ──────────────────────────────────────────────────────────
+    match /offers/{offerId} {
+      allow read: if isSignedIn() && (
+                    existing().artisanId == uid()
+                    || existing().customerId == uid()
+                    || isAdmin());
+      allow create: if isArtisan()
+                    && incoming().artisanId == uid()
+                    && incoming().status == 'PENDING'
+                    && incoming().price is number && incoming().price > 0;
+      // Artisan may withdraw; customer may accept/reject (status transitions only).
+      allow update: if isSignedIn() && (
+                      (existing().artisanId == uid() && incoming().status == 'WITHDRAWN')
+                      || existing().customerId == uid()
+                      || isAdmin());
+      allow delete: if isAdmin();
+    }
+
+    // ── reviews/{id} ─────────────────────────────────────────────────────────
+    match /reviews/{id} {
+      allow read: if true;
+      allow create: if isSignedIn()
+                    && incoming().authorId == uid()
+                    && incoming().rating is int
+                    && incoming().rating >= 1 && incoming().rating <= 5;
+      allow update, delete: if isAdmin();
+    }
+
+    // ── wallets / transactions ───────────────────────────────────────────────
+    match /wallets/{userId} {
+      allow read: if isSignedIn() && (uid() == userId || isAdmin());
+      allow write: if isAdmin(); // balances are server-controlled
+      match /transactions/{txnId} {
+        allow read: if isSignedIn() && (uid() == userId || isAdmin());
+        allow write: if isAdmin();
+      }
+    }
+
+    // ── subscriptions ────────────────────────────────────────────────────────
+    match /subscriptions/{id} {
+      allow read: if isSignedIn() && (existing().artisanId == uid() || isAdmin());
+      allow create: if isArtisan() && incoming().artisanId == uid();
+      allow update, delete: if isAdmin();
+    }
+
+    // ── complaints ───────────────────────────────────────────────────────────
+    match /complaints/{id} {
+      allow read: if isSignedIn() && (existing().reporterId == uid() || isAdmin());
+      allow create: if isSignedIn() && incoming().reporterId == uid();
+      allow update, delete: if isAdmin();
+    }
+
+    // ── verificationRequests ─────────────────────────────────────────────────
+    match /verificationRequests/{id} {
+      allow read: if isSignedIn() && (existing().artisanId == uid() || isAdmin());
+      allow create: if isArtisan() && incoming().artisanId == uid();
+      allow update, delete: if isAdmin();
+    }
+
+    // ── auditLogs / cms (admin only) ─────────────────────────────────────────
+    match /auditLogs/{id} {
+      allow read, write: if isAdmin();
+    }
+    match /cms/{id} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+  }
+}

@@ -1,0 +1,37 @@
+rules_version = '2';
+
+// Qareeb — Cloud Storage Security Rules
+// Signed-in users manage their own media; uploads are size- and type-limited.
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    function isSignedIn() { return request.auth != null; }
+    function isOwner(userId) { return isSignedIn() && request.auth.uid == userId; }
+    function isImage() { return request.resource.contentType.matches('image/.*'); }
+    function underMB(n) { return request.resource.size < n * 1024 * 1024; }
+
+    // Profile & work-gallery photos, keyed by owner.
+    match /users/{userId}/{allPaths=**} {
+      allow read: if isSignedIn();
+      allow write: if isOwner(userId) && isImage() && underMB(8);
+    }
+
+    // Request attachment images.
+    match /requests/{requestId}/{fileName} {
+      allow read: if isSignedIn();
+      allow write: if isSignedIn() && isImage() && underMB(8);
+    }
+
+    // Verification documents — private to owner + admins (enforced app-side).
+    match /verification/{userId}/{fileName} {
+      allow read: if isOwner(userId);
+      allow write: if isOwner(userId) && underMB(10);
+    }
+
+    // Chat media (images / voice notes).
+    match /chat/{requestId}/{fileName} {
+      allow read: if isSignedIn();
+      allow write: if isSignedIn() && underMB(15);
+    }
+  }
+}

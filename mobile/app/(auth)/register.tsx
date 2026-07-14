@@ -10,9 +10,11 @@ import { Text } from '@/components/ui/Text';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
 import { registerSchema, type RegisterInput } from '@/lib/validation';
+import { useT } from '@/i18n';
 
 export default function Register() {
   const [loading, setLoading] = useState(false);
+  const { t } = useT();
   const { control, handleSubmit, getValues, formState: { errors } } = useForm<RegisterInput>({
     resolver: zodResolver(registerSchema),
     defaultValues: { fullName: '', email: '', phone: '', password: '', confirmPassword: '' },
@@ -27,9 +29,9 @@ export default function Register() {
   };
 
   const fields = [
-    { name: 'fullName' as const, label: 'Full name', placeholder: 'Layla Al-Harbi', icon: 'user' as const, kb: 'default' as const },
-    { name: 'email' as const, label: 'Email', placeholder: 'you@example.com', icon: 'mail' as const, kb: 'email-address' as const },
-    { name: 'phone' as const, label: 'Phone', placeholder: '+966 5X XXX XXXX', icon: 'phone' as const, kb: 'phone-pad' as const },
+    { name: 'fullName' as const, label: t('auth.fullName'), placeholder: 'Layla Al-Harbi', icon: 'user' as const, kb: 'default' as const },
+    { name: 'email' as const, label: t('auth.email'), placeholder: 'you@example.com', icon: 'mail' as const, kb: 'email-address' as const },
+    { name: 'phone' as const, label: t('auth.phone'), placeholder: '+970 5X XXX XXXX', icon: 'phone' as const, kb: 'phone-pad' as const },
   ];
 
   return (
@@ -37,9 +39,9 @@ export default function Register() {
       <Header showBack />
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         <Animated.View entering={FadeInDown.duration(400)} style={{ gap: 6, marginBottom: 24 }}>
-          <Text variant="h1">Create your account</Text>
+          <Text variant="h1">{t('auth.registerTitle')}</Text>
           <Text variant="body" tone="muted">
-            Join thousands finding trusted help nearby.
+            {t('auth.registerSubtitle')}
           </Text>
         </Animated.View>
 
@@ -68,29 +70,29 @@ export default function Register() {
             control={control}
             name="password"
             render={({ field: { onChange, value, onBlur } }) => (
-              <Input label="Password" placeholder="••••••••" iconLeft="lock" secure value={value} onChangeText={onChange} onBlur={onBlur} error={errors.password?.message} />
+              <Input label={t('auth.password')} placeholder="••••••••" iconLeft="lock" secure value={value} onChangeText={onChange} onBlur={onBlur} error={errors.password?.message} />
             )}
           />
           <Controller
             control={control}
             name="confirmPassword"
             render={({ field: { onChange, value, onBlur } }) => (
-              <Input label="Confirm password" placeholder="••••••••" iconLeft="lock" secure value={value} onChangeText={onChange} onBlur={onBlur} error={errors.confirmPassword?.message} />
+              <Input label={t('auth.confirmPassword')} placeholder="••••••••" iconLeft="lock" secure value={value} onChangeText={onChange} onBlur={onBlur} error={errors.confirmPassword?.message} />
             )}
           />
 
-          <Button label="Continue" onPress={handleSubmit(onSubmit)} loading={loading} style={{ marginTop: 4 }} />
+          <Button label={t('common.continue')} onPress={handleSubmit(onSubmit)} loading={loading} style={{ marginTop: 4 }} />
 
           <Text variant="caption" tone="muted" center style={{ marginTop: 4 }}>
-            By continuing you agree to our Terms & Privacy Policy.
+            {t('auth.terms')}
           </Text>
 
           <View style={{ flexDirection: 'row', justifyContent: 'center', gap: 4 }}>
             <Text variant="body" tone="muted">
-              Already have an account?
+              {t('auth.haveAccount')}
             </Text>
             <Text variant="body" tone="primary" style={{ fontFamily: 'Inter_600SemiBold' }} onPress={() => router.replace('/(auth)/login')}>
-              Sign in
+              {t('auth.signIn')}
             </Text>
           </View>
         </View>

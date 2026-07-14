@@ -57,6 +57,7 @@ export const translations = {
     'auth.phone': 'Phone',
     'auth.confirmPassword': 'Confirm password',
     'auth.haveAccount': 'Already have an account?',
+    'auth.terms': 'By continuing you agree to our Terms & Privacy Policy.',
 
     // home
     'home.morning': 'Good morning',
@@ -228,6 +229,7 @@ export const translations = {
     'auth.phone': 'رقم الجوال',
     'auth.confirmPassword': 'تأكيد كلمة المرور',
     'auth.haveAccount': 'لديك حساب بالفعل؟',
+    'auth.terms': 'بالمتابعة، أنت توافق على الشروط وسياسة الخصوصية.',
 
     // home
     'home.morning': 'صباح الخير',

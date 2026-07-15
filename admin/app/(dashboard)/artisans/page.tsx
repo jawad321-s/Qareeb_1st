@@ -1,19 +1,27 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Check, FileText, ShieldCheck, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Card, Button, StatusPill } from '@/components/ui/primitives';
-import { VERIFICATIONS, type VerificationItem } from '@/lib/mock-data';
+import { type VerificationItem } from '@/lib/mock-data';
+import { subscribeVerifications, decideVerification } from '@/lib/verification.service';
+import { isLive } from '@/lib/firebase';
 import { timeAgo } from '@/lib/utils';
 import { useT } from '@/lib/i18n';
 
 export default function ArtisansPage() {
   const { t } = useT();
-  const [items, setItems] = useState<VerificationItem[]>(VERIFICATIONS);
+  const [items, setItems] = useState<VerificationItem[]>([]);
 
-  const decide = (id: string, status: 'approved' | 'rejected') =>
-    setItems((prev) => prev.map((v) => (v.id === id ? { ...v, status } : v)));
+  // Live queue from Firestore (falls back to the mock list on mock mode).
+  useEffect(() => subscribeVerifications(setItems), []);
+
+  const decide = (item: VerificationItem, status: 'approved' | 'rejected') => {
+    // Optimistic UI; persists to Firestore when live.
+    setItems((prev) => prev.map((v) => (v.id === item.id ? { ...v, status } : v)));
+    void decideVerification(item, status);
+  };
 
   const pending = items.filter((v) => v.status === 'pending');
 
@@ -57,10 +65,10 @@ export default function ArtisansPage() {
 
                 {v.status === 'pending' && (
                   <div className="mt-4 flex gap-2">
-                    <Button variant="outline" className="flex-1" onClick={() => decide(v.id, 'rejected')}>
+                    <Button variant="outline" className="flex-1" onClick={() => decide(v, 'rejected')}>
                       <X className="h-4 w-4" /> {t('ver.reject')}
                     </Button>
-                    <Button className="flex-1" onClick={() => decide(v.id, 'approved')}>
+                    <Button className="flex-1" onClick={() => decide(v, 'approved')}>
                       <Check className="h-4 w-4" /> {t('ver.approve')}
                     </Button>
                   </div>

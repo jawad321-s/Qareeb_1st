@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { View, Pressable } from 'react-native';
 import { router } from 'expo-router';
 import { Image } from 'expo-image';
@@ -11,10 +11,12 @@ import { Text } from '@/components/ui/Text';
 import { Button } from '@/components/ui/Button';
 import { Icon, type IconName } from '@/components/ui/Icon';
 import { useVerification, type DocSlot } from '@/store/verification';
+import { useAuth } from '@/store/auth';
 import { useTheme } from '@/theme/ThemeProvider';
 import { useT } from '@/i18n';
 import { radius } from '@/theme/tokens';
 import { useToast } from '@/components/feedback/Toast';
+import { MOCK_ARTISAN_PROFILE } from '@/mock/data';
 
 async function pickImage(): Promise<string | null> {
   const res = await ImagePicker.launchImageLibraryAsync({
@@ -29,11 +31,19 @@ export default function Verification() {
   const { colors } = useTheme();
   const { t } = useT();
   const showToast = useToast();
-  const { status, idFront, idBack, selfie, certificates, setDoc, addCertificate, removeCertificate, submit } =
+  const user = useAuth((s) => s.user);
+  const { status, idFront, idBack, selfie, certificates, setDoc, addCertificate, removeCertificate, submit, watch } =
     useVerification();
 
   const docs: Record<DocSlot, string | undefined> = { idFront, idBack, selfie };
   const canSubmit = !!idFront && !!idBack && status !== 'pending' && status !== 'approved';
+
+  // Live-sync with the admin dashboard's decision (no-op on mock).
+  useEffect(() => {
+    if (!user) return;
+    const unsub = watch(user.uid);
+    return unsub;
+  }, [user, watch]);
 
   const onPickDoc = async (slot: DocSlot) => {
     const uri = await pickImage();
@@ -56,7 +66,7 @@ export default function Verification() {
       showToast('error', t('vrf.needId'));
       return;
     }
-    submit();
+    if (user) submit(user, MOCK_ARTISAN_PROFILE.categoryIds);
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => {});
     showToast('success', t('vrf.submitted'));
     setTimeout(() => router.back(), 900);

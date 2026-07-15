@@ -22,15 +22,15 @@ export function RevenueChart({ data }: { data: { month: string; revenue: number 
       <AreaChart data={data} margin={{ left: -10, right: 8, top: 8 }}>
         <defs>
           <linearGradient id="rev" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#6366F1" stopOpacity={0.4} />
-            <stop offset="100%" stopColor="#6366F1" stopOpacity={0} />
+            <stop offset="0%" stopColor="#3B82F6" stopOpacity={0.4} />
+            <stop offset="100%" stopColor="#3B82F6" stopOpacity={0} />
           </linearGradient>
         </defs>
         <CartesianGrid strokeDasharray="3 3" stroke={GRID} vertical={false} />
         <XAxis dataKey="month" tickLine={false} axisLine={false} tick={AXIS} />
         <YAxis tickLine={false} axisLine={false} tick={AXIS} tickFormatter={(v) => `${v / 1000}k`} />
         <Tooltip contentStyle={tooltipStyle} formatter={(v: number) => [`${v.toLocaleString()} ₪`, 'Revenue']} />
-        <Area type="monotone" dataKey="revenue" stroke="#6366F1" strokeWidth={2.5} fill="url(#rev)" />
+        <Area type="monotone" dataKey="revenue" stroke="#3B82F6" strokeWidth={2.5} fill="url(#rev)" />
       </AreaChart>
     </ResponsiveContainer>
   );
@@ -44,14 +44,14 @@ export function RequestsBarChart({ data }: { data: { month: string; requests: nu
         <XAxis dataKey="month" tickLine={false} axisLine={false} tick={AXIS} />
         <YAxis tickLine={false} axisLine={false} tick={AXIS} />
         <Tooltip contentStyle={tooltipStyle} cursor={{ fill: 'rgb(148 163 184 / 0.1)' }} />
-        <Bar dataKey="requests" fill="#06B6D4" radius={[6, 6, 0, 0]} maxBarSize={28} />
+        <Bar dataKey="requests" fill="#0EA5E9" radius={[6, 6, 0, 0]} maxBarSize={28} />
       </BarChart>
     </ResponsiveContainer>
   );
 }
 
 export function CategoryPie({ data }: { data: { name: string; value: number }[] }) {
-  const COLORS = ['#6366F1', '#06B6D4', '#10B981', '#F59E0B', '#EF4444', '#EC4899', '#8B5CF6', '#0EA5E9'];
+  const COLORS = ['#2563EB', '#0EA5E9', '#6366F1', '#06B6D4', '#8B5CF6', '#14B8A6', '#3B82F6', '#0284C7'];
   return (
     <ResponsiveContainer width="100%" height={280}>
       <PieChart>

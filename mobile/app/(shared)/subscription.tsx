@@ -55,7 +55,7 @@ export default function Subscription() {
                 style={{ borderRadius: 24, borderWidth: 2, borderColor: active ? colors.tint : colors.border, overflow: 'hidden' }}
               >
                 <LinearGradient
-                  colors={plan.highlight ? ['#4F46E5', '#06B6D4'] : [colors.card, colors.card]}
+                  colors={plan.highlight ? ['#2563EB', '#0EA5E9'] : [colors.card, colors.card]}
                   style={{ padding: 20, gap: 14 }}
                 >
                   <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>

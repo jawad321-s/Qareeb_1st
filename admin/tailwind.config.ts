@@ -7,10 +7,10 @@ const config: Config = {
     extend: {
       colors: {
         brand: {
-          50: '#EEF2FF', 100: '#E0E7FF', 200: '#C7D2FE', 300: '#A5B4FC', 400: '#818CF8',
-          500: '#6366F1', 600: '#4F46E5', 700: '#4338CA', 800: '#3730A3', 900: '#312E81',
+          50: '#EFF6FF', 100: '#DBEAFE', 200: '#BFDBFE', 300: '#93C5FD', 400: '#60A5FA',
+          500: '#3B82F6', 600: '#2563EB', 700: '#1D4ED8', 800: '#1E40AF', 900: '#1E3A8A',
         },
-        accent: { 400: '#22D3EE', 500: '#06B6D4', 600: '#0891B2' },
+        accent: { 400: '#38BDF8', 500: '#0EA5E9', 600: '#0284C7' },
       },
       fontFamily: {
         // Cairo first — it renders Arabic beautifully and Latin cleanly.

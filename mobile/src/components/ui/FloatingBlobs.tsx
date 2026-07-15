@@ -89,7 +89,7 @@ const StyleSheetAbsoluteFill = {
 
 /** Sensible default palette of blobs for a brand hero. */
 export const brandBlobs: Blob[] = [
-  { size: 220, colors: ['#818CF8', '#6366F1'], top: -40, right: -30, delay: 0, range: 30 },
-  { size: 180, colors: ['#22D3EE', '#06B6D4'], bottom: -30, left: -40, delay: 1200, range: 24 },
-  { size: 140, colors: ['#A78BFA', '#7C3AED'], top: 60, left: 40, delay: 2400, range: 18 },
+  { size: 220, colors: ['#60A5FA', '#3B82F6'], top: -40, right: -30, delay: 0, range: 30 },
+  { size: 180, colors: ['#38BDF8', '#0EA5E9'], bottom: -30, left: -40, delay: 1200, range: 24 },
+  { size: 140, colors: ['#60A5FA', '#1D4ED8'], top: 60, left: 40, delay: 2400, range: 18 },
 ];

@@ -7,7 +7,7 @@ type Variant = 'neutral' | 'primary' | 'success' | 'warning' | 'danger' | 'info'
 
 const COLORS: Record<Variant, { bg: string; fg: string }> = {
   neutral: { bg: 'rgba(100,116,139,0.15)', fg: '#64748B' },
-  primary: { bg: 'rgba(99,102,241,0.15)', fg: '#6366F1' },
+  primary: { bg: 'rgba(37,99,235,0.15)', fg: '#2563EB' },
   success: { bg: 'rgba(16,185,129,0.15)', fg: '#059669' },
   warning: { bg: 'rgba(245,158,11,0.15)', fg: '#D97706' },
   danger: { bg: 'rgba(239,68,68,0.15)', fg: '#DC2626' },

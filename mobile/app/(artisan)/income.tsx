@@ -27,14 +27,14 @@ export default function Income() {
     { icon: 'check-circle' as const, label: t('inc.completedJobs'), value: '214', color: '#10B981' },
     { icon: 'x-circle' as const, label: t('inc.rejectedJobs'), value: '18', color: '#EF4444' },
     { icon: 'clock' as const, label: t('inc.avgResponse'), value: '6 min', color: '#F59E0B' },
-    { icon: 'star' as const, label: t('inc.avgRating'), value: '4.8', color: '#6366F1' },
+    { icon: 'star' as const, label: t('inc.avgRating'), value: '4.8', color: '#3B82F6' },
   ];
   return (
     <Screen scroll>
       <Header title={t('artisan.income')} />
 
       <Animated.View entering={FadeInDown.duration(400)}>
-        <LinearGradient colors={['#10B981', '#06B6D4']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ borderRadius: 24, padding: 24, gap: 4 }}>
+        <LinearGradient colors={['#10B981', '#0EA5E9']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ borderRadius: 24, padding: 24, gap: 4 }}>
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
             <Text variant="caption" style={{ color: 'rgba(255,255,255,0.85)' }}>
               {t('artisan.totalMonth')}

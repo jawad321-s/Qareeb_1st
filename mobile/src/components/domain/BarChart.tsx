@@ -34,7 +34,7 @@ function Bar({ label, ratio, index, maxHeight, muted }: { label: string; ratio: 
   return (
     <View style={{ flex: 1, alignItems: 'center', gap: 6 }}>
       <Animated.View style={[{ width: '70%', borderRadius: 8, overflow: 'hidden' }, aStyle]}>
-        <LinearGradient colors={['#6366F1', '#06B6D4']} style={{ flex: 1 }} />
+        <LinearGradient colors={['#3B82F6', '#0EA5E9']} style={{ flex: 1 }} />
       </Animated.View>
       <Text variant="overline" style={{ color: muted }}>
         {label}

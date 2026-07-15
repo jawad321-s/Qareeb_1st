@@ -97,7 +97,7 @@ function TabItem({
             style={[
               { position: 'absolute', width: 46, height: 34, borderRadius: 17, overflow: 'hidden' },
               {
-                shadowColor: '#6366F1',
+                shadowColor: '#3B82F6',
                 shadowOpacity: 0.5,
                 shadowRadius: 10,
                 shadowOffset: { width: 0, height: 4 },

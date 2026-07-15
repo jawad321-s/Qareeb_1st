@@ -29,12 +29,12 @@ export default function Welcome() {
   return (
     <View style={{ flex: 1 }}>
       <StatusBar style="light" />
-      <LinearGradient colors={['#312E81', '#4F46E5', '#06B6D4']} style={{ flex: 1 }}>
+      <LinearGradient colors={['#1E3A8A', '#2563EB', '#0EA5E9']} style={{ flex: 1 }}>
         <FloatingBlobs
           blobs={[
-            { size: 260, colors: ['#818CF8', '#4F46E5'], top: -60, right: -50, range: 34 },
-            { size: 200, colors: ['#22D3EE', '#06B6D4'], bottom: 120, left: -60, delay: 1400, range: 26 },
-            { size: 150, colors: ['#A78BFA', '#7C3AED'], top: 220, left: 30, delay: 2600, range: 20 },
+            { size: 260, colors: ['#60A5FA', '#2563EB'], top: -60, right: -50, range: 34 },
+            { size: 200, colors: ['#38BDF8', '#0EA5E9'], bottom: 120, left: -60, delay: 1400, range: 26 },
+            { size: 150, colors: ['#60A5FA', '#1D4ED8'], top: 220, left: 30, delay: 2600, range: 20 },
           ]}
         />
         <SafeAreaView style={{ flex: 1, paddingHorizontal: 24, justifyContent: 'space-between' }}>

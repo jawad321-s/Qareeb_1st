@@ -38,7 +38,7 @@ export default function ServiceDetail() {
   }
 
   const cat = categoryById(service.categoryId);
-  const color = cat?.colorHex ?? '#6366F1';
+  const color = cat?.colorHex ?? '#3B82F6';
 
   return (
     <View style={{ flex: 1 }}>

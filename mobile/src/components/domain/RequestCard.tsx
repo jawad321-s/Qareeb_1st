@@ -19,12 +19,12 @@ export function RequestCard({ request, onPress }: { request: ServiceRequest; onP
               width: 40,
               height: 40,
               borderRadius: 12,
-              backgroundColor: (cat?.colorHex ?? '#6366F1') + '22',
+              backgroundColor: (cat?.colorHex ?? '#3B82F6') + '22',
               alignItems: 'center',
               justifyContent: 'center',
             }}
           >
-            <Icon name={(cat?.icon as any) ?? 'tools'} size={20} color={cat?.colorHex ?? '#6366F1'} />
+            <Icon name={(cat?.icon as any) ?? 'tools'} size={20} color={cat?.colorHex ?? '#3B82F6'} />
           </View>
           <View style={{ flex: 1 }}>
             <Text variant="bodyMedium" numberOfLines={1}>

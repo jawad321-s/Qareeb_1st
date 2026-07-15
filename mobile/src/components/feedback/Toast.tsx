@@ -16,7 +16,7 @@ interface ToastItem {
 }
 
 const ICON: Record<ToastType, IconName> = { success: 'check-circle', error: 'x-circle', info: 'info' };
-const COLOR: Record<ToastType, string> = { success: '#10B981', error: '#EF4444', info: '#6366F1' };
+const COLOR: Record<ToastType, string> = { success: '#10B981', error: '#EF4444', info: '#2563EB' };
 
 const ToastContext = createContext<(type: ToastType, message: string) => void>(() => {});
 

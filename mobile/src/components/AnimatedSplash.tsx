@@ -71,11 +71,11 @@ export function AnimatedSplash({ onFinish }: { onFinish: () => void }) {
 
   return (
     <Animated.View style={[StyleSheet.absoluteFill, { zIndex: 100 }, overlayStyle]}>
-      <LinearGradient colors={['#312E81', '#4F46E5', '#06B6D4']} style={StyleSheet.absoluteFill}>
+      <LinearGradient colors={['#1E3A8A', '#2563EB', '#0EA5E9']} style={StyleSheet.absoluteFill}>
         <FloatingBlobs
           blobs={[
-            { size: 280, colors: ['#818CF8', '#4F46E5'], top: height * 0.1, right: -60, range: 30 },
-            { size: 220, colors: ['#22D3EE', '#06B6D4'], bottom: height * 0.12, left: -60, delay: 1200, range: 24 },
+            { size: 280, colors: ['#60A5FA', '#2563EB'], top: height * 0.1, right: -60, range: 30 },
+            { size: 220, colors: ['#38BDF8', '#0EA5E9'], bottom: height * 0.12, left: -60, delay: 1200, range: 24 },
           ]}
         />
         <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', gap: 22 }}>

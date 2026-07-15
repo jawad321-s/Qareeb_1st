@@ -112,7 +112,7 @@ export const CATEGORY_SPLIT = CATS.map((c) => ({ name: c, value: rnd(40, 260) })
 
 export const REQUESTS_BY_STATUS = [
   { status: 'Pending', value: 32, color: '#F59E0B' },
-  { status: 'Active', value: 58, color: '#6366F1' },
+  { status: 'Active', value: 58, color: '#3B82F6' },
   { status: 'Completed', value: 214, color: '#10B981' },
   { status: 'Cancelled', value: 12, color: '#EF4444' },
 ];

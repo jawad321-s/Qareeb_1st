@@ -27,7 +27,7 @@ export default function ArtisanDashboard() {
   const nearby = useNearbyRequests(user.uid);
 
   const stats = [
-    { icon: 'wallet' as const, label: t('artisan.thisMonth'), value: formatMoney(1240000), color: '#6366F1' },
+    { icon: 'wallet' as const, label: t('artisan.thisMonth'), value: formatMoney(1240000), color: '#3B82F6' },
     { icon: 'check-circle' as const, label: t('artisan.completed'), value: '214', color: '#10B981' },
     { icon: 'star' as const, label: t('profile.rating'), value: '4.8', color: '#F59E0B' },
   ];
@@ -35,7 +35,7 @@ export default function ArtisanDashboard() {
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
       <StatusBar style={isDark ? 'light' : 'dark'} />
-      <LinearGradient colors={isDark ? ['#1E1B4B', '#0B1120'] : ['#EEF2FF', '#F8FAFC']} style={{ paddingBottom: 8 }}>
+      <LinearGradient colors={isDark ? ['#172554', '#0B1120'] : ['#EEF2FF', '#F8FAFC']} style={{ paddingBottom: 8 }}>
         <SafeAreaView edges={['top']}>
           <View style={{ paddingHorizontal: 20, paddingTop: 8, gap: 16 }}>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>

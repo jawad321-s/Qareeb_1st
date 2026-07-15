@@ -51,7 +51,7 @@ export default function Home() {
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
       <StatusBar style={isDark ? 'light' : 'dark'} />
       {/* Gradient hero header */}
-      <LinearGradient colors={isDark ? ['#1E1B4B', '#0B1120'] : ['#EEF2FF', '#F8FAFC']} style={{ paddingBottom: 8 }}>
+      <LinearGradient colors={isDark ? ['#172554', '#0B1120'] : ['#EEF2FF', '#F8FAFC']} style={{ paddingBottom: 8 }}>
         <SafeAreaView edges={['top']}>
           <View style={{ paddingHorizontal: 20, paddingTop: 8, gap: 16 }}>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
@@ -104,7 +104,7 @@ export default function Home() {
         {/* Promo banner */}
         <View style={{ paddingHorizontal: 20, marginTop: 20 }}>
           <LinearGradient
-            colors={['#4F46E5', '#06B6D4']}
+            colors={['#2563EB', '#0EA5E9']}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
             style={{ borderRadius: 20, padding: 20, flexDirection: 'row', alignItems: 'center', gap: 12 }}

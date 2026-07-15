@@ -18,7 +18,7 @@ export function SectionHeader({ title, actionLabel, onAction }: Props) {
           <Text variant="caption" tone="primary" style={{ fontFamily: 'Inter_600SemiBold' }}>
             {actionLabel}
           </Text>
-          <Icon name="chevron-right" size={14} color="#6366F1" />
+          <Icon name="chevron-right" size={14} color="#3B82F6" />
         </Pressable>
       )}
     </View>

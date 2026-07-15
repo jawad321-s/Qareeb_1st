@@ -39,7 +39,7 @@ export default function LocationPermission() {
   return (
     <View style={{ flex: 1 }}>
       <StatusBar style="light" />
-      <LinearGradient colors={['#312E81', '#4F46E5', '#06B6D4']} style={{ flex: 1 }}>
+      <LinearGradient colors={['#1E3A8A', '#2563EB', '#0EA5E9']} style={{ flex: 1 }}>
         <SafeAreaView style={{ flex: 1, paddingHorizontal: 24, justifyContent: 'space-between' }}>
           <View style={{ flex: 1, justifyContent: 'center', gap: 28 }}>
             <Animated.View entering={FadeIn.duration(500)} style={{ alignItems: 'center', gap: 16 }}>

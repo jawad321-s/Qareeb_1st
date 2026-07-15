@@ -18,7 +18,7 @@ interface Props {
 
 export function ServiceCard({ service, locale = 'en', onPress }: Props) {
   const cat = categoryById(service.categoryId);
-  const color = cat?.colorHex ?? '#6366F1';
+  const color = cat?.colorHex ?? '#3B82F6';
   const { t } = useT();
 
   return (

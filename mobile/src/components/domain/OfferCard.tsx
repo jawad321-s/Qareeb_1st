@@ -26,7 +26,7 @@ export function OfferCard({ offer, best, onAccept, onReject, onPressArtisan, loa
   const decided = offer.status !== 'PENDING';
 
   return (
-    <Card style={{ gap: 14, borderColor: best ? '#6366F1' : undefined, borderWidth: best ? 1.5 : 1 }}>
+    <Card style={{ gap: 14, borderColor: best ? '#3B82F6' : undefined, borderWidth: best ? 1.5 : 1 }}>
       {best && (
         <Badge label={t('offer.best')} variant="primary" icon="award" style={{ position: 'absolute', top: -10, left: 16 }} />
       )}

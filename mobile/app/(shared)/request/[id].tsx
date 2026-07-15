@@ -71,8 +71,8 @@ export default function RequestDetail() {
         <Card style={{ gap: 14 }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, flex: 1 }}>
-              <View style={{ width: 44, height: 44, borderRadius: 12, backgroundColor: (cat?.colorHex ?? '#6366F1') + '22', alignItems: 'center', justifyContent: 'center' }}>
-                <Icon name={(cat?.icon as any) ?? 'tools'} size={22} color={cat?.colorHex ?? '#6366F1'} />
+              <View style={{ width: 44, height: 44, borderRadius: 12, backgroundColor: (cat?.colorHex ?? '#3B82F6') + '22', alignItems: 'center', justifyContent: 'center' }}>
+                <Icon name={(cat?.icon as any) ?? 'tools'} size={22} color={cat?.colorHex ?? '#3B82F6'} />
               </View>
               <View style={{ flex: 1 }}>
                 <Text variant="h3" numberOfLines={1}>

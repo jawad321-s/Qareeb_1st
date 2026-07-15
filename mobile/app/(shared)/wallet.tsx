@@ -35,7 +35,7 @@ export default function Wallet() {
     <Screen scroll>
       <Header showBack title={t('wallet.title')} />
       <Animated.View entering={FadeInDown.duration(400)}>
-        <LinearGradient colors={['#4F46E5', '#06B6D4']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ borderRadius: 24, padding: 24, gap: 6 }}>
+        <LinearGradient colors={['#2563EB', '#0EA5E9']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ borderRadius: 24, padding: 24, gap: 6 }}>
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
             <Text variant="caption" style={{ color: 'rgba(255,255,255,0.85)' }}>
               {t('wallet.balance')}

@@ -96,7 +96,7 @@ export default function Login() {
               variant="body"
               tone="primary"
               style={{ fontFamily: 'Inter_600SemiBold' }}
-              onPress={() => router.replace('/(auth)/register')}
+              onPress={() => router.push('/(auth)/role')}
             >
               {t('auth.createAccount')}
             </Text>

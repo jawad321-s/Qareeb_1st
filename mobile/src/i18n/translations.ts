@@ -44,7 +44,7 @@ export const translations = {
     'welcome.haveAccount': 'I already have an account',
 
     // auth
-    'auth.welcomeBack': 'Welcome back 👋',
+    'auth.welcomeBack': 'Welcome back',
     'auth.signInSubtitle': 'Sign in to continue to Qareeb.',
     'auth.email': 'Email',
     'auth.password': 'Password',
@@ -448,7 +448,7 @@ export const translations = {
     'welcome.haveAccount': 'لدي حساب بالفعل',
 
     // auth
-    'auth.welcomeBack': 'أهلاً بعودتك 👋',
+    'auth.welcomeBack': 'أهلاً بعودتك',
     'auth.signInSubtitle': 'سجّل الدخول للمتابعة إلى قريب.',
     'auth.email': 'البريد الإلكتروني',
     'auth.password': 'كلمة المرور',

@@ -2,14 +2,14 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Lock, Mail, Wrench } from 'lucide-react';
+import { Languages, Lock, Mail, Wrench } from 'lucide-react';
 import { Button } from '@/components/ui/primitives';
 import { signIn } from '@/lib/session';
 import { useT } from '@/lib/i18n';
 
 export default function LoginPage() {
   const router = useRouter();
-  const { t } = useT();
+  const { t, locale, toggle } = useT();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -24,7 +24,15 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="grid min-h-screen lg:grid-cols-2">
+    <div className="relative grid min-h-screen lg:grid-cols-2">
+      {/* Language switch — reachable before signing in */}
+      <button
+        onClick={toggle}
+        className="absolute end-6 top-6 z-10 flex h-10 items-center gap-1.5 rounded-xl border border-base px-3 text-sm font-medium hover:bg-slate-500/10"
+      >
+        <Languages className="h-[18px] w-[18px]" />
+        {locale === 'ar' ? 'EN' : 'ع'}
+      </button>
       {/* Brand panel */}
       <div className="relative hidden overflow-hidden bg-gradient-to-br from-brand-800 via-brand-600 to-accent-500 lg:block">
         <div className="flex h-full flex-col justify-between p-12 text-white">

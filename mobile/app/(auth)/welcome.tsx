@@ -18,7 +18,7 @@ const { height } = Dimensions.get('window');
 
 export default function Welcome() {
   const signInAs = useAuth((s) => s.signInAs);
-  const { t } = useT();
+  const { t, locale, toggle } = useT();
 
   const FEATURES = [
     { icon: 'map-pin', title: t('welcome.feature1.title'), desc: t('welcome.feature1.desc') },
@@ -38,6 +38,26 @@ export default function Welcome() {
           ]}
         />
         <SafeAreaView style={{ flex: 1, paddingHorizontal: 24, justifyContent: 'space-between' }}>
+          {/* Language switch — reachable before any account exists */}
+          <View style={{ position: 'absolute', top: 56, right: 24, zIndex: 10 }}>
+            <Text
+              onPress={toggle}
+              variant="caption"
+              style={{
+                color: '#FFFFFF',
+                fontFamily: 'Inter_600SemiBold',
+                backgroundColor: 'rgba(255,255,255,0.18)',
+                borderWidth: 1,
+                borderColor: 'rgba(255,255,255,0.3)',
+                paddingHorizontal: 14,
+                paddingVertical: 7,
+                borderRadius: 999,
+                overflow: 'hidden',
+              }}
+            >
+              {locale === 'ar' ? 'English' : 'العربية'}
+            </Text>
+          </View>
           <View style={{ flex: 1, justifyContent: 'center', gap: 28, paddingTop: height * 0.06 }}>
             <Animated.View entering={FadeIn.duration(600)} style={{ alignItems: 'center', gap: 16 }}>
               <View

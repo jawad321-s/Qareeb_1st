@@ -25,7 +25,7 @@ export default function ArtisanProfile() {
   const profile = MOCK_ARTISAN_PROFILE;
 
   const items: { icon: IconName; label: string; danger?: boolean; onPress?: () => void; route?: string }[] = [
-    { icon: 'shield', label: t('ap.verification'), route: '/(shared)/settings' },
+    { icon: 'shield', label: t('ap.verification'), route: '/(shared)/verification' },
     { icon: 'image', label: t('ap.gallery'), route: '/(shared)/settings' },
     { icon: 'sliders', label: t('ap.servicesPricing'), route: '/(shared)/settings' },
     { icon: 'map-pin', label: t('ap.radius'), route: '/(shared)/settings' },

@@ -42,8 +42,11 @@ export default function Otp() {
     await new Promise((r) => setTimeout(r, 700));
     setLoading(false);
     // Mock: any code verifies and signs the user into the matching app.
-    signInAs(role === 'artisan' ? 'artisan' : 'customer');
+    const isArtisan = role === 'artisan';
+    signInAs(isArtisan ? 'artisan' : 'customer');
     router.replace('/');
+    // New artisans continue to document verification as the next step.
+    if (isArtisan) setTimeout(() => router.push('/(shared)/verification'), 350);
   };
 
   return (

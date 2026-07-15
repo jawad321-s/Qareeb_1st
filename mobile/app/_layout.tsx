@@ -24,6 +24,7 @@ import { ToastProvider } from '@/components/feedback/Toast';
 import { AnimatedSplash } from '@/components/AnimatedSplash';
 import { queryClient } from '@/lib/queryClient';
 import { useAuth } from '@/store/auth';
+import { useVerification } from '@/store/verification';
 
 SplashScreen.preventAutoHideAsync().catch(() => {});
 
@@ -31,6 +32,7 @@ function RootNavigator() {
   const { colors } = useTheme();
   const hydrate = useAuth((s) => s.hydrate);
   const hydrated = useAuth((s) => s.hydrated);
+  const hydrateVerification = useVerification((s) => s.hydrate);
   const [fontsLoaded] = useFonts({
     Inter_400Regular,
     Inter_500Medium,
@@ -45,7 +47,8 @@ function RootNavigator() {
 
   useEffect(() => {
     hydrate();
-  }, [hydrate]);
+    hydrateVerification();
+  }, [hydrate, hydrateVerification]);
 
   useEffect(() => {
     // Hand the native splash over to our animated splash as soon as we're ready.

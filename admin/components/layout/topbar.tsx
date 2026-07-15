@@ -1,12 +1,20 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Bell, Moon, Search, Sun, Languages } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { Bell, LogOut, Moon, Search, Sun, Languages } from 'lucide-react';
+import { signOut } from '@/lib/session';
 import { useT } from '@/lib/i18n';
 
 export function Topbar() {
   const { t, locale, toggle } = useT();
+  const router = useRouter();
   const [dark, setDark] = useState(false);
+
+  const logout = () => {
+    signOut();
+    router.replace('/login');
+  };
 
   useEffect(() => {
     const isDark = document.documentElement.classList.contains('dark');
@@ -48,6 +56,13 @@ export function Topbar() {
           <p className="text-[11px] text-muted">{t('topbar.superAdmin')}</p>
         </div>
       </div>
+      <button
+        onClick={logout}
+        title={t('topbar.signOut')}
+        className="grid h-10 w-10 place-items-center rounded-xl border border-base text-muted hover:bg-red-500/10 hover:text-red-500"
+      >
+        <LogOut className="h-[18px] w-[18px]" />
+      </button>
     </header>
   );
 }

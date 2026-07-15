@@ -56,6 +56,7 @@ Moving Services
 | [Database Schema](./docs/DATABASE_SCHEMA.md) | Firestore collections, relationships, indexes |
 | [Design System](./docs/DESIGN_SYSTEM.md) | Colors, typography, spacing, components, motion |
 | [User Flows](./docs/USER_FLOWS.md) | Auth, request lifecycle, offers, chat, ratings |
+| [Integration](./docs/INTEGRATION.md) | Mobile ↔ Admin shared Firestore backend, mock/live switch |
 
 ---
 

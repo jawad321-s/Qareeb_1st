@@ -20,6 +20,9 @@ export const translations = {
     'common.popular': 'Popular',
     'common.results': 'results',
     'common.online': 'Online now',
+    'nf.title': 'Page not found',
+    'nf.desc': "The page you're looking for doesn't exist or was moved.",
+    'nf.home': 'Back to home',
 
     // tabs (customer)
     'tab.home': 'Home',
@@ -424,6 +427,9 @@ export const translations = {
     'common.popular': 'الأكثر طلباً',
     'common.results': 'نتيجة',
     'common.online': 'متصل الآن',
+    'nf.title': 'الصفحة غير موجودة',
+    'nf.desc': 'الصفحة التي تبحث عنها غير موجودة أو تم نقلها.',
+    'nf.home': 'العودة للرئيسية',
 
     // tabs (customer)
     'tab.home': 'الرئيسية',

@@ -1,13 +1,27 @@
 'use client';
 
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Lock, Mail, Wrench } from 'lucide-react';
 import { Button } from '@/components/ui/primitives';
+import { signIn } from '@/lib/session';
 import { useT } from '@/lib/i18n';
 
 export default function LoginPage() {
   const router = useRouter();
   const { t } = useT();
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+
+  const submit = () => {
+    if (!/^\S+@\S+\.\S+$/.test(email) || password.length < 6) {
+      setError(t('login.errInvalid'));
+      return;
+    }
+    signIn(email);
+    router.push('/');
+  };
 
   return (
     <div className="grid min-h-screen lg:grid-cols-2">
@@ -40,13 +54,30 @@ export default function LoginPage() {
           <div className="space-y-4">
             <div className="relative">
               <Mail className="pointer-events-none absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted" />
-              <input placeholder={t('login.email')} className="h-11 w-full rounded-xl border border-base bg-transparent ps-10 pe-4 text-sm outline-none focus:border-brand-500" />
+              <input
+                value={email}
+                onChange={(e) => { setEmail(e.target.value); setError(''); }}
+                onKeyDown={(e) => e.key === 'Enter' && submit()}
+                placeholder={t('login.email')}
+                type="email"
+                autoComplete="email"
+                className="h-11 w-full rounded-xl border border-base bg-transparent ps-10 pe-4 text-sm outline-none focus:border-brand-500"
+              />
             </div>
             <div className="relative">
               <Lock className="pointer-events-none absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted" />
-              <input type="password" placeholder="••••••••" className="h-11 w-full rounded-xl border border-base bg-transparent ps-10 pe-4 text-sm outline-none focus:border-brand-500" />
+              <input
+                value={password}
+                onChange={(e) => { setPassword(e.target.value); setError(''); }}
+                onKeyDown={(e) => e.key === 'Enter' && submit()}
+                type="password"
+                autoComplete="current-password"
+                placeholder="••••••••"
+                className="h-11 w-full rounded-xl border border-base bg-transparent ps-10 pe-4 text-sm outline-none focus:border-brand-500"
+              />
             </div>
-            <Button className="h-11 w-full" onClick={() => router.push('/')}>
+            {error && <p className="text-xs font-medium text-red-500">{error}</p>}
+            <Button className="h-11 w-full" onClick={submit}>
               {t('login.signIn')}
             </Button>
           </div>

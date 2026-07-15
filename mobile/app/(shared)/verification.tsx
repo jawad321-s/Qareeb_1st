@@ -16,7 +16,6 @@ import { useTheme } from '@/theme/ThemeProvider';
 import { useT } from '@/i18n';
 import { radius } from '@/theme/tokens';
 import { useToast } from '@/components/feedback/Toast';
-import { MOCK_ARTISAN_PROFILE } from '@/mock/data';
 
 async function pickImage(): Promise<string | null> {
   const res = await ImagePicker.launchImageLibraryAsync({
@@ -66,7 +65,7 @@ export default function Verification() {
       showToast('error', t('vrf.needId'));
       return;
     }
-    if (user) submit(user, MOCK_ARTISAN_PROFILE.categoryIds);
+    if (user) submit(user);
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => {});
     showToast('success', t('vrf.submitted'));
     setTimeout(() => router.back(), 900);

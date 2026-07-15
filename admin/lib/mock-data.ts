@@ -49,10 +49,10 @@ export interface Complaint {
 const day = 864e5;
 const rnd = (a: number, b: number) => Math.floor(a + Math.random() * (b - a));
 
-const FIRST = ['Omar', 'Layla', 'Yousef', 'Hassan', 'Tariq', 'Sara', 'Khalid', 'Noura', 'Faisal', 'Huda', 'Ahmed', 'Reem'];
-const LAST = ['Al-Harbi', 'Khalid', 'Nasser', 'Ali', 'Mansour', 'Al-Otaibi', 'Zahrani', 'Qahtani'];
-const CITIES = ['Riyadh', 'Jeddah', 'Dammam', 'Mecca', 'Medina', 'Khobar'];
-const CATS = ['Plumbing', 'Electrical', 'AC', 'Cleaning', 'Carpentry', 'Painting', 'Moving', 'Gardening'];
+const FIRST = ['عمر', 'ليلى', 'يوسف', 'حسان', 'طارق', 'سارة', 'خالد', 'نورا', 'فيصل', 'هدى', 'أحمد', 'ريم'];
+const LAST = ['خالد', 'ناصر', 'علي', 'منصور', 'عودة', 'حمدان', 'زهران', 'قاسم'];
+const CITIES = ['رام الله', 'نابلس', 'الخليل', 'بيت لحم', 'جنين', 'طولكرم'];
+const CATS = ['سباكة', 'كهرباء', 'تكييف', 'تنظيف', 'نجارة', 'دهان', 'نقل عفش', 'بستنة'];
 const name = () => `${FIRST[rnd(0, FIRST.length)]} ${LAST[rnd(0, LAST.length)]}`;
 
 export const USERS: AdminUser[] = Array.from({ length: 48 }).map((_, i) => {
@@ -61,7 +61,7 @@ export const USERS: AdminUser[] = Array.from({ length: 48 }).map((_, i) => {
   return {
     uid: `u_${i + 1}`,
     fullName: n,
-    email: `${n.split(' ')[0].toLowerCase()}${i}@qareeb.app`,
+    email: `user${i + 1}@qareeb.app`,
     role,
     status: (['active', 'active', 'active', 'suspended', 'pending'] as UserStatus[])[rnd(0, 5)],
     verified: role === 'artisan' ? Math.random() > 0.35 : true,
@@ -83,7 +83,7 @@ export const VERIFICATIONS: VerificationItem[] = Array.from({ length: 8 }).map((
 
 export const REQUESTS: AdminRequest[] = Array.from({ length: 40 }).map((_, i) => ({
   id: `r_${i + 1}`,
-  title: `${CATS[rnd(0, CATS.length)]} service needed`,
+  title: `طلب خدمة ${CATS[rnd(0, CATS.length)]}`,
   customer: name(),
   category: CATS[rnd(0, CATS.length)],
   status: (['PENDING', 'ACCEPTED', 'ON_THE_WAY', 'WORKING', 'COMPLETED', 'CANCELLED'] as AdminRequest['status'][])[rnd(0, 6)],
@@ -96,7 +96,7 @@ export const COMPLAINTS: Complaint[] = Array.from({ length: 6 }).map((_, i) => (
   id: `c_${i + 1}`,
   reporter: name(),
   target: name(),
-  reason: ['No-show', 'Overcharged', 'Poor quality', 'Unprofessional', 'Safety concern'][rnd(0, 5)],
+  reason: ['عدم حضور', 'مبالغة بالسعر', 'جودة منخفضة', 'سلوك غير مهني', 'مخاوف تتعلق بالسلامة'][rnd(0, 5)],
   status: (['open', 'reviewing', 'resolved'] as Complaint['status'][])[rnd(0, 3)],
   createdAt: Date.now() - rnd(1, 15) * day,
 }));

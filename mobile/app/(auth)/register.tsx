@@ -12,6 +12,7 @@ import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
 import { Icon } from '@/components/ui/Icon';
 import { registerSchema, artisanRegisterSchema } from '@/lib/validation';
+import { useVerification } from '@/store/verification';
 import { CATEGORIES } from '@/constants/categories';
 import { useTheme } from '@/theme/ThemeProvider';
 import { useT, useLocaleStore } from '@/i18n';
@@ -49,12 +50,23 @@ export default function Register() {
     setCategoryIds((prev) => (prev.includes(id) ? prev.filter((c) => c !== id) : [...prev, id]));
   };
 
+  const setArtisanDraft = useVerification((s) => s.setArtisanDraft);
+
   const onSubmit = async () => {
     if (isArtisan && categoryIds.length === 0) {
       setCatError(t('auth.errCategories'));
       return;
     }
     setLoading(true);
+    // Persist the professional profile so verification (and Firestore) get it.
+    if (isArtisan) {
+      setArtisanDraft({
+        categoryIds,
+        experienceYears: Number(getValues('experience')) || undefined,
+        serviceRadiusKm: Number(getValues('serviceRadius')) || undefined,
+        bio: (getValues('bio') as string) || undefined,
+      });
+    }
     // Simulate account creation, then move to OTP verification.
     await new Promise((r) => setTimeout(r, 700));
     setLoading(false);
@@ -62,7 +74,7 @@ export default function Register() {
   };
 
   const baseFields = [
-    { name: 'fullName' as const, label: t('auth.fullName'), placeholder: 'Layla Al-Harbi', icon: 'user' as const, kb: 'default' as const },
+    { name: 'fullName' as const, label: t('auth.fullName'), placeholder: 'ليلى خالد', icon: 'user' as const, kb: 'default' as const },
     { name: 'email' as const, label: t('auth.email'), placeholder: 'you@example.com', icon: 'mail' as const, kb: 'email-address' as const },
     { name: 'phone' as const, label: t('auth.phone'), placeholder: '+970 5X XXX XXXX', icon: 'phone' as const, kb: 'phone-pad' as const },
   ];

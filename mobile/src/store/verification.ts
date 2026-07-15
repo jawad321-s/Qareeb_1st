@@ -12,6 +12,14 @@ interface Certificate {
   uri: string;
 }
 
+/** Professional info captured at artisan sign-up, carried into verification. */
+export interface ArtisanDraft {
+  categoryIds: string[];
+  experienceYears?: number;
+  serviceRadiusKm?: number;
+  bio?: string;
+}
+
 interface VerificationSnapshot {
   status: VerificationStatus;
   idFront?: string;
@@ -19,6 +27,7 @@ interface VerificationSnapshot {
   selfie?: string;
   certificates: Certificate[];
   submittedAt?: number;
+  draft: ArtisanDraft;
 }
 
 interface VerificationState extends VerificationSnapshot {
@@ -27,78 +36,87 @@ interface VerificationState extends VerificationSnapshot {
   setDoc: (slot: DocSlot, uri: string) => void;
   addCertificate: (uri: string) => void;
   removeCertificate: (id: string) => void;
-  submit: (user: AppUser, categoryIds: string[]) => Promise<void>;
+  setArtisanDraft: (draft: ArtisanDraft) => void;
+  submit: (user: AppUser) => Promise<void>;
   watch: (uid: string) => () => void;
   setStatus: (status: VerificationStatus) => void;
   reset: () => void;
 }
 
-const EMPTY: VerificationSnapshot = { status: 'unsubmitted', certificates: [] };
+const EMPTY: VerificationSnapshot = { status: 'unsubmitted', certificates: [], draft: { categoryIds: [] } };
 
-const persist = (s: VerificationSnapshot) => kv.set(STORE_KEY, s);
+export const useVerification = create<VerificationState>((set, get) => {
+  const save = () => {
+    const { status, idFront, idBack, selfie, certificates, submittedAt, draft } = get();
+    kv.set<VerificationSnapshot>(STORE_KEY, { status, idFront, idBack, selfie, certificates, submittedAt, draft });
+  };
 
-export const useVerification = create<VerificationState>((set, get) => ({
-  ...EMPTY,
-  hydrated: false,
+  return {
+    ...EMPTY,
+    hydrated: false,
 
-  hydrate: () => {
-    const saved = kv.get<VerificationSnapshot>(STORE_KEY);
-    set({ ...(saved ?? EMPTY), hydrated: true });
-  },
+    hydrate: () => {
+      const saved = kv.get<VerificationSnapshot>(STORE_KEY);
+      set({ ...EMPTY, ...(saved ?? {}), draft: saved?.draft ?? EMPTY.draft, hydrated: true });
+    },
 
-  setDoc: (slot, uri) => {
-    set({ [slot]: uri } as Partial<VerificationState>);
-    const { status, idFront, idBack, selfie, certificates } = get();
-    persist({ status, idFront, idBack, selfie, certificates });
-  },
+    setDoc: (slot, uri) => {
+      set({ [slot]: uri } as Partial<VerificationState>);
+      save();
+    },
 
-  addCertificate: (uri) => {
-    const cert = { id: `c_${Date.now()}`, uri };
-    set((s) => ({ certificates: [...s.certificates, cert] }));
-    const { status, idFront, idBack, selfie, certificates } = get();
-    persist({ status, idFront, idBack, selfie, certificates });
-  },
+    addCertificate: (uri) => {
+      set((s) => ({ certificates: [...s.certificates, { id: `c_${Date.now()}`, uri }] }));
+      save();
+    },
 
-  removeCertificate: (id) => {
-    set((s) => ({ certificates: s.certificates.filter((c) => c.id !== id) }));
-    const { status, idFront, idBack, selfie, certificates } = get();
-    persist({ status, idFront, idBack, selfie, certificates });
-  },
+    removeCertificate: (id) => {
+      set((s) => ({ certificates: s.certificates.filter((c) => c.id !== id) }));
+      save();
+    },
 
-  submit: async (user, categoryIds) => {
-    const submittedAt = Date.now();
-    set({ status: 'pending', submittedAt });
-    const { idFront, idBack, selfie, certificates } = get();
-    persist({ status: 'pending', idFront, idBack, selfie, certificates, submittedAt });
-    // Push to Firestore (no-op on mock) so the admin queue picks it up live.
-    if (idFront && idBack) {
-      await submitVerification({
-        user,
-        categoryIds,
-        idFront,
-        idBack,
-        selfie,
-        certificates: certificates.map((c) => c.uri),
-      }).catch(() => {});
-    }
-  },
+    // Called from the artisan sign-up form so the professional profile survives
+    // into verification (and Firestore) instead of being discarded.
+    setArtisanDraft: (draft) => {
+      set({ draft });
+      save();
+    },
 
-  // Live-subscribe to admin decisions; keeps local status in sync.
-  watch: (uid) =>
-    watchVerificationStatus(uid, (status) => {
+    submit: async (user) => {
+      set({ status: 'pending', submittedAt: Date.now() });
+      save();
+      const { idFront, idBack, selfie, certificates, draft } = get();
+      // Push to Firestore (no-op on mock) so the admin queue picks it up live.
+      if (idFront && idBack) {
+        await submitVerification({
+          user,
+          categoryIds: draft.categoryIds,
+          experienceYears: draft.experienceYears,
+          serviceRadiusKm: draft.serviceRadiusKm,
+          bio: draft.bio,
+          idFront,
+          idBack,
+          selfie,
+          certificates: certificates.map((c) => c.uri),
+        }).catch(() => {});
+      }
+    },
+
+    // Live-subscribe to admin decisions; keeps local status in sync.
+    watch: (uid) =>
+      watchVerificationStatus(uid, (status) => {
+        set({ status });
+        save();
+      }),
+
+    setStatus: (status) => {
       set({ status });
-      const { idFront, idBack, selfie, certificates, submittedAt } = get();
-      persist({ status, idFront, idBack, selfie, certificates, submittedAt });
-    }),
+      save();
+    },
 
-  setStatus: (status) => {
-    set({ status });
-    const { idFront, idBack, selfie, certificates, submittedAt } = get();
-    persist({ status, idFront, idBack, selfie, certificates, submittedAt });
-  },
-
-  reset: () => {
-    set({ ...EMPTY });
-    persist(EMPTY);
-  },
-}));
+    reset: () => {
+      set({ ...EMPTY });
+      save();
+    },
+  };
+});

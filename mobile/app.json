@@ -11,7 +11,7 @@
     "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "contain",
-      "backgroundColor": "#0B1120"
+      "backgroundColor": "#0A0F1E"
     },
     "assetBundlePatterns": ["**/*"],
     "ios": {
@@ -27,7 +27,7 @@
       "package": "com.qareeb.app",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#0B1120"
+        "backgroundColor": "#0A0F1E"
       },
       "permissions": [
         "ACCESS_FINE_LOCATION",
@@ -47,7 +47,7 @@
       [
         "expo-splash-screen",
         {
-          "backgroundColor": "#0B1120",
+          "backgroundColor": "#0A0F1E",
           "image": "./assets/splash.png",
           "imageWidth": 200
         }

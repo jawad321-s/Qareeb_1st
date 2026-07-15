@@ -23,6 +23,7 @@ const dict = {
     'sidebar.helpDesc': 'Check the docs or contact support.',
     // topbar
     'topbar.search': 'Search users, requests, artisans…',
+    'topbar.signOut': 'Sign out',
     'topbar.admin': 'Admin',
     'topbar.superAdmin': 'Super admin',
     // common
@@ -148,6 +149,7 @@ const dict = {
     'login.welcomeBack': 'Welcome back',
     'login.subtitle': 'Sign in to the Qareeb admin console.',
     'login.email': 'admin@qareeb.app',
+    'login.errInvalid': 'Enter a valid email and a password (6+ characters).',
     'login.signIn': 'Sign in',
     'login.rbac': 'Protected by role-based access control.',
   },
@@ -166,6 +168,7 @@ const dict = {
     'sidebar.help': 'تحتاج مساعدة؟',
     'sidebar.helpDesc': 'راجع الوثائق أو تواصل مع الدعم.',
     'topbar.search': 'ابحث عن مستخدمين، طلبات، حرفيين…',
+    'topbar.signOut': 'تسجيل الخروج',
     'topbar.admin': 'المسؤول',
     'topbar.superAdmin': 'مسؤول عام',
     'common.search': 'بحث…',
@@ -279,6 +282,7 @@ const dict = {
     'login.welcomeBack': 'أهلاً بعودتك',
     'login.subtitle': 'سجّل الدخول إلى لوحة إدارة قريب.',
     'login.email': 'admin@qareeb.app',
+    'login.errInvalid': 'أدخل بريداً صحيحاً وكلمة مرور (6 أحرف فأكثر).',
     'login.signIn': 'تسجيل الدخول',
     'login.rbac': 'محميّة بنظام صلاحيات حسب الدور.',
   },

@@ -14,7 +14,7 @@ const LENGTH = 4;
 
 export default function Otp() {
   const { colors } = useTheme();
-  const { phone } = useLocalSearchParams<{ phone?: string }>();
+  const { phone, role } = useLocalSearchParams<{ phone?: string; role?: string }>();
   const signInAs = useAuth((s) => s.signInAs);
   const { t } = useT();
   const [code, setCode] = useState<string[]>(Array(LENGTH).fill(''));
@@ -41,8 +41,8 @@ export default function Otp() {
     setLoading(true);
     await new Promise((r) => setTimeout(r, 700));
     setLoading(false);
-    // Mock: any code verifies and signs the user in as a customer.
-    signInAs('customer');
+    // Mock: any code verifies and signs the user into the matching app.
+    signInAs(role === 'artisan' ? 'artisan' : 'customer');
     router.replace('/');
   };
 

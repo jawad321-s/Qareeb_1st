@@ -21,6 +21,7 @@ export function Input({
   style,
   onFocus,
   onBlur,
+  multiline,
   ...rest
 }: InputProps) {
   const { colors } = useTheme();
@@ -40,10 +41,12 @@ export function Input({
       <View
         style={{
           flexDirection: 'row',
-          alignItems: 'center',
+          alignItems: multiline ? 'flex-start' : 'center',
           gap: 10,
-          height: 54,
+          height: multiline ? undefined : 54,
+          minHeight: multiline ? 96 : undefined,
           paddingHorizontal: 14,
+          paddingVertical: multiline ? 12 : 0,
           borderRadius: radius.lg,
           borderWidth: 1.5,
           borderColor,
@@ -52,13 +55,15 @@ export function Input({
       >
         {iconLeft && <Icon name={iconLeft} size={20} color={focused ? colors.tint : colors.muted} />}
         <TextInput
+          multiline={multiline}
+          textAlignVertical={multiline ? 'top' : 'center'}
           style={[
             {
               flex: 1,
               color: colors.fg,
               fontSize: 15,
               fontFamily: font('Inter_400Regular'),
-              height: '100%',
+              height: multiline ? undefined : '100%',
               textAlign: 'auto',
             },
             style,

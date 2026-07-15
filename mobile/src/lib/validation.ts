@@ -20,6 +20,16 @@ export const registerSchema = z
   });
 export type RegisterInput = z.infer<typeof registerSchema>;
 
+// Artisan sign-up adds a professional profile on top of the base account.
+export const artisanRegisterSchema = registerSchema.and(
+  z.object({
+    experience: z.coerce.number().min(0, 'Enter your experience').max(60),
+    serviceRadius: z.coerce.number().min(1, 'Set a service radius').max(100),
+    bio: z.string().min(10, 'Tell customers a bit about you (min 10 chars)'),
+  }),
+);
+export type ArtisanRegisterInput = z.infer<typeof artisanRegisterSchema>;
+
 export const requestSchema = z.object({
   title: z.string().min(4, 'Give your request a short title'),
   description: z.string().min(10, 'Describe the problem (min 10 chars)'),

@@ -83,7 +83,7 @@ export default function Welcome() {
             <View style={{ gap: 14, marginTop: 12 }}>
               {FEATURES.map((f, i) => (
                 <Animated.View key={f.title} entering={FadeInDown.delay(200 + i * 120).duration(500)}>
-                  <GlassView radius={18}>
+                  <GlassView radius={18} tone="onColor">
                     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14, padding: 14 }}>
                       <View
                         style={{

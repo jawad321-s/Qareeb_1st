@@ -31,7 +31,7 @@ export default function ComplaintsPage() {
                 <StatusPill status={c.status} />
               </div>
               <p className="mt-1 text-sm text-muted">
-                {c.reporter} {t('comp.reported')} {c.target} · {timeAgo(c.createdAt)}
+                {c.reporter} {t('comp.reported')} {c.target} · {timeAgo(c.createdAt, locale)}
               </p>
             </div>
             <div className="flex gap-2">

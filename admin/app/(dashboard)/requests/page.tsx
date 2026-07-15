@@ -10,7 +10,7 @@ import { formatMoney, timeAgo } from '@/lib/utils';
 import { useT } from '@/lib/i18n';
 
 export default function RequestsPage() {
-  const { t } = useT();
+  const { t, locale } = useT();
   const [data, setData] = useState<AdminRequest[]>([]);
 
   // Live requests feed from Firestore (falls back to mock on mock mode).
@@ -25,9 +25,9 @@ export default function RequestsPage() {
       { accessorKey: 'offers', header: t('rcol.offers') },
       { accessorKey: 'budgetMax', header: t('rcol.budget'), cell: ({ getValue }) => formatMoney(getValue() as number) },
       { accessorKey: 'status', header: t('col.status'), cell: ({ getValue }) => <StatusPill status={getValue() as string} /> },
-      { accessorKey: 'createdAt', header: t('rcol.created'), cell: ({ getValue }) => <span className="text-muted">{timeAgo(getValue() as number)}</span> },
+      { accessorKey: 'createdAt', header: t('rcol.created'), cell: ({ getValue }) => <span className="text-muted">{timeAgo(getValue() as number, locale)}</span> },
     ],
-    [t],
+    [t, locale],
   );
 
   return (

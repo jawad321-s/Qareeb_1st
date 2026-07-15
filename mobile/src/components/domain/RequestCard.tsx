@@ -7,19 +7,23 @@ import { StatusBadge } from './StatusBadge';
 import type { ServiceRequest } from '@/types';
 import { categoryById } from '@/constants/categories';
 import { formatMoney, timeAgo } from '@/lib/format';
+import { useT } from '@/i18n';
+import { useTheme } from '@/theme/ThemeProvider';
 
 export function RequestCard({ request, onPress }: { request: ServiceRequest; onPress?: () => void }) {
   const cat = categoryById(request.categoryId);
+  const { t } = useT();
+  const { isDark } = useTheme();
   return (
     <Card onPress={onPress} style={{ gap: 12 }}>
       <View style={{ flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between', gap: 10 }}>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, flex: 1 }}>
           <View
             style={{
-              width: 40,
-              height: 40,
-              borderRadius: 12,
-              backgroundColor: (cat?.colorHex ?? '#3B82F6') + '22',
+              width: 42,
+              height: 42,
+              borderRadius: 13,
+              backgroundColor: (cat?.colorHex ?? '#3B82F6') + (isDark ? '26' : '14'),
               alignItems: 'center',
               justifyContent: 'center',
             }}
@@ -49,7 +53,7 @@ export function RequestCard({ request, onPress }: { request: ServiceRequest; onP
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
             <Icon name="message" size={14} color="#94A3B8" />
             <Text variant="caption" tone="muted">
-              {request.offerCount} offers
+              {request.offerCount} {t('common.offers')}
             </Text>
           </View>
         )}

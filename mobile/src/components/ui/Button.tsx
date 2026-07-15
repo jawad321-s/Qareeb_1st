@@ -18,7 +18,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import { Text } from './Text';
 import { Icon, type IconName } from './Icon';
-import { radius, gradients } from '@/theme/tokens';
+import { radius, gradients, shadows } from '@/theme/tokens';
 import { useTheme } from '@/theme/ThemeProvider';
 
 type Variant = 'primary' | 'secondary' | 'outline' | 'ghost' | 'danger';
@@ -152,6 +152,9 @@ export function Button({
     overflow: 'hidden',
     opacity: isDisabled ? 0.55 : 1,
     width: fullWidth ? '100%' : undefined,
+    // Primary CTAs glow softly in brand color — depth reserved for the action
+    // that matters, not sprinkled everywhere.
+    ...(variant === 'primary' && !isDisabled ? shadows.brand : {}),
   };
 
   const Ripple = (

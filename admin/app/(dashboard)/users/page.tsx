@@ -10,7 +10,7 @@ import { timeAgo } from '@/lib/utils';
 import { useT } from '@/lib/i18n';
 
 export default function UsersPage() {
-  const { t } = useT();
+  const { t, locale } = useT();
   const columns = useMemo<ColumnDef<AdminUser, any>[]>(
     () => [
       {
@@ -57,10 +57,10 @@ export default function UsersPage() {
       {
         accessorKey: 'joinedAt',
         header: t('col.joined'),
-        cell: ({ getValue }) => <span className="text-muted">{timeAgo(getValue() as number)}</span>,
+        cell: ({ getValue }) => <span className="text-muted">{timeAgo(getValue() as number, locale)}</span>,
       },
     ],
-    [t],
+    [t, locale],
   );
 
   return (

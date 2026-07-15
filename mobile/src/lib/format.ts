@@ -9,18 +9,21 @@ export function formatMoney(minor: number, currency = config.currency): string {
   })} ${currency}`;
 }
 
-/** Compact relative time ("2h ago", "just now"). */
+/** Compact relative time ("2h ago" / "منذ ٢ س"), localized to the active UI language. */
 export function timeAgo(ts: number): string {
+  // Read the locale lazily to avoid a circular import at module load.
+  const { useLocaleStore } = require('@/i18n') as typeof import('@/i18n');
+  const ar = useLocaleStore.getState().locale === 'ar';
   const diff = Date.now() - ts;
   const s = Math.floor(diff / 1000);
-  if (s < 60) return 'just now';
+  if (s < 60) return ar ? 'الآن' : 'just now';
   const m = Math.floor(s / 60);
-  if (m < 60) return `${m}m ago`;
+  if (m < 60) return ar ? `منذ ${m} د` : `${m}m ago`;
   const h = Math.floor(m / 60);
-  if (h < 24) return `${h}h ago`;
+  if (h < 24) return ar ? `منذ ${h} س` : `${h}h ago`;
   const d = Math.floor(h / 24);
-  if (d < 7) return `${d}d ago`;
-  return new Date(ts).toLocaleDateString();
+  if (d < 7) return ar ? `منذ ${d} يوم` : `${d}d ago`;
+  return new Date(ts).toLocaleDateString(ar ? 'ar' : 'en');
 }
 
 export function formatDistance(km: number): string {

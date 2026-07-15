@@ -1,9 +1,9 @@
 import React from 'react';
-import { Pressable, TextInput, View } from 'react-native';
+import { Pressable, StyleSheet, TextInput, View } from 'react-native';
 import { Icon } from './Icon';
 import { useTheme } from '@/theme/ThemeProvider';
 import { useFont } from '@/i18n';
-import { radius } from '@/theme/tokens';
+import { radius, shadows } from '@/theme/tokens';
 
 interface Props {
   value?: string;
@@ -26,12 +26,13 @@ export function SearchBar({ value, onChangeText, placeholder = 'Search servicesâ
         flexDirection: 'row',
         alignItems: 'center',
         gap: 10,
-        height: 52,
-        paddingHorizontal: 16,
-        borderRadius: radius.lg,
+        height: 50,
+        paddingHorizontal: 18,
+        borderRadius: radius.full,
         backgroundColor: colors.surface,
-        borderWidth: 1,
+        borderWidth: StyleSheet.hairlineWidth,
         borderColor: colors.border,
+        ...shadows.sm,
       }}
     >
       <Icon name="search" size={20} color={colors.muted} />

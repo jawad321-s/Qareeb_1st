@@ -41,23 +41,23 @@ export interface ThemeColors {
 // Semantic colors resolved per color scheme.
 export const themes: { light: ThemeColors; dark: ThemeColors } = {
   light: {
-    bg: '#F8FAFC',
+    bg: '#F6F8FB',
     surface: '#FFFFFF',
-    surface2: '#F1F5F9',
+    surface2: '#EEF2F7',
     card: '#FFFFFF',
-    border: '#E2E8F0',
+    border: '#E5EAF2',
     fg: '#0F172A',
-    muted: '#64748B',
+    muted: '#61708A',
     tint: '#2563EB',
     tabInactive: '#94A3B8',
     overlay: 'rgba(15,23,42,0.45)',
   },
   dark: {
-    bg: '#0B1120',
-    surface: '#111827',
-    surface2: '#1E293B',
-    card: '#141C2E',
-    border: '#2A344A',
+    bg: '#0A0F1E',
+    surface: '#101827',
+    surface2: '#1C2537',
+    card: '#121A2B',
+    border: '#243046',
     fg: '#F1F5F9',
     muted: '#94A3B8',
     tint: '#60A5FA',
@@ -85,40 +85,52 @@ export const radius = {
   full: 9999,
 } as const;
 
+// Type scale with optical letter-spacing: tight negative tracking on large
+// sizes, generous positive tracking on overlines — the discipline that makes
+// headings read "designed" rather than default.
 export const typography = {
-  display: { fontSize: 34, lineHeight: 40, fontFamily: 'Inter_700Bold' },
-  h1: { fontSize: 28, lineHeight: 34, fontFamily: 'Inter_700Bold' },
-  h2: { fontSize: 22, lineHeight: 28, fontFamily: 'Inter_600SemiBold' },
-  h3: { fontSize: 18, lineHeight: 24, fontFamily: 'Inter_600SemiBold' },
-  body: { fontSize: 15, lineHeight: 22, fontFamily: 'Inter_400Regular' },
-  bodyMedium: { fontSize: 15, lineHeight: 22, fontFamily: 'Inter_500Medium' },
-  caption: { fontSize: 13, lineHeight: 18, fontFamily: 'Inter_400Regular' },
-  overline: { fontSize: 11, lineHeight: 14, fontFamily: 'Inter_600SemiBold' },
+  display: { fontSize: 34, lineHeight: 40, fontFamily: 'Inter_700Bold', letterSpacing: -0.8 },
+  h1: { fontSize: 28, lineHeight: 34, fontFamily: 'Inter_700Bold', letterSpacing: -0.6 },
+  h2: { fontSize: 22, lineHeight: 28, fontFamily: 'Inter_600SemiBold', letterSpacing: -0.4 },
+  h3: { fontSize: 18, lineHeight: 24, fontFamily: 'Inter_600SemiBold', letterSpacing: -0.25 },
+  body: { fontSize: 15, lineHeight: 22, fontFamily: 'Inter_400Regular', letterSpacing: 0 },
+  bodyMedium: { fontSize: 15, lineHeight: 22, fontFamily: 'Inter_500Medium', letterSpacing: -0.1 },
+  caption: { fontSize: 13, lineHeight: 18, fontFamily: 'Inter_400Regular', letterSpacing: 0 },
+  overline: { fontSize: 11, lineHeight: 14, fontFamily: 'Inter_600SemiBold', letterSpacing: 0.7 },
 } as const;
 
-// Elevation presets (iOS shadow + Android elevation).
+// Elevation presets (iOS shadow + Android elevation). Deliberately restrained:
+// resting cards get a whisper of depth; only floating surfaces get drama.
 export const shadows = {
   none: {},
   sm: {
-    shadowColor: '#0F172A',
+    shadowColor: '#101828',
     shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.06,
-    shadowRadius: 4,
-    elevation: 2,
+    shadowOpacity: 0.05,
+    shadowRadius: 3,
+    elevation: 1,
   },
   md: {
-    shadowColor: '#0F172A',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.1,
-    shadowRadius: 16,
-    elevation: 6,
+    shadowColor: '#101828',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.07,
+    shadowRadius: 12,
+    elevation: 3,
   },
   lg: {
-    shadowColor: '#0F172A',
-    shadowOffset: { width: 0, height: 12 },
-    shadowOpacity: 0.16,
-    shadowRadius: 28,
-    elevation: 12,
+    shadowColor: '#101828',
+    shadowOffset: { width: 0, height: 16 },
+    shadowOpacity: 0.14,
+    shadowRadius: 32,
+    elevation: 10,
+  },
+  // Brand-tinted glow for primary CTAs.
+  brand: {
+    shadowColor: '#2563EB',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.32,
+    shadowRadius: 14,
+    elevation: 6,
   },
 } as const;
 

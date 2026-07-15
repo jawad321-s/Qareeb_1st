@@ -51,33 +51,47 @@ export default function Home() {
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
       <StatusBar style={isDark ? 'light' : 'dark'} />
       {/* Gradient hero header */}
-      <LinearGradient colors={isDark ? ['#172554', '#0B1120'] : ['#EEF2FF', '#F8FAFC']} style={{ paddingBottom: 8 }}>
+      <LinearGradient colors={isDark ? ['#141F3C', '#0A0F1E'] : ['#E9EFFB', '#F6F8FB']} style={{ paddingBottom: 10 }}>
         <SafeAreaView edges={['top']}>
-          <View style={{ paddingHorizontal: 20, paddingTop: 8, gap: 16 }}>
+          <View style={{ paddingHorizontal: 20, paddingTop: 10, gap: 14 }}>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
               <Avatar uri={user?.photoUrl} name={user?.fullName} size={46} />
-              <View style={{ flex: 1 }}>
+              <View style={{ flex: 1, gap: 1 }}>
                 <Text variant="caption" tone="muted">
-                  {greeting()},
+                  {greeting()}
                 </Text>
                 <Text variant="h3" numberOfLines={1}>
-                  {user?.fullName?.split(' ')[0] ?? 'there'} 👋
+                  {user?.fullName ?? ''}
                 </Text>
               </View>
               <Pressable
                 onPress={() => router.push('/(shared)/notifications')}
-                style={{ width: 44, height: 44, borderRadius: 14, backgroundColor: colors.surface, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: colors.border }}
+                style={{ width: 42, height: 42, borderRadius: 21, backgroundColor: colors.surface, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: colors.border }}
               >
-                <Icon name="bell" size={20} color={colors.fg} />
-                <View style={{ position: 'absolute', top: 10, right: 12, width: 8, height: 8, borderRadius: 4, backgroundColor: '#EF4444' }} />
+                <Icon name="bell" size={19} color={colors.fg} />
+                <View style={{ position: 'absolute', top: 9, right: 11, width: 8, height: 8, borderRadius: 4, backgroundColor: '#EF4444', borderWidth: 1.5, borderColor: colors.surface }} />
               </Pressable>
             </View>
-            <Pressable onPress={() => router.push('/(shared)/location-permission')} style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
-              <Icon name="map-pin" size={14} color={colors.tint} />
-              <Text variant="caption" tone="muted">
+            <Pressable
+              onPress={() => router.push('/(shared)/location-permission')}
+              style={{
+                alignSelf: 'flex-start',
+                flexDirection: 'row',
+                alignItems: 'center',
+                gap: 6,
+                paddingHorizontal: 12,
+                paddingVertical: 7,
+                borderRadius: 999,
+                backgroundColor: colors.surface,
+                borderWidth: 1,
+                borderColor: colors.border,
+              }}
+            >
+              <Icon name="map-pin" size={13} color={colors.tint} />
+              <Text variant="caption" style={{ fontFamily: 'Inter_500Medium' }} numberOfLines={1}>
                 {user?.location?.address ?? t('home.setLocation')}
               </Text>
-              <Icon name="chevron-down" size={14} color={colors.muted} />
+              <Icon name="chevron-down" size={13} color={colors.muted} />
             </Pressable>
             <SearchBar placeholder={t('home.searchPlaceholder')} onPress={() => router.push('/(customer)/search')} onFilter={() => router.push('/(customer)/search')} />
           </View>
@@ -101,31 +115,44 @@ export default function Home() {
           ))}
         </ScrollView>
 
-        {/* Promo banner */}
+        {/* Promo banner — layered gradient with decorative geometry and a
+            high-contrast white CTA (banner owns the color, button owns focus). */}
         <View style={{ paddingHorizontal: 20, marginTop: 20 }}>
           <LinearGradient
-            colors={['#2563EB', '#0EA5E9']}
+            colors={['#1E40AF', '#2563EB', '#0891D1']}
             start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            style={{ borderRadius: 20, padding: 20, flexDirection: 'row', alignItems: 'center', gap: 12 }}
+            end={{ x: 1.1, y: 1.2 }}
+            style={{ borderRadius: 24, padding: 20, overflow: 'hidden' }}
           >
-            <View style={{ flex: 1, gap: 4 }}>
-              <Text variant="h3" tone="inverse">
-                {t('home.promoTitle')}
-              </Text>
-              <Text variant="caption" style={{ color: 'rgba(255,255,255,0.85)' }}>
-                {t('home.promoDesc')}
-              </Text>
+            <View style={{ position: 'absolute', top: -46, right: -30, width: 150, height: 150, borderRadius: 75, backgroundColor: 'rgba(255,255,255,0.08)' }} />
+            <View style={{ position: 'absolute', bottom: -60, right: 60, width: 120, height: 120, borderRadius: 60, backgroundColor: 'rgba(255,255,255,0.05)' }} />
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14 }}>
+              <View style={{ flex: 1, gap: 5 }}>
+                <Text variant="h3" tone="inverse">
+                  {t('home.promoTitle')}
+                </Text>
+                <Text variant="caption" style={{ color: 'rgba(255,255,255,0.82)', lineHeight: 18 }}>
+                  {t('home.promoDesc')}
+                </Text>
+              </View>
+              <Pressable
+                onPress={() => router.push('/(customer)/create')}
+                style={{
+                  backgroundColor: '#FFFFFF',
+                  paddingHorizontal: 16,
+                  paddingVertical: 11,
+                  borderRadius: 999,
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  gap: 6,
+                }}
+              >
+                <Text variant="caption" style={{ fontFamily: 'Inter_600SemiBold', color: '#1D4ED8' }}>
+                  {t('tab.request')}
+                </Text>
+                <Icon name="arrow-right" size={14} color="#1D4ED8" />
+              </Pressable>
             </View>
-            <Pressable
-              onPress={() => router.push('/(customer)/create')}
-              style={{ backgroundColor: 'rgba(255,255,255,0.2)', paddingHorizontal: 16, paddingVertical: 10, borderRadius: 14, flexDirection: 'row', alignItems: 'center', gap: 6 }}
-            >
-              <Text variant="bodyMedium" tone="inverse">
-                {t('tab.request')}
-              </Text>
-              <Icon name="arrow-right" size={16} color="#FFFFFF" />
-            </Pressable>
           </LinearGradient>
         </View>
 

@@ -11,7 +11,7 @@ import { timeAgo } from '@/lib/utils';
 import { useT } from '@/lib/i18n';
 
 export default function ArtisansPage() {
-  const { t } = useT();
+  const { t, locale } = useT();
   const [items, setItems] = useState<VerificationItem[]>([]);
 
   // Live queue from Firestore (falls back to the mock list on mock mode).
@@ -49,7 +49,7 @@ export default function ArtisansPage() {
                     </div>
                     <div>
                       <p className="font-semibold">{v.name}</p>
-                      <p className="text-xs text-muted">{v.category} · {t('ver.submitted')} {timeAgo(v.submittedAt)}</p>
+                      <p className="text-xs text-muted">{v.category} · {t('ver.submitted')} {timeAgo(v.submittedAt, locale)}</p>
                     </div>
                   </div>
                   <StatusPill status={v.status} />

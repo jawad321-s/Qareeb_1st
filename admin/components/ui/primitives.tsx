@@ -5,7 +5,7 @@ import { useT, type TKey } from '@/lib/i18n';
 
 export function Card({ className, children }: { className?: string; children: React.ReactNode }) {
   return (
-    <div className={cn('surface rounded-2xl border border-base shadow-sm', className)}>{children}</div>
+    <div className={cn('surface rounded-2xl border border-base card-shadow', className)}>{children}</div>
   );
 }
 

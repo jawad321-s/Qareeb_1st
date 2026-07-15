@@ -1,5 +1,5 @@
 import React from 'react';
-import { Pressable, View, type ViewProps, type ViewStyle } from 'react-native';
+import { Pressable, StyleSheet, View, type ViewProps, type ViewStyle } from 'react-native';
 import * as Haptics from 'expo-haptics';
 import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
 import { GlassView } from './GlassView';
@@ -32,14 +32,16 @@ export function Card({
   const scale = useSharedValue(1);
   const animatedStyle = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }));
 
+  // Hairline border + a whisper of shadow: cards feel crisp at rest instead of
+  // floating — heavy uniform shadows are the fastest way to look template-made.
   const base: ViewStyle = {
     borderRadius: radius.xl,
     backgroundColor: glass ? 'transparent' : colors.card,
-    borderWidth: glass ? 0 : 1,
+    borderWidth: glass ? 0 : StyleSheet.hairlineWidth,
     borderColor: colors.border,
     padding: padded ? 16 : 0,
     overflow: 'hidden',
-    ...(elevated ? shadows.md : {}),
+    ...(elevated ? shadows.sm : {}),
   };
 
   const inner = glass ? (

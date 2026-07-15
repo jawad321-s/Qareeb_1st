@@ -1,20 +1,10 @@
 import React from 'react';
-import { Pressable, View } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
+import { Pressable, StyleSheet } from 'react-native';
 import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
 import { Text } from '../ui/Text';
 import { Icon } from '../ui/Icon';
 import type { Category } from '@/types';
-import { shadows } from '@/theme/tokens';
-
-function shade(hex: string, amount = -24) {
-  const n = parseInt(hex.slice(1), 16);
-  const clamp = (v: number) => Math.max(0, Math.min(255, v));
-  const r = clamp((n >> 16) + amount);
-  const g = clamp(((n >> 8) & 0xff) + amount);
-  const b = clamp((n & 0xff) + amount);
-  return `#${((r << 16) | (g << 8) | b).toString(16).padStart(6, '0')}`;
-}
+import { useTheme } from '@/theme/ThemeProvider';
 
 interface Props {
   category: Category;
@@ -23,29 +13,38 @@ interface Props {
   size?: number;
 }
 
-export function CategoryTile({ category, locale = 'en', onPress, size = 72 }: Props) {
+/**
+ * Category tile — soft-tinted surface with the category color reserved for the
+ * icon itself. Restraint over saturation: color identifies, it doesn't shout.
+ */
+export function CategoryTile({ category, locale = 'en', onPress, size = 68 }: Props) {
+  const { isDark } = useTheme();
   const scale = useSharedValue(1);
   const aStyle = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }));
 
   return (
     <Pressable
       onPress={onPress}
-      onPressIn={() => (scale.value = withSpring(0.92))}
-      onPressOut={() => (scale.value = withSpring(1))}
-      style={{ alignItems: 'center', gap: 8, width: size + 12 }}
+      onPressIn={() => (scale.value = withSpring(0.9, { damping: 16, stiffness: 320 }))}
+      onPressOut={() => (scale.value = withSpring(1, { damping: 12, stiffness: 220 }))}
+      style={{ alignItems: 'center', gap: 8, width: size + 16 }}
     >
-      <Animated.View style={aStyle}>
-        <LinearGradient
-          colors={[category.colorHex, shade(category.colorHex)]}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-          style={[
-            { width: size, height: size, borderRadius: 20, alignItems: 'center', justifyContent: 'center' },
-            shadows.sm,
-          ]}
-        >
-          <Icon name={category.icon as any} size={30} color="#FFFFFF" />
-        </LinearGradient>
+      <Animated.View
+        style={[
+          {
+            width: size,
+            height: size,
+            borderRadius: 22,
+            alignItems: 'center',
+            justifyContent: 'center',
+            backgroundColor: category.colorHex + (isDark ? '24' : '14'),
+            borderWidth: StyleSheet.hairlineWidth,
+            borderColor: category.colorHex + (isDark ? '55' : '30'),
+          },
+          aStyle,
+        ]}
+      >
+        <Icon name={category.icon as any} size={26} color={category.colorHex} />
       </Animated.View>
       <Text variant="caption" center numberOfLines={1} style={{ fontFamily: 'Inter_500Medium' }}>
         {category.name[locale]}

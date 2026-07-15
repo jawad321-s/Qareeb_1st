@@ -69,9 +69,34 @@ Verified badge  ◀──live snapshot── status: "approved"/"rejected" ◀�
 }
 ```
 
+## Second integrated flow — Requests & Offers
+
+The customer's request lifecycle is now shared end-to-end:
+
+```
+Mobile (customer)              Firestore              Mobile (artisan)        Admin
+────────────────               ─────────              ────────────────        ─────
+Create request  ──write──▶ requests/{id}  ──read──▶ Nearby requests feed
+                            status:PENDING                    │
+                                                       submit offer
+Offers list  ◀──read──── offers (by requestId) ◀──write──────┘
+Accept offer ──batch──▶ request:ACCEPTED + offers:ACCEPTED/REJECTED
+                            │
+                            └────────────────live──────────────────────▶ Requests table
+                                                                          (real-time feed)
+```
+
+- **Mobile data facade:** `mobile/src/services/api.ts` picks `firebaseApi`
+  (`firebase-api.ts`) when live — a full Firestore implementation with the
+  **same surface** as the mock, so no screen/hook changed. It covers
+  services, artisans, requests, offers, reviews and chat.
+- **Admin read:** `admin/lib/requests.service.ts` → `subscribeRequests()`
+  streams the `requests` collection into the admin table live.
+
 ## Extending to other collections
 
 The same pattern (a `*.service.ts` with a mock branch + a Firestore branch,
-gated by `config.useMock`) extends to `users`, `requests`, `offers`,
-`reviews`, `wallets`, `complaints`, etc. — all already defined in
-`firebase/firestore.rules` and `docs/DATABASE_SCHEMA.md`.
+gated by `config.useMock`, plus the `firebaseApi` facade on mobile) extends to
+`reviews`, `wallets`, `complaints`, `subscriptions`, `notifications`, etc. —
+all already defined in `firebase/firestore.rules` and
+`docs/DATABASE_SCHEMA.md`.

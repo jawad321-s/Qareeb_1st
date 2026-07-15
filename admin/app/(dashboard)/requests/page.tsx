@@ -1,15 +1,21 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import type { ColumnDef } from '@tanstack/react-table';
 import { DataTable } from '@/components/ui/data-table';
 import { StatusPill } from '@/components/ui/primitives';
-import { REQUESTS, type AdminRequest } from '@/lib/mock-data';
+import { type AdminRequest } from '@/lib/mock-data';
+import { subscribeRequests } from '@/lib/requests.service';
 import { formatMoney, timeAgo } from '@/lib/utils';
 import { useT } from '@/lib/i18n';
 
 export default function RequestsPage() {
   const { t } = useT();
+  const [data, setData] = useState<AdminRequest[]>([]);
+
+  // Live requests feed from Firestore (falls back to mock on mock mode).
+  useEffect(() => subscribeRequests(setData), []);
+
   const columns = useMemo<ColumnDef<AdminRequest, any>[]>(
     () => [
       { accessorKey: 'id', header: t('rcol.id'), cell: ({ getValue }) => <span className="font-mono text-xs text-muted">{getValue() as string}</span> },
@@ -30,7 +36,7 @@ export default function RequestsPage() {
         <h1 className="text-2xl font-bold">{t('req.title')}</h1>
         <p className="text-sm text-muted">{t('req.subtitle')}</p>
       </div>
-      <DataTable columns={columns} data={REQUESTS} searchPlaceholder={t('req.search')} />
+      <DataTable columns={columns} data={data} searchPlaceholder={t('req.search')} />
     </div>
   );
 }

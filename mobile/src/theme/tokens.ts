@@ -141,3 +141,35 @@ export const gradients = {
   success: ['#10B981', '#0EA5E9'] as const,
   night: ['#0B1120', '#1E293B'] as const,
 };
+
+// ── Role accents ─────────────────────────────────────────────────────────────
+// Customers live in the brand royal blue; artisans get the logo's wrench
+// orange. ThemeProvider swaps `tint` + gradients by the signed-in role, so
+// every tint-aware component recolors automatically.
+export interface RoleAccent {
+  tintLight: string;
+  tintDark: string;
+  gradient: readonly [string, string, string];
+  gradientSoft: readonly [string, string];
+  heroLight: readonly [string, string];
+  heroDark: readonly [string, string];
+}
+
+export const roleAccents: Record<'customer' | 'artisan', RoleAccent> = {
+  customer: {
+    tintLight: '#2563EB',
+    tintDark: '#60A5FA',
+    gradient: ['#1D4ED8', '#2563EB', '#0EA5E9'],
+    gradientSoft: ['#3B82F6', '#38BDF8'],
+    heroLight: ['#E9EFFB', '#F6F8FB'],
+    heroDark: ['#141F3C', '#0A0F1E'],
+  },
+  artisan: {
+    tintLight: '#E96D0A', // logo wrench orange, deepened for contrast
+    tintDark: '#FB923C',
+    gradient: ['#C2410C', '#F97316', '#FB923C'],
+    gradientSoft: ['#F97316', '#FBA94C'],
+    heroLight: ['#FBEFE1', '#F6F8FB'],
+    heroDark: ['#33200B', '#0A0F1E'],
+  },
+};

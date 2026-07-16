@@ -18,7 +18,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import { Text } from './Text';
 import { Icon, type IconName } from './Icon';
-import { radius, gradients, shadows } from '@/theme/tokens';
+import { radius, shadows } from '@/theme/tokens';
 import { useTheme } from '@/theme/ThemeProvider';
 
 type Variant = 'primary' | 'secondary' | 'outline' | 'ghost' | 'danger';
@@ -51,7 +51,7 @@ export function Button({
   fullWidth = true,
   style,
 }: ButtonProps) {
-  const { colors } = useTheme();
+  const { colors, gradient } = useTheme();
   const scale = useSharedValue(1);
 
   // Ripple state — a circle grows out from the touch point and fades.
@@ -154,7 +154,7 @@ export function Button({
     width: fullWidth ? '100%' : undefined,
     // Primary CTAs glow softly in brand color — depth reserved for the action
     // that matters, not sprinkled everywhere.
-    ...(variant === 'primary' && !isDisabled ? shadows.brand : {}),
+    ...(variant === 'primary' && !isDisabled ? { ...shadows.brand, shadowColor: colors.tint } : {}),
   };
 
   const Ripple = (
@@ -165,7 +165,7 @@ export function Button({
     <Animated.View style={[animatedStyle, containerBase, style]}>
       <Pressable onPress={press} onPressIn={onPressIn} onPressOut={onPressOut} onLayout={onLayout} disabled={isDisabled}>
         {variant === 'primary' ? (
-          <LinearGradient colors={gradients.brand} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}>
+          <LinearGradient colors={gradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}>
             {Content}
             {Ripple}
           </LinearGradient>

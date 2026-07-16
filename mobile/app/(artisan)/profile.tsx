@@ -40,11 +40,11 @@ export default function ArtisanProfile() {
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
       <StatusBar style="light" />
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 140 }}>
-        <LinearGradient colors={['#2563EB', '#0EA5E9']} style={{ paddingBottom: 28, overflow: 'hidden' }}>
+        <LinearGradient colors={['#C2410C', '#F97316']} style={{ paddingBottom: 28, overflow: 'hidden' }}>
           <FloatingBlobs
             blobs={[
-              { size: 200, colors: ['#60A5FA', '#2563EB'], top: -70, right: -40, range: 26 },
-              { size: 150, colors: ['#38BDF8', '#0EA5E9'], bottom: -40, left: -30, delay: 1500, range: 20 },
+              { size: 200, colors: ['#FDBA74', '#F97316'], top: -70, right: -40, range: 26 },
+              { size: 150, colors: ['#FBA94C', '#EA7509'], bottom: -40, left: -30, delay: 1500, range: 20 },
             ]}
           />
           <SafeAreaView edges={['top']}>

@@ -1,10 +1,10 @@
 import React from 'react';
 import { View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import { useTheme } from '@/theme/ThemeProvider';
 import { Text } from '../ui/Text';
 import { Icon, type IconName } from '../ui/Icon';
 import { Button } from '../ui/Button';
-import { gradients } from '@/theme/tokens';
 
 interface EmptyStateProps {
   icon?: IconName;
@@ -21,10 +21,11 @@ export function EmptyState({
   actionLabel,
   onAction,
 }: EmptyStateProps) {
+  const { gradientSoft } = useTheme();
   return (
     <View style={{ alignItems: 'center', justifyContent: 'center', padding: 32, gap: 12 }}>
       <LinearGradient
-        colors={gradients.brandSoft}
+        colors={gradientSoft}
         style={{
           width: 88,
           height: 88,

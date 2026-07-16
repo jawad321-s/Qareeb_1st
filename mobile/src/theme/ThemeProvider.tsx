@@ -3,7 +3,8 @@ import { colorScheme as nwColorScheme } from 'nativewind';
 import React, { createContext, useContext, useEffect, useMemo } from 'react';
 import { create } from 'zustand';
 import { storage } from '@/lib/mmkv';
-import { themes, type ThemeColors } from './tokens';
+import { roleAccents, themes, type RoleAccent, type ThemeColors } from './tokens';
+import { useAuth } from '@/store/auth';
 
 export type ThemeMode = 'light' | 'dark' | 'system';
 
@@ -28,6 +29,12 @@ interface ThemeContextValue {
   mode: ThemeMode;
   setMode: (m: ThemeMode) => void;
   isDark: boolean;
+  /** Signed-in role driving the accent (customer = blue, artisan = orange). */
+  role: 'customer' | 'artisan';
+  /** Role-accented brand gradient for CTAs, active pills, hero fills. */
+  gradient: RoleAccent['gradient'];
+  gradientSoft: RoleAccent['gradientSoft'];
+  hero: readonly [string, string];
 }
 
 const ThemeContext = createContext<ThemeContextValue | null>(null);
@@ -36,6 +43,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const system = useRNColorScheme() ?? 'light';
   const { mode, setMode } = useThemeStore();
   const scheme: 'light' | 'dark' = mode === 'system' ? system : mode;
+  const role: 'customer' | 'artisan' = useAuth((s) => (s.user?.role === 'artisan' ? 'artisan' : 'customer'));
 
   // Keep NativeWind's runtime color scheme in sync with our store. Guarded
   // because some platforms reject manual set unless darkMode is class-based.
@@ -47,16 +55,21 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     }
   }, [mode]);
 
-  const value = useMemo<ThemeContextValue>(
-    () => ({
-      colors: themes[scheme],
+  const value = useMemo<ThemeContextValue>(() => {
+    const accent = roleAccents[role];
+    const isDark = scheme === 'dark';
+    return {
+      colors: { ...themes[scheme], tint: isDark ? accent.tintDark : accent.tintLight },
       scheme,
       mode,
       setMode,
-      isDark: scheme === 'dark',
-    }),
-    [scheme, mode, setMode],
-  );
+      isDark,
+      role,
+      gradient: accent.gradient,
+      gradientSoft: accent.gradientSoft,
+      hero: isDark ? accent.heroDark : accent.heroLight,
+    };
+  }, [scheme, mode, setMode, role]);
 
   return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;
 }

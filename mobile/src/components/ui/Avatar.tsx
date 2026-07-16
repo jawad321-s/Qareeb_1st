@@ -2,10 +2,10 @@ import React from 'react';
 import { View } from 'react-native';
 import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
+import { useTheme } from '@/theme/ThemeProvider';
 import { Text } from './Text';
 import { Icon } from './Icon';
 import { initials } from '@/lib/format';
-import { gradients } from '@/theme/tokens';
 
 interface AvatarProps {
   uri?: string;
@@ -15,6 +15,7 @@ interface AvatarProps {
 }
 
 export function Avatar({ uri, name, size = 48, verified }: AvatarProps) {
+  const { gradientSoft } = useTheme();
   return (
     <View style={{ width: size, height: size }}>
       {uri ? (
@@ -26,7 +27,7 @@ export function Avatar({ uri, name, size = 48, verified }: AvatarProps) {
         />
       ) : (
         <LinearGradient
-          colors={gradients.brandSoft}
+          colors={gradientSoft}
           style={{
             width: size,
             height: size,

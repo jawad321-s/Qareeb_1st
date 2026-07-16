@@ -11,6 +11,7 @@ import { BarChart } from '@/components/domain/BarChart';
 import { AnimatedNumber } from '@/components/ui/AnimatedNumber';
 import { formatMoney } from '@/lib/format';
 import { useT } from '@/i18n';
+import { useTheme } from '@/theme/ThemeProvider';
 
 const MONTHLY = [
   { label: 'Jan', value: 8200 },
@@ -22,12 +23,13 @@ const MONTHLY = [
 ];
 
 export default function Income() {
+  const { colors } = useTheme();
   const { t } = useT();
   const BREAKDOWN = [
     { icon: 'check-circle' as const, label: t('inc.completedJobs'), value: '214', color: '#10B981' },
     { icon: 'x-circle' as const, label: t('inc.rejectedJobs'), value: '18', color: '#EF4444' },
     { icon: 'clock' as const, label: t('inc.avgResponse'), value: '6 min', color: '#F59E0B' },
-    { icon: 'star' as const, label: t('inc.avgRating'), value: '4.8', color: '#3B82F6' },
+    { icon: 'star' as const, label: t('inc.avgRating'), value: '4.8', color: colors.tint },
   ];
   return (
     <Screen scroll>

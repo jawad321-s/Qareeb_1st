@@ -20,14 +20,14 @@ import { useT } from '@/i18n';
 import { formatMoney } from '@/lib/format';
 
 export default function ArtisanDashboard() {
-  const { colors, isDark } = useTheme();
+  const { colors, isDark, hero } = useTheme();
   const user = useAuth((s) => s.user)!;
   const { t } = useT();
   const [online, setOnline] = useState(true);
   const nearby = useNearbyRequests(user.uid);
 
   const stats = [
-    { icon: 'wallet' as const, label: t('artisan.thisMonth'), value: formatMoney(1240000), color: '#3B82F6' },
+    { icon: 'wallet' as const, label: t('artisan.thisMonth'), value: formatMoney(1240000), color: colors.tint },
     { icon: 'check-circle' as const, label: t('artisan.completed'), value: '214', color: '#10B981' },
     { icon: 'star' as const, label: t('profile.rating'), value: '4.8', color: '#F59E0B' },
   ];
@@ -35,7 +35,7 @@ export default function ArtisanDashboard() {
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
       <StatusBar style={isDark ? 'light' : 'dark'} />
-      <LinearGradient colors={isDark ? ['#172554', '#0B1120'] : ['#EEF2FF', '#F8FAFC']} style={{ paddingBottom: 8 }}>
+      <LinearGradient colors={hero} style={{ paddingBottom: 8 }}>
         <SafeAreaView edges={['top']}>
           <View style={{ paddingHorizontal: 20, paddingTop: 8, gap: 16 }}>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>

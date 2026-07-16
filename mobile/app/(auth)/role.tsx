@@ -46,7 +46,7 @@ export default function RolePicker() {
       icon: 'tools',
       title: t('role.artisan.title'),
       desc: t('role.artisan.desc'),
-      gradient: ['#4338CA', '#6366F1'],
+      gradient: ['#EA7509', '#FB923C'],
     },
   ];
 

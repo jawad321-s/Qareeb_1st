@@ -16,7 +16,7 @@ import { GlassView } from './GlassView';
 import { useTheme } from '@/theme/ThemeProvider';
 import { useT } from '@/i18n';
 import type { TranslationKey } from '@/i18n/translations';
-import { gradients, shadows } from '@/theme/tokens';
+import { shadows } from '@/theme/tokens';
 
 interface TabMeta {
   icon: IconName;
@@ -25,7 +25,7 @@ interface TabMeta {
 
 /** Floating liquid-glass tab bar with a springy, glowing active pill. */
 export function TabBar({ state, navigation, meta }: BottomTabBarProps & { meta: Record<string, TabMeta> }) {
-  const { colors } = useTheme();
+  const { colors, gradient } = useTheme();
   const { t } = useT();
   const insets = useSafeAreaInsets();
 
@@ -49,6 +49,7 @@ export function TabBar({ state, navigation, meta }: BottomTabBarProps & { meta: 
                   if (!focused && !event.defaultPrevented) navigation.navigate(route.name);
                 }}
                 tint={colors.tint}
+            gradient={gradient}
                 inactive={colors.tabInactive}
               />
             );
@@ -66,6 +67,7 @@ function TabItem({
   onPress,
   tint,
   inactive,
+  gradient,
 }: {
   icon: IconName;
   label: string;
@@ -73,6 +75,7 @@ function TabItem({
   onPress: () => void;
   tint: string;
   inactive: string;
+  gradient: readonly [string, string, string];
 }) {
   const scale = useSharedValue(focused ? 1 : 0.9);
   const glow = useSharedValue(focused ? 1 : 0);
@@ -97,7 +100,7 @@ function TabItem({
             style={[
               { position: 'absolute', width: 46, height: 34, borderRadius: 17, overflow: 'hidden' },
               {
-                shadowColor: '#3B82F6',
+                shadowColor: tint,
                 shadowOpacity: 0.5,
                 shadowRadius: 10,
                 shadowOffset: { width: 0, height: 4 },
@@ -106,7 +109,7 @@ function TabItem({
               pillStyle,
             ]}
           >
-            <LinearGradient colors={gradients.brand} style={{ flex: 1 }} />
+            <LinearGradient colors={gradient} style={{ flex: 1 }} />
           </Animated.View>
           <Animated.View style={iconWrapStyle}>
             <Icon name={icon} size={20} color={focused ? '#FFFFFF' : inactive} />

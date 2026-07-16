@@ -45,13 +45,14 @@ export function Text({
   const baseFamily = flat?.fontFamily ?? typography[variant].fontFamily;
   const fontFamily = isRTL ? arabicFont(baseFamily) : baseFamily;
 
+  // Alignment/direction comes from the native layout engine (I18nManager) —
+  // no manual flipping here, so LTR and RTL both behave like first-class.
   return (
     <RNText
       style={[
         typography[variant],
         { color: toneColor[tone] },
-        isRTL && { writingDirection: 'rtl' },
-        center ? { textAlign: 'center' } : isRTL ? { textAlign: 'right' } : null,
+        center && { textAlign: 'center' },
         style,
         { fontFamily }, // final override wins for both LTR passthrough and RTL swap
       ]}

@@ -30,7 +30,9 @@ export function TabBar({ state, navigation, meta }: BottomTabBarProps & { meta: 
   const insets = useSafeAreaInsets();
 
   return (
-    <View style={{ position: 'absolute', left: 16, right: 16, bottom: insets.bottom + 8 }}>
+    // Floats clear of the Android navigation bar/gesture area: honour the safe
+    // inset when reported, and never sit closer than 20px to the screen edge.
+    <View style={{ position: 'absolute', left: 16, right: 16, bottom: Math.max(insets.bottom + 10, 20) }}>
       <GlassView radius={28} style={shadows.lg}>
         <View style={{ flexDirection: 'row', paddingVertical: 10, paddingHorizontal: 8 }}>
           {state.routes.map((route, index) => {

@@ -1,6 +1,13 @@
 import React from 'react';
+import { I18nManager } from 'react-native';
 import Svg, { Path, Circle, Line, Polyline, Polygon, Rect } from 'react-native-svg';
 import { useTheme } from '@/theme/ThemeProvider';
+
+// Directional glyphs must mirror in RTL (back arrows point right, chevrons
+// flip) — the layout engine flips positions but never the artwork itself.
+const MIRRORED_IN_RTL: ReadonlySet<string> = new Set([
+  'chevron-right', 'chevron-left', 'arrow-left', 'arrow-right', 'send', 'log-out',
+]);
 
 // Curated Feather-style icon set (24×24 grid, stroke-based). Keys are referenced
 // by categories, tab bars and UI throughout the app.
@@ -27,9 +34,15 @@ export function Icon({ name, size = 24, color, strokeWidth = 2 }: IconProps) {
   const { colors } = useTheme();
   const c = color ?? colors.fg;
   const p = { stroke: c, strokeWidth, strokeLinecap: 'round' as const, strokeLinejoin: 'round' as const, fill: 'none' };
+  const mirror = I18nManager.isRTL && MIRRORED_IN_RTL.has(name);
 
   return (
-    <Svg width={size} height={size} viewBox="0 0 24 24">
+    <Svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      style={mirror ? { transform: [{ scaleX: -1 }] } : undefined}
+    >
       {renderPaths(name, c, p)}
     </Svg>
   );

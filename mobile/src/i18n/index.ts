@@ -3,8 +3,18 @@ import { storage } from '@/lib/mmkv';
 import { config } from '@/lib/config';
 import type { Locale } from '@/types';
 import { translations, type TranslationKey } from './translations';
+import { reloadApp, syncNativeRTL } from './rtl';
 
 const LOCALE_KEY = 'qareeb.locale';
+
+const initialLocale: Locale = (storage.getString(LOCALE_KEY) as Locale) ?? config.defaultLocale;
+
+// Boot-time direction sync — runs before the first render so rows, paddings
+// and icons lay out natively RTL for Arabic. On native, a mismatch (e.g. first
+// install) forces RTL and restarts once; afterwards the flag persists.
+if (syncNativeRTL(initialLocale === 'ar')) {
+  void reloadApp();
+}
 
 interface LocaleState {
   locale: Locale;
@@ -12,17 +22,24 @@ interface LocaleState {
   toggle: () => void;
 }
 
+function applyLocale(locale: Locale) {
+  storage.set(LOCALE_KEY, locale);
+  // Direction changes require a restart for the layout engine to flip.
+  syncNativeRTL(locale === 'ar');
+  void reloadApp();
+}
+
 /** Persisted app language. Defaults to Arabic. */
 export const useLocaleStore = create<LocaleState>((set, get) => ({
-  locale: (storage.getString(LOCALE_KEY) as Locale) ?? config.defaultLocale,
+  locale: initialLocale,
   setLocale: (locale) => {
-    storage.set(LOCALE_KEY, locale);
     set({ locale });
+    applyLocale(locale);
   },
   toggle: () => {
     const next: Locale = get().locale === 'ar' ? 'en' : 'ar';
-    storage.set(LOCALE_KEY, next);
     set({ locale: next });
+    applyLocale(next);
   },
 }));
 

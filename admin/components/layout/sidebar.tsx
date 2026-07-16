@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
   LayoutDashboard, Users, ShieldCheck, ClipboardList, BarChart3,
-  Layers, MessageSquareWarning, CreditCard, Settings, Wrench,
+  Layers, MessageSquareWarning, CreditCard, Settings,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useT, type TKey } from '@/lib/i18n';
@@ -27,8 +27,8 @@ export function Sidebar() {
   return (
     <aside className="hidden lg:flex w-64 shrink-0 flex-col border-e border-base surface">
       <div className="flex items-center gap-2.5 px-6 h-16 border-b border-base">
-        <div className="grid h-9 w-9 place-items-center rounded-xl bg-gradient-to-br from-brand-600 to-accent-500">
-          <Wrench className="h-5 w-5 text-white" />
+        <div className="grid h-9 w-9 place-items-center rounded-xl bg-[#031746]">
+          <img src="/brand/mark-white.png" alt="قريب" className="h-6 w-auto" />
         </div>
         <div>
           <p className="font-bold leading-none">{t('app.name')}</p>

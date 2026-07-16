@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Languages, Lock, Mail, Wrench } from 'lucide-react';
+import { Languages, Lock, Mail } from 'lucide-react';
 import { Button } from '@/components/ui/primitives';
 import { signIn } from '@/lib/session';
 import { useT } from '@/lib/i18n';
@@ -38,7 +38,7 @@ export default function LoginPage() {
         <div className="flex h-full flex-col justify-between p-12 text-white">
           <div className="flex items-center gap-3">
             <div className="grid h-11 w-11 place-items-center rounded-xl bg-white/15">
-              <Wrench className="h-6 w-6" />
+              <img src="/brand/mark-white.png" alt="قريب" className="h-7 w-auto" />
             </div>
             <span className="text-xl font-bold">{t('app.name')}</span>
           </div>

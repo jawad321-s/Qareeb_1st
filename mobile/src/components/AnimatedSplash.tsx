@@ -11,7 +11,7 @@ import Animated, {
   withSpring,
   withTiming,
 } from 'react-native-reanimated';
-import { Icon } from './ui/Icon';
+import { Image } from 'expo-image';
 import { Text } from './ui/Text';
 import { FloatingBlobs } from './ui/FloatingBlobs';
 
@@ -103,7 +103,7 @@ export function AnimatedSplash({ onFinish }: { onFinish: () => void }) {
                 logoStyle,
               ]}
             >
-              <Icon name="tools" size={52} color="#FFFFFF" />
+              <Image source={require('../../assets/brand/mark-white.png')} style={{ width: 62, height: 66 }} contentFit="contain" />
             </Animated.View>
           </View>
           <Animated.View style={wordStyle}>

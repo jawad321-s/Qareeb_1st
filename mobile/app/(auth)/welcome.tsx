@@ -5,6 +5,7 @@ import { router } from 'expo-router';
 import Animated, { FadeInDown, FadeIn } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
+import { Image } from 'expo-image';
 import { Text } from '@/components/ui/Text';
 import { Button } from '@/components/ui/Button';
 import { Icon } from '@/components/ui/Icon';
@@ -62,15 +63,17 @@ export default function Welcome() {
             <Animated.View entering={FadeIn.duration(600)} style={{ alignItems: 'center', gap: 16 }}>
               <View
                 style={{
-                  width: 96,
-                  height: 96,
-                  borderRadius: 28,
-                  backgroundColor: 'rgba(255,255,255,0.15)',
+                  width: 104,
+                  height: 104,
+                  borderRadius: 30,
+                  backgroundColor: 'rgba(255,255,255,0.14)',
+                  borderWidth: 1,
+                  borderColor: 'rgba(255,255,255,0.28)',
                   alignItems: 'center',
                   justifyContent: 'center',
                 }}
               >
-                <Icon name="tools" size={48} color="#FFFFFF" />
+                <Image source={require('../../assets/brand/mark-white.png')} style={{ width: 72, height: 77 }} contentFit="contain" />
               </View>
               <Text variant="display" tone="inverse" center>
                 Qareeb

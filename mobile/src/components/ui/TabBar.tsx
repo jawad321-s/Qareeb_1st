@@ -31,8 +31,8 @@ export function TabBar({ state, navigation, meta }: BottomTabBarProps & { meta: 
 
   return (
     // Floats clear of the Android navigation bar/gesture area: honour the safe
-    // inset when reported, and never sit closer than 20px to the screen edge.
-    <View style={{ position: 'absolute', left: 16, right: 16, bottom: Math.max(insets.bottom + 10, 20) }}>
+    // inset when reported, and never sit closer than 35px to the screen edge.
+    <View style={{ position: 'absolute', left: 16, right: 16, bottom: Math.max(insets.bottom + 10, 35) }}>
       <GlassView radius={28} style={shadows.lg}>
         <View style={{ flexDirection: 'row', paddingVertical: 10, paddingHorizontal: 8 }}>
           {state.routes.map((route, index) => {

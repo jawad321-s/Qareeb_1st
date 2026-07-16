@@ -36,7 +36,7 @@ export default function Income() {
       <Header title={t('artisan.income')} />
 
       <Animated.View entering={FadeInDown.duration(400)}>
-        <LinearGradient colors={['#10B981', '#0EA5E9']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ borderRadius: 24, padding: 24, gap: 4 }}>
+        <LinearGradient colors={['#059669', '#34D399']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ borderRadius: 24, padding: 24, gap: 4 }}>
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
             <Text variant="caption" style={{ color: 'rgba(255,255,255,0.85)' }}>
               {t('artisan.totalMonth')}

@@ -27,7 +27,7 @@ const PLANS = {
 };
 
 export default function Subscription() {
-  const { colors } = useTheme();
+  const { colors, gradient } = useTheme();
   const toast = useToast();
   const { t, locale } = useT();
   const [selected, setSelected] = useState('pro');
@@ -55,7 +55,7 @@ export default function Subscription() {
                 style={{ borderRadius: 24, borderWidth: 2, borderColor: active ? colors.tint : colors.border, overflow: 'hidden' }}
               >
                 <LinearGradient
-                  colors={plan.highlight ? ['#2563EB', '#0EA5E9'] : [colors.card, colors.card]}
+                  colors={plan.highlight ? [gradient[0], gradient[2]] : [colors.card, colors.card]}
                   style={{ padding: 20, gap: 14 }}
                 >
                   <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>

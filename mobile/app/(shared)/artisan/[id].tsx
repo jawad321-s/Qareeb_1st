@@ -23,7 +23,7 @@ import { useTheme } from '@/theme/ThemeProvider';
 import { useT } from '@/i18n';
 
 export default function ArtisanDetail() {
-  const { colors, isDark } = useTheme();
+  const { colors, isDark, gradient, gradientSoft } = useTheme();
   const { id } = useLocalSearchParams<{ id: string }>();
   const { t, locale } = useT();
   const { data, isLoading } = useArtisan(id!);
@@ -46,11 +46,11 @@ export default function ArtisanDetail() {
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
       <StatusBar style="light" />
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 120 }}>
-        <LinearGradient colors={isDark ? ['#172554', '#0B1120'] : ['#2563EB', '#0EA5E9']} style={{ paddingBottom: 24, overflow: 'hidden' }}>
+        <LinearGradient colors={isDark ? [gradient[0], '#0A0F1E'] : [gradient[0], gradient[2]]} style={{ paddingBottom: 24, overflow: 'hidden' }}>
           <FloatingBlobs
             blobs={[
-              { size: 190, colors: ['#60A5FA', '#2563EB'], top: -60, right: -40, range: 24 },
-              { size: 140, colors: ['#38BDF8', '#0EA5E9'], bottom: -30, left: -30, delay: 1400, range: 18 },
+              { size: 190, colors: [gradientSoft[1], gradientSoft[0]], top: -60, right: -40, range: 24 },
+              { size: 140, colors: [gradientSoft[0], gradientSoft[1]], bottom: -30, left: -30, delay: 1400, range: 18 },
             ]}
           />
           <SafeAreaView edges={['top']}>

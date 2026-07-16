@@ -24,7 +24,7 @@ interface Item {
 }
 
 export default function Profile() {
-  const { colors, isDark } = useTheme();
+  const { colors, isDark, gradient, gradientSoft } = useTheme();
   const user = useAuth((s) => s.user)!;
   const signOut = useAuth((s) => s.signOut);
   const { mode, setMode } = useThemeStore();
@@ -62,11 +62,11 @@ export default function Profile() {
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
       <StatusBar style="light" />
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 140 }}>
-        <LinearGradient colors={['#2563EB', '#0EA5E9']} style={{ paddingBottom: 28, overflow: 'hidden' }}>
+        <LinearGradient colors={gradient} style={{ paddingBottom: 28, overflow: 'hidden' }}>
           <FloatingBlobs
             blobs={[
-              { size: 200, colors: ['#60A5FA', '#2563EB'], top: -70, right: -40, range: 26 },
-              { size: 150, colors: ['#38BDF8', '#0EA5E9'], bottom: -40, left: -30, delay: 1500, range: 20 },
+              { size: 200, colors: [gradientSoft[1], gradientSoft[0]], top: -70, right: -40, range: 26 },
+              { size: 150, colors: [gradientSoft[0], gradientSoft[1]], bottom: -40, left: -30, delay: 1500, range: 20 },
             ]}
           />
           <SafeAreaView edges={['top']}>

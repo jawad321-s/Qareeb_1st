@@ -29,7 +29,7 @@ const FAQS = {
 };
 
 export default function HelpCenter() {
-  const { colors } = useTheme();
+  const { colors, gradient } = useTheme();
   const { t, locale } = useT();
   const [open, setOpen] = useState<number | null>(0);
   const faqs = FAQS[locale];
@@ -38,7 +38,7 @@ export default function HelpCenter() {
     <Screen scroll>
       <Header showBack title={t('help.title')} />
 
-      <LinearGradient colors={['#2563EB', '#0EA5E9']} style={{ borderRadius: 20, padding: 20, gap: 12, marginBottom: 24 }}>
+      <LinearGradient colors={gradient} style={{ borderRadius: 20, padding: 20, gap: 12, marginBottom: 24 }}>
         <Icon name="help-circle" size={28} color="#FFF" />
         <Text variant="h3" tone="inverse">
           {t('help.howHelp')}

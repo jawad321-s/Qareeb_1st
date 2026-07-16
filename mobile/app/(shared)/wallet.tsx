@@ -1,5 +1,5 @@
 import React from 'react';
-import { View } from 'react-native';
+import { Pressable, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { Screen } from '@/components/ui/Screen';
@@ -28,14 +28,14 @@ const TXNS: Record<'en' | 'ar', WalletTransaction[]> = {
 };
 
 export default function Wallet() {
-  const { colors } = useTheme();
+  const { colors, gradient } = useTheme();
   const { t, locale } = useT();
   const txns = TXNS[locale];
   return (
     <Screen scroll>
       <Header showBack title={t('wallet.title')} />
       <Animated.View entering={FadeInDown.duration(400)}>
-        <LinearGradient colors={['#2563EB', '#0EA5E9']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ borderRadius: 24, padding: 24, gap: 6 }}>
+        <LinearGradient colors={gradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ borderRadius: 24, padding: 24, gap: 6 }}>
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
             <Text variant="caption" style={{ color: 'rgba(255,255,255,0.85)' }}>
               {t('wallet.balance')}
@@ -47,9 +47,26 @@ export default function Wallet() {
             <View style={{ flex: 1 }}>
               <Button label={t('wallet.topUp')} variant="secondary" size="sm" iconLeft="plus" onPress={() => {}} />
             </View>
-            <View style={{ flex: 1 }}>
-              <Button label={t('wallet.withdraw')} variant="ghost" size="sm" iconLeft="arrow-right" onPress={() => {}} />
-            </View>
+            <Pressable
+              onPress={() => {}}
+              style={{
+                flex: 1,
+                height: 40,
+                borderRadius: 16,
+                backgroundColor: 'rgba(255,255,255,0.18)',
+                borderWidth: 1,
+                borderColor: 'rgba(255,255,255,0.35)',
+                flexDirection: 'row',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: 6,
+              }}
+            >
+              <Icon name="arrow-right" size={16} color="#FFFFFF" />
+              <Text variant="caption" tone="inverse" style={{ fontFamily: 'Inter_600SemiBold' }}>
+                {t('wallet.withdraw')}
+              </Text>
+            </Pressable>
           </View>
         </LinearGradient>
       </Animated.View>

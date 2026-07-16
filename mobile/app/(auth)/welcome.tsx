@@ -21,6 +21,13 @@ export default function Welcome() {
   const signInAs = useAuth((s) => s.signInAs);
   const { t, locale, toggle } = useT();
 
+  // Demo entry: sign in, then route to the root so index.tsx redirects into
+  // the matching app. (Setting the session alone doesn't navigate.)
+  const enterDemo = (role: 'customer' | 'artisan') => {
+    signInAs(role);
+    router.replace('/');
+  };
+
   const FEATURES = [
     { icon: 'map-pin', title: t('welcome.feature1.title'), desc: t('welcome.feature1.desc') },
     { icon: 'shield', title: t('welcome.feature2.title'), desc: t('welcome.feature2.desc') },
@@ -119,10 +126,18 @@ export default function Welcome() {
             <Button label={t('welcome.getStarted')} variant="secondary" iconRight="arrow-right" onPress={() => router.push('/(auth)/role')} />
             <Button label={t('welcome.haveAccount')} variant="ghost" onPress={() => router.push('/(auth)/login')} />
             <View style={{ flexDirection: 'row', justifyContent: 'center', gap: 16, marginTop: 4 }}>
-              <Text variant="caption" style={{ color: 'rgba(255,255,255,0.8)' }} onPress={() => signInAs('customer')}>
+              <Text
+                variant="caption"
+                style={{ color: 'rgba(255,255,255,0.85)', fontFamily: 'Inter_600SemiBold' }}
+                onPress={() => enterDemo('customer')}
+              >
                 Demo: Customer
               </Text>
-              <Text variant="caption" style={{ color: 'rgba(255,255,255,0.8)' }} onPress={() => signInAs('artisan')}>
+              <Text
+                variant="caption"
+                style={{ color: 'rgba(255,255,255,0.85)', fontFamily: 'Inter_600SemiBold' }}
+                onPress={() => enterDemo('artisan')}
+              >
                 Demo: Artisan
               </Text>
             </View>

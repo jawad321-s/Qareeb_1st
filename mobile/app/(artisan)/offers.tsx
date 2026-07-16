@@ -31,9 +31,9 @@ export default function ArtisanOffers() {
       <ScrollView contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 16, paddingBottom: 140, gap: 12 }} showsVerticalScrollIndicator={false}>
         {offers.map((o) => (
           <Card key={o.id} onPress={() => o.request && router.push(`/(artisan)/job/${o.request.id}`)} style={{ gap: 12 }}>
-            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 10 }}>
               <Text variant="bodyMedium" style={{ flex: 1 }} numberOfLines={1}>
-                {o.request?.title ?? 'Request'}
+                {o.request?.title ?? ''}
               </Text>
               <Badge label={t(`ostatus.${o.status}` as any)} variant={STATUS_VARIANT[o.status]} />
             </View>
@@ -47,7 +47,7 @@ export default function ArtisanOffers() {
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
                 <Icon name="clock" size={15} color="#94A3B8" />
                 <Text variant="caption" tone="muted">
-                  ~{o.etaMinutes} min
+                  ~{o.etaMinutes} {t('offer.min')}
                 </Text>
               </View>
               <View style={{ flex: 1 }} />

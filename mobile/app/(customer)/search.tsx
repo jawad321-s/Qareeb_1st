@@ -41,8 +41,10 @@ export default function Search() {
   }, [data, category, query, sort]);
 
   const chip = (active: boolean) => ({
+    height: 36,
     paddingHorizontal: 14,
-    paddingVertical: 8,
+    alignItems: 'center' as const,
+    justifyContent: 'center' as const,
     borderRadius: 999,
     backgroundColor: active ? colors.tint : colors.surface,
     borderWidth: 1,
@@ -57,7 +59,7 @@ export default function Search() {
       </View>
 
       {/* Category filter chips */}
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingHorizontal: 20, gap: 8, paddingVertical: 14 }}>
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ flexGrow: 0, height: 52, marginTop: 12, marginBottom: 4 }} contentContainerStyle={{ paddingHorizontal: 20, gap: 8, alignItems: 'center' }}>
         <Pressable onPress={() => setCategory(null)} style={chip(!category)}>
           <Text variant="caption" style={{ color: !category ? '#FFF' : colors.fg, fontFamily: 'Inter_500Medium' }}>
             {t('search.all')}

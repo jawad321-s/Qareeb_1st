@@ -27,8 +27,10 @@ export function timeAgo(ts: number): string {
 }
 
 export function formatDistance(km: number): string {
-  if (km < 1) return `${Math.round(km * 1000)} m`;
-  return `${km.toFixed(1)} km`;
+  const { useLocaleStore } = require('@/i18n') as typeof import('@/i18n');
+  const ar = useLocaleStore.getState().locale === 'ar';
+  if (km < 1) return `${Math.round(km * 1000)} ${ar ? 'م' : 'm'}`;
+  return `${km.toFixed(1)} ${ar ? 'كم' : 'km'}`;
 }
 
 export function initials(name: string): string {

@@ -10,6 +10,7 @@ import { Icon } from '../ui/Icon';
 import type { Offer } from '@/types';
 import { formatMoney, timeAgo } from '@/lib/format';
 import { useT } from '@/i18n';
+import { useTheme } from '@/theme/ThemeProvider';
 
 interface Props {
   offer: Offer;
@@ -23,12 +24,15 @@ interface Props {
 export function OfferCard({ offer, best, onAccept, onReject, onPressArtisan, loading }: Props) {
   const a = offer.artisan;
   const { t } = useT();
+  const { colors } = useTheme();
   const decided = offer.status !== 'PENDING';
 
   return (
-    <Card style={{ gap: 14, borderColor: best ? '#3B82F6' : undefined, borderWidth: best ? 1.5 : 1 }}>
+    <Card style={{ gap: 14, borderColor: best ? colors.tint : undefined, borderWidth: best ? 1.5 : 1 }}>
       {best && (
-        <Badge label={t('offer.best')} variant="primary" icon="award" style={{ position: 'absolute', top: -10, left: 16 }} />
+        <View style={{ flexDirection: 'row' }}>
+          <Badge label={t('offer.best')} variant="primary" icon="award" />
+        </View>
       )}
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
         <Avatar uri={a?.photoUrl} name={a?.fullName} size={48} />

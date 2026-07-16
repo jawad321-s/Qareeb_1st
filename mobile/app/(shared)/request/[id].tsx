@@ -27,7 +27,7 @@ export default function RequestDetail() {
   const { colors } = useTheme();
   const { id } = useLocalSearchParams<{ id: string }>();
   const toast = useToast();
-  const { t } = useT();
+  const { t, locale } = useT();
   const { data: request, isLoading } = useRequest(id!);
   const offers = useOffers(id!);
   const accept = useAcceptOffer(id!);
@@ -79,7 +79,7 @@ export default function RequestDetail() {
                   {request.title}
                 </Text>
                 <Text variant="caption" tone="muted">
-                  {cat?.name.en}
+                  {cat?.name[locale]}
                 </Text>
               </View>
             </View>

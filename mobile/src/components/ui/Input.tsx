@@ -65,6 +65,7 @@ export function Input({
               fontFamily: font('Inter_400Regular'),
               height: multiline ? undefined : '100%',
               textAlign: 'auto',
+              ...({ outlineStyle: 'none' } as any),
             },
             style,
           ]}

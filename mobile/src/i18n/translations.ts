@@ -383,6 +383,7 @@ export const translations = {
     // job detail
     'job.title': 'Job details',
     'job.sendQuote': 'Send your quotation',
+    'job.price': 'Price',
     'job.eta': 'ETA (min)',
     'job.messageToCustomer': 'Message to customer',
     'job.messagePlaceholder': "Introduce yourself and what's included…",
@@ -790,6 +791,7 @@ export const translations = {
     // job detail
     'job.title': 'تفاصيل العمل',
     'job.sendQuote': 'أرسل عرض سعرك',
+    'job.price': 'السعر',
     'job.eta': 'الوصول (دقيقة)',
     'job.messageToCustomer': 'رسالة للعميل',
     'job.messagePlaceholder': 'عرّف بنفسك وما يشمله العرض…',

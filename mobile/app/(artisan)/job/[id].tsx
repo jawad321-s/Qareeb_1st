@@ -24,7 +24,7 @@ export default function JobDetail() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const user = useAuth((s) => s.user)!;
   const toast = useToast();
-  const { t } = useT();
+  const { t, locale } = useT();
   const { data: request, isLoading } = useRequest(id!);
   const submit = useSubmitOffer(id!);
 
@@ -74,7 +74,7 @@ export default function JobDetail() {
             <View style={{ flex: 1 }}>
               <Text variant="h3">{request.title}</Text>
               <Text variant="caption" tone="muted">
-                {cat?.name.en}
+                {cat?.name[locale]}
               </Text>
             </View>
           </View>
@@ -113,7 +113,7 @@ export default function JobDetail() {
         <View style={{ flexDirection: 'row', gap: 12 }}>
           <View style={{ flex: 1, gap: 6 }}>
             <Text variant="caption" tone="muted">
-              Price ({config.currency})
+              {t('job.price')} ({config.currency})
             </Text>
             <TextInput value={price} onChangeText={setPrice} keyboardType="number-pad" placeholder="120" placeholderTextColor={colors.muted} style={inputStyle(colors)} />
           </View>

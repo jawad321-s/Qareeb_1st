@@ -180,6 +180,7 @@ export function Button({
                     : 'transparent',
               borderWidth: variant === 'outline' ? 1.5 : 0,
               borderColor: colors.tint,
+              borderRadius: radius.lg,
             }}
           >
             {Content}

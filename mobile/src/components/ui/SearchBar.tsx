@@ -38,7 +38,7 @@ export function SearchBar({ value, onChangeText, placeholder = 'Search servicesâ
       <Icon name="search" size={20} color={colors.muted} />
       {onPress ? (
         <View style={{ flex: 1 }}>
-          <TextInput editable={false} pointerEvents="none" placeholder={placeholder} placeholderTextColor={colors.muted} style={{ color: colors.fg, fontSize: 15, fontFamily: font('Inter_400Regular') }} />
+          <TextInput editable={false} pointerEvents="none" placeholder={placeholder} placeholderTextColor={colors.muted} style={{ color: colors.fg, fontSize: 15, fontFamily: font('Inter_400Regular'), ...({ outlineStyle: 'none' } as any) }} />
         </View>
       ) : (
         <TextInput
@@ -47,7 +47,7 @@ export function SearchBar({ value, onChangeText, placeholder = 'Search servicesâ
           placeholder={placeholder}
           placeholderTextColor={colors.muted}
           autoFocus={autoFocus}
-          style={{ flex: 1, color: colors.fg, fontSize: 15, fontFamily: font('Inter_400Regular') }}
+          style={{ flex: 1, color: colors.fg, fontSize: 15, fontFamily: font('Inter_400Regular'), ...({ outlineStyle: 'none' } as any) }}
         />
       )}
       {onFilter && (

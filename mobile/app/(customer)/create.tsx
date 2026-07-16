@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/Button';
 import { Icon } from '@/components/ui/Icon';
 import { Card } from '@/components/ui/Card';
 import { CategoryTile } from '@/components/domain/CategoryTile';
+import { useTabBarSpace } from '@/components/ui/TabBar';
 import { CATEGORIES } from '@/constants/categories';
 import { useCreateRequest } from '@/hooks/queries';
 import { useAuth } from '@/store/auth';
@@ -24,6 +25,7 @@ export default function CreateRequest() {
   const user = useAuth((s) => s.user)!;
   const { t, locale, isRTL } = useT();
   const font = useFont();
+  const tabBarSpace = useTabBarSpace();
   const create = useCreateRequest(user.uid);
   const STEPS = [t('create.step.service'), t('create.step.details'), t('create.step.budget'), t('create.step.review')];
 
@@ -83,7 +85,7 @@ export default function CreateRequest() {
         </View>
       </View>
 
-      <ScrollView contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 40 }} showsVerticalScrollIndicator={false}>
+      <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 24 }} showsVerticalScrollIndicator={false}>
         {step === 0 && (
           <Animated.View entering={FadeIn} style={{ gap: 16 }}>
             <Text variant="h3">{t('create.whatNeed')}</Text>
@@ -222,7 +224,7 @@ export default function CreateRequest() {
         )}
       </ScrollView>
 
-      <View style={{ flexDirection: 'row', gap: 12, paddingHorizontal: 20, paddingBottom: 24, paddingTop: 8 }}>
+      <View style={{ flexDirection: 'row', gap: 12, paddingHorizontal: 20, paddingBottom: tabBarSpace + 12, paddingTop: 8 }}>
         {step > 0 && (
           <View style={{ width: 120 }}>
             <Button label={t('common.back')} variant="secondary" onPress={() => setStep((s) => s - 1)} />

@@ -1,5 +1,5 @@
-import React, { useEffect } from 'react';
-import { Pressable, View } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { Pressable, View, type LayoutRectangle } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
@@ -7,7 +7,6 @@ import Animated, {
   useAnimatedStyle,
   useSharedValue,
   withSpring,
-  withTiming,
 } from 'react-native-reanimated';
 import type { BottomTabBarProps } from '@react-navigation/bottom-tabs';
 import { Text } from './Text';
@@ -23,35 +22,104 @@ interface TabMeta {
   label: TranslationKey;
 }
 
-/** Floating liquid-glass tab bar with a springy, glowing active pill. */
+/** Height of the floating bar itself (glass container). */
+export const TAB_BAR_HEIGHT = 70;
+
+/**
+ * Vertical space a tab screen must leave at the bottom so its content (lists,
+ * pinned action buttons) clears the floating bar and the Android nav area.
+ */
+export function useTabBarSpace() {
+  const insets = useSafeAreaInsets();
+  return Math.max(insets.bottom + 10, 35) + TAB_BAR_HEIGHT;
+}
+
+const PILL_W = 52;
+const PILL_H = 36;
+
+/**
+ * Floating liquid-glass tab bar. A single glass pill glides between tabs with a
+ * spring (Instagram / iOS-26 feel) — positions are measured from real layout so
+ * it's correct in both LTR and RTL.
+ */
 export function TabBar({ state, navigation, meta }: BottomTabBarProps & { meta: Record<string, TabMeta> }) {
   const { colors, gradient } = useTheme();
   const { t } = useT();
   const insets = useSafeAreaInsets();
 
+  // Only the routes that have tab metadata are shown.
+  const items = state.routes
+    .map((route, index) => ({ route, index, m: meta[route.name] }))
+    .filter((x): x is { route: (typeof state.routes)[number]; index: number; m: TabMeta } => !!x.m);
+
+  const activeVisible = Math.max(0, items.findIndex((x) => x.index === state.index));
+
+  // Measured centre-x of each visible tab (accounts for RTL flex order).
+  const [layouts, setLayouts] = useState<Record<number, LayoutRectangle>>({});
+  const pillX = useSharedValue(0);
+  const ready = useSharedValue(0);
+
+  useEffect(() => {
+    const l = layouts[activeVisible];
+    if (!l) return;
+    const target = l.x + l.width / 2 - PILL_W / 2;
+    if (ready.value === 0) {
+      pillX.value = target; // first placement without animation
+      ready.value = 1;
+    } else {
+      pillX.value = withSpring(target, { damping: 16, stiffness: 170, mass: 0.7 });
+    }
+  }, [activeVisible, layouts, pillX, ready]);
+
+  const pillStyle = useAnimatedStyle(() => ({
+    transform: [{ translateX: pillX.value }],
+    opacity: ready.value,
+  }));
+
   return (
-    // Floats clear of the Android navigation bar/gesture area: honour the safe
-    // inset when reported, and never sit closer than 35px to the screen edge.
+    // Clears the Android navigation / gesture area; never hugs the screen edge.
     <View style={{ position: 'absolute', left: 16, right: 16, bottom: Math.max(insets.bottom + 10, 35) }}>
       <GlassView radius={28} style={shadows.lg}>
         <View style={{ flexDirection: 'row', paddingVertical: 10, paddingHorizontal: 8 }}>
-          {state.routes.map((route, index) => {
-            const m = meta[route.name];
-            if (!m) return null;
-            const focused = state.index === index;
+          {/* The single gliding glass pill, behind the icons. */}
+          <Animated.View
+            pointerEvents="none"
+            style={[
+              {
+                position: 'absolute',
+                top: 10,
+                left: 0,
+                width: PILL_W,
+                height: PILL_H,
+                borderRadius: PILL_H / 2,
+                overflow: 'hidden',
+                shadowColor: colors.tint,
+                shadowOpacity: 0.5,
+                shadowRadius: 12,
+                shadowOffset: { width: 0, height: 5 },
+                elevation: 6,
+              },
+              pillStyle,
+            ]}
+          >
+            <LinearGradient colors={gradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ flex: 1 }} />
+          </Animated.View>
+
+          {items.map((x, visibleIndex) => {
+            const focused = x.index === state.index;
             return (
               <TabItem
-                key={route.key}
-                icon={m.icon}
-                label={t(m.label)}
+                key={x.route.key}
+                icon={x.m.icon}
+                label={t(x.m.label)}
                 focused={focused}
+                onLayout={(rect) => setLayouts((prev) => (prev[visibleIndex]?.x === rect.x ? prev : { ...prev, [visibleIndex]: rect }))}
                 onPress={() => {
                   Haptics.selectionAsync().catch(() => {});
-                  const event = navigation.emit({ type: 'tabPress', target: route.key, canPreventDefault: true });
-                  if (!focused && !event.defaultPrevented) navigation.navigate(route.name);
+                  const event = navigation.emit({ type: 'tabPress', target: x.route.key, canPreventDefault: true });
+                  if (!focused && !event.defaultPrevented) navigation.navigate(x.route.name);
                 }}
                 tint={colors.tint}
-            gradient={gradient}
                 inactive={colors.tabInactive}
               />
             );
@@ -67,52 +135,30 @@ function TabItem({
   label,
   focused,
   onPress,
+  onLayout,
   tint,
   inactive,
-  gradient,
 }: {
   icon: IconName;
   label: string;
   focused: boolean;
   onPress: () => void;
+  onLayout: (rect: LayoutRectangle) => void;
   tint: string;
   inactive: string;
-  gradient: readonly [string, string, string];
 }) {
-  const scale = useSharedValue(focused ? 1 : 0.9);
-  const glow = useSharedValue(focused ? 1 : 0);
+  const scale = useSharedValue(focused ? 1 : 0.92);
 
   useEffect(() => {
-    scale.value = withSpring(focused ? 1 : 0.9, { damping: 13, stiffness: 180 });
-    glow.value = withTiming(focused ? 1 : 0, { duration: 260 });
-  }, [focused, scale, glow]);
+    scale.value = withSpring(focused ? 1 : 0.92, { damping: 13, stiffness: 200 });
+  }, [focused, scale]);
 
-  const pillStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: scale.value }],
-    opacity: glow.value,
-  }));
   const iconWrapStyle = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }));
 
   return (
-    <Pressable onPress={onPress} style={{ flex: 1, alignItems: 'center' }}>
+    <Pressable onPress={onPress} onLayout={(e) => onLayout(e.nativeEvent.layout)} style={{ flex: 1, alignItems: 'center' }}>
       <View style={{ alignItems: 'center', gap: 3 }}>
-        <View style={{ width: 46, height: 34, alignItems: 'center', justifyContent: 'center' }}>
-          {/* Glowing active pill (fades/springs in) */}
-          <Animated.View
-            style={[
-              { position: 'absolute', width: 46, height: 34, borderRadius: 17, overflow: 'hidden' },
-              {
-                shadowColor: tint,
-                shadowOpacity: 0.5,
-                shadowRadius: 10,
-                shadowOffset: { width: 0, height: 4 },
-                elevation: 6,
-              },
-              pillStyle,
-            ]}
-          >
-            <LinearGradient colors={gradient} style={{ flex: 1 }} />
-          </Animated.View>
+        <View style={{ width: PILL_W, height: PILL_H, alignItems: 'center', justifyContent: 'center' }}>
           <Animated.View style={iconWrapStyle}>
             <Icon name={icon} size={20} color={focused ? '#FFFFFF' : inactive} />
           </Animated.View>

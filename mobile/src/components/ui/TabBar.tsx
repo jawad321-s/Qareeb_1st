@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { Pressable, View, type LayoutRectangle } from 'react-native';
+import { Pressable, StyleSheet, View, type LayoutRectangle } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
+import { BlurView } from 'expo-blur';
 import * as Haptics from 'expo-haptics';
 import Animated, {
   useAnimatedStyle,
@@ -23,7 +24,7 @@ interface TabMeta {
 }
 
 /** Height of the floating bar itself (glass container). */
-export const TAB_BAR_HEIGHT = 70;
+export const TAB_BAR_HEIGHT = 74;
 
 /**
  * Vertical space a tab screen must leave at the bottom so its content (lists,
@@ -34,8 +35,8 @@ export function useTabBarSpace() {
   return Math.max(insets.bottom + 10, 35) + TAB_BAR_HEIGHT;
 }
 
-const PILL_W = 52;
-const PILL_H = 36;
+const PILL_W = 54;
+const PILL_H = 40;
 
 /**
  * Floating liquid-glass tab bar. A single glass pill glides between tabs with a
@@ -43,7 +44,7 @@ const PILL_H = 36;
  * it's correct in both LTR and RTL.
  */
 export function TabBar({ state, navigation, meta }: BottomTabBarProps & { meta: Record<string, TabMeta> }) {
-  const { colors, gradient } = useTheme();
+  const { colors, gradient, isDark } = useTheme();
   const { t } = useT();
   const insets = useSafeAreaInsets();
 
@@ -81,7 +82,9 @@ export function TabBar({ state, navigation, meta }: BottomTabBarProps & { meta: 
     <View style={{ position: 'absolute', left: 16, right: 16, bottom: Math.max(insets.bottom + 10, 35) }}>
       <GlassView radius={28} style={shadows.lg}>
         <View style={{ flexDirection: 'row', paddingVertical: 10, paddingHorizontal: 8 }}>
-          {/* The single gliding glass pill, behind the icons. */}
+          {/* The single gliding liquid-glass lens, behind the icons: extra blur,
+              a tinted translucent fill, a diagonal specular sheen and a bright
+              rim — a glass bubble that slides between tabs (WhatsApp / iOS-26). */}
           <Animated.View
             pointerEvents="none"
             style={[
@@ -94,15 +97,36 @@ export function TabBar({ state, navigation, meta }: BottomTabBarProps & { meta: 
                 borderRadius: PILL_H / 2,
                 overflow: 'hidden',
                 shadowColor: colors.tint,
-                shadowOpacity: 0.5,
-                shadowRadius: 12,
-                shadowOffset: { width: 0, height: 5 },
-                elevation: 6,
+                shadowOpacity: 0.55,
+                shadowRadius: 14,
+                shadowOffset: { width: 0, height: 6 },
+                elevation: 7,
               },
               pillStyle,
             ]}
           >
-            <LinearGradient colors={gradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ flex: 1 }} />
+            <BlurView intensity={isDark ? 30 : 45} tint={isDark ? 'dark' : 'light'} style={StyleSheet.absoluteFill} />
+            {/* Tinted glass fill (translucent so the bar shows through the lens) */}
+            <LinearGradient
+              colors={[gradient[0] + 'F2', gradient[gradient.length - 1] + 'DE']}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={StyleSheet.absoluteFill}
+            />
+            {/* Specular sheen — the wet-glass highlight */}
+            <LinearGradient
+              colors={['rgba(255,255,255,0.5)', 'rgba(255,255,255,0.08)', 'rgba(255,255,255,0)']}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 0.7, y: 1 }}
+              style={StyleSheet.absoluteFill}
+            />
+            {/* Bright rim (glass edge) */}
+            <View
+              style={[
+                StyleSheet.absoluteFill,
+                { borderRadius: PILL_H / 2, borderWidth: 1, borderColor: 'rgba(255,255,255,0.6)' },
+              ]}
+            />
           </Animated.View>
 
           {items.map((x, visibleIndex) => {

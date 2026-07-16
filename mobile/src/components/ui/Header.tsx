@@ -11,11 +11,22 @@ interface HeaderProps {
   showBack?: boolean;
   rightIcon?: IconName;
   onRightPress?: () => void;
+  onBack?: () => void;
   transparent?: boolean;
 }
 
-export function Header({ title, subtitle, showBack, rightIcon, onRightPress, transparent }: HeaderProps) {
+export function Header({ title, subtitle, showBack, rightIcon, onRightPress, onBack, transparent }: HeaderProps) {
   const { colors } = useTheme();
+
+  // Safe back: some screens are reached via router.replace (e.g. the new
+  // request detail after submitting), so there's no history to pop. Fall back
+  // to the root, which redirects to the right home — never throws GO_BACK.
+  const goBack = () => {
+    if (onBack) return onBack();
+    if (router.canGoBack()) router.back();
+    else router.replace('/');
+  };
+
   return (
     <View
       style={{
@@ -29,7 +40,7 @@ export function Header({ title, subtitle, showBack, rightIcon, onRightPress, tra
     >
       {showBack && (
         <Pressable
-          onPress={() => router.back()}
+          onPress={goBack}
           hitSlop={8}
           style={{
             width: 40,

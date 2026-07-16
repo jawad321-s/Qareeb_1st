@@ -4,7 +4,7 @@ import { Text } from './Text';
 import { Icon, type IconName } from './Icon';
 import { radius } from '@/theme/tokens';
 import { useTheme } from '@/theme/ThemeProvider';
-import { useFont } from '@/i18n';
+import { useFont, useT } from '@/i18n';
 
 interface InputProps extends TextInputProps {
   label?: string;
@@ -26,6 +26,7 @@ export function Input({
 }: InputProps) {
   const { colors } = useTheme();
   const font = useFont();
+  const { isRTL } = useT();
   const [focused, setFocused] = useState(false);
   const [hidden, setHidden] = useState(!!secure);
 
@@ -64,7 +65,7 @@ export function Input({
               fontSize: 15,
               fontFamily: font('Inter_400Regular'),
               height: multiline ? undefined : '100%',
-              textAlign: 'auto',
+              textAlign: isRTL ? 'right' : 'left',
               ...({ outlineStyle: 'none' } as any),
             },
             style,

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, ScrollView, Pressable, TextInput } from 'react-native';
+import { I18nManager, View, ScrollView, Pressable, TextInput } from 'react-native';
 import { router } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
 import { Image } from 'expo-image';
@@ -15,14 +15,15 @@ import { CATEGORIES } from '@/constants/categories';
 import { useCreateRequest } from '@/hooks/queries';
 import { useAuth } from '@/store/auth';
 import { useTheme } from '@/theme/ThemeProvider';
-import { useT } from '@/i18n';
+import { useFont, useT } from '@/i18n';
 import { config } from '@/lib/config';
 import { formatMoney } from '@/lib/format';
 
 export default function CreateRequest() {
   const { colors } = useTheme();
   const user = useAuth((s) => s.user)!;
-  const { t, locale } = useT();
+  const { t, locale, isRTL } = useT();
+  const font = useFont();
   const create = useCreateRequest(user.uid);
   const STEPS = [t('create.step.service'), t('create.step.details'), t('create.step.budget'), t('create.step.review')];
 
@@ -112,7 +113,7 @@ export default function CreateRequest() {
                 onChangeText={setTitle}
                 placeholder={category?.name[locale]}
                 placeholderTextColor={colors.muted}
-                style={{ height: 54, borderRadius: 16, borderWidth: 1.5, borderColor: colors.border, backgroundColor: colors.surface, paddingHorizontal: 14, color: colors.fg, fontSize: 15, fontFamily: 'Inter_400Regular' }}
+                style={{ height: 54, borderRadius: 16, borderWidth: 1.5, borderColor: colors.border, backgroundColor: colors.surface, paddingHorizontal: 14, color: colors.fg, fontSize: 15, fontFamily: font('Inter_400Regular'), textAlign: isRTL ? 'right' : 'left' }}
               />
             </View>
             <View style={{ gap: 6 }}>
@@ -125,7 +126,7 @@ export default function CreateRequest() {
                 placeholder={t('create.describePlaceholder')}
                 placeholderTextColor={colors.muted}
                 multiline
-                style={{ minHeight: 120, borderRadius: 16, borderWidth: 1.5, borderColor: colors.border, backgroundColor: colors.surface, padding: 14, color: colors.fg, fontSize: 15, fontFamily: 'Inter_400Regular', textAlignVertical: 'top' }}
+                style={{ minHeight: 120, borderRadius: 16, borderWidth: 1.5, borderColor: colors.border, backgroundColor: colors.surface, padding: 14, color: colors.fg, fontSize: 15, fontFamily: font('Inter_400Regular'), textAlign: isRTL ? 'right' : 'left', textAlignVertical: 'top' }}
               />
             </View>
             <View style={{ gap: 8 }}>
@@ -167,7 +168,7 @@ export default function CreateRequest() {
                     value={b.v}
                     onChangeText={b.set}
                     keyboardType="number-pad"
-                    style={{ height: 54, borderRadius: 16, borderWidth: 1.5, borderColor: colors.border, backgroundColor: colors.surface, paddingHorizontal: 14, color: colors.fg, fontSize: 18, fontFamily: 'Inter_600SemiBold' }}
+                    style={{ height: 54, borderRadius: 16, borderWidth: 1.5, borderColor: colors.border, backgroundColor: colors.surface, paddingHorizontal: 14, color: colors.fg, fontSize: 18, fontFamily: font('Inter_600SemiBold'), textAlign: isRTL ? 'right' : 'left' }}
                   />
                 </View>
               ))}
@@ -247,7 +248,7 @@ function Row({ label, value }: { label: string; value: string }) {
       <Text variant="body" tone="muted">
         {label}
       </Text>
-      <Text variant="bodyMedium" style={{ flex: 1, textAlign: 'right' }} numberOfLines={1}>
+      <Text variant="bodyMedium" style={{ flex: 1, textAlign: I18nManager.isRTL ? 'left' : 'right' }} numberOfLines={1}>
         {value}
       </Text>
     </View>

@@ -17,14 +17,15 @@ import { config } from '@/lib/config';
 import { formatMoney } from '@/lib/format';
 import { useAuth } from '@/store/auth';
 import { useTheme } from '@/theme/ThemeProvider';
-import { useT } from '@/i18n';
+import { useFont, useT } from '@/i18n';
 
 export default function JobDetail() {
   const { colors } = useTheme();
   const { id } = useLocalSearchParams<{ id: string }>();
   const user = useAuth((s) => s.user)!;
   const toast = useToast();
-  const { t, locale } = useT();
+  const { t, locale, isRTL } = useT();
+  const font = useFont();
   const { data: request, isLoading } = useRequest(id!);
   const submit = useSubmitOffer(id!);
 
@@ -115,13 +116,13 @@ export default function JobDetail() {
             <Text variant="caption" tone="muted">
               {t('job.price')} ({config.currency})
             </Text>
-            <TextInput value={price} onChangeText={setPrice} keyboardType="number-pad" placeholder="120" placeholderTextColor={colors.muted} style={inputStyle(colors)} />
+            <TextInput value={price} onChangeText={setPrice} keyboardType="number-pad" placeholder="120" placeholderTextColor={colors.muted} style={inputStyle(colors, font, isRTL)} />
           </View>
           <View style={{ flex: 1, gap: 6 }}>
             <Text variant="caption" tone="muted">
               {t('job.eta')}
             </Text>
-            <TextInput value={eta} onChangeText={setEta} keyboardType="number-pad" placeholder="30" placeholderTextColor={colors.muted} style={inputStyle(colors)} />
+            <TextInput value={eta} onChangeText={setEta} keyboardType="number-pad" placeholder="30" placeholderTextColor={colors.muted} style={inputStyle(colors, font, isRTL)} />
           </View>
         </View>
         <View style={{ gap: 6 }}>
@@ -134,7 +135,7 @@ export default function JobDetail() {
             placeholder={t('job.messagePlaceholder')}
             placeholderTextColor={colors.muted}
             multiline
-            style={{ ...inputStyle(colors), minHeight: 100, height: undefined, textAlignVertical: 'top', paddingTop: 12 }}
+            style={{ ...inputStyle(colors, font, isRTL), minHeight: 100, height: undefined, textAlignVertical: 'top', paddingTop: 12 }}
           />
         </View>
         <Button label={sent ? t('job.sent') : t('job.submit')} iconRight={sent ? 'check-circle' : 'send'} onPress={send} loading={submit.isPending} disabled={!canSend} />
@@ -143,7 +144,7 @@ export default function JobDetail() {
   );
 }
 
-const inputStyle = (colors: any) => ({
+const inputStyle = (colors: any, font: (f: string) => string, isRTL: boolean) => ({
   height: 54,
   borderRadius: 16,
   borderWidth: 1.5,
@@ -152,5 +153,6 @@ const inputStyle = (colors: any) => ({
   paddingHorizontal: 14,
   color: colors.fg,
   fontSize: 16,
-  fontFamily: 'Inter_500Medium',
+  fontFamily: font('Inter_500Medium'),
+  textAlign: (isRTL ? 'right' : 'left') as 'right' | 'left',
 });

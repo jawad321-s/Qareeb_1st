@@ -9,12 +9,13 @@ import { Button } from '@/components/ui/Button';
 import { Rating } from '@/components/ui/Rating';
 import { Avatar } from '@/components/ui/Avatar';
 import { useTheme } from '@/theme/ThemeProvider';
-import { useT } from '@/i18n';
+import { useFont, useT } from '@/i18n';
 import { MOCK_ARTISANS } from '@/mock/data';
 
 export default function ReviewScreen() {
   const { colors } = useTheme();
-  const { t } = useT();
+  const { t, isRTL } = useT();
+  const font = useFont();
   useLocalSearchParams<{ id: string }>();
   const artisan = MOCK_ARTISANS[3];
   const TAGS = [
@@ -69,7 +70,7 @@ export default function ReviewScreen() {
         placeholder={t('review.commentPlaceholder')}
         placeholderTextColor={colors.muted}
         multiline
-        style={{ minHeight: 120, borderRadius: 16, borderWidth: 1.5, borderColor: colors.border, backgroundColor: colors.surface, padding: 14, color: colors.fg, fontSize: 15, fontFamily: 'Inter_400Regular', textAlignVertical: 'top', marginBottom: 20 }}
+        style={{ minHeight: 120, borderRadius: 16, borderWidth: 1.5, borderColor: colors.border, backgroundColor: colors.surface, padding: 14, color: colors.fg, fontSize: 15, fontFamily: font('Inter_400Regular'), textAlign: isRTL ? 'right' : 'left', textAlignVertical: 'top', marginBottom: 20 }}
       />
 
       <Button label={t('review.submit')} iconRight="send" onPress={submit} loading={saving} />

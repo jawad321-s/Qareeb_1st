@@ -8,12 +8,13 @@ import { Button } from '@/components/ui/Button';
 import { Icon } from '@/components/ui/Icon';
 import { useToast } from '@/components/feedback/Toast';
 import { useTheme } from '@/theme/ThemeProvider';
-import { useT } from '@/i18n';
+import { useFont, useT } from '@/i18n';
 
 export default function Report() {
   const { colors } = useTheme();
   const toast = useToast();
-  const { t } = useT();
+  const { t, isRTL } = useT();
+  const font = useFont();
   const REASONS = [t('report.r1'), t('report.r2'), t('report.r3'), t('report.r4'), t('report.r5'), t('report.r6')];
   const [reason, setReason] = useState<string | null>(null);
   const [details, setDetails] = useState('');
@@ -62,7 +63,7 @@ export default function Report() {
         placeholder={t('report.detailsPlaceholder')}
         placeholderTextColor={colors.muted}
         multiline
-        style={{ minHeight: 120, borderRadius: 16, borderWidth: 1.5, borderColor: colors.border, backgroundColor: colors.surface, padding: 14, color: colors.fg, fontSize: 15, fontFamily: 'Inter_400Regular', textAlignVertical: 'top', marginBottom: 20 }}
+        style={{ minHeight: 120, borderRadius: 16, borderWidth: 1.5, borderColor: colors.border, backgroundColor: colors.surface, padding: 14, color: colors.fg, fontSize: 15, fontFamily: font('Inter_400Regular'), textAlign: isRTL ? 'right' : 'left', textAlignVertical: 'top', marginBottom: 20 }}
       />
 
       <Button label={t('report.submit')} iconLeft="flag" variant="danger" onPress={submit} loading={loading} disabled={!reason} />

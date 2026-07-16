@@ -11,7 +11,7 @@ import { Avatar } from '@/components/ui/Avatar';
 import { useMessages, useSendMessage } from '@/hooks/queries';
 import { useAuth } from '@/store/auth';
 import { useTheme } from '@/theme/ThemeProvider';
-import { useT } from '@/i18n';
+import { useFont, useT } from '@/i18n';
 import { timeAgo } from '@/lib/format';
 import { MOCK_ARTISANS } from '@/mock/data';
 
@@ -21,7 +21,8 @@ export default function Chat() {
   const me = useAuth((s) => s.user)!;
   const { data: messages } = useMessages(requestId!);
   const send = useSendMessage(requestId!);
-  const { t } = useT();
+  const { t, isRTL } = useT();
+  const font = useFont();
   const [text, setText] = useState('');
   const scrollRef = useRef<ScrollView>(null);
   const other = MOCK_ARTISANS[3];
@@ -98,7 +99,7 @@ export default function Chat() {
               placeholder={t('chat.message')}
               placeholderTextColor={colors.muted}
               multiline
-              style={{ flex: 1, color: colors.fg, fontSize: 15, fontFamily: 'Inter_400Regular', maxHeight: 100, paddingVertical: 10 }}
+              style={{ flex: 1, color: colors.fg, fontSize: 15, fontFamily: font('Inter_400Regular'), textAlign: isRTL ? 'right' : 'left', maxHeight: 100, paddingVertical: 10 }}
             />
             <Pressable hitSlop={6}>
               <Icon name="mic" size={20} color={colors.muted} />

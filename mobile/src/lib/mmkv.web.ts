@@ -1,6 +1,6 @@
-// Web fallback for the MMKV store. react-native-mmkv is native-only, so on web
-// we back the same tiny API with localStorage. Metro loads this file for the
-// web platform automatically (in place of mmkv.ts).
+// Web build of the key-value store — synchronous localStorage. Metro loads this
+// file for the web platform automatically (in place of mmkv.ts, which uses the
+// expo-sqlite backend on native). Same MMKV-compatible surface.
 
 const mem = new Map<string, string>();
 const ls = typeof localStorage !== 'undefined' ? localStorage : null;

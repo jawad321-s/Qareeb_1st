@@ -142,16 +142,6 @@ service cloud.firestore {
       allow update, delete: if isAdmin();
     }
 
-    // ── wallets / transactions ───────────────────────────────────────────────
-    match /wallets/{userId} {
-      allow read: if isSignedIn() && (uid() == userId || isAdmin());
-      allow write: if isAdmin(); // balances are server-controlled
-      match /transactions/{txnId} {
-        allow read: if isSignedIn() && (uid() == userId || isAdmin());
-        allow write: if isAdmin();
-      }
-    }
-
     // ── subscriptions ────────────────────────────────────────────────────────
     match /subscriptions/{id} {
       allow read: if isSignedIn() && (existing().artisanId == uid() || isAdmin());

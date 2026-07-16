@@ -161,7 +161,6 @@ export const translations = {
     // profile
     'profile.account': 'Account',
     'profile.editProfile': 'Edit profile',
-    'profile.wallet': 'Wallet & payments',
     'profile.favorites': 'Favorites',
     'profile.notifications': 'Notifications',
     'profile.preferences': 'Preferences',
@@ -196,11 +195,6 @@ export const translations = {
     'notif.emptyDesc': "You're all caught up! New updates will appear here.",
 
     // wallet
-    'wallet.title': 'Wallet',
-    'wallet.balance': 'Available balance',
-    'wallet.topUp': 'Top up',
-    'wallet.withdraw': 'Withdraw',
-    'wallet.transactions': 'Transactions',
 
     // subscription
     'sub.title': 'Subscription',
@@ -569,7 +563,6 @@ export const translations = {
     // profile
     'profile.account': 'الحساب',
     'profile.editProfile': 'تعديل الملف الشخصي',
-    'profile.wallet': 'المحفظة والمدفوعات',
     'profile.favorites': 'المفضّلة',
     'profile.notifications': 'الإشعارات',
     'profile.preferences': 'التفضيلات',
@@ -604,11 +597,6 @@ export const translations = {
     'notif.emptyDesc': 'لا جديد حالياً! ستظهر التحديثات هنا.',
 
     // wallet
-    'wallet.title': 'المحفظة',
-    'wallet.balance': 'الرصيد المتاح',
-    'wallet.topUp': 'شحن',
-    'wallet.withdraw': 'سحب',
-    'wallet.transactions': 'العمليات',
 
     // subscription
     'sub.title': 'الاشتراك',

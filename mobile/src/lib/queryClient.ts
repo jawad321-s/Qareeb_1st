@@ -29,5 +29,4 @@ export const qk = {
   messages: (requestId: string) => ['messages', requestId] as const,
   reviews: (targetId: string) => ['reviews', targetId] as const,
   notifications: (uid: string) => ['notifications', uid] as const,
-  wallet: (uid: string) => ['wallet', uid] as const,
 };

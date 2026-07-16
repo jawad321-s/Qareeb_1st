@@ -153,15 +153,6 @@ export interface Review {
   createdAt: number;
 }
 
-export interface WalletTransaction {
-  id: string;
-  type: 'credit' | 'debit';
-  amount: number;
-  reason: string;
-  requestId?: string;
-  createdAt: number;
-}
-
 export interface AppNotification {
   id: string;
   type: string;

@@ -25,7 +25,6 @@ offers/{offerId}
 
 reviews/{reviewId}
 
-wallets/{uid}
   └── transactions/{txnId}
 
 subscriptions/{subscriptionId}
@@ -139,10 +138,6 @@ cms/{docId}
 ## `reviews/{reviewId}`
 `{ id, requestId, authorId, targetId, role: 'customer'|'artisan', rating: 1..5, comment, createdAt }`
 
-## `wallets/{uid}` + `transactions/{txnId}`
-`wallet: { uid, balance, currency, updatedAt }`
-`txn: { id, type: 'credit'|'debit', amount, reason, requestId?, createdAt }`
-
 ## `subscriptions/{id}`
 `{ id, artisanId, plan: 'free'|'pro'|'elite', price, status, startedAt, renewsAt }`
 
@@ -169,7 +164,6 @@ requests 1───* messages
 requests 1───* reviews
 categories 1───* services
 services 1───* requests
-users 1───1 wallets 1───* transactions
 ```
 
 ---

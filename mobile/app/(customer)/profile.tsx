@@ -35,7 +35,6 @@ export default function Profile() {
       title: t('profile.account'),
       items: [
         { icon: 'user', label: t('profile.editProfile'), route: '/(shared)/edit-profile' },
-        { icon: 'wallet', label: t('profile.wallet'), route: '/(shared)/wallet' },
         { icon: 'heart', label: t('profile.favorites'), route: '/(shared)/favorites' },
         { icon: 'bell', label: t('profile.notifications'), route: '/(shared)/notifications' },
       ],
@@ -43,7 +42,7 @@ export default function Profile() {
     {
       title: t('profile.preferences'),
       items: [
-        { icon: isDark ? 'moon' : 'sun', label: `${t('profile.theme')}: ${mode}`, onPress: () => setMode(mode === 'dark' ? 'light' : mode === 'light' ? 'system' : 'dark') },
+        { icon: isDark ? 'moon' : 'sun', label: `${t('profile.theme')}: ${t(`settings.${mode}` as any)}`, onPress: () => setMode(mode === 'dark' ? 'light' : mode === 'light' ? 'system' : 'dark') },
         { icon: 'globe', label: `${t('profile.language')}: ${locale === 'ar' ? 'العربية' : 'English'}`, onPress: toggle },
         { icon: 'settings', label: t('profile.settings'), route: '/(shared)/settings' },
       ],

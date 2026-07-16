@@ -97,6 +97,6 @@ Accept offer ──batch──▶ request:ACCEPTED + offers:ACCEPTED/REJECTED
 
 The same pattern (a `*.service.ts` with a mock branch + a Firestore branch,
 gated by `config.useMock`, plus the `firebaseApi` facade on mobile) extends to
-`reviews`, `wallets`, `complaints`, `subscriptions`, `notifications`, etc. —
+`reviews`, `complaints`, `subscriptions`, `notifications`, etc. —
 all already defined in `firebase/firestore.rules` and
 `docs/DATABASE_SCHEMA.md`.

@@ -43,9 +43,9 @@ export function Header({ title, subtitle, showBack, rightIcon, onRightPress, onB
           onPress={goBack}
           hitSlop={8}
           style={{
-            width: 40,
-            height: 40,
-            borderRadius: 12,
+            width: 44,
+            height: 44,
+            borderRadius: 14,
             alignItems: 'center',
             justifyContent: 'center',
             backgroundColor: colors.surface2,
@@ -67,9 +67,9 @@ export function Header({ title, subtitle, showBack, rightIcon, onRightPress, onB
           onPress={onRightPress}
           hitSlop={8}
           style={{
-            width: 40,
-            height: 40,
-            borderRadius: 12,
+            width: 44,
+            height: 44,
+            borderRadius: 14,
             alignItems: 'center',
             justifyContent: 'center',
             backgroundColor: colors.surface2,

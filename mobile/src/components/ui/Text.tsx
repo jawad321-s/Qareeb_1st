@@ -14,6 +14,11 @@ interface TextProps extends RNTextProps {
   children: React.ReactNode;
 }
 
+// HIG "Dynamic Type": text scales with the OS font-size setting (accessibility),
+// but we cap the multiplier so fixed-height chrome (buttons, chips, the tab bar)
+// can't break its layout at the largest settings. Body copy can raise this.
+const DEFAULT_MAX_FONT_SCALE = 1.3;
+
 /** Map an Inter weight to its Cairo (Arabic) equivalent. */
 function arabicFont(family?: string) {
   if (family && family.startsWith('Inter')) return family.replace('Inter', 'Cairo');
@@ -26,6 +31,7 @@ export function Text({
   center,
   style,
   children,
+  maxFontSizeMultiplier = DEFAULT_MAX_FONT_SCALE,
   ...rest
 }: TextProps) {
   const { colors } = useTheme();
@@ -56,6 +62,7 @@ export function Text({
         style,
         { fontFamily }, // final override wins for both LTR passthrough and RTL swap
       ]}
+      maxFontSizeMultiplier={maxFontSizeMultiplier}
       {...rest}
     >
       {children}

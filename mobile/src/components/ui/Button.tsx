@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import {
   ActivityIndicator,
+  Platform,
   Pressable,
   View,
   type GestureResponderEvent,
@@ -11,6 +12,7 @@ import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
 import Animated, {
   useAnimatedStyle,
+  useReducedMotion,
   useSharedValue,
   withSpring,
   withTiming,
@@ -52,6 +54,11 @@ export function Button({
   style,
 }: ButtonProps) {
   const { colors, gradient } = useTheme();
+  const reduceMotion = useReducedMotion();
+  // A growing ripple is a Material (Android) idiom; on iOS the HIG feedback is a
+  // subtle press-in scale + dim. Show the ripple only on Android, and drop all
+  // motion entirely when the user has enabled "Reduce Motion".
+  const rippleEnabled = Platform.OS === 'android' && !reduceMotion;
   const scale = useSharedValue(1);
 
   // Ripple state — a circle grows out from the touch point and fades.
@@ -86,18 +93,21 @@ export function Button({
 
   const onPressIn = (e: GestureResponderEvent) => {
     if (isDisabled) return;
-    rx.value = e.nativeEvent.locationX;
-    ry.value = e.nativeEvent.locationY;
-    rippleScale.value = 0;
-    rippleOpacity.value = 0.35;
-    rippleScale.value = withTiming(1, { duration: 480, easing: Easing.out(Easing.ease) });
-    rippleOpacity.value = withTiming(0, { duration: 520, easing: Easing.out(Easing.ease) });
-    // Deeper press
-    scale.value = withSpring(0.93, { damping: 16, stiffness: 320 });
+    if (rippleEnabled) {
+      rx.value = e.nativeEvent.locationX;
+      ry.value = e.nativeEvent.locationY;
+      rippleScale.value = 0;
+      rippleOpacity.value = 0.35;
+      rippleScale.value = withTiming(1, { duration: 480, easing: Easing.out(Easing.ease) });
+      rippleOpacity.value = withTiming(0, { duration: 520, easing: Easing.out(Easing.ease) });
+    }
+    // Press-in scale — the primary iOS feedback. Skipped under Reduce Motion,
+    // where a static pressed-opacity (below) gives the feedback instead.
+    if (!reduceMotion) scale.value = withSpring(0.93, { damping: 16, stiffness: 320 });
   };
 
   const onPressOut = () => {
-    scale.value = withSpring(1, { damping: 12, stiffness: 200 });
+    if (!reduceMotion) scale.value = withSpring(1, { damping: 12, stiffness: 200 });
   };
 
   const press = () => {
@@ -157,13 +167,25 @@ export function Button({
     ...(variant === 'primary' && !isDisabled ? { ...shadows.brand, shadowColor: colors.tint } : {}),
   };
 
-  const Ripple = (
+  const Ripple = rippleEnabled ? (
     <Animated.View pointerEvents="none" style={[rippleStyle, { backgroundColor: rippleColor }]} />
-  );
+  ) : null;
+
+  // Under Reduce Motion the scale/ripple are off, so give a clear static
+  // pressed-opacity as the touch feedback instead.
+  const pressedStyle = ({ pressed }: { pressed: boolean }): ViewStyle =>
+    reduceMotion && pressed && !isDisabled ? { opacity: 0.7 } : {};
 
   return (
     <Animated.View style={[animatedStyle, containerBase, style]}>
-      <Pressable onPress={press} onPressIn={onPressIn} onPressOut={onPressOut} onLayout={onLayout} disabled={isDisabled}>
+      <Pressable
+        onPress={press}
+        onPressIn={onPressIn}
+        onPressOut={onPressOut}
+        onLayout={onLayout}
+        disabled={isDisabled}
+        style={pressedStyle}
+      >
         {variant === 'primary' ? (
           <LinearGradient colors={gradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}>
             {Content}

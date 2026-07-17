@@ -83,7 +83,7 @@ export function Input({
           {...rest}
         />
         {secure && (
-          <Pressable onPress={() => setHidden((h) => !h)} hitSlop={8}>
+          <Pressable onPress={() => setHidden((h) => !h)} hitSlop={12}>
             <Icon name={hidden ? 'eye' : 'eye-off'} size={20} color={colors.muted} />
           </Pressable>
         )}

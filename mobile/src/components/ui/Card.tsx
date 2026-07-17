@@ -1,7 +1,12 @@
 import React from 'react';
 import { Pressable, StyleSheet, View, type ViewProps, type ViewStyle } from 'react-native';
 import * as Haptics from 'expo-haptics';
-import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
+import Animated, {
+  useAnimatedStyle,
+  useReducedMotion,
+  useSharedValue,
+  withSpring,
+} from 'react-native-reanimated';
 import { GlassView } from './GlassView';
 import { radius, shadows } from '@/theme/tokens';
 import { useTheme } from '@/theme/ThemeProvider';
@@ -29,6 +34,7 @@ export function Card({
   ...rest
 }: CardProps) {
   const { colors } = useTheme();
+  const reduceMotion = useReducedMotion();
   const scale = useSharedValue(1);
   const animatedStyle = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }));
 
@@ -61,9 +67,18 @@ export function Card({
       <Animated.View style={animatedStyle}>
         <Pressable
           onPress={press}
-          onPressIn={() => (scale.value = withSpring(0.96, { damping: 18, stiffness: 320 }))}
-          onPressOut={() => (scale.value = withSpring(1, { damping: 13, stiffness: 200 }))}
-          style={[base, glass && { padding: 0 }, style]}
+          onPressIn={() => {
+            if (!reduceMotion) scale.value = withSpring(0.96, { damping: 18, stiffness: 320 });
+          }}
+          onPressOut={() => {
+            if (!reduceMotion) scale.value = withSpring(1, { damping: 13, stiffness: 200 });
+          }}
+          style={({ pressed }) => [
+            base,
+            glass && { padding: 0 },
+            reduceMotion && pressed && { opacity: 0.85 },
+            style,
+          ]}
           {...rest}
         >
           {inner}

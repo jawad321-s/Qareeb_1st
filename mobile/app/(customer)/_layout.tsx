@@ -20,7 +20,10 @@ export default function CustomerLayout() {
 
   return (
     <Tabs
-      screenOptions={{ headerShown: false, animation: 'shift', freezeOnBlur: true, lazy: true }}
+      // No freezeOnBlur: frozen tabs skip re-renders, so a theme/language change
+      // made on one tab left the others painted with stale colors (dark cards on
+      // a light background). Keeping them live costs little with 5 tabs.
+      screenOptions={{ headerShown: false, animation: 'shift', lazy: true }}
       tabBar={(props) => <TabBar {...props} meta={META} />}
     >
       <Tabs.Screen name="home" />

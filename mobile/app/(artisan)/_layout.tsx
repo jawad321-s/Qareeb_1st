@@ -17,8 +17,9 @@ export default function ArtisanLayout() {
   const user = useAuth((s) => s.user);
   if (!user) return <Redirect href="/(auth)/welcome" />;
 
+  // No freezeOnBlur — see the customer layout: frozen tabs kept stale theme colors.
   return (
-    <Tabs screenOptions={{ headerShown: false, animation: 'shift', freezeOnBlur: true, lazy: true }} tabBar={(props) => <TabBar {...props} meta={META} />}>
+    <Tabs screenOptions={{ headerShown: false, animation: 'shift', lazy: true }} tabBar={(props) => <TabBar {...props} meta={META} />}>
       <Tabs.Screen name="dashboard" />
       <Tabs.Screen name="requests" />
       <Tabs.Screen name="offers" />

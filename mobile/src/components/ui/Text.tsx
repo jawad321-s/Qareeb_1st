@@ -51,14 +51,25 @@ export function Text({
   const baseFamily = flat?.fontFamily ?? typography[variant].fontFamily;
   const fontFamily = isRTL ? arabicFont(baseFamily) : baseFamily;
 
+  // Cairo's Arabic glyphs are taller than Inter's Latin ones (dots and marks sit
+  // high above the x-height), so line heights tuned for Inter clip them — ث lost
+  // its dots and read as ت in screen titles. Give Arabic text a taller line.
+  const base = typography[variant];
+  const arabicLineHeight = Math.max(base.lineHeight, Math.round(base.fontSize * 1.65));
+
   // Default alignment follows the active language, so Arabic reads right-aligned
   // even if the native RTL flip (I18nManager) hasn't taken effect on this build.
   // `center` and any inline `textAlign` still win, since they come after.
   return (
     <RNText
       style={[
-        typography[variant],
-        { color: toneColor[tone], textAlign: isRTL ? 'right' : 'left', writingDirection: isRTL ? 'rtl' : 'ltr' },
+        base,
+        {
+          color: toneColor[tone],
+          textAlign: isRTL ? 'right' : 'left',
+          writingDirection: isRTL ? 'rtl' : 'ltr',
+          ...(isRTL ? { lineHeight: arabicLineHeight } : {}),
+        },
         center && { textAlign: 'center' },
         style,
         { fontFamily }, // final override wins for both LTR passthrough and RTL swap

@@ -1,11 +1,15 @@
 import { create } from 'zustand';
 import { storage } from '@/lib/mmkv';
 import { config } from '@/lib/config';
+import { getCurrentPathname } from '@/lib/currentRoute';
 import type { Locale } from '@/types';
 import { translations, type TranslationKey } from './translations';
 import { reloadApp, syncNativeRTL } from './rtl';
 
 const LOCALE_KEY = 'qareeb.locale';
+
+/** One-shot route to return to after the RTL-flip restart (read by app/index). */
+export const RESTORE_ROUTE_KEY = 'qareeb.restoreRoute';
 
 const initialLocale: Locale = (storage.getString(LOCALE_KEY) as Locale) ?? config.defaultLocale;
 
@@ -25,6 +29,10 @@ interface LocaleState {
 function applyLocale(locale: Locale) {
   storage.set(LOCALE_KEY, locale);
   // Direction changes require a restart for the layout engine to flip.
+  // Remember where the user is so the boot redirect brings them straight back
+  // to this screen instead of dumping them on home.
+  const path = getCurrentPathname();
+  if (path && path !== '/') storage.set(RESTORE_ROUTE_KEY, path);
   syncNativeRTL(locale === 'ar');
   void reloadApp();
 }

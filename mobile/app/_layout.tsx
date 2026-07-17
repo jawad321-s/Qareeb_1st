@@ -4,7 +4,7 @@ import { View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { QueryClientProvider } from '@tanstack/react-query';
-import { Stack } from 'expo-router';
+import { Stack, usePathname } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import {
   useFonts,
@@ -23,6 +23,7 @@ import { ThemeProvider, useTheme } from '@/theme/ThemeProvider';
 import { ToastProvider } from '@/components/feedback/Toast';
 import { AnimatedSplash } from '@/components/AnimatedSplash';
 import { queryClient } from '@/lib/queryClient';
+import { setCurrentPathname } from '@/lib/currentRoute';
 import { useAuth } from '@/store/auth';
 import { useVerification } from '@/store/verification';
 
@@ -44,6 +45,13 @@ function RootNavigator() {
     Cairo_700Bold,
   });
   const [splashDone, setSplashDone] = useState(false);
+  const pathname = usePathname();
+
+  // Keep the module-level "where am I" up to date, so the language switch can
+  // save it before the RTL restart and return the user to the same screen.
+  useEffect(() => {
+    setCurrentPathname(pathname);
+  }, [pathname]);
 
   useEffect(() => {
     hydrate();

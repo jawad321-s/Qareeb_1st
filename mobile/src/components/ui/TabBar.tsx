@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { Pressable, StyleSheet, View, type LayoutRectangle } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
-import { BlurView } from 'expo-blur';
 import * as Haptics from 'expo-haptics';
 import Animated, {
   useAnimatedStyle,
@@ -44,7 +43,7 @@ const PILL_H = 40;
  * it's correct in both LTR and RTL.
  */
 export function TabBar({ state, navigation, meta }: BottomTabBarProps & { meta: Record<string, TabMeta> }) {
-  const { colors, gradient, isDark } = useTheme();
+  const { colors, gradient } = useTheme();
   const { t } = useT();
   const insets = useSafeAreaInsets();
 
@@ -82,9 +81,12 @@ export function TabBar({ state, navigation, meta }: BottomTabBarProps & { meta: 
     <View style={{ position: 'absolute', left: 16, right: 16, bottom: Math.max(insets.bottom + 10, 35) }}>
       <GlassView radius={28} style={shadows.lg}>
         <View style={{ flexDirection: 'row', paddingVertical: 10, paddingHorizontal: 8 }}>
-          {/* The single gliding liquid-glass lens, behind the icons: extra blur,
-              a tinted translucent fill, a diagonal specular sheen and a bright
-              rim — a glass bubble that slides between tabs (WhatsApp / iOS-26). */}
+          {/* The single gliding liquid-glass lens, behind the icons: a tinted
+              glass fill, a diagonal specular sheen and a bright rim — a glass
+              bubble that slides between tabs (WhatsApp / iOS-26). It sits on top
+              of the already-blurred bar, and is fully clipped by the bar's
+              rounded container, so it needs no nested blur or drop shadow (both
+              of which bleed outside the bar on native iOS). */}
           <Animated.View
             pointerEvents="none"
             style={[
@@ -96,35 +98,29 @@ export function TabBar({ state, navigation, meta }: BottomTabBarProps & { meta: 
                 height: PILL_H,
                 borderRadius: PILL_H / 2,
                 overflow: 'hidden',
-                shadowColor: colors.tint,
-                shadowOpacity: 0.55,
-                shadowRadius: 14,
-                shadowOffset: { width: 0, height: 6 },
-                elevation: 7,
               },
               pillStyle,
             ]}
           >
-            <BlurView intensity={isDark ? 30 : 45} tint={isDark ? 'dark' : 'light'} style={StyleSheet.absoluteFill} />
-            {/* Tinted glass fill (translucent so the bar shows through the lens) */}
+            {/* Tinted glass fill */}
             <LinearGradient
-              colors={[gradient[0] + 'F2', gradient[gradient.length - 1] + 'DE']}
+              colors={[gradient[0], gradient[gradient.length - 1]]}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 1 }}
               style={StyleSheet.absoluteFill}
             />
             {/* Specular sheen — the wet-glass highlight */}
             <LinearGradient
-              colors={['rgba(255,255,255,0.5)', 'rgba(255,255,255,0.08)', 'rgba(255,255,255,0)']}
+              colors={['rgba(255,255,255,0.45)', 'rgba(255,255,255,0.06)', 'rgba(255,255,255,0)']}
               start={{ x: 0, y: 0 }}
-              end={{ x: 0.7, y: 1 }}
+              end={{ x: 0.65, y: 1 }}
               style={StyleSheet.absoluteFill}
             />
             {/* Bright rim (glass edge) */}
             <View
               style={[
                 StyleSheet.absoluteFill,
-                { borderRadius: PILL_H / 2, borderWidth: 1, borderColor: 'rgba(255,255,255,0.6)' },
+                { borderRadius: PILL_H / 2, borderWidth: 1, borderColor: 'rgba(255,255,255,0.55)' },
               ]}
             />
           </Animated.View>

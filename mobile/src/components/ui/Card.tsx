@@ -17,6 +17,10 @@ interface CardProps extends ViewProps {
   elevated?: boolean;
   glass?: boolean;
   haptic?: boolean;
+  /** Clip children to the rounded corners. Off by default: on iOS a view can't
+   *  both clip AND cast a shadow, and clipping silently kills the shadow, which
+   *  made cards look flat. Enable only for cards with full-bleed content. */
+  clip?: boolean;
   style?: ViewStyle;
   children: React.ReactNode;
 }
@@ -29,6 +33,7 @@ export function Card({
   elevated = true,
   glass = false,
   haptic = true,
+  clip = false,
   style,
   children,
   ...rest
@@ -38,16 +43,17 @@ export function Card({
   const scale = useSharedValue(1);
   const animatedStyle = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }));
 
-  // Hairline border + a whisper of shadow: cards feel crisp at rest instead of
-  // floating — heavy uniform shadows are the fastest way to look template-made.
+  // A crisp border + a soft resting shadow so cards read as raised surfaces.
+  // `overflow: hidden` is opt-in (see the `clip` prop) because on iOS it kills
+  // the shadow — which is exactly what made cards look flat / not like cards.
   const base: ViewStyle = {
     borderRadius: radius.xl,
     backgroundColor: glass ? 'transparent' : colors.card,
     borderWidth: glass ? 0 : StyleSheet.hairlineWidth,
     borderColor: colors.border,
     padding: padded ? 16 : 0,
-    overflow: 'hidden',
-    ...(elevated ? shadows.sm : {}),
+    ...(clip || glass ? { overflow: 'hidden' as const } : {}),
+    ...(elevated ? shadows.card : {}),
   };
 
   const inner = glass ? (

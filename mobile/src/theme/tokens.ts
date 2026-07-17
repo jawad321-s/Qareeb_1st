@@ -54,10 +54,13 @@ export const themes: { light: ThemeColors; dark: ThemeColors } = {
   },
   dark: {
     bg: '#0A0F1E',
-    surface: '#101827',
+    surface: '#111A2C',
     surface2: '#1C2537',
-    card: '#121A2B',
-    border: '#243046',
+    // Cards sit a clear step above the page so they read as distinct surfaces
+    // (the previous value was almost the same as `bg`, so cards vanished on
+    // dark backgrounds). A more visible border reinforces the edge.
+    card: '#18223A',
+    border: '#2C3A57',
     fg: '#F1F5F9',
     muted: '#94A3B8',
     tint: '#60A5FA',
@@ -115,6 +118,15 @@ export const shadows = {
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.07,
     shadowRadius: 12,
+    elevation: 3,
+  },
+  // Resting card elevation — enough lift to read clearly as a raised surface on
+  // both light and dark, without looking heavy or "template-made".
+  card: {
+    shadowColor: '#0B1220',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.1,
+    shadowRadius: 16,
     elevation: 3,
   },
   lg: {

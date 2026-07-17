@@ -51,13 +51,14 @@ export function Text({
   const baseFamily = flat?.fontFamily ?? typography[variant].fontFamily;
   const fontFamily = isRTL ? arabicFont(baseFamily) : baseFamily;
 
-  // Alignment/direction comes from the native layout engine (I18nManager) —
-  // no manual flipping here, so LTR and RTL both behave like first-class.
+  // Default alignment follows the active language, so Arabic reads right-aligned
+  // even if the native RTL flip (I18nManager) hasn't taken effect on this build.
+  // `center` and any inline `textAlign` still win, since they come after.
   return (
     <RNText
       style={[
         typography[variant],
-        { color: toneColor[tone] },
+        { color: toneColor[tone], textAlign: isRTL ? 'right' : 'left', writingDirection: isRTL ? 'rtl' : 'ltr' },
         center && { textAlign: 'center' },
         style,
         { fontFamily }, // final override wins for both LTR passthrough and RTL swap

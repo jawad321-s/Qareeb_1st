@@ -23,39 +23,44 @@ export function ServiceCard({ service, locale = 'en', onPress }: Props) {
   const { colors, isDark } = useTheme();
 
   return (
-    <Card onPress={onPress} style={{ flexDirection: 'row', alignItems: 'center', gap: 14 }}>
-      <View
-        style={{
-          width: 50,
-          height: 50,
-          borderRadius: 15,
-          alignItems: 'center',
-          justifyContent: 'center',
-          backgroundColor: color + (isDark ? '26' : '14'),
-        }}
-      >
-        <Icon name={service.icon as any} size={23} color={color} />
-      </View>
-      <View style={{ flex: 1, gap: 3 }}>
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-          <Text variant="bodyMedium" numberOfLines={1} style={{ flex: 1 }}>
-            {service.name[locale]}
-          </Text>
-          {service.popular && <Badge label={t('common.popular')} variant="primary" icon="trending-up" />}
+    <Card onPress={onPress}>
+      {/* Row lives in a plain View, not on the Card itself — passing
+          flexDirection through the Card's Pressable style was unreliable on
+          native and stacked the card vertically. */}
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14 }}>
+        <View
+          style={{
+            width: 50,
+            height: 50,
+            borderRadius: 15,
+            alignItems: 'center',
+            justifyContent: 'center',
+            backgroundColor: color + (isDark ? '26' : '14'),
+          }}
+        >
+          <Icon name={service.icon as any} size={23} color={color} />
         </View>
-        <Text variant="caption" tone="muted" numberOfLines={1}>
-          {service.description[locale]}
-        </Text>
-        <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: 4 }}>
-          <Text variant="caption" tone="muted">
-            {t('common.from')}
+        <View style={{ flex: 1, gap: 3 }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+            <Text variant="bodyMedium" numberOfLines={1} style={{ flex: 1 }}>
+              {service.name[locale]}
+            </Text>
+            {service.popular && <Badge label={t('common.popular')} variant="primary" icon="trending-up" />}
+          </View>
+          <Text variant="caption" tone="muted" numberOfLines={1}>
+            {service.description[locale]}
           </Text>
-          <Text variant="bodyMedium" tone="primary" style={{ fontFamily: 'Inter_600SemiBold', fontVariant: ['tabular-nums'] }}>
-            {formatMoney(service.basePriceFrom)}
-          </Text>
+          <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: 4 }}>
+            <Text variant="caption" tone="muted">
+              {t('common.from')}
+            </Text>
+            <Text variant="bodyMedium" tone="primary" style={{ fontFamily: 'Inter_600SemiBold', fontVariant: ['tabular-nums'] }}>
+              {formatMoney(service.basePriceFrom)}
+            </Text>
+          </View>
         </View>
+        <Icon name="chevron-right" size={18} color={colors.tabInactive} />
       </View>
-      <Icon name="chevron-right" size={18} color={colors.tabInactive} />
     </Card>
   );
 }

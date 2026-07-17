@@ -17,6 +17,10 @@ export default function CustomerLayout() {
   // signed-in user) before any of them can read a null `user` and crash.
   const user = useAuth((s) => s.user);
   if (!user) return <Redirect href="/(auth)/welcome" />;
+  // Role gate: tab paths like /profile exist in BOTH groups, and an ambiguous
+  // link (deep link, post-restart restore) can land an artisan here — showing
+  // customer data mixed with artisan theming. Bounce them to their own app.
+  if (user.role === 'artisan') return <Redirect href="/(artisan)/dashboard" />;
 
   return (
     <Tabs

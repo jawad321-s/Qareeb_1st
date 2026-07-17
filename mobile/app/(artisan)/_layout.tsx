@@ -16,6 +16,9 @@ export default function ArtisanLayout() {
   // ancestor guard prevents a null-user crash on sign-out.
   const user = useAuth((s) => s.user);
   if (!user) return <Redirect href="/(auth)/welcome" />;
+  // Role gate — see the customer layout: ambiguous tab paths must not land a
+  // customer inside the artisan app.
+  if (user.role !== 'artisan') return <Redirect href="/(customer)/home" />;
 
   // No freezeOnBlur — see the customer layout: frozen tabs kept stale theme colors.
   return (

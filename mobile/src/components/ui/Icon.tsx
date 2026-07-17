@@ -12,7 +12,7 @@ const MIRRORED_IN_RTL: ReadonlySet<string> = new Set([
 // Curated Feather-style icon set (24×24 grid, stroke-based). Keys are referenced
 // by categories, tab bars and UI throughout the app.
 export type IconName =
-  | 'home' | 'search' | 'plus' | 'user' | 'bell' | 'message' | 'settings'
+  | 'home' | 'search' | 'plus' | 'minus' | 'user' | 'bell' | 'message' | 'settings'
   | 'chevron-right' | 'chevron-left' | 'chevron-down' | 'arrow-left' | 'arrow-right'
   | 'star' | 'star-filled' | 'heart' | 'heart-filled' | 'map-pin' | 'clock'
   | 'check' | 'check-circle' | 'x' | 'x-circle' | 'filter' | 'sliders'
@@ -53,6 +53,7 @@ function renderPaths(name: IconName, c: string, p: object) {
     case 'home': return <><Path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" {...p} /><Polyline points="9 22 9 12 15 12 15 22" {...p} /></>;
     case 'search': return <><Circle cx="11" cy="11" r="8" {...p} /><Line x1="21" y1="21" x2="16.65" y2="16.65" {...p} /></>;
     case 'plus': return <><Line x1="12" y1="5" x2="12" y2="19" {...p} /><Line x1="5" y1="12" x2="19" y2="12" {...p} /></>;
+    case 'minus': return <Line x1="5" y1="12" x2="19" y2="12" {...p} />;
     case 'user': return <><Path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" {...p} /><Circle cx="12" cy="7" r="4" {...p} /></>;
     case 'bell': return <><Path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" {...p} /><Path d="M13.73 21a2 2 0 0 1-3.46 0" {...p} /></>;
     case 'message': return <Path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8z" {...p} />;

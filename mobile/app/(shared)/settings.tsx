@@ -85,8 +85,8 @@ export default function Settings() {
         {t('set.about')}
       </Text>
       <Card padded={false}>
-        <LinkRow icon="shield" label={t('set.privacy')} first />
-        <LinkRow icon="info" label={t('set.terms')} />
+        <LinkRow icon="shield" label={t('set.privacy')} first onPress={() => router.push({ pathname: '/(shared)/legal', params: { doc: 'privacy' } })} />
+        <LinkRow icon="info" label={t('set.terms')} onPress={() => router.push({ pathname: '/(shared)/legal', params: { doc: 'terms' } })} />
         <LinkRow icon="help-circle" label={t('help.title')} onPress={() => router.push('/(shared)/help')} />
       </Card>
     </Screen>

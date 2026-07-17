@@ -29,10 +29,10 @@ export default function ArtisanProfile() {
 
   const items: { icon: IconName; label: string; danger?: boolean; onPress?: () => void; route?: string }[] = [
     { icon: 'shield', label: t('ap.verification'), route: '/(shared)/verification' },
-    { icon: 'image', label: t('ap.gallery'), route: '/(shared)/settings' },
-    { icon: 'sliders', label: t('ap.servicesPricing'), route: '/(shared)/settings' },
-    { icon: 'map-pin', label: t('ap.radius'), route: '/(shared)/settings' },
-    { icon: 'calendar', label: t('ap.availability'), route: '/(shared)/settings' },
+    { icon: 'image', label: t('ap.gallery'), route: '/(shared)/gallery' },
+    { icon: 'sliders', label: t('ap.servicesPricing'), route: '/(shared)/services-pricing' },
+    { icon: 'map-pin', label: t('ap.radius'), route: '/(shared)/service-radius' },
+    { icon: 'calendar', label: t('ap.availability'), route: '/(shared)/availability' },
     { icon: 'award', label: t('ap.subscription'), route: '/(shared)/subscription' },
     { icon: 'globe', label: `${t('profile.language')}: ${locale === 'ar' ? 'العربية' : 'English'}`, onPress: toggle },
     { icon: isDark ? 'moon' : 'sun', label: `${t('profile.theme')}: ${t(`settings.${mode}` as any)}`, onPress: () => setMode(mode === 'dark' ? 'light' : mode === 'light' ? 'system' : 'dark') },

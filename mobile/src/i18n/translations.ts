@@ -367,6 +367,39 @@ export const translations = {
     'ap.subscription': 'Subscription plan',
     'ap.pending': 'Pending',
 
+    // work gallery
+    'gal.desc': 'Photos customers see on your public profile.',
+    'gal.add': 'Add photo',
+    'gal.photos': 'photos',
+
+    // services & pricing
+    'sp.desc': 'Choose the services you offer and their starting prices.',
+    'sp.basePrice': 'Starting price',
+    'sp.active': 'Offered',
+
+    // service radius
+    'rad.desc': 'You will only see requests within this distance from your location.',
+    'rad.km': 'km',
+    'rad.current': 'Current radius',
+
+    // availability
+    'av.desc': 'Days and hours customers can book you.',
+    'av.from': 'From',
+    'av.to': 'To',
+    'av.day0': 'Sun',
+    'av.day1': 'Mon',
+    'av.day2': 'Tue',
+    'av.day3': 'Wed',
+    'av.day4': 'Thu',
+    'av.day5': 'Fri',
+    'av.day6': 'Sat',
+
+    // legal
+    'legal.privacyBody':
+      'We collect only the data needed to run Qareeb: your account details, requests and location while using the app. Your data is never sold, and photos and messages are visible only to the people involved in a request. You can delete your account and data at any time from settings.',
+    'legal.termsBody':
+      'Qareeb connects customers with independent artisans. Prices are agreed directly between both parties, and artisans are responsible for the quality of their work. Respectful conduct is required; fraudulent activity or abuse leads to account suspension. Payments are made in Israeli Shekel (₪).',
+
     // artisan offers / jobs
     'aOffers.title': 'My offers',
     'aJobs.title': 'Nearby jobs',
@@ -768,6 +801,39 @@ export const translations = {
     'ap.availability': 'أوقات العمل',
     'ap.subscription': 'باقة الاشتراك',
     'ap.pending': 'قيد المراجعة',
+
+    // work gallery
+    'gal.desc': 'الصور التي يشاهدها الزبائن على ملفك العام.',
+    'gal.add': 'إضافة صورة',
+    'gal.photos': 'صور',
+
+    // services & pricing
+    'sp.desc': 'اختر الخدمات التي تقدمها وأسعارها الابتدائية.',
+    'sp.basePrice': 'السعر الابتدائي',
+    'sp.active': 'مفعّلة',
+
+    // service radius
+    'rad.desc': 'ستظهر لك الطلبات ضمن هذه المسافة من موقعك فقط.',
+    'rad.km': 'كم',
+    'rad.current': 'النطاق الحالي',
+
+    // availability
+    'av.desc': 'الأيام والساعات التي يمكن للزبائن حجزك فيها.',
+    'av.from': 'من',
+    'av.to': 'إلى',
+    'av.day0': 'الأحد',
+    'av.day1': 'الإثنين',
+    'av.day2': 'الثلاثاء',
+    'av.day3': 'الأربعاء',
+    'av.day4': 'الخميس',
+    'av.day5': 'الجمعة',
+    'av.day6': 'السبت',
+
+    // legal
+    'legal.privacyBody':
+      'نجمع فقط البيانات اللازمة لتشغيل قريب: بيانات حسابك وطلباتك وموقعك أثناء استخدام التطبيق. لا نبيع بياناتك أبداً، والصور والرسائل تظهر فقط لأطراف الطلب. يمكنك حذف حسابك وبياناتك في أي وقت من الإعدادات.',
+    'legal.termsBody':
+      'قريب يربط الزبائن بحرفيين مستقلين. تُتفق الأسعار مباشرة بين الطرفين، والحرفي مسؤول عن جودة عمله. السلوك المحترم شرط لاستخدام التطبيق؛ أي احتيال أو إساءة يؤدي لتعليق الحساب. المدفوعات بالشيكل (₪).',
 
     // artisan offers / jobs
     'aOffers.title': 'عروضي',

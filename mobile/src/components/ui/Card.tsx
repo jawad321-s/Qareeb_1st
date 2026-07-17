@@ -64,38 +64,37 @@ export function Card({
     children
   );
 
+  // The card's visual surface ALWAYS renders on a plain View — the pressable
+  // variant only wraps it with (transparent) touch handling and a scale spring.
+  // Rendering the surface styles on the Pressable itself proved unreliable on
+  // native iOS (pressable cards lost their background/border and looked like
+  // bare rows), while the plain-View surface renders correctly everywhere.
+  const surface = (
+    <View style={[base, glass && { padding: 0 }, style]} {...rest}>
+      {inner}
+    </View>
+  );
+
   if (onPress) {
     const press = () => {
       if (haptic) Haptics.selectionAsync().catch(() => {});
       onPress();
     };
     return (
-      <Animated.View style={animatedStyle}>
-        <Pressable
-          onPress={press}
-          onPressIn={() => {
-            if (!reduceMotion) scale.value = withSpring(0.96, { damping: 18, stiffness: 320 });
-          }}
-          onPressOut={() => {
-            if (!reduceMotion) scale.value = withSpring(1, { damping: 13, stiffness: 200 });
-          }}
-          style={({ pressed }) => [
-            base,
-            glass && { padding: 0 },
-            reduceMotion && pressed && { opacity: 0.85 },
-            style,
-          ]}
-          {...rest}
-        >
-          {inner}
-        </Pressable>
-      </Animated.View>
+      <Pressable
+        onPress={press}
+        onPressIn={() => {
+          if (!reduceMotion) scale.value = withSpring(0.96, { damping: 18, stiffness: 320 });
+        }}
+        onPressOut={() => {
+          if (!reduceMotion) scale.value = withSpring(1, { damping: 13, stiffness: 200 });
+        }}
+        style={({ pressed }) => (reduceMotion && pressed ? { opacity: 0.85 } : undefined)}
+      >
+        <Animated.View style={animatedStyle}>{surface}</Animated.View>
+      </Pressable>
     );
   }
 
-  return (
-    <View style={[base, glass && { padding: 0 }, style]} {...rest}>
-      {inner}
-    </View>
-  );
+  return surface;
 }

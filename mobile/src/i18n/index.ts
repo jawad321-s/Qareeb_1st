@@ -11,6 +11,10 @@ const LOCALE_KEY = 'qareeb.locale';
 /** One-shot route to return to after the RTL-flip restart (read by app/index). */
 export const RESTORE_ROUTE_KEY = 'qareeb.restoreRoute';
 
+/** One-shot marker that this boot is a language-switch reload — the root layout
+ *  skips the animated splash so the user is back on their screen fast. */
+export const LANG_RELOAD_KEY = 'qareeb.langReload';
+
 const initialLocale: Locale = (storage.getString(LOCALE_KEY) as Locale) ?? config.defaultLocale;
 
 // Boot-time direction sync — runs before the first render so rows, paddings
@@ -33,6 +37,7 @@ function applyLocale(locale: Locale) {
   // to this screen instead of dumping them on home.
   const path = getCurrentPathname();
   if (path && path !== '/') storage.set(RESTORE_ROUTE_KEY, path);
+  storage.set(LANG_RELOAD_KEY, '1');
   syncNativeRTL(locale === 'ar');
   void reloadApp();
 }

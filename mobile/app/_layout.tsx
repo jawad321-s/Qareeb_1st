@@ -24,6 +24,8 @@ import { ToastProvider } from '@/components/feedback/Toast';
 import { AnimatedSplash } from '@/components/AnimatedSplash';
 import { queryClient } from '@/lib/queryClient';
 import { setCurrentPathname } from '@/lib/currentRoute';
+import { storage } from '@/lib/mmkv';
+import { LANG_RELOAD_KEY } from '@/i18n';
 import { useAuth } from '@/store/auth';
 import { useVerification } from '@/store/verification';
 
@@ -44,7 +46,13 @@ function RootNavigator() {
     Cairo_600SemiBold,
     Cairo_700Bold,
   });
-  const [splashDone, setSplashDone] = useState(false);
+  // A language switch restarts the app; that boot should feel like a quick
+  // refresh, not a cold start — so skip the animated splash for it (one-shot).
+  const [splashDone, setSplashDone] = useState(() => {
+    const langReload = storage.getString(LANG_RELOAD_KEY);
+    if (langReload) storage.delete(LANG_RELOAD_KEY);
+    return !!langReload;
+  });
   const pathname = usePathname();
 
   // Keep the module-level "where am I" up to date, so the language switch can
@@ -63,7 +71,9 @@ function RootNavigator() {
     if (hydrated && fontsLoaded) SplashScreen.hideAsync().catch(() => {});
   }, [hydrated, fontsLoaded]);
 
-  if (!fontsLoaded) return null;
+  // Never render null here: a null tree shows as a black window during the
+  // fonts reload after a language switch. Paint the theme background instead.
+  if (!fontsLoaded) return <View style={{ flex: 1, backgroundColor: colors.bg }} />;
 
   return (
     <View style={{ flex: 1 }}>

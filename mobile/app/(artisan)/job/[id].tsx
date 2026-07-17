@@ -4,6 +4,7 @@ import { Image } from 'expo-image';
 import { router, useLocalSearchParams } from 'expo-router';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { Screen } from '@/components/ui/Screen';
+import { useTabBarSpace } from '@/components/ui/TabBar';
 import { Header } from '@/components/ui/Header';
 import { Text } from '@/components/ui/Text';
 import { Card } from '@/components/ui/Card';
@@ -28,6 +29,9 @@ export default function JobDetail() {
   const font = useFont();
   const { data: request, isLoading } = useRequest(id!);
   const submit = useSubmitOffer(id!);
+  // This screen lives inside the artisan tab navigator, so the floating tab bar
+  // overlays it — the submit button must clear the bar.
+  const tabBarSpace = useTabBarSpace();
 
   const [price, setPrice] = useState('');
   const [eta, setEta] = useState('30');
@@ -63,7 +67,7 @@ export default function JobDetail() {
   const canSend = Number(price) > 0 && Number(eta) > 0 && message.trim().length >= 5 && !sent;
 
   return (
-    <Screen scroll>
+    <Screen scroll contentStyle={{ paddingBottom: tabBarSpace + 12 }}>
       <Header showBack title={t('job.title')} />
 
       <Animated.View entering={FadeInDown.duration(400)}>

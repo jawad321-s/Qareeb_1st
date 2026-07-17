@@ -9,6 +9,7 @@ import { Icon } from '@/components/ui/Icon';
 import { useToast } from '@/components/feedback/Toast';
 import { useTheme } from '@/theme/ThemeProvider';
 import { useFont, useT } from '@/i18n';
+import { localizedTextAlign } from '@/i18n/rtl';
 
 export default function Report() {
   const { colors } = useTheme();
@@ -63,7 +64,7 @@ export default function Report() {
         placeholder={t('report.detailsPlaceholder')}
         placeholderTextColor={colors.muted}
         multiline
-        style={{ minHeight: 120, borderRadius: 16, borderWidth: 1.5, borderColor: colors.border, backgroundColor: colors.surface, padding: 14, color: colors.fg, fontSize: 15, fontFamily: font('Inter_400Regular'), textAlign: isRTL ? 'right' : 'left', textAlignVertical: 'top', marginBottom: 20 }}
+        style={{ minHeight: 120, borderRadius: 16, borderWidth: 1.5, borderColor: colors.border, backgroundColor: colors.surface, padding: 14, color: colors.fg, fontSize: 15, fontFamily: font('Inter_400Regular'), textAlign: localizedTextAlign(isRTL), textAlignVertical: 'top', marginBottom: 20 }}
       />
 
       <Button label={t('report.submit')} iconLeft="flag" variant="danger" onPress={submit} loading={loading} disabled={!reason} />

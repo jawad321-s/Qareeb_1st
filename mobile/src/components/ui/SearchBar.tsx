@@ -4,6 +4,7 @@ import { Icon } from './Icon';
 import { useTheme } from '@/theme/ThemeProvider';
 import { useFont, useT } from '@/i18n';
 import { radius, shadows } from '@/theme/tokens';
+import { localizedTextAlign } from '@/i18n/rtl';
 
 interface Props {
   value?: string;
@@ -26,7 +27,7 @@ export function SearchBar({ value, onChangeText, placeholder = 'Search servicesâ
     color: colors.fg,
     fontSize: 15,
     fontFamily: font('Inter_400Regular'),
-    textAlign: isRTL ? 'right' : 'left',
+    textAlign: localizedTextAlign(isRTL),
     ...({ outlineStyle: 'none' } as any),
   };
 

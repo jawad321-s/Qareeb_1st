@@ -5,6 +5,7 @@ import { Icon, type IconName } from './Icon';
 import { radius } from '@/theme/tokens';
 import { useTheme } from '@/theme/ThemeProvider';
 import { useFont, useT } from '@/i18n';
+import { localizedTextAlign } from '@/i18n/rtl';
 
 interface InputProps extends TextInputProps {
   label?: string;
@@ -65,7 +66,7 @@ export function Input({
               fontSize: 15,
               fontFamily: font('Inter_400Regular'),
               height: multiline ? undefined : '100%',
-              textAlign: isRTL ? 'right' : 'left',
+              textAlign: localizedTextAlign(isRTL),
               ...({ outlineStyle: 'none' } as any),
             },
             style,

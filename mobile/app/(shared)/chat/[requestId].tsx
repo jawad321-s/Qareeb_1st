@@ -14,6 +14,7 @@ import { useTheme } from '@/theme/ThemeProvider';
 import { useFont, useT } from '@/i18n';
 import { timeAgo } from '@/lib/format';
 import { MOCK_ARTISANS } from '@/mock/data';
+import { localizedTextAlign } from '@/i18n/rtl';
 
 export default function Chat() {
   const { colors, isDark } = useTheme();
@@ -99,7 +100,7 @@ export default function Chat() {
               placeholder={t('chat.message')}
               placeholderTextColor={colors.muted}
               multiline
-              style={{ flex: 1, color: colors.fg, fontSize: 15, fontFamily: font('Inter_400Regular'), textAlign: isRTL ? 'right' : 'left', maxHeight: 100, paddingVertical: 10 }}
+              style={{ flex: 1, color: colors.fg, fontSize: 15, fontFamily: font('Inter_400Regular'), textAlign: localizedTextAlign(isRTL), maxHeight: 100, paddingVertical: 10 }}
             />
             <Pressable hitSlop={6}>
               <Icon name="mic" size={20} color={colors.muted} />

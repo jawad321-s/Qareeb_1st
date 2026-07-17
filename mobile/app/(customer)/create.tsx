@@ -19,6 +19,7 @@ import { useTheme } from '@/theme/ThemeProvider';
 import { useFont, useT } from '@/i18n';
 import { config } from '@/lib/config';
 import { formatMoney } from '@/lib/format';
+import { localizedTextAlign } from '@/i18n/rtl';
 
 export default function CreateRequest() {
   const { colors } = useTheme();
@@ -115,7 +116,7 @@ export default function CreateRequest() {
                 onChangeText={setTitle}
                 placeholder={category?.name[locale]}
                 placeholderTextColor={colors.muted}
-                style={{ height: 54, borderRadius: 16, borderWidth: 1.5, borderColor: colors.border, backgroundColor: colors.surface, paddingHorizontal: 14, color: colors.fg, fontSize: 15, fontFamily: font('Inter_400Regular'), textAlign: isRTL ? 'right' : 'left' }}
+                style={{ height: 54, borderRadius: 16, borderWidth: 1.5, borderColor: colors.border, backgroundColor: colors.surface, paddingHorizontal: 14, color: colors.fg, fontSize: 15, fontFamily: font('Inter_400Regular'), textAlign: localizedTextAlign(isRTL) }}
               />
             </View>
             <View style={{ gap: 6 }}>
@@ -128,7 +129,7 @@ export default function CreateRequest() {
                 placeholder={t('create.describePlaceholder')}
                 placeholderTextColor={colors.muted}
                 multiline
-                style={{ minHeight: 120, borderRadius: 16, borderWidth: 1.5, borderColor: colors.border, backgroundColor: colors.surface, padding: 14, color: colors.fg, fontSize: 15, fontFamily: font('Inter_400Regular'), textAlign: isRTL ? 'right' : 'left', textAlignVertical: 'top' }}
+                style={{ minHeight: 120, borderRadius: 16, borderWidth: 1.5, borderColor: colors.border, backgroundColor: colors.surface, padding: 14, color: colors.fg, fontSize: 15, fontFamily: font('Inter_400Regular'), textAlign: localizedTextAlign(isRTL), textAlignVertical: 'top' }}
               />
             </View>
             <View style={{ gap: 8 }}>
@@ -170,7 +171,7 @@ export default function CreateRequest() {
                     value={b.v}
                     onChangeText={b.set}
                     keyboardType="number-pad"
-                    style={{ height: 54, borderRadius: 16, borderWidth: 1.5, borderColor: colors.border, backgroundColor: colors.surface, paddingHorizontal: 14, color: colors.fg, fontSize: 18, fontFamily: font('Inter_600SemiBold'), textAlign: isRTL ? 'right' : 'left' }}
+                    style={{ height: 54, borderRadius: 16, borderWidth: 1.5, borderColor: colors.border, backgroundColor: colors.surface, paddingHorizontal: 14, color: colors.fg, fontSize: 18, fontFamily: font('Inter_600SemiBold'), textAlign: localizedTextAlign(isRTL) }}
                   />
                 </View>
               ))}

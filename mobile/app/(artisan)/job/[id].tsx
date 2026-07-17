@@ -19,6 +19,7 @@ import { formatMoney } from '@/lib/format';
 import { useAuth } from '@/store/auth';
 import { useTheme } from '@/theme/ThemeProvider';
 import { useFont, useT } from '@/i18n';
+import { localizedTextAlign } from '@/i18n/rtl';
 
 export default function JobDetail() {
   const { colors } = useTheme();
@@ -158,5 +159,5 @@ const inputStyle = (colors: any, font: (f: string) => string, isRTL: boolean) =>
   color: colors.fg,
   fontSize: 16,
   fontFamily: font('Inter_500Medium'),
-  textAlign: (isRTL ? 'right' : 'left') as 'right' | 'left',
+  textAlign: localizedTextAlign(isRTL),
 });

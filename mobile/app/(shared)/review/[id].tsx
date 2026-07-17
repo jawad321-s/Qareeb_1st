@@ -11,6 +11,7 @@ import { Avatar } from '@/components/ui/Avatar';
 import { useTheme } from '@/theme/ThemeProvider';
 import { useFont, useT } from '@/i18n';
 import { MOCK_ARTISANS } from '@/mock/data';
+import { localizedTextAlign } from '@/i18n/rtl';
 
 export default function ReviewScreen() {
   const { colors } = useTheme();
@@ -70,7 +71,7 @@ export default function ReviewScreen() {
         placeholder={t('review.commentPlaceholder')}
         placeholderTextColor={colors.muted}
         multiline
-        style={{ minHeight: 120, borderRadius: 16, borderWidth: 1.5, borderColor: colors.border, backgroundColor: colors.surface, padding: 14, color: colors.fg, fontSize: 15, fontFamily: font('Inter_400Regular'), textAlign: isRTL ? 'right' : 'left', textAlignVertical: 'top', marginBottom: 20 }}
+        style={{ minHeight: 120, borderRadius: 16, borderWidth: 1.5, borderColor: colors.border, backgroundColor: colors.surface, padding: 14, color: colors.fg, fontSize: 15, fontFamily: font('Inter_400Regular'), textAlign: localizedTextAlign(isRTL), textAlignVertical: 'top', marginBottom: 20 }}
       />
 
       <Button label={t('review.submit')} iconRight="send" onPress={submit} loading={saving} />

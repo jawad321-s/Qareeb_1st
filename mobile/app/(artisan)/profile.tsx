@@ -18,11 +18,14 @@ import { MOCK_ARTISAN_PROFILE } from '@/mock/data';
 
 export default function ArtisanProfile() {
   const { colors, isDark } = useTheme();
-  const user = useAuth((s) => s.user)!;
+  const user = useAuth((s) => s.user);
   const signOut = useAuth((s) => s.signOut);
   const { mode, setMode } = useThemeStore();
   const { t, locale, toggle } = useT();
   const profile = MOCK_ARTISAN_PROFILE;
+
+  // See customer profile: guard against a null user during the sign-out redirect.
+  if (!user) return null;
 
   const items: { icon: IconName; label: string; danger?: boolean; onPress?: () => void; route?: string }[] = [
     { icon: 'shield', label: t('ap.verification'), route: '/(shared)/verification' },
@@ -33,7 +36,7 @@ export default function ArtisanProfile() {
     { icon: 'award', label: t('ap.subscription'), route: '/(shared)/subscription' },
     { icon: 'globe', label: `${t('profile.language')}: ${locale === 'ar' ? 'العربية' : 'English'}`, onPress: toggle },
     { icon: isDark ? 'moon' : 'sun', label: `${t('profile.theme')}: ${t(`settings.${mode}` as any)}`, onPress: () => setMode(mode === 'dark' ? 'light' : mode === 'light' ? 'system' : 'dark') },
-    { icon: 'log-out', label: t('profile.signOut'), danger: true, onPress: () => { signOut(); router.replace('/(auth)/welcome'); } },
+    { icon: 'log-out', label: t('profile.signOut'), danger: true, onPress: signOut },
   ];
 
   return (

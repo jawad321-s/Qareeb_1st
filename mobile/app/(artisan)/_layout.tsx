@@ -1,6 +1,7 @@
 import React from 'react';
-import { Tabs } from 'expo-router';
+import { Redirect, Tabs } from 'expo-router';
 import { TabBar } from '@/components/ui/TabBar';
+import { useAuth } from '@/store/auth';
 
 const META = {
   dashboard: { icon: 'home' as const, label: 'tab.home' as const },
@@ -11,6 +12,11 @@ const META = {
 };
 
 export default function ArtisanLayout() {
+  // Auth gate for the whole artisan stack — see the customer layout for why this
+  // ancestor guard prevents a null-user crash on sign-out.
+  const user = useAuth((s) => s.user);
+  if (!user) return <Redirect href="/(auth)/welcome" />;
+
   return (
     <Tabs screenOptions={{ headerShown: false, animation: 'shift', freezeOnBlur: true, lazy: true }} tabBar={(props) => <TabBar {...props} meta={META} />}>
       <Tabs.Screen name="dashboard" />

@@ -78,8 +78,26 @@ export function TabBar({ state, navigation, meta }: BottomTabBarProps & { meta: 
 
   return (
     // Clears the Android navigation / gesture area; never hugs the screen edge.
-    <View style={{ position: 'absolute', left: 16, right: 16, bottom: Math.max(insets.bottom + 10, 35) }}>
-      <GlassView radius={28} style={shadows.lg}>
+    // Shadow/clip are split across two layers to avoid an iOS gotcha: a view
+    // that casts a shadow cannot also clip its children (the shadow forces
+    // masksToBounds=false), which let the sliding pill escape above the bar.
+    //  • Outer view  → iOS drop shadow only (Android ignores shadow* props).
+    //  • GlassView   → rounded clip + Android elevation (iOS ignores elevation),
+    //                  so it clips the blur AND the pill on both platforms.
+    <View
+      style={{
+        position: 'absolute',
+        left: 16,
+        right: 16,
+        bottom: Math.max(insets.bottom + 10, 35),
+        borderRadius: 28,
+        shadowColor: shadows.lg.shadowColor,
+        shadowOffset: shadows.lg.shadowOffset,
+        shadowOpacity: shadows.lg.shadowOpacity,
+        shadowRadius: shadows.lg.shadowRadius,
+      }}
+    >
+      <GlassView radius={28} style={{ elevation: shadows.lg.elevation }}>
         <View style={{ flexDirection: 'row', paddingVertical: 10, paddingHorizontal: 8 }}>
           {/* The single gliding liquid-glass lens, behind the icons: a tinted
               glass fill, a diagonal specular sheen and a bright rim — a glass

@@ -1,6 +1,7 @@
 import React from 'react';
-import { Tabs } from 'expo-router';
+import { Redirect, Tabs } from 'expo-router';
 import { TabBar } from '@/components/ui/TabBar';
+import { useAuth } from '@/store/auth';
 
 const META = {
   home: { icon: 'home' as const, label: 'tab.home' as const },
@@ -11,6 +12,12 @@ const META = {
 };
 
 export default function CustomerLayout() {
+  // Auth gate for the whole customer stack. On sign-out `user` becomes null and
+  // this ancestor re-renders first, unmounting every tab screen (which assume a
+  // signed-in user) before any of them can read a null `user` and crash.
+  const user = useAuth((s) => s.user);
+  if (!user) return <Redirect href="/(auth)/welcome" />;
+
   return (
     <Tabs
       screenOptions={{ headerShown: false, animation: 'shift', freezeOnBlur: true, lazy: true }}

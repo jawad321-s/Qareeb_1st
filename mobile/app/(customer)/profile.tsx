@@ -25,10 +25,14 @@ interface Item {
 
 export default function Profile() {
   const { colors, isDark, gradient, gradientSoft } = useTheme();
-  const user = useAuth((s) => s.user)!;
+  const user = useAuth((s) => s.user);
   const signOut = useAuth((s) => s.signOut);
   const { mode, setMode } = useThemeStore();
   const { t, locale, toggle } = useT();
+
+  // Signing out clears `user`; the layout redirects to welcome, but guard here
+  // too so this screen never dereferences a null user during that transition.
+  if (!user) return null;
 
   const sections: { title: string; items: Item[] }[] = [
     {
@@ -52,7 +56,7 @@ export default function Profile() {
       items: [
         { icon: 'help-circle', label: t('profile.help'), route: '/(shared)/help' },
         { icon: 'flag', label: t('profile.report'), route: '/(shared)/report' },
-        { icon: 'log-out', label: t('profile.signOut'), danger: true, onPress: () => { signOut(); router.replace('/(auth)/welcome'); } },
+        { icon: 'log-out', label: t('profile.signOut'), danger: true, onPress: signOut },
       ],
     },
   ];

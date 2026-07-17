@@ -58,8 +58,11 @@ export default function Search() {
         <SearchBar value={query} onChangeText={setQuery} placeholder={t('search.placeholder')} autoFocus={!params.category} />
       </View>
 
-      {/* Category filter chips */}
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ flexGrow: 0, height: 52, marginTop: 12, marginBottom: 4 }} contentContainerStyle={{ paddingHorizontal: 20, gap: 8, alignItems: 'center' }}>
+      {/* Category filter chips. The row lives inside a fixed-height plain View —
+          a height set directly on a horizontal ScrollView collapses on web and
+          clipped the chips to half their height. */}
+      <View style={{ height: 44, marginTop: 12, marginBottom: 4 }}>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingHorizontal: 20, gap: 8, alignItems: 'center' }}>
         <Pressable onPress={() => setCategory(null)} style={chip(!category)}>
           <Text variant="caption" style={{ color: !category ? '#FFF' : colors.fg, fontFamily: 'Inter_500Medium' }}>
             {t('search.all')}
@@ -75,7 +78,8 @@ export default function Search() {
             </Pressable>
           );
         })}
-      </ScrollView>
+        </ScrollView>
+      </View>
 
       {/* Sort row */}
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, paddingHorizontal: 20, marginBottom: 8 }}>

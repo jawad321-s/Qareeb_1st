@@ -9,6 +9,7 @@ import { Text } from '@/components/ui/Text';
 import { Icon } from '@/components/ui/Icon';
 import { Avatar } from '@/components/ui/Avatar';
 import { SearchBar } from '@/components/ui/SearchBar';
+import { useTabBarSpace } from '@/components/ui/TabBar';
 import { SectionHeader } from '@/components/ui/SectionHeader';
 import { CategoryTile } from '@/components/domain/CategoryTile';
 import { ServiceCard } from '@/components/domain/ServiceCard';
@@ -23,6 +24,7 @@ import { useT } from '@/i18n';
 
 export default function Home() {
   const { colors, isDark } = useTheme();
+  const tabBarSpace = useTabBarSpace();
   const user = useAuth((s) => s.user);
   const { t, locale } = useT();
   const [refreshing, setRefreshing] = useState(false);
@@ -98,7 +100,7 @@ export default function Home() {
         </SafeAreaView>
       </LinearGradient>
 
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 120, paddingTop: 20 }}>
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: tabBarSpace + 16, paddingTop: 20 }}>
         {/* Categories */}
         <View style={{ paddingHorizontal: 20 }}>
           <SectionHeader title={t('home.categories')} actionLabel={t('common.seeAll')} onAction={() => router.push('/(customer)/search')} />

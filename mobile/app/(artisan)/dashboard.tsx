@@ -11,6 +11,7 @@ import { Avatar } from '@/components/ui/Avatar';
 import { Card } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
 import { SectionHeader } from '@/components/ui/SectionHeader';
+import { useTabBarSpace } from '@/components/ui/TabBar';
 import { RequestCard } from '@/components/domain/RequestCard';
 import { CardSkeleton } from '@/components/feedback/Skeleton';
 import { useNearbyRequests } from '@/hooks/queries';
@@ -25,6 +26,7 @@ export default function ArtisanDashboard() {
   const { t } = useT();
   const [online, setOnline] = useState(true);
   const nearby = useNearbyRequests(user.uid);
+  const tabBarSpace = useTabBarSpace();
 
   const stats = [
     { icon: 'wallet' as const, label: t('artisan.thisMonth'), value: formatMoney(1240000), color: colors.tint },
@@ -74,7 +76,7 @@ export default function ArtisanDashboard() {
         </SafeAreaView>
       </LinearGradient>
 
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 120, paddingTop: 16 }}>
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: tabBarSpace + 16, paddingTop: 16 }}>
         {/* Stats */}
         <View style={{ flexDirection: 'row', gap: 10, paddingHorizontal: 20 }}>
           {stats.map((s, i) => (

@@ -3,6 +3,7 @@ import { View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { Screen } from '@/components/ui/Screen';
+import { useTabBarSpace } from '@/components/ui/TabBar';
 import { Header } from '@/components/ui/Header';
 import { Text } from '@/components/ui/Text';
 import { Card } from '@/components/ui/Card';
@@ -25,6 +26,7 @@ const MONTHLY = [
 export default function Income() {
   const { colors } = useTheme();
   const { t } = useT();
+  const tabBarSpace = useTabBarSpace();
   const BREAKDOWN = [
     { icon: 'check-circle' as const, label: t('inc.completedJobs'), value: '214', color: '#10B981' },
     { icon: 'x-circle' as const, label: t('inc.rejectedJobs'), value: '18', color: '#EF4444' },
@@ -32,7 +34,8 @@ export default function Income() {
     { icon: 'star' as const, label: t('inc.avgRating'), value: '4.8', color: colors.tint },
   ];
   return (
-    <Screen scroll>
+    // Bottom padding must clear the floating tab bar (Screen's default doesn't).
+    <Screen scroll contentStyle={{ paddingBottom: tabBarSpace + 12 }}>
       <Header title={t('artisan.income')} />
 
       <Animated.View entering={FadeInDown.duration(400)}>

@@ -1,10 +1,11 @@
-import React, { useEffect, useState } from 'react';
-import { Pressable, StyleSheet, View, type LayoutRectangle } from 'react-native';
+import React, { useEffect } from 'react';
+import { Pressable, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
 import Animated, {
   useAnimatedStyle,
+  useReducedMotion,
   useSharedValue,
   withSpring,
 } from 'react-native-reanimated';
@@ -38,9 +39,13 @@ const PILL_W = 54;
 const PILL_H = 40;
 
 /**
- * Floating liquid-glass tab bar. A single glass pill glides between tabs with a
- * spring (Instagram / iOS-26 feel) — positions are measured from real layout so
- * it's correct in both LTR and RTL.
+ * Floating liquid-glass tab bar. The active tab shows a glass bubble behind its
+ * icon (tinted gradient + specular sheen + bright rim) that springs in on
+ * selection. The bubble is rendered INSIDE each tab item — not as a measured,
+ * translated overlay — so its position is correct by construction on iOS,
+ * Android and web, in both LTR and RTL. (The previous gliding-overlay approach
+ * measured child layouts and translated a shared pill; native RTL flipped the
+ * coordinate space and left the pill stranded outside the bar.)
  */
 export function TabBar({ state, navigation, meta }: BottomTabBarProps & { meta: Record<string, TabMeta> }) {
   const { colors, gradient } = useTheme();
@@ -52,38 +57,13 @@ export function TabBar({ state, navigation, meta }: BottomTabBarProps & { meta: 
     .map((route, index) => ({ route, index, m: meta[route.name] }))
     .filter((x): x is { route: (typeof state.routes)[number]; index: number; m: TabMeta } => !!x.m);
 
-  const activeVisible = Math.max(0, items.findIndex((x) => x.index === state.index));
-
-  // Measured centre-x of each visible tab (accounts for RTL flex order).
-  const [layouts, setLayouts] = useState<Record<number, LayoutRectangle>>({});
-  const pillX = useSharedValue(0);
-  const ready = useSharedValue(0);
-
-  useEffect(() => {
-    const l = layouts[activeVisible];
-    if (!l) return;
-    const target = l.x + l.width / 2 - PILL_W / 2;
-    if (ready.value === 0) {
-      pillX.value = target; // first placement without animation
-      ready.value = 1;
-    } else {
-      pillX.value = withSpring(target, { damping: 16, stiffness: 170, mass: 0.7 });
-    }
-  }, [activeVisible, layouts, pillX, ready]);
-
-  const pillStyle = useAnimatedStyle(() => ({
-    transform: [{ translateX: pillX.value }],
-    opacity: ready.value,
-  }));
-
   return (
     // Clears the Android navigation / gesture area; never hugs the screen edge.
     // Shadow/clip are split across two layers to avoid an iOS gotcha: a view
     // that casts a shadow cannot also clip its children (the shadow forces
-    // masksToBounds=false), which let the sliding pill escape above the bar.
+    // masksToBounds=false).
     //  • Outer view  → iOS drop shadow only (Android ignores shadow* props).
-    //  • GlassView   → rounded clip + Android elevation (iOS ignores elevation),
-    //                  so it clips the blur AND the pill on both platforms.
+    //  • GlassView   → rounded clip + Android elevation (iOS ignores elevation).
     <View
       style={{
         position: 'absolute',
@@ -99,51 +79,7 @@ export function TabBar({ state, navigation, meta }: BottomTabBarProps & { meta: 
     >
       <GlassView radius={28} style={{ elevation: shadows.lg.elevation }}>
         <View style={{ flexDirection: 'row', paddingVertical: 10, paddingHorizontal: 8 }}>
-          {/* The single gliding liquid-glass lens, behind the icons: a tinted
-              glass fill, a diagonal specular sheen and a bright rim — a glass
-              bubble that slides between tabs (WhatsApp / iOS-26). It sits on top
-              of the already-blurred bar, and is fully clipped by the bar's
-              rounded container, so it needs no nested blur or drop shadow (both
-              of which bleed outside the bar on native iOS). */}
-          <Animated.View
-            pointerEvents="none"
-            style={[
-              {
-                position: 'absolute',
-                top: 10,
-                left: 0,
-                width: PILL_W,
-                height: PILL_H,
-                borderRadius: PILL_H / 2,
-                overflow: 'hidden',
-              },
-              pillStyle,
-            ]}
-          >
-            {/* Tinted glass fill */}
-            <LinearGradient
-              colors={[gradient[0], gradient[gradient.length - 1]]}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
-              style={StyleSheet.absoluteFill}
-            />
-            {/* Specular sheen — the wet-glass highlight */}
-            <LinearGradient
-              colors={['rgba(255,255,255,0.45)', 'rgba(255,255,255,0.06)', 'rgba(255,255,255,0)']}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 0.65, y: 1 }}
-              style={StyleSheet.absoluteFill}
-            />
-            {/* Bright rim (glass edge) */}
-            <View
-              style={[
-                StyleSheet.absoluteFill,
-                { borderRadius: PILL_H / 2, borderWidth: 1, borderColor: 'rgba(255,255,255,0.55)' },
-              ]}
-            />
-          </Animated.View>
-
-          {items.map((x, visibleIndex) => {
+          {items.map((x) => {
             const focused = x.index === state.index;
             return (
               <TabItem
@@ -151,7 +87,7 @@ export function TabBar({ state, navigation, meta }: BottomTabBarProps & { meta: 
                 icon={x.m.icon}
                 label={t(x.m.label)}
                 focused={focused}
-                onLayout={(rect) => setLayouts((prev) => (prev[visibleIndex]?.x === rect.x ? prev : { ...prev, [visibleIndex]: rect }))}
+                gradient={gradient}
                 onPress={() => {
                   Haptics.selectionAsync().catch(() => {});
                   const event = navigation.emit({ type: 'tabPress', target: x.route.key, canPreventDefault: true });
@@ -173,7 +109,7 @@ function TabItem({
   label,
   focused,
   onPress,
-  onLayout,
+  gradient,
   tint,
   inactive,
 }: {
@@ -181,22 +117,68 @@ function TabItem({
   label: string;
   focused: boolean;
   onPress: () => void;
-  onLayout: (rect: LayoutRectangle) => void;
+  gradient: readonly [string, string, ...string[]];
   tint: string;
   inactive: string;
 }) {
-  const scale = useSharedValue(focused ? 1 : 0.92);
+  const reduceMotion = useReducedMotion();
+  const bubble = useSharedValue(focused ? 1 : 0);
+  const iconScale = useSharedValue(focused ? 1 : 0.92);
 
   useEffect(() => {
-    scale.value = withSpring(focused ? 1 : 0.92, { damping: 13, stiffness: 200 });
-  }, [focused, scale]);
+    if (reduceMotion) {
+      bubble.value = focused ? 1 : 0;
+      iconScale.value = 1;
+      return;
+    }
+    bubble.value = withSpring(focused ? 1 : 0, { damping: 15, stiffness: 220 });
+    iconScale.value = withSpring(focused ? 1 : 0.92, { damping: 13, stiffness: 200 });
+  }, [focused, reduceMotion, bubble, iconScale]);
 
-  const iconWrapStyle = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }));
+  const bubbleStyle = useAnimatedStyle(() => ({
+    opacity: bubble.value,
+    transform: [{ scale: 0.6 + 0.4 * bubble.value }],
+  }));
+
+  const iconWrapStyle = useAnimatedStyle(() => ({ transform: [{ scale: iconScale.value }] }));
 
   return (
-    <Pressable onPress={onPress} onLayout={(e) => onLayout(e.nativeEvent.layout)} style={{ flex: 1, alignItems: 'center' }}>
+    <Pressable onPress={onPress} style={{ flex: 1, alignItems: 'center' }}>
       <View style={{ alignItems: 'center', gap: 3 }}>
         <View style={{ width: PILL_W, height: PILL_H, alignItems: 'center', justifyContent: 'center' }}>
+          {/* Liquid-glass bubble behind the active icon: tinted glass fill,
+              wet-glass sheen and a bright rim. Lives inside the item, so it is
+              always exactly under its icon. */}
+          <Animated.View
+            pointerEvents="none"
+            style={[
+              {
+                ...StyleSheet.absoluteFillObject,
+                borderRadius: PILL_H / 2,
+                overflow: 'hidden',
+              },
+              bubbleStyle,
+            ]}
+          >
+            <LinearGradient
+              colors={[gradient[0], gradient[gradient.length - 1]]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={StyleSheet.absoluteFill}
+            />
+            <LinearGradient
+              colors={['rgba(255,255,255,0.45)', 'rgba(255,255,255,0.06)', 'rgba(255,255,255,0)']}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 0.65, y: 1 }}
+              style={StyleSheet.absoluteFill}
+            />
+            <View
+              style={[
+                StyleSheet.absoluteFill,
+                { borderRadius: PILL_H / 2, borderWidth: 1, borderColor: 'rgba(255,255,255,0.55)' },
+              ]}
+            />
+          </Animated.View>
           <Animated.View style={iconWrapStyle}>
             <Icon name={icon} size={20} color={focused ? '#FFFFFF' : inactive} />
           </Animated.View>

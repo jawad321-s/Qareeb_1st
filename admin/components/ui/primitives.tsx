@@ -1,51 +1,69 @@
 'use client';
 
+// UI primitives, now backed by HeroUI v3. The exported API is unchanged so
+// every page keeps working exactly as before — only the rendering layer moved
+// to HeroUI components (React Aria accessibility + Tailwind v4 styling).
+import {
+  Button as HeroButton,
+  Card as HeroCard,
+  Chip as HeroChip,
+  Input as HeroInput,
+} from '@heroui/react';
 import { cn } from '@/lib/utils';
 import { useT, type TKey } from '@/lib/i18n';
 
 export function Card({ className, children }: { className?: string; children: React.ReactNode }) {
-  return (
-    <div className={cn('surface rounded-2xl border border-base card-shadow', className)}>{children}</div>
-  );
+  return <HeroCard className={cn('card-shadow', className)}>{children}</HeroCard>;
 }
 
 type BadgeTone = 'neutral' | 'brand' | 'success' | 'warning' | 'danger' | 'info';
-const TONES: Record<BadgeTone, string> = {
-  neutral: 'bg-slate-500/15 text-slate-500',
-  brand: 'bg-brand-500/15 text-brand-500',
-  success: 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400',
-  warning: 'bg-amber-500/15 text-amber-600 dark:text-amber-400',
-  danger: 'bg-red-500/15 text-red-600 dark:text-red-400',
-  info: 'bg-blue-500/15 text-blue-600 dark:text-blue-400',
+const TONE_TO_COLOR: Record<BadgeTone, 'default' | 'accent' | 'success' | 'warning' | 'danger'> = {
+  neutral: 'default',
+  brand: 'accent',
+  success: 'success',
+  warning: 'warning',
+  danger: 'danger',
+  info: 'accent',
 };
 
 export function Badge({ tone = 'neutral', children }: { tone?: BadgeTone; children: React.ReactNode }) {
   return (
-    <span className={cn('inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-semibold', TONES[tone])}>
-      {children}
-    </span>
+    <HeroChip color={TONE_TO_COLOR[tone]} variant="soft" size="sm">
+      <HeroChip.Label>{children}</HeroChip.Label>
+    </HeroChip>
   );
 }
 
-export function Button({
-  children,
-  variant = 'primary',
-  size = 'md',
-  className,
-  ...props
-}: React.ButtonHTMLAttributes<HTMLButtonElement> & { variant?: 'primary' | 'ghost' | 'outline' | 'danger'; size?: 'sm' | 'md' }) {
-  const variants = {
-    primary: 'bg-brand-600 text-white hover:bg-brand-700',
-    ghost: 'hover:bg-slate-500/10 text-muted',
-    outline: 'border border-base hover:bg-slate-500/5',
-    danger: 'bg-red-600 text-white hover:bg-red-700',
-  };
-  const sizes = { sm: 'h-8 px-3 text-xs', md: 'h-10 px-4 text-sm' };
+interface ButtonProps {
+  children: React.ReactNode;
+  variant?: 'primary' | 'ghost' | 'outline' | 'danger';
+  size?: 'sm' | 'md';
+  className?: string;
+  disabled?: boolean;
+  title?: string;
+  type?: 'button' | 'submit';
+  onClick?: () => void;
+}
+
+export function Button({ children, variant = 'primary', size = 'md', className, disabled, title, type, onClick }: ButtonProps) {
   return (
-    <button className={cn('inline-flex items-center justify-center gap-2 rounded-xl font-medium transition-colors', variants[variant], sizes[size], className)} {...props}>
+    <HeroButton
+      variant={variant}
+      size={size}
+      isDisabled={disabled}
+      className={className}
+      aria-label={title}
+      type={type}
+      onPress={onClick ? () => onClick() : undefined}
+    >
       {children}
-    </button>
+    </HeroButton>
   );
+}
+
+/** HeroUI text input with the app's sizing defaults; standard <input> props. */
+export function Input({ className, ...props }: React.ComponentProps<typeof HeroInput>) {
+  return <HeroInput fullWidth className={className} {...props} />;
 }
 
 export function StatusPill({ status }: { status: string }) {

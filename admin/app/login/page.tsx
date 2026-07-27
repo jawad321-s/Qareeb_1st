@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Languages, Lock, Mail } from 'lucide-react';
-import { Button } from '@/components/ui/primitives';
+import { Button, Input } from '@/components/ui/primitives';
 import { signIn } from '@/lib/session';
 import { useT } from '@/lib/i18n';
 
@@ -61,31 +61,31 @@ export default function LoginPage() {
           </div>
           <div className="space-y-4">
             <div className="relative">
-              <Mail className="pointer-events-none absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted" />
-              <input
+              <Mail className="pointer-events-none absolute start-3 top-1/2 z-10 h-4 w-4 -translate-y-1/2 text-muted" />
+              <Input
                 value={email}
                 onChange={(e) => { setEmail(e.target.value); setError(''); }}
                 onKeyDown={(e) => e.key === 'Enter' && submit()}
                 placeholder={t('login.email')}
                 type="email"
                 autoComplete="email"
-                className="h-11 w-full rounded-xl border border-base bg-transparent ps-10 pe-4 text-sm outline-none focus:border-brand-500"
+                className="ps-10"
               />
             </div>
             <div className="relative">
-              <Lock className="pointer-events-none absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted" />
-              <input
+              <Lock className="pointer-events-none absolute start-3 top-1/2 z-10 h-4 w-4 -translate-y-1/2 text-muted" />
+              <Input
                 value={password}
                 onChange={(e) => { setPassword(e.target.value); setError(''); }}
                 onKeyDown={(e) => e.key === 'Enter' && submit()}
                 type="password"
                 autoComplete="current-password"
                 placeholder="••••••••"
-                className="h-11 w-full rounded-xl border border-base bg-transparent ps-10 pe-4 text-sm outline-none focus:border-brand-500"
+                className="ps-10"
               />
             </div>
             {error && <p className="text-xs font-medium text-red-500">{error}</p>}
-            <Button className="h-11 w-full" onClick={submit}>
+            <Button className="w-full" onClick={submit}>
               {t('login.signIn')}
             </Button>
           </div>

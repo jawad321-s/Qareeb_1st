@@ -1,6 +1,6 @@
 'use client';
 
-import { Card, Button, Badge } from '@/components/ui/primitives';
+import { Card, Button, Badge, Input } from '@/components/ui/primitives';
 import { useT } from '@/lib/i18n';
 
 export default function SettingsPage() {
@@ -31,7 +31,7 @@ export default function SettingsPage() {
           ].map((f) => (
             <div key={f.label} className="grid grid-cols-3 items-center gap-4">
               <label className="text-sm text-muted">{f.label}</label>
-              <input defaultValue={f.value} className="col-span-2 h-10 rounded-xl border border-base bg-transparent px-3 text-sm outline-none focus:border-brand-500" />
+              <Input defaultValue={f.value} className="col-span-2" />
             </div>
           ))}
         </div>

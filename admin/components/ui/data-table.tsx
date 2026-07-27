@@ -7,7 +7,7 @@ import {
 } from '@tanstack/react-table';
 import { ChevronDown, ChevronLeft, ChevronRight, ChevronUp, Search } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { Button } from './primitives';
+import { Button, Input } from './primitives';
 import { useT } from '@/lib/i18n';
 
 interface DataTableProps<T> {
@@ -37,12 +37,12 @@ export function DataTable<T>({ columns, data, searchPlaceholder }: DataTableProp
   return (
     <div className="space-y-4">
       <div className="relative max-w-xs">
-        <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted" />
-        <input
+        <Search className="pointer-events-none absolute start-3 top-1/2 z-10 h-4 w-4 -translate-y-1/2 text-muted" />
+        <Input
           value={globalFilter}
           onChange={(e) => setGlobalFilter(e.target.value)}
           placeholder={searchPlaceholder ?? t('common.search')}
-          className="h-10 w-full rounded-xl border border-base bg-transparent ps-10 pe-4 text-sm outline-none focus:border-brand-500"
+          className="ps-10"
         />
       </div>
 

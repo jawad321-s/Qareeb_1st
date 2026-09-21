@@ -40,7 +40,7 @@ export default function Register() {
       phone: '',
       password: '',
       confirmPassword: '',
-      ...(isArtisan ? { experience: '', serviceRadius: '', bio: '' } : {}),
+      ...(isArtisan ? { experience: '', bio: '' } : {}),
     },
   });
 
@@ -63,7 +63,6 @@ export default function Register() {
       setArtisanDraft({
         categoryIds,
         experienceYears: Number(getValues('experience')) || undefined,
-        serviceRadiusKm: Number(getValues('serviceRadius')) || undefined,
         bio: (getValues('bio') as string) || undefined,
       });
     }
@@ -175,26 +174,13 @@ export default function Register() {
                 )}
               </View>
 
-              <View style={{ flexDirection: 'row', gap: 12 }}>
-                <View style={{ flex: 1 }}>
-                  <Controller
-                    control={control}
-                    name="experience"
-                    render={({ field: { onChange, value, onBlur } }) => (
-                      <Input label={t('auth.experience')} placeholder="8" iconLeft="award" keyboardType="number-pad" value={value} onChangeText={onChange} onBlur={onBlur} error={errors.experience?.message as string | undefined} />
-                    )}
-                  />
-                </View>
-                <View style={{ flex: 1 }}>
-                  <Controller
-                    control={control}
-                    name="serviceRadius"
-                    render={({ field: { onChange, value, onBlur } }) => (
-                      <Input label={t('auth.serviceRadius')} placeholder="15 km" iconLeft="map-pin" keyboardType="number-pad" value={value} onChangeText={onChange} onBlur={onBlur} error={errors.serviceRadius?.message as string | undefined} />
-                    )}
-                  />
-                </View>
-              </View>
+              <Controller
+                control={control}
+                name="experience"
+                render={({ field: { onChange, value, onBlur } }) => (
+                  <Input label={t('auth.experience')} placeholder="8" iconLeft="award" keyboardType="number-pad" value={value} onChangeText={onChange} onBlur={onBlur} error={errors.experience?.message as string | undefined} />
+                )}
+              />
 
               <Controller
                 control={control}

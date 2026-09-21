@@ -16,7 +16,6 @@ interface Certificate {
 export interface ArtisanDraft {
   categoryIds: string[];
   experienceYears?: number;
-  serviceRadiusKm?: number;
   bio?: string;
 }
 
@@ -92,7 +91,6 @@ export const useVerification = create<VerificationState>((set, get) => {
           user,
           categoryIds: draft.categoryIds,
           experienceYears: draft.experienceYears,
-          serviceRadiusKm: draft.serviceRadiusKm,
           bio: draft.bio,
           idFront,
           idBack,

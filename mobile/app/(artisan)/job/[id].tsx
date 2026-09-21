@@ -11,11 +11,13 @@ import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Icon } from '@/components/ui/Icon';
 import { CardSkeleton } from '@/components/feedback/Skeleton';
-import { useRequest, useSubmitOffer } from '@/hooks/queries';
+import { useRequest, useSubmitOffer, useCancelRequest } from '@/hooks/queries';
 import { useToast } from '@/components/feedback/Toast';
 import { categoryById } from '@/constants/categories';
 import { config } from '@/lib/config';
 import { formatMoney } from '@/lib/format';
+import { canCancelRequest } from '@/lib/requestRules';
+import { confirmAction } from '@/lib/confirm';
 import { useAuth } from '@/store/auth';
 import { useTheme } from '@/theme/ThemeProvider';
 import { useFont, useT } from '@/i18n';
@@ -30,6 +32,7 @@ export default function JobDetail() {
   const font = useFont();
   const { data: request, isLoading } = useRequest(id!);
   const submit = useSubmitOffer(id!);
+  const cancel = useCancelRequest(id!);
   // This screen lives inside the artisan tab navigator, so the floating tab bar
   // overlays it — the submit button must clear the bar.
   const tabBarSpace = useTabBarSpace();
@@ -57,7 +60,8 @@ export default function JobDetail() {
       customerId: request.customerId,
       price: Number(price) * 100,
       etaMinutes: Number(eta),
-      message: message.trim(),
+      // Optional — a quotation may be price + ETA only.
+      message: message.trim() || undefined,
       artisan: { uid: user.uid, fullName: user.fullName, photoUrl: user.photoUrl, rating: user.rating, ratingCount: user.ratingCount },
     });
     setSent(true);
@@ -65,7 +69,25 @@ export default function JobDetail() {
     setTimeout(() => router.back(), 900);
   };
 
-  const canSend = Number(price) > 0 && Number(eta) > 0 && message.trim().length >= 5 && !sent;
+  const canSend = Number(price) > 0 && Number(eta) > 0 && !sent;
+
+  // The assigned artisan can also call the job off before work starts.
+  const isAssigned = request.acceptedArtisanId === user.uid;
+  const showCancel = isAssigned && canCancelRequest(request.status);
+
+  const onCancel = async () => {
+    const ok = await confirmAction({
+      title: t('req.cancelConfirmTitle'),
+      message: t('req.cancelConfirmBody'),
+      confirmLabel: t('req.cancelConfirmYes'),
+      cancelLabel: t('req.cancelKeep'),
+      destructive: true,
+    });
+    if (!ok) return;
+    await cancel.mutateAsync();
+    toast('info', t('req.cancelled'));
+    router.back();
+  };
 
   return (
     <Screen scroll contentStyle={{ paddingBottom: tabBarSpace + 12 }}>
@@ -132,7 +154,7 @@ export default function JobDetail() {
         </View>
         <View style={{ gap: 6 }}>
           <Text variant="caption" tone="muted">
-            {t('job.messageToCustomer')}
+            {t('job.messageToCustomer')} · {t('vrf.optional')}
           </Text>
           <TextInput
             value={message}
@@ -145,6 +167,19 @@ export default function JobDetail() {
         </View>
         <Button label={sent ? t('job.sent') : t('job.submit')} iconRight={sent ? 'check-circle' : 'send'} onPress={send} loading={submit.isPending} disabled={!canSend} />
       </View>
+
+      {/* Assigned artisan may call the job off until work starts */}
+      {showCancel && (
+        <View style={{ marginTop: 20 }}>
+          <Button
+            label={t('req.cancel')}
+            iconLeft="x-circle"
+            variant="danger"
+            loading={cancel.isPending}
+            onPress={onCancel}
+          />
+        </View>
+      )}
     </Screen>
   );
 }

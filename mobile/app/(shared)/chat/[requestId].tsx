@@ -43,7 +43,6 @@ export default function Chat() {
           showBack
           title={other.fullName}
           subtitle={t('common.online')}
-          rightIcon="phone"
         />
       </View>
 

@@ -91,7 +91,7 @@ async function seedUsers() {
     });
     await db.collection('artisanProfiles').doc(a.uid).set({
       uid: a.uid, bio: 'Experienced, reliable and highly rated professional.',
-      serviceIds: a.cats.map((c) => `${c}_repair`), categoryIds: a.cats, serviceRadiusKm: 15,
+      serviceIds: a.cats.map((c) => `${c}_repair`), categoryIds: a.cats,
       basePrices: {}, availability: { days: [0, 1, 2, 3, 4], from: '08:00', to: '20:00' },
       gallery: [], certificates: [], verificationStatus: a.verified ? 'approved' : 'pending',
       premium: a.premium, completedJobs: a.ratingCount, rating: a.rating, ratingCount: a.ratingCount,

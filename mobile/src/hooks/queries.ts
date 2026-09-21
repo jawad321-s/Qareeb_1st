@@ -79,6 +79,24 @@ export function useRejectOffer(requestId: string) {
   });
 }
 
+/**
+ * Cancel a request. Available to the customer who owns it and to the artisan
+ * assigned to it, while its status still allows cancelling.
+ */
+export function useCancelRequest(requestId: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: () => api.cancelRequest(requestId),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: qk.request(requestId) });
+      qc.invalidateQueries({ queryKey: qk.offers(requestId) });
+      // Both sides' lists show this request, so refresh them too.
+      qc.invalidateQueries({ queryKey: ['requests'] });
+      qc.invalidateQueries({ queryKey: ['nearbyRequests'] });
+    },
+  });
+}
+
 export function useSubmitOffer(requestId: string) {
   const qc = useQueryClient();
   return useMutation({

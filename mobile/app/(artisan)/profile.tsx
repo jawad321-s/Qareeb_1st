@@ -31,7 +31,6 @@ export default function ArtisanProfile() {
     { icon: 'shield', label: t('ap.verification'), route: '/(shared)/verification' },
     { icon: 'image', label: t('ap.gallery'), route: '/(shared)/gallery' },
     { icon: 'sliders', label: t('ap.servicesPricing'), route: '/(shared)/services-pricing' },
-    { icon: 'map-pin', label: t('ap.radius'), route: '/(shared)/service-radius' },
     { icon: 'calendar', label: t('ap.availability'), route: '/(shared)/availability' },
     { icon: 'award', label: t('ap.subscription'), route: '/(shared)/subscription' },
     { icon: 'globe', label: `${t('profile.language')}: ${locale === 'ar' ? 'العربية' : 'English'}`, onPress: toggle },
@@ -63,7 +62,6 @@ export default function ArtisanProfile() {
               <View style={{ flexDirection: 'row', gap: 28, marginTop: 8 }}>
                 <Stat value={String(profile.completedJobs)} label={t('ad.jobs')} />
                 <Stat value={user.rating.toFixed(1)} label={t('profile.rating')} />
-                <Stat value={`${profile.serviceRadiusKm}km`} label={t('ad.radius')} />
               </View>
             </View>
           </SafeAreaView>

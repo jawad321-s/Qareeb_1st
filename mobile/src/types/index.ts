@@ -48,7 +48,6 @@ export interface ArtisanProfile {
   bio: string;
   serviceIds: string[];
   categoryIds: string[];
-  serviceRadiusKm: number;
   basePrices: Record<string, number>;
   availability: Availability;
   gallery: string[];
@@ -122,7 +121,8 @@ export interface Offer {
   customerId: string;
   price: number; // minor units
   etaMinutes: number;
-  message: string;
+  /** Optional note to the customer — a quotation may be price + ETA only. */
+  message?: string;
   status: OfferStatus;
   createdAt: number;
   // Denormalized artisan snapshot for fast rendering in the offers list.

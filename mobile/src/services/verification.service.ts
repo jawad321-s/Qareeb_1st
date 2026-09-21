@@ -13,7 +13,6 @@ export interface VerificationSubmission {
   user: AppUser;
   categoryIds: string[];
   experienceYears?: number;
-  serviceRadiusKm?: number;
   bio?: string;
   idFront: string;
   idBack: string;
@@ -38,7 +37,7 @@ export async function submitVerification(payload: VerificationSubmission): Promi
   const db = getDb();
   if (!db || !isLive()) return false;
 
-  const { user, categoryIds, experienceYears, serviceRadiusKm, bio, idFront, idBack, selfie, certificates } = payload;
+  const { user, categoryIds, experienceYears, bio, idFront, idBack, selfie, certificates } = payload;
   const uid = user.uid;
 
   const [idFrontUrl, idBackUrl, selfieUrl] = await Promise.all([
@@ -59,7 +58,6 @@ export async function submitVerification(payload: VerificationSubmission): Promi
     categoryIds,
     category: categoryIds[0] ?? '',
     experienceYears: experienceYears ?? null,
-    serviceRadiusKm: serviceRadiusKm ?? null,
     bio: bio ?? null,
     status: 'pending' as VerificationStatus,
     idFrontUrl,

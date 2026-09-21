@@ -36,6 +36,9 @@ interface ButtonProps {
   iconLeft?: IconName;
   iconRight?: IconName;
   fullWidth?: boolean;
+  /** Override the role accent — e.g. the artisan sign-in screen, which is shown
+   *  before a session exists so the theme can't derive the role yet. */
+  accent?: { gradient: readonly [string, string, ...string[]]; tint: string };
   style?: ViewStyle;
 }
 
@@ -51,9 +54,12 @@ export function Button({
   iconLeft,
   iconRight,
   fullWidth = true,
+  accent,
   style,
 }: ButtonProps) {
-  const { colors, gradient } = useTheme();
+  const { colors, gradient: themeGradient } = useTheme();
+  const gradient = accent?.gradient ?? themeGradient;
+  const tint = accent?.tint ?? colors.tint;
   const reduceMotion = useReducedMotion();
   // A growing ripple is a Material (Android) idiom; on iOS the HIG feedback is a
   // subtle press-in scale + dim. Show the ripple only on Android, and drop all
@@ -124,13 +130,13 @@ export function Button({
         : 'default';
 
   const contentColor =
-    textTone === 'inverse' ? '#FFFFFF' : variant === 'secondary' ? colors.fg : colors.tint;
+    textTone === 'inverse' ? '#FFFFFF' : variant === 'secondary' ? colors.fg : tint;
 
   // Ripple tint: light over dark buttons, tinted over light ones.
   const rippleColor =
     variant === 'primary' || variant === 'danger'
       ? 'rgba(255,255,255,0.45)'
-      : colors.tint + '55';
+      : tint + '55';
 
   const Content = (
     <View
@@ -164,7 +170,7 @@ export function Button({
     width: fullWidth ? '100%' : undefined,
     // Primary CTAs glow softly in brand color — depth reserved for the action
     // that matters, not sprinkled everywhere.
-    ...(variant === 'primary' && !isDisabled ? { ...shadows.brand, shadowColor: colors.tint } : {}),
+    ...(variant === 'primary' && !isDisabled ? { ...shadows.brand, shadowColor: tint } : {}),
   };
 
   const Ripple = rippleEnabled ? (
@@ -201,7 +207,7 @@ export function Button({
                     ? colors.surface2
                     : 'transparent',
               borderWidth: variant === 'outline' ? 1.5 : 0,
-              borderColor: colors.tint,
+              borderColor: tint,
               borderRadius: radius.lg,
             }}
           >

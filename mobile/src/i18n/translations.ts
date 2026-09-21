@@ -65,6 +65,8 @@ export const translations = {
     // role picker
     'role.title': 'Choose your account type',
     'role.subtitle': 'How would you like to use Qareeb?',
+    'role.loginTitle': 'Sign in to your account',
+    'role.loginSubtitle': 'Which account type are you signing in to?',
     'role.customer.title': 'I need a service',
     'role.customer.desc': 'Find and book trusted artisans nearby.',
     'role.artisan.title': 'I provide a service',
@@ -78,7 +80,6 @@ export const translations = {
     'auth.selectCategories': 'Your services',
     'auth.selectCategoriesHint': 'Pick at least one',
     'auth.experience': 'Years of experience',
-    'auth.serviceRadius': 'Service radius',
     'auth.bio': 'About you',
     'auth.bioPlaceholder': 'e.g. Certified plumber with 8 years of experience…',
     'auth.verifyNote': 'After signup you can upload your ID & certificates to earn the verified badge.',
@@ -247,10 +248,16 @@ export const translations = {
     'req.tracking': 'Order tracking',
     'req.yourArtisan': 'Your artisan',
     'req.chat': 'Chat',
-    'req.call': 'Call',
     'req.offers': 'Offers',
     'req.sortedByPrice': 'Sorted by price',
     'req.rateExperience': 'Rate your experience',
+    'req.cancel': 'Cancel request',
+    'req.cancelConfirmTitle': 'Cancel this request?',
+    'req.cancelConfirmBody': 'The other party will be notified and any open offers will be closed. This cannot be undone.',
+    'req.cancelConfirmYes': 'Yes, cancel it',
+    'req.cancelKeep': 'Keep it',
+    'req.cancelled': 'The request has been cancelled.',
+    'req.cancelNotAllowed': 'This request can no longer be cancelled — work has already started.',
 
     // offer card
     'offer.best': 'Best value',
@@ -282,7 +289,6 @@ export const translations = {
     'ad.reviews': 'Reviews',
     'ad.request': 'Request this artisan',
     'ad.jobs': 'Jobs',
-    'ad.radius': 'Radius',
     'ad.verified': 'Verified',
     'ad.premium': 'Premium',
 
@@ -362,7 +368,6 @@ export const translations = {
     'ap.verification': 'Identity verification',
     'ap.gallery': 'Work gallery',
     'ap.servicesPricing': 'Services & pricing',
-    'ap.radius': 'Service radius',
     'ap.availability': 'Availability',
     'ap.subscription': 'Subscription plan',
     'ap.pending': 'Pending',
@@ -376,11 +381,6 @@ export const translations = {
     'sp.desc': 'Choose the services you offer and their starting prices.',
     'sp.basePrice': 'Starting price',
     'sp.active': 'Offered',
-
-    // service radius
-    'rad.desc': 'You will only see requests within this distance from your location.',
-    'rad.km': 'km',
-    'rad.current': 'Current radius',
 
     // availability
     'av.desc': 'Days and hours customers can book you.',
@@ -500,6 +500,8 @@ export const translations = {
     // role picker
     'role.title': 'اختر نوع حسابك',
     'role.subtitle': 'كيف تريد استخدام قريب؟',
+    'role.loginTitle': 'تسجيل الدخول إلى حسابك',
+    'role.loginSubtitle': 'إلى أي نوع حساب تسجّل الدخول؟',
     'role.customer.title': 'أحتاج خدمة',
     'role.customer.desc': 'ابحث واحجز حرفيين موثوقين بالقرب منك.',
     'role.artisan.title': 'أقدّم خدمة',
@@ -513,7 +515,6 @@ export const translations = {
     'auth.selectCategories': 'خدماتك',
     'auth.selectCategoriesHint': 'اختر واحدة على الأقل',
     'auth.experience': 'سنوات الخبرة',
-    'auth.serviceRadius': 'نطاق الخدمة',
     'auth.bio': 'نبذة عنك',
     'auth.bioPlaceholder': 'مثال: سبّاك معتمد بخبرة 8 سنوات…',
     'auth.verifyNote': 'بعد التسجيل يمكنك رفع الهوية والشهادات للحصول على شارة التوثيق.',
@@ -682,10 +683,16 @@ export const translations = {
     'req.tracking': 'تتبّع الطلب',
     'req.yourArtisan': 'الحرفي الخاص بك',
     'req.chat': 'محادثة',
-    'req.call': 'اتصال',
     'req.offers': 'العروض',
     'req.sortedByPrice': 'مرتّبة حسب السعر',
     'req.rateExperience': 'قيّم تجربتك',
+    'req.cancel': 'إلغاء الطلب',
+    'req.cancelConfirmTitle': 'إلغاء هذا الطلب؟',
+    'req.cancelConfirmBody': 'سيتم إشعار الطرف الآخر وإغلاق العروض المفتوحة. لا يمكن التراجع عن هذا الإجراء.',
+    'req.cancelConfirmYes': 'نعم، ألغِ الطلب',
+    'req.cancelKeep': 'تراجع',
+    'req.cancelled': 'تم إلغاء الطلب.',
+    'req.cancelNotAllowed': 'لا يمكن إلغاء هذا الطلب — العمل بدأ بالفعل.',
 
     // offer card
     'offer.best': 'أفضل قيمة',
@@ -717,7 +724,6 @@ export const translations = {
     'ad.reviews': 'المراجعات',
     'ad.request': 'اطلب هذا الحرفي',
     'ad.jobs': 'عمل',
-    'ad.radius': 'النطاق',
     'ad.verified': 'موثّق',
     'ad.premium': 'مميّز',
 
@@ -797,7 +803,6 @@ export const translations = {
     'ap.verification': 'توثيق الهوية',
     'ap.gallery': 'معرض الأعمال',
     'ap.servicesPricing': 'الخدمات والأسعار',
-    'ap.radius': 'نطاق الخدمة',
     'ap.availability': 'أوقات العمل',
     'ap.subscription': 'باقة الاشتراك',
     'ap.pending': 'قيد المراجعة',
@@ -811,11 +816,6 @@ export const translations = {
     'sp.desc': 'اختر الخدمات التي تقدمها وأسعارها الابتدائية.',
     'sp.basePrice': 'السعر الابتدائي',
     'sp.active': 'مفعّلة',
-
-    // service radius
-    'rad.desc': 'ستظهر لك الطلبات ضمن هذه المسافة من موقعك فقط.',
-    'rad.km': 'كم',
-    'rad.current': 'النطاق الحالي',
 
     // availability
     'av.desc': 'الأيام والساعات التي يمكن للزبائن حجزك فيها.',

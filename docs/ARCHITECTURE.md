@@ -143,7 +143,7 @@ Customer                Firestore                 Artisan
 ```
 
 Geo fan-out uses **geohash** ranges (`src/services/geo.ts`) so a customer's
-request is matched to artisans whose `serviceRadius` covers the request location.
+request is matched to the artisans nearest its location.
 
 ---
 

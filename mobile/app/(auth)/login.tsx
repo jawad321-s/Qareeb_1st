@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { View, KeyboardAvoidingView, Platform } from 'react-native';
-import { router } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import Animated, { FadeInDown } from 'react-native-reanimated';
@@ -9,23 +9,34 @@ import { Header } from '@/components/ui/Header';
 import { Text } from '@/components/ui/Text';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
+import { Icon } from '@/components/ui/Icon';
 import { loginSchema, type LoginInput } from '@/lib/validation';
 import { useAuth } from '@/store/auth';
 import { useT } from '@/i18n';
+import { roleAccents } from '@/theme/tokens';
+import { useTheme } from '@/theme/ThemeProvider';
+import type { UserRole } from '@/types';
 
 export default function Login() {
   const signIn = useAuth((s) => s.signIn);
   const { t } = useT();
+  const { isDark } = useTheme();
+  // Each account type has its own sign-in entry, reached from the role picker.
+  const { role: roleParam } = useLocalSearchParams<{ role?: string }>();
+  const role: UserRole = roleParam === 'artisan' ? 'artisan' : 'customer';
+  const accent = roleAccents[role];
+  const tint = isDark ? accent.tintDark : accent.tintLight;
+
   const [loading, setLoading] = useState(false);
   const { control, handleSubmit, formState: { errors } } = useForm<LoginInput>({
     resolver: zodResolver(loginSchema),
-    defaultValues: { email: '', password: '' },
+    defaultValues: { phone: '', password: '' },
   });
 
   const onSubmit = async (data: LoginInput) => {
     setLoading(true);
     try {
-      await signIn(data.email, data.password);
+      await signIn(data.phone, data.password, role);
       router.replace('/');
     } finally {
       setLoading(false);
@@ -36,7 +47,28 @@ export default function Login() {
     <Screen scroll>
       <Header showBack />
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-        <Animated.View entering={FadeInDown.duration(400)} style={{ gap: 6, marginBottom: 24 }}>
+        <Animated.View entering={FadeInDown.duration(400)} style={{ gap: 10, marginBottom: 24 }}>
+          {/* Which account type this sign-in belongs to */}
+          <View
+            style={{
+              alignSelf: 'flex-start',
+              flexDirection: 'row',
+              alignItems: 'center',
+              gap: 8,
+              paddingHorizontal: 12,
+              paddingVertical: 7,
+              borderRadius: 999,
+              backgroundColor: tint + '16',
+              borderWidth: 1,
+              borderColor: tint + '40',
+            }}
+          >
+            <Icon name={role === 'artisan' ? 'tools' : 'search'} size={15} color={tint} />
+            <Text variant="caption" style={{ color: tint, fontFamily: 'Inter_600SemiBold' }}>
+              {t(role === 'artisan' ? 'role.artisan.title' : 'role.customer.title')}
+            </Text>
+          </View>
+
           <Text variant="h1">{t('auth.welcomeBack')}</Text>
           <Text variant="body" tone="muted">
             {t('auth.signInSubtitle')}
@@ -46,18 +78,18 @@ export default function Login() {
         <View style={{ gap: 16 }}>
           <Controller
             control={control}
-            name="email"
+            name="phone"
             render={({ field: { onChange, value, onBlur } }) => (
               <Input
-                label={t('auth.email')}
-                placeholder="you@example.com"
-                iconLeft="mail"
+                label={t('auth.phone')}
+                placeholder="+970 5X XXX XXXX"
+                iconLeft="phone"
                 autoCapitalize="none"
-                keyboardType="email-address"
+                keyboardType="phone-pad"
                 value={value}
                 onChangeText={onChange}
                 onBlur={onBlur}
-                error={errors.email?.message}
+                error={errors.phone?.message}
               />
             )}
           />
@@ -79,14 +111,18 @@ export default function Login() {
           />
           <Text
             variant="caption"
-            tone="primary"
-            style={{ textAlign: 'right', fontFamily: 'Inter_500Medium' }}
+            style={{ color: tint, fontFamily: 'Inter_500Medium' }}
             onPress={() => router.push('/(auth)/forgot')}
           >
             {t('auth.forgot')}
           </Text>
 
-          <Button label={t('auth.signIn')} onPress={handleSubmit(onSubmit)} loading={loading} />
+          <Button
+            label={t('auth.signIn')}
+            accent={{ gradient: accent.gradient, tint }}
+            onPress={handleSubmit(onSubmit)}
+            loading={loading}
+          />
 
           <View style={{ flexDirection: 'row', justifyContent: 'center', gap: 4, marginTop: 8 }}>
             <Text variant="body" tone="muted">
@@ -94,9 +130,8 @@ export default function Login() {
             </Text>
             <Text
               variant="body"
-              tone="primary"
-              style={{ fontFamily: 'Inter_600SemiBold' }}
-              onPress={() => router.push('/(auth)/role')}
+              style={{ color: tint, fontFamily: 'Inter_600SemiBold' }}
+              onPress={() => router.push({ pathname: '/(auth)/register', params: { role } })}
             >
               {t('auth.createAccount')}
             </Text>

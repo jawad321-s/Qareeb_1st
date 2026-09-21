@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
 export const loginSchema = z.object({
-  email: z.string().min(1, 'Email is required').email('Enter a valid email'),
+  phone: z.string().min(9, 'Enter a valid phone number'),
   password: z.string().min(6, 'At least 6 characters'),
 });
 export type LoginInput = z.infer<typeof loginSchema>;
@@ -24,7 +24,6 @@ export type RegisterInput = z.infer<typeof registerSchema>;
 export const artisanRegisterSchema = registerSchema.and(
   z.object({
     experience: z.coerce.number().min(0, 'Enter your experience').max(60),
-    serviceRadius: z.coerce.number().min(1, 'Set a service radius').max(100),
     bio: z.string().min(10, 'Tell customers a bit about you (min 10 chars)'),
   }),
 );
@@ -41,6 +40,7 @@ export type RequestInput = z.infer<typeof requestSchema>;
 export const offerSchema = z.object({
   price: z.coerce.number().min(1, 'Enter a price'),
   etaMinutes: z.coerce.number().min(1, 'Enter an ETA'),
-  message: z.string().min(5, 'Add a short message'),
+  // Optional: artisans can send a bare price + ETA quotation.
+  message: z.string().optional(),
 });
 export type OfferInput = z.infer<typeof offerSchema>;

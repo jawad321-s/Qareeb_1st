@@ -124,7 +124,7 @@ export default function Welcome() {
 
           <Animated.View entering={FadeInDown.delay(700).duration(500)} style={{ gap: 12, paddingBottom: 12 }}>
             <Button label={t('welcome.getStarted')} variant="secondary" iconRight="arrow-right" onPress={() => router.push('/(auth)/role')} />
-            <Button label={t('welcome.haveAccount')} variant="ghost" onPress={() => router.push('/(auth)/login')} />
+            <Button label={t('welcome.haveAccount')} variant="ghost" onPress={() => router.push({ pathname: '/(auth)/role', params: { mode: 'login' } })} />
             <View style={{ flexDirection: 'row', justifyContent: 'center', gap: 16, marginTop: 4 }}>
               <Text
                 variant="caption"

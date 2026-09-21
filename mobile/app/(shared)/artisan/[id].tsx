@@ -69,7 +69,6 @@ export default function ArtisanDetail() {
               <View style={{ flexDirection: 'row', gap: 28, marginTop: 12 }}>
                 <Stat value={user.rating.toFixed(1)} label={t('profile.rating')} />
                 <Stat value={String(profile.completedJobs)} label={t('ad.jobs')} />
-                <Stat value={`${profile.serviceRadiusKm}km`} label={t('ad.radius')} />
               </View>
             </View>
           </SafeAreaView>

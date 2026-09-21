@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { View, Pressable } from 'react-native';
-import { router } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
 import Animated, {
@@ -31,6 +31,10 @@ interface RoleOption {
 export default function RolePicker() {
   const { colors } = useTheme();
   const { t } = useT();
+  // `mode=login` routes to the matching sign-in screen instead of sign-up, so
+  // each account type keeps its own separate entry point.
+  const { mode } = useLocalSearchParams<{ mode?: string }>();
+  const isLogin = mode === 'login';
   const [selected, setSelected] = useState<UserRole>('customer');
 
   const options: RoleOption[] = [
@@ -51,16 +55,19 @@ export default function RolePicker() {
   ];
 
   const onContinue = () => {
-    router.push({ pathname: '/(auth)/register', params: { role: selected } });
+    router.push({
+      pathname: isLogin ? '/(auth)/login' : '/(auth)/register',
+      params: { role: selected },
+    });
   };
 
   return (
     <Screen scroll>
       <Header showBack />
       <Animated.View entering={FadeInDown.duration(400)} style={{ gap: 6, marginBottom: 28 }}>
-        <Text variant="h1">{t('role.title')}</Text>
+        <Text variant="h1">{t(isLogin ? 'role.loginTitle' : 'role.title')}</Text>
         <Text variant="body" tone="muted">
-          {t('role.subtitle')}
+          {t(isLogin ? 'role.loginSubtitle' : 'role.subtitle')}
         </Text>
       </Animated.View>
 

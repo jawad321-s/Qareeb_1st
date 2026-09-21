@@ -3,13 +3,16 @@
 ## 1. Authentication
 
 ```
-Welcome ─┬─► Register ─► OTP verify ─► [Location permission] ─► Customer Home
+Welcome ─┬─► Pick account type ─► Register ─► OTP verify ─► [Location] ─► Home
          │
-         └─► Login ─► (role check) ─┬─► Customer Home
-                                    └─► Artisan Dashboard
-         Login ─► Forgot password ─► email link ─► Login
+         └─► Pick account type ─► Login (phone + password) ─┬─► Customer Home
+                                                            └─► Artisan Dashboard
+         Login ─► Forgot password ─► reset link ─► Login
 ```
 
+- Sign-in is by **phone number** — there is no email login.
+- Each account type has its own sign-in entry: the role picker (`mode=login`)
+  routes to `/(auth)/login?role=…`, and the chosen role decides which app opens.
 - Session persists in MMKV; the entry screen redirects by `role` on cold start.
 - Demo shortcuts on Welcome enter instantly as Customer or Artisan.
 
@@ -33,10 +36,13 @@ Request detail  (status: PENDING)
                               │
                               ▼
         Tracking timeline: ACCEPTED → ON_THE_WAY → WORKING → COMPLETED
-        Chat + Call with the assigned artisan
+        Chat with the assigned artisan
                               │
                               ▼
                        COMPLETED ─► Leave review (stars + tags + comment)
+
+Either party may cancel while status is PENDING / ACCEPTED / ON_THE_WAY.
+Once the artisan starts work (WORKING) the request can no longer be cancelled.
 ```
 
 ## 3. Artisan — job lifecycle
@@ -45,7 +51,7 @@ Request detail  (status: PENDING)
 Dashboard (online toggle, stats, nearby requests)
    │
    ▼
-Nearby jobs ─► Job detail ─► Send quotation (price + ETA + message)
+Nearby jobs ─► Job detail ─► Send quotation (price + ETA + optional message)
    │                                   │
    │                                   ▼
    │                            Offer: PENDING ─► (customer accepts)

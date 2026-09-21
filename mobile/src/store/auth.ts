@@ -9,7 +9,7 @@ interface AuthState {
   user: AppUser | null;
   hydrated: boolean;
   signInAs: (role: UserRole) => void;
-  signIn: (email: string, password: string) => Promise<void>;
+  signIn: (phone: string, password: string, role: UserRole) => Promise<void>;
   signOut: () => void;
   updateUser: (patch: Partial<AppUser>) => void;
   hydrate: () => void;
@@ -31,10 +31,11 @@ export const useAuth = create<AuthState>((set, get) => ({
     set({ user });
   },
 
-  signIn: async (email) => {
-    // Mock auth: any credentials succeed; artisan emails route to the artisan app.
-    const isArtisan = email.toLowerCase().includes('artisan') || email.toLowerCase().includes('omar');
-    const user = isArtisan ? { ...MOCK_ARTISANS[0], email } : { ...MOCK_CUSTOMER, email };
+  // Sign in with a phone number. Each account type has its own sign-in entry,
+  // so the chosen role — not the credentials — decides which app is opened.
+  signIn: async (phone, _password, role) => {
+    const base = role === 'artisan' ? MOCK_ARTISANS[0] : MOCK_CUSTOMER;
+    const user = { ...base, phone };
     kv.set(SESSION_KEY, user);
     set({ user });
   },

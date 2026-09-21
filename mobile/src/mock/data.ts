@@ -42,7 +42,6 @@ export const MOCK_ARTISAN_PROFILE: ArtisanProfile = {
   bio: 'سبّاك معتمد بخبرة 12 عاماً. عمل سريع ونظيف ومضمون.',
   serviceIds: ['plumbing_leak', 'plumbing_install'],
   categoryIds: ['plumbing', 'maintenance'],
-  serviceRadiusKm: 15,
   basePrices: { plumbing_leak: 12000, plumbing_install: 25000 },
   availability: { days: [0, 1, 2, 3, 4], from: '08:00', to: '20:00' },
   gallery: [

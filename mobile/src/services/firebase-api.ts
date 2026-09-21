@@ -13,6 +13,7 @@ import type { mockApi } from '@/mock/api';
 import { getDb } from '@/lib/firebase';
 import { useAuth } from '@/store/auth';
 import { MOCK_CUSTOMER } from '@/mock/data';
+import { canCancelRequest } from '@/lib/requestRules';
 
 function db() {
   const d = getDb();
@@ -116,6 +117,23 @@ export const firebaseApi: typeof mockApi = {
       acceptedArtisanId: offer.artisanId,
       updatedAt: Date.now(),
     });
+    await batch.commit();
+  },
+
+  // Either party can call off a request while it hasn't started yet. Any offers
+  // still open on it are closed out in the same batch.
+  async cancelRequest(requestId: string): Promise<void> {
+    const reqSnap = await getDoc(doc(db(), 'requests', requestId));
+    if (!reqSnap.exists()) return;
+    const current = reqSnap.data() as ServiceRequest;
+    if (!canCancelRequest(current.status)) return;
+
+    const batch = writeBatch(db());
+    batch.update(reqSnap.ref, { status: 'CANCELLED', updatedAt: Date.now() });
+    const open = await getDocs(
+      query(collection(db(), 'offers'), where('requestId', '==', requestId), where('status', '==', 'PENDING')),
+    );
+    open.forEach((o) => batch.update(o.ref, { status: 'REJECTED' }));
     await batch.commit();
   },
 

@@ -70,7 +70,6 @@ cms/{docId}
 | `bio` | string | |
 | `serviceIds` | string[] | references `services` |
 | `categoryIds` | string[] | references `categories` |
-| `serviceRadiusKm` | number | matching radius |
 | `basePrices` | `Record<serviceId, number>` | minor units |
 | `availability` | `{ days: number[], from: string, to: string }` | weekly schedule |
 | `gallery` | string[] | Storage URLs of past work |

@@ -15,10 +15,12 @@ import { StatusBadge } from '@/components/domain/StatusBadge';
 import { TrackingTimeline } from '@/components/domain/TrackingTimeline';
 import { OfferCard } from '@/components/domain/OfferCard';
 import { CardSkeleton } from '@/components/feedback/Skeleton';
-import { useRequest, useOffers, useAcceptOffer, useRejectOffer } from '@/hooks/queries';
+import { useRequest, useOffers, useAcceptOffer, useRejectOffer, useCancelRequest } from '@/hooks/queries';
 import { useToast } from '@/components/feedback/Toast';
 import { categoryById } from '@/constants/categories';
 import { formatMoney } from '@/lib/format';
+import { canCancelRequest } from '@/lib/requestRules';
+import { confirmAction } from '@/lib/confirm';
 import { useTheme } from '@/theme/ThemeProvider';
 import { useT } from '@/i18n';
 import { MOCK_ARTISANS } from '@/mock/data';
@@ -32,6 +34,7 @@ export default function RequestDetail() {
   const offers = useOffers(id!);
   const accept = useAcceptOffer(id!);
   const reject = useRejectOffer(id!);
+  const cancel = useCancelRequest(id!);
   const [acceptingId, setAcceptingId] = useState<string | null>(null);
 
   if (isLoading || !request) {
@@ -48,6 +51,7 @@ export default function RequestDetail() {
 
   const cat = categoryById(request.categoryId);
   const isPending = request.status === 'PENDING';
+  const isCancelled = request.status === 'CANCELLED';
   const acceptedArtisan = MOCK_ARTISANS.find((a) => a.uid === request.acceptedArtisanId);
   const bestPrice = Math.min(...(offers.data ?? []).map((o) => o.price));
 
@@ -61,6 +65,20 @@ export default function RequestDetail() {
   const onReject = (offerId: string) => {
     reject.mutate(offerId);
     toast('info', 'Offer declined');
+  };
+
+  // Cancelling is only offered while the job hasn't started (see requestRules).
+  const onCancel = async () => {
+    const ok = await confirmAction({
+      title: t('req.cancelConfirmTitle'),
+      message: t('req.cancelConfirmBody'),
+      confirmLabel: t('req.cancelConfirmYes'),
+      cancelLabel: t('req.cancelKeep'),
+      destructive: true,
+    });
+    if (!ok) return;
+    await cancel.mutateAsync();
+    toast('info', t('req.cancelled'));
   };
 
   return (
@@ -102,8 +120,8 @@ export default function RequestDetail() {
         </Card>
       </Animated.View>
 
-      {/* Tracking (non-pending) */}
-      {!isPending && (
+      {/* Tracking (accepted through completed — nothing to track once cancelled) */}
+      {!isPending && !isCancelled && (
         <View style={{ marginTop: 20 }}>
           <Text variant="h3" style={{ marginBottom: 14 }}>
             {t('req.tracking')}
@@ -115,7 +133,7 @@ export default function RequestDetail() {
       )}
 
       {/* Accepted artisan card */}
-      {acceptedArtisan && (
+      {acceptedArtisan && !isCancelled && (
         <View style={{ marginTop: 20 }}>
           <Text variant="h3" style={{ marginBottom: 14 }}>
             {t('req.yourArtisan')}
@@ -128,14 +146,7 @@ export default function RequestDetail() {
                 <Rating value={acceptedArtisan.rating} count={acceptedArtisan.ratingCount} size={13} showValue />
               </View>
             </View>
-            <View style={{ flexDirection: 'row', gap: 10 }}>
-              <View style={{ flex: 1 }}>
-                <Button label={t('req.chat')} iconLeft="message" variant="secondary" onPress={() => router.push(`/(shared)/chat/${request.id}`)} />
-              </View>
-              <View style={{ flex: 1 }}>
-                <Button label={t('req.call')} iconLeft="phone" onPress={() => {}} />
-              </View>
-            </View>
+            <Button label={t('req.chat')} iconLeft="message" onPress={() => router.push(`/(shared)/chat/${request.id}`)} />
           </Card>
         </View>
       )}
@@ -166,6 +177,19 @@ export default function RequestDetail() {
               ))
             )}
           </View>
+        </View>
+      )}
+
+      {/* Either party may call the job off until work starts */}
+      {canCancelRequest(request.status) && (
+        <View style={{ marginTop: 20 }}>
+          <Button
+            label={t('req.cancel')}
+            iconLeft="x-circle"
+            variant="danger"
+            loading={cancel.isPending}
+            onPress={onCancel}
+          />
         </View>
       )}
 

@@ -9,6 +9,7 @@ import {
   MOCK_REVIEWS,
   MOCK_SERVICES,
 } from './data';
+import { canCancelRequest } from '@/lib/requestRules';
 
 // In-memory mutable stores so the app behaves like a real backend during a session.
 let requests = [...MOCK_REQUESTS];
@@ -93,6 +94,20 @@ export const mockApi = {
       r.id === offer.requestId
         ? { ...r, status: 'ACCEPTED', acceptedOfferId: offerId, acceptedArtisanId: offer.artisanId, updatedAt: Date.now() }
         : r,
+    );
+  },
+
+  // Either party can call off a request while it hasn't started yet. Any offers
+  // still open on it are closed out at the same time.
+  async cancelRequest(requestId: string): Promise<void> {
+    await delay(400);
+    const target = requests.find((r) => r.id === requestId);
+    if (!target || !canCancelRequest(target.status)) return;
+    requests = requests.map((r) =>
+      r.id === requestId ? { ...r, status: 'CANCELLED', updatedAt: Date.now() } : r,
+    );
+    offers = offers.map((o) =>
+      o.requestId === requestId && o.status === 'PENDING' ? { ...o, status: 'REJECTED' } : o,
     );
   },
 

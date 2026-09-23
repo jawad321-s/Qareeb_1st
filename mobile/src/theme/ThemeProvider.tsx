@@ -40,7 +40,9 @@ interface ThemeContextValue {
 const ThemeContext = createContext<ThemeContextValue | null>(null);
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const system = useRNColorScheme() ?? 'light';
+  // RN 0.86 widened useColorScheme() to include 'unspecified'; anything that
+  // isn't an explicit dark preference resolves to light.
+  const system: 'light' | 'dark' = useRNColorScheme() === 'dark' ? 'dark' : 'light';
   const { mode, setMode } = useThemeStore();
   const scheme: 'light' | 'dark' = mode === 'system' ? system : mode;
   const role: 'customer' | 'artisan' = useAuth((s) => (s.user?.role === 'artisan' ? 'artisan' : 'customer'));

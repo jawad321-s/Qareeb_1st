@@ -41,7 +41,7 @@ Moving Services
 
 | Package | Stack | Purpose |
 |---|---|---|
-| [`mobile/`](./mobile) | Expo SDK 54 · React Native · Expo Router · NativeWind | Customer **and** Artisan apps (role-based) |
+| [`mobile/`](./mobile) | Expo SDK 57 · React Native · Expo Router · NativeWind | Customer **and** Artisan apps (role-based) |
 | [`admin/`](./admin) | Next.js 15 · Tailwind · shadcn/ui · Recharts | Enterprise admin dashboard |
 | [`firebase/`](./firebase) | Firestore · Storage · Auth · FCM | Backend: security rules, indexes, seed data |
 | [`docs/`](./docs) | Markdown | Architecture, schema, design system, flows |
@@ -111,7 +111,7 @@ See the [Design System](./docs/DESIGN_SYSTEM.md) for the full token set.
 
 ## 🧱 Tech Stack
 
-**Mobile:** React Native · Expo SDK 54 · TypeScript · Expo Router · NativeWind ·
+**Mobile:** React Native · Expo SDK 57 · TypeScript · Expo Router · NativeWind ·
 React Query · MMKV · Zod · React Hook Form · Reanimated · Expo Location
 
 **Web:** Next.js 15 · TypeScript · Tailwind CSS · shadcn/ui · Framer Motion ·

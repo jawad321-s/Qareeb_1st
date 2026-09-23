@@ -1,5 +1,7 @@
 import React from 'react';
-import { Redirect, Tabs } from 'expo-router';
+import { Redirect } from 'expo-router';
+// SDK 57 moved the JS tab navigator out of the root entry point.
+import { Tabs } from 'expo-router/js-tabs';
 import { TabBar } from '@/components/ui/TabBar';
 import { useAuth } from '@/store/auth';
 

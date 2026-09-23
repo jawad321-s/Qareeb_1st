@@ -9,7 +9,7 @@ import Animated, {
   useSharedValue,
   withSpring,
 } from 'react-native-reanimated';
-import type { BottomTabBarProps } from '@react-navigation/bottom-tabs';
+import type { BottomTabBarProps } from 'expo-router/js-tabs';
 import { Text } from './Text';
 import { Icon, type IconName } from './Icon';
 import { GlassView } from './GlassView';
@@ -153,7 +153,7 @@ function TabItem({
             pointerEvents="none"
             style={[
               {
-                ...StyleSheet.absoluteFillObject,
+                ...StyleSheet.absoluteFill,
                 borderRadius: PILL_H / 2,
                 overflow: 'hidden',
               },

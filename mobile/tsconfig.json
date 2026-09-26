@@ -2,7 +2,8 @@
   "extends": "expo/tsconfig.base",
   "compilerOptions": {
     "strict": true,
-    "baseUrl": ".",
+    // No `baseUrl`: TypeScript 6 deprecates it, and path mappings that start
+    // with "./" already resolve relative to this file.
     "paths": {
       "@/*": ["./src/*"],
       "@app/*": ["./app/*"]

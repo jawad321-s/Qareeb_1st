@@ -1,4 +1,4 @@
-import { I18nManager, Platform } from 'react-native';
+import { DevSettings, I18nManager, Platform } from 'react-native';
 
 /**
  * Native RTL synchronisation. Translating strings isn't enough — the layout
@@ -46,19 +46,20 @@ export function localizedTextAlign(isRTL: boolean): 'left' | 'right' | undefined
   return isRTL ? 'right' : 'left';
 }
 
-/** Restart the app so the new layout direction takes effect. */
+/**
+ * Restart the app so the new layout direction takes effect.
+ *
+ * This used to call `Updates.reloadAsync()`, but `expo-updates` is not
+ * supported in Expo Go: with it installed, Expo Go boots the app through the
+ * updates JS runtime, where no native modules are registered — the app then
+ * dies with "Cannot find native module 'ExpoAsset'" and "main has not been
+ * registered". `DevSettings.reload()` restarts the bundle just as well in Expo
+ * Go and in development builds, which is where this app runs.
+ */
 export async function reloadApp() {
   if (Platform.OS === 'web') {
     if (typeof window !== 'undefined') window.location.reload();
     return;
   }
-  try {
-    const Updates = await import('expo-updates');
-    await Updates.reloadAsync();
-  } catch {
-    // Dev / Expo Go fallback
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const { DevSettings } = require('react-native');
-    DevSettings?.reload?.();
-  }
+  DevSettings?.reload?.();
 }

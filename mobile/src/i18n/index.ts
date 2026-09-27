@@ -17,11 +17,31 @@ export const LANG_RELOAD_KEY = 'qareeb.langReload';
 
 const initialLocale: Locale = (storage.getString(LOCALE_KEY) as Locale) ?? config.defaultLocale;
 
+/** Records the direction we last restarted for, so a boot can never loop. */
+const RTL_FLIP_KEY = 'qareeb.rtlFlipAttempt';
+
 // Boot-time direction sync — runs before the first render so rows, paddings
 // and icons lay out natively RTL for Arabic. On native, a mismatch (e.g. first
-// install) forces RTL and restarts once; afterwards the flag persists.
-if (syncNativeRTL(initialLocale === 'ar')) {
-  void reloadApp();
+// install) forces RTL and restarts once.
+//
+// The restart is attempted ONCE per direction. In Expo Go a JS-level reload
+// does not always carry the native RTL flag across, so an unguarded restart
+// would find the same mismatch on the next boot and restart again — trapping
+// the app in a relaunch loop that ends with Expo Go closing. If the flip does
+// not stick we simply keep running: `localizedTextAlign` still aligns text for
+// the locale, and the flag applies on the next full launch of the app.
+{
+  const wantsRTL = initialLocale === 'ar';
+  if (syncNativeRTL(wantsRTL)) {
+    if (storage.getString(RTL_FLIP_KEY) !== String(wantsRTL)) {
+      storage.set(RTL_FLIP_KEY, String(wantsRTL));
+      void reloadApp();
+    }
+  } else {
+    // Direction already matches — clear the marker so a later switch back
+    // gets its own single restart.
+    storage.delete(RTL_FLIP_KEY);
+  }
 }
 
 interface LocaleState {
@@ -38,6 +58,10 @@ function applyLocale(locale: Locale) {
   const path = getCurrentPathname();
   if (path && path !== '/') storage.set(RESTORE_ROUTE_KEY, path);
   storage.set(LANG_RELOAD_KEY, '1');
+  // The user asked for this switch, so record the attempt for the new
+  // direction before restarting — the boot guard above then won't restart
+  // a second time for the same flip.
+  storage.set(RTL_FLIP_KEY, String(locale === 'ar'));
   syncNativeRTL(locale === 'ar');
   void reloadApp();
 }

@@ -17,32 +17,23 @@ export const LANG_RELOAD_KEY = 'qareeb.langReload';
 
 const initialLocale: Locale = (storage.getString(LOCALE_KEY) as Locale) ?? config.defaultLocale;
 
-/** Records the direction we last restarted for, so a boot can never loop. */
-const RTL_FLIP_KEY = 'qareeb.rtlFlipAttempt';
-
-// Boot-time direction sync — runs before the first render so rows, paddings
-// and icons lay out natively RTL for Arabic. On native, a mismatch (e.g. first
-// install) forces RTL and restarts once.
+// Boot-time direction sync. This only ASKS the layout engine to flip — it never
+// restarts the app.
 //
-// The restart is attempted ONCE per direction. In Expo Go a JS-level reload
-// does not always carry the native RTL flag across, so an unguarded restart
-// would find the same mismatch on the next boot and restart again — trapping
-// the app in a relaunch loop that ends with Expo Go closing. If the flip does
-// not stick we simply keep running: `localizedTextAlign` still aligns text for
-// the locale, and the flag applies on the next full launch of the app.
-{
-  const wantsRTL = initialLocale === 'ar';
-  if (syncNativeRTL(wantsRTL)) {
-    if (storage.getString(RTL_FLIP_KEY) !== String(wantsRTL)) {
-      storage.set(RTL_FLIP_KEY, String(wantsRTL));
-      void reloadApp();
-    }
-  } else {
-    // Direction already matches — clear the marker so a later switch back
-    // gets its own single restart.
-    storage.delete(RTL_FLIP_KEY);
-  }
-}
+// Restarting here was a trap: on a fresh install the saved locale is Arabic
+// while the native direction is still LTR, so boot forced RTL and reloaded. In
+// Expo Go a JS-level reload does not carry the native RTL flag across, so the
+// next boot saw the same mismatch and reloaded again — a relaunch loop that
+// ended with Expo Go closing, and no error to show for it. A stored "already
+// tried" marker is not a safe guard either, because the key-value store falls
+// back to memory when it isn't ready this early, and memory does not survive a
+// reload.
+//
+// So the flag is set and the app simply renders. Text still aligns correctly
+// for the locale through `localizedTextAlign`, and the native flip applies on
+// the next full launch. Only an explicit language switch by the user restarts
+// the app (see `applyLocale`).
+syncNativeRTL(initialLocale === 'ar');
 
 interface LocaleState {
   locale: Locale;
@@ -58,10 +49,6 @@ function applyLocale(locale: Locale) {
   const path = getCurrentPathname();
   if (path && path !== '/') storage.set(RESTORE_ROUTE_KEY, path);
   storage.set(LANG_RELOAD_KEY, '1');
-  // The user asked for this switch, so record the attempt for the new
-  // direction before restarting — the boot guard above then won't restart
-  // a second time for the same flip.
-  storage.set(RTL_FLIP_KEY, String(locale === 'ar'));
   syncNativeRTL(locale === 'ar');
   void reloadApp();
 }

@@ -62,6 +62,9 @@ export function Input({
           style={[
             {
               flex: 1,
+              // Web inputs have an intrinsic minimum width; without this they
+              // push the icons out of narrow (half-width) fields.
+              minWidth: 0,
               color: colors.fg,
               fontSize: 15,
               fontFamily: font('Inter_400Regular'),

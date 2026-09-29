@@ -4,6 +4,7 @@ import { Redirect } from 'expo-router';
 import { Tabs } from 'expo-router/js-tabs';
 import { TabBar } from '@/components/ui/TabBar';
 import { useAuth } from '@/store/auth';
+import { usePendingReview } from '@/hooks/queries';
 
 const META = {
   dashboard: { icon: 'home' as const, label: 'tab.home' as const },
@@ -17,10 +18,18 @@ export default function ArtisanLayout() {
   // Auth gate for the whole artisan stack — see the customer layout for why this
   // ancestor guard prevents a null-user crash on sign-out.
   const user = useAuth((s) => s.user);
+  // Called before the early returns below (rules of hooks); idle until signed in.
+  const pendingReview = usePendingReview(user);
   if (!user) return <Redirect href="/(auth)/welcome" />;
   // Role gate — see the customer layout: ambiguous tab paths must not land a
   // customer inside the artisan app.
   if (user.role !== 'artisan') return <Redirect href="/(customer)/home" />;
+  // Rating is mandatory once a job is completed — for both sides. Until this
+  // user has rated every finished job they took part in, the app opens the
+  // review instead of the tabs.
+  if (pendingReview.data) {
+    return <Redirect href={{ pathname: '/(shared)/review/[id]', params: { id: pendingReview.data.id } }} />;
+  }
 
   // No freezeOnBlur — see the customer layout: frozen tabs kept stale theme colors.
   return (

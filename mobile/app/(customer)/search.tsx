@@ -29,8 +29,15 @@ export default function Search() {
     let list = data ?? [];
     if (category) list = list.filter((s) => s.categoryId === category);
     if (query.trim()) {
-      const q = query.toLowerCase();
-      list = list.filter((s) => s.name.en.toLowerCase().includes(q) || s.name.ar.includes(query) || s.description.en.toLowerCase().includes(q));
+      // Search matches services only (name + description, both languages).
+      const q = query.trim().toLowerCase();
+      list = list.filter(
+        (s) =>
+          s.name.en.toLowerCase().includes(q) ||
+          s.name.ar.includes(q) ||
+          s.description.en.toLowerCase().includes(q) ||
+          s.description.ar.includes(q),
+      );
     }
     list = [...list].sort((a, b) => {
       if (sort === 'price') return a.basePriceFrom - b.basePriceFrom;

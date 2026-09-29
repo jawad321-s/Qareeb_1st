@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/services/api';
 import { qk } from '@/lib/queryClient';
-import type { Offer, ServiceRequest, ChatMessage } from '@/types';
+import type { AppUser, Offer, Review, ServiceRequest, ChatMessage } from '@/types';
 
 export function useServices(categoryId?: string) {
   return useQuery({ queryKey: qk.services(categoryId), queryFn: () => api.getServices(categoryId) });
@@ -41,6 +41,49 @@ export function useOffers(requestId: string) {
 
 export function useReviews(targetId: string) {
   return useQuery({ queryKey: qk.reviews(targetId), queryFn: () => api.getReviews(targetId), enabled: !!targetId });
+}
+
+export function useUser(uid: string | undefined) {
+  return useQuery({ queryKey: qk.user(uid ?? ''), queryFn: () => api.getUser(uid!), enabled: !!uid });
+}
+
+/**
+ * The completed job the signed-in user still has to rate, or null. Rating is
+ * mandatory on both sides: each role layout redirects to the review while this
+ * returns a request.
+ */
+export function usePendingReview(user: Pick<AppUser, 'uid' | 'role'> | null) {
+  const role = user?.role === 'artisan' ? 'artisan' : 'customer';
+  return useQuery({
+    queryKey: qk.pendingReview(user?.uid ?? ''),
+    queryFn: () => api.getPendingReview(user!.uid, role),
+    enabled: !!user,
+  });
+}
+
+export function useHasReviewed(requestId: string, uid: string | undefined) {
+  return useQuery({
+    queryKey: qk.hasReviewed(requestId, uid ?? ''),
+    queryFn: () => api.hasReviewed(requestId, uid!),
+    enabled: !!requestId && !!uid,
+  });
+}
+
+export function useSubmitReview() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (input: Omit<Review, 'id' | 'createdAt'>) => api.submitReview(input),
+    onSuccess: async (review) => {
+      // Drop the pending-review answer rather than just invalidating it: the
+      // role layout re-reads it on mount, and a stale cached request would
+      // bounce the user straight back into the review they just submitted.
+      qc.removeQueries({ queryKey: qk.pendingReview(review.authorId) });
+      await Promise.all([
+        qc.invalidateQueries({ queryKey: qk.hasReviewed(review.requestId, review.authorId) }),
+        qc.invalidateQueries({ queryKey: qk.reviews(review.targetId) }),
+      ]);
+    },
+  });
 }
 
 export function useMessages(requestId: string) {

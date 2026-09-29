@@ -124,7 +124,7 @@ export const translations = {
 
     // search
     'search.title': 'Search',
-    'search.placeholder': 'Search services or artisans…',
+    'search.placeholder': 'Search services…',
     'search.all': 'All',
     'search.sort': 'Sort:',
     'search.noResults': 'No results',
@@ -174,7 +174,6 @@ export const translations = {
     'profile.signOut': 'Sign out',
     'profile.orders': 'Orders',
     'profile.rating': 'Rating',
-    'profile.reviews': 'Reviews',
 
     // settings
     'settings.title': 'Settings',
@@ -314,6 +313,21 @@ export const translations = {
     'review.tag.cleanWork': 'Clean work',
     'review.tag.friendly': 'Friendly',
     'review.tag.rehire': 'Would rehire',
+    'review.requiredTitle': 'Your job is complete',
+    'review.requiredBody': 'Rating is required before you continue — it keeps Qareeb fair for everyone.',
+    'review.howCustomer': 'How was working with this customer?',
+    'review.pickStars': 'Tap the stars to rate',
+    'review.thanks': 'Thanks — your rating was saved',
+    'review.failed': 'Could not save your rating. Try again.',
+    'review.done': 'Rated',
+    'review.theArtisan': 'The artisan',
+    'review.theCustomer': 'The customer',
+    'review.ctag.respectful': 'Respectful',
+    'review.ctag.clearRequest': 'Clear request',
+    'review.ctag.paidOnTime': 'Paid on time',
+    'review.ctag.cooperative': 'Cooperative',
+    'review.ctag.onSite': 'Was on site',
+    'review.ctag.recommend': 'Would work with again',
 
     // edit profile
     'edit.title': 'Edit profile',
@@ -559,7 +573,7 @@ export const translations = {
 
     // search
     'search.title': 'بحث',
-    'search.placeholder': 'ابحث عن خدمة أو حرفي…',
+    'search.placeholder': 'ابحث عن خدمة…',
     'search.all': 'الكل',
     'search.sort': 'ترتيب:',
     'search.noResults': 'لا توجد نتائج',
@@ -609,7 +623,6 @@ export const translations = {
     'profile.signOut': 'تسجيل الخروج',
     'profile.orders': 'الطلبات',
     'profile.rating': 'التقييم',
-    'profile.reviews': 'المراجعات',
 
     // settings
     'settings.title': 'الإعدادات',
@@ -749,6 +762,21 @@ export const translations = {
     'review.tag.cleanWork': 'عمل نظيف',
     'review.tag.friendly': 'ودود',
     'review.tag.rehire': 'سأكرّر التعامل',
+    'review.requiredTitle': 'اكتمل طلبك',
+    'review.requiredBody': 'التقييم إلزامي قبل المتابعة — يحافظ على عدالة قريب للجميع.',
+    'review.howCustomer': 'كيف كان التعامل مع هذا الزبون؟',
+    'review.pickStars': 'اضغط على النجوم للتقييم',
+    'review.thanks': 'شكراً — تم حفظ تقييمك',
+    'review.failed': 'تعذّر حفظ التقييم. حاول مرة أخرى.',
+    'review.done': 'تم التقييم',
+    'review.theArtisan': 'الحرفي',
+    'review.theCustomer': 'الزبون',
+    'review.ctag.respectful': 'محترم',
+    'review.ctag.clearRequest': 'طلب واضح',
+    'review.ctag.paidOnTime': 'دفع في الوقت',
+    'review.ctag.cooperative': 'متعاون',
+    'review.ctag.onSite': 'كان متواجداً',
+    'review.ctag.recommend': 'أتعامل معه مجدداً',
 
     // edit profile
     'edit.title': 'تعديل الملف الشخصي',

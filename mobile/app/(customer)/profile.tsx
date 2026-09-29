@@ -8,7 +8,6 @@ import { Text } from '@/components/ui/Text';
 import { Avatar } from '@/components/ui/Avatar';
 import { Icon, type IconName } from '@/components/ui/Icon';
 import { Card } from '@/components/ui/Card';
-import { Rating } from '@/components/ui/Rating';
 import { FloatingBlobs } from '@/components/ui/FloatingBlobs';
 import { useAuth } from '@/store/auth';
 import { useThemeStore } from '@/theme/ThemeProvider';
@@ -84,7 +83,6 @@ export default function Profile() {
               <View style={{ flexDirection: 'row', gap: 24, marginTop: 8 }}>
                 <Stat label={t('profile.orders')} value="18" />
                 <Stat label={t('profile.rating')} value={user.rating.toFixed(1)} />
-                <Stat label={t('profile.reviews')} value={String(user.ratingCount)} />
               </View>
             </View>
           </SafeAreaView>

@@ -15,7 +15,8 @@ import { StatusBadge } from '@/components/domain/StatusBadge';
 import { TrackingTimeline } from '@/components/domain/TrackingTimeline';
 import { OfferCard } from '@/components/domain/OfferCard';
 import { CardSkeleton } from '@/components/feedback/Skeleton';
-import { useRequest, useOffers, useAcceptOffer, useRejectOffer, useCancelRequest } from '@/hooks/queries';
+import { useRequest, useOffers, useAcceptOffer, useRejectOffer, useCancelRequest, useHasReviewed } from '@/hooks/queries';
+import { useAuth } from '@/store/auth';
 import { useToast } from '@/components/feedback/Toast';
 import { categoryById } from '@/constants/categories';
 import { formatMoney } from '@/lib/format';
@@ -31,6 +32,8 @@ export default function RequestDetail() {
   const toast = useToast();
   const { t, locale } = useT();
   const { data: request, isLoading } = useRequest(id!);
+  const uid = useAuth((s) => s.user?.uid);
+  const { data: rated } = useHasReviewed(id!, uid);
   const offers = useOffers(id!);
   const accept = useAcceptOffer(id!);
   const reject = useRejectOffer(id!);
@@ -193,10 +196,14 @@ export default function RequestDetail() {
         </View>
       )}
 
-      {/* Completed → review CTA */}
+      {/* Completed → review CTA (rating is mandatory; once done it's just a label) */}
       {request.status === 'COMPLETED' && (
         <View style={{ marginTop: 20 }}>
-          <Button label={t('req.rateExperience')} iconLeft="star" onPress={() => router.push(`/(shared)/review/${request.id}`)} />
+          {rated ? (
+            <Button label={t('review.done')} iconLeft="check-circle" variant="secondary" disabled />
+          ) : (
+            <Button label={t('req.rateExperience')} iconLeft="star" onPress={() => router.push(`/(shared)/review/${request.id}`)} />
+          )}
         </View>
       )}
     </Screen>

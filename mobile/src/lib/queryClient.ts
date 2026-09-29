@@ -28,5 +28,8 @@ export const qk = {
   artisanOffers: (artisanId: string) => ['artisanOffers', artisanId] as const,
   messages: (requestId: string) => ['messages', requestId] as const,
   reviews: (targetId: string) => ['reviews', targetId] as const,
+  user: (uid: string) => ['user', uid] as const,
+  pendingReview: (uid: string) => ['pendingReview', uid] as const,
+  hasReviewed: (requestId: string, uid: string) => ['hasReviewed', requestId, uid] as const,
   notifications: (uid: string) => ['notifications', uid] as const,
 };

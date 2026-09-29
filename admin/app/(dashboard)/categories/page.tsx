@@ -11,7 +11,6 @@ const CATEGORIES = [
   { id: 'ac', name: 'Air Conditioning', nameAr: 'تكييف', color: '#06B6D4', services: 2, active: true },
   { id: 'painting', name: 'Painting', nameAr: 'دهان', color: '#8B5CF6', services: 2, active: true },
   { id: 'cleaning', name: 'Cleaning', nameAr: 'تنظيف', color: '#14B8A6', services: 2, active: true },
-  { id: 'maintenance', name: 'Maintenance', nameAr: 'صيانة', color: '#3B82F6', services: 2, active: true },
   { id: 'repair', name: 'Home Repair', nameAr: 'إصلاح منزلي', color: '#7C3AED', services: 2, active: true },
   { id: 'appliance', name: 'Appliance Repair', nameAr: 'إصلاح أجهزة', color: '#0284C7', services: 2, active: true },
   { id: 'gardening', name: 'Gardening', nameAr: 'بستنة', color: '#0D9488', services: 2, active: true },

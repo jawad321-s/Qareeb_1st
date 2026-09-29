@@ -41,7 +41,7 @@ export const MOCK_ARTISAN_PROFILE: ArtisanProfile = {
   uid: 'art_1',
   bio: 'سبّاك معتمد بخبرة 12 عاماً. عمل سريع ونظيف ومضمون.',
   serviceIds: ['plumbing_leak', 'plumbing_install'],
-  categoryIds: ['plumbing', 'maintenance'],
+  categoryIds: ['plumbing'],
   basePrices: { plumbing_leak: 12000, plumbing_install: 25000 },
   availability: { days: [0, 1, 2, 3, 4], from: '08:00', to: '20:00' },
   gallery: [
@@ -133,6 +133,25 @@ export const MOCK_REQUESTS: ServiceRequest[] = [
     createdAt: mins(60 * 24 * 5),
     updatedAt: mins(60 * 24 * 4),
   },
+  {
+    // Finished job between the two demo accounts (Layla ↔ Omar) that neither
+    // side has rated yet — signing in as either one opens the mandatory review.
+    id: 'req_4',
+    customerId: 'cust_1',
+    serviceId: 'plumbing_install',
+    categoryId: 'plumbing',
+    title: 'تبديل خلاط الحمّام',
+    description: 'الخلاط القديم يسرّب ماء ونحتاج تركيب خلاط جديد.',
+    images: [],
+    location: MOCK_CUSTOMER.location!,
+    preferredTime: now - 3600_000 * 30,
+    budget: { min: 10000, max: 25000 },
+    status: 'COMPLETED',
+    acceptedArtisanId: 'art_1',
+    offerCount: 2,
+    createdAt: mins(60 * 24 * 2),
+    updatedAt: mins(60 * 26),
+  },
 ];
 
 // ── Offers ───────────────────────────────────────────────────────────────────
@@ -152,9 +171,11 @@ export const MOCK_OFFERS: Offer[] = [
 
 // ── Reviews ──────────────────────────────────────────────────────────────────
 export const MOCK_REVIEWS: Review[] = [
-  { id: 'rev_1', requestId: 'req_3', authorId: 'cust_1', targetId: 'art_1', role: 'customer', rating: 5, comment: 'محترف جداً وملتزم بالوقت. أنصح فيه بشدة!', createdAt: mins(60 * 24 * 4) },
+  { id: 'rev_1', requestId: 'req_w', authorId: 'cust_4', targetId: 'art_1', role: 'customer', rating: 5, comment: 'محترف جداً وملتزم بالوقت. أنصح فيه بشدة!', createdAt: mins(60 * 24 * 4) },
   { id: 'rev_2', requestId: 'req_x', authorId: 'cust_2', targetId: 'art_1', role: 'customer', rating: 5, comment: 'صلّح المشكلة بسرعة وترك المكان نظيفاً تماماً.', createdAt: mins(60 * 24 * 12) },
   { id: 'rev_3', requestId: 'req_y', authorId: 'cust_3', targetId: 'art_1', role: 'customer', rating: 4, comment: 'شغل ممتاز، تأخر قليلاً لكن النتيجة رائعة.', createdAt: mins(60 * 24 * 20) },
+  // Layla already rated the cleaning job (req_3), so it doesn't reopen the review.
+  { id: 'rev_4', requestId: 'req_3', authorId: 'cust_1', targetId: 'art_2', role: 'customer', rating: 5, comment: 'تنظيف ممتاز ودقيق.', createdAt: mins(60 * 24 * 4) },
 ];
 
 // ── Chat ─────────────────────────────────────────────────────────────────────

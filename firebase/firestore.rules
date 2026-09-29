@@ -135,11 +135,23 @@ service cloud.firestore {
     // ── reviews/{id} ─────────────────────────────────────────────────────────
     match /reviews/{id} {
       allow read: if true;
+      // Rating is mandatory for both sides once a job is COMPLETED. Only a
+      // party to that request may write, only about the other party, and the
+      // id is `${requestId}_${authorId}` so each person rates a job once —
+      // there is no `update`, so a second write for the same pair is denied.
       allow create: if isSignedIn()
                     && incoming().authorId == uid()
+                    && id == incoming().requestId + '_' + uid()
                     && incoming().rating is int
-                    && incoming().rating >= 1 && incoming().rating <= 5;
+                    && incoming().rating >= 1 && incoming().rating <= 5
+                    && reviewableBy(incoming().requestId, incoming().targetId);
       allow update, delete: if isAdmin();
+    }
+    function reviewableBy(requestId, targetId) {
+      let req = get(/databases/$(database)/documents/requests/$(requestId)).data;
+      return req.status == 'COMPLETED'
+        && ((req.customerId == uid() && req.acceptedArtisanId == targetId)
+         || (req.acceptedArtisanId == uid() && req.customerId == targetId));
     }
 
     // ── subscriptions ────────────────────────────────────────────────────────

@@ -10,11 +10,17 @@ import {
   MOCK_SERVICES,
 } from './data';
 import { canCancelRequest } from '@/lib/requestRules';
+import { kv } from '@/lib/mmkv';
 
 // In-memory mutable stores so the app behaves like a real backend during a session.
 let requests = [...MOCK_REQUESTS];
 let offers = [...MOCK_OFFERS];
 let messages = [...MOCK_MESSAGES];
+// Reviews the user submitted are kept on the device. Everything else here resets
+// on reload, but ratings can't: the mandatory-review gate would otherwise ask
+// for the same rating again after every app launch or language switch.
+const SUBMITTED_REVIEWS_KEY = 'qareeb.mock.submittedReviews';
+let reviews: Review[] = [...(kv.get<Review[]>(SUBMITTED_REVIEWS_KEY) ?? []), ...MOCK_REVIEWS];
 
 const delay = (ms = 450) => new Promise((r) => setTimeout(r, ms));
 const clone = <T>(v: T): T => JSON.parse(JSON.stringify(v));
@@ -126,7 +132,43 @@ export const mockApi = {
 
   async getReviews(targetId: string): Promise<Review[]> {
     await delay();
-    return clone(MOCK_REVIEWS.filter((r) => r.targetId === targetId));
+    return clone(reviews.filter((r) => r.targetId === targetId));
+  },
+
+  /** Public profile of any user — used to show who is being rated. */
+  async getUser(uid: string): Promise<AppUser | undefined> {
+    await delay(200);
+    return clone([MOCK_CUSTOMER, ...MOCK_ARTISANS].find((u) => u.uid === uid));
+  },
+
+  /**
+   * The first completed request this user took part in but hasn't rated yet.
+   * Rating is mandatory: while one exists, the app sends the user to review it.
+   */
+  async getPendingReview(uid: string, role: 'customer' | 'artisan'): Promise<ServiceRequest | null> {
+    await delay(200);
+    const rated = new Set(reviews.filter((r) => r.authorId === uid).map((r) => r.requestId));
+    const pending = requests
+      .filter((r) => r.status === 'COMPLETED' && !rated.has(r.id))
+      .filter((r) => (role === 'customer' ? r.customerId === uid : r.acceptedArtisanId === uid))
+      .sort((a, b) => a.updatedAt - b.updatedAt)[0];
+    return pending ? clone(pending) : null;
+  },
+
+  async hasReviewed(requestId: string, authorId: string): Promise<boolean> {
+    await delay(150);
+    return reviews.some((r) => r.requestId === requestId && r.authorId === authorId);
+  },
+
+  async submitReview(input: Omit<Review, 'id' | 'createdAt'>): Promise<Review> {
+    await delay(500);
+    // One review per person per request.
+    const existing = reviews.find((r) => r.requestId === input.requestId && r.authorId === input.authorId);
+    if (existing) return clone(existing);
+    const review: Review = { ...input, id: uid('rev'), createdAt: Date.now() };
+    reviews = [review, ...reviews];
+    kv.set(SUBMITTED_REVIEWS_KEY, [review, ...(kv.get<Review[]>(SUBMITTED_REVIEWS_KEY) ?? [])]);
+    return clone(review);
   },
 
   async getMessages(requestId: string): Promise<ChatMessage[]> {

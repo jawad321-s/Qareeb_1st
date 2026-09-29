@@ -14,7 +14,8 @@ export default function SharedLayout() {
       {/* Chat & permission slide up like a sheet for a native, focused feel. */}
       <Stack.Screen name="chat/[requestId]" options={{ animation: 'slide_from_bottom', animationDuration: 320 }} />
       <Stack.Screen name="location-permission" options={{ animation: 'slide_from_bottom', presentation: 'modal' }} />
-      <Stack.Screen name="review/[id]" options={{ animation: 'slide_from_bottom', presentation: 'modal' }} />
+      {/* Rating a finished job is mandatory — no swipe-to-dismiss. */}
+      <Stack.Screen name="review/[id]" options={{ animation: 'slide_from_bottom', presentation: 'modal', gestureEnabled: false }} />
     </Stack>
   );
 }

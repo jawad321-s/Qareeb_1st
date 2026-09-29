@@ -4,7 +4,7 @@
 // dashboard also uses, giving live mobile ↔ admin integration.
 import {
   addDoc, collection, doc, getDoc, getDocs, limit, orderBy, query,
-  updateDoc, where, writeBatch,
+  setDoc, updateDoc, where, writeBatch,
 } from 'firebase/firestore';
 import type {
   AppUser, ArtisanProfile, ChatMessage, Offer, Review, Service, ServiceRequest,
@@ -157,6 +157,51 @@ export const firebaseApi: typeof mockApi = {
     const q = query(collection(db(), 'reviews'), where('targetId', '==', targetId));
     const snap = await getDocs(q);
     return snap.docs.map((d) => withId<Review>(d.id, { ...d.data(), createdAt: ms(d.data().createdAt) }));
+  },
+
+  async getUser(uid: string): Promise<AppUser | undefined> {
+    // Users may only read their own doc (see firestore.rules), so reading the
+    // other party can be denied — callers fall back to a generic label.
+    const snap = await getDoc(doc(db(), 'users', uid)).catch(() => null);
+    if (!snap) return undefined;
+    if (!snap.exists()) return undefined;
+    const v = snap.data();
+    return { ...(v as AppUser), uid: snap.id, createdAt: ms(v.createdAt), updatedAt: ms(v.updatedAt) };
+  },
+
+  async getPendingReview(uid: string, role: 'customer' | 'artisan'): Promise<ServiceRequest | null> {
+    const party = role === 'customer' ? 'customerId' : 'acceptedArtisanId';
+    const [reqSnap, revSnap] = await Promise.all([
+      getDocs(query(collection(db(), 'requests'), where(party, '==', uid), where('status', '==', 'COMPLETED'))),
+      getDocs(query(collection(db(), 'reviews'), where('authorId', '==', uid))),
+    ]);
+    const rated = new Set(revSnap.docs.map((d) => d.data().requestId as string));
+    const pending = reqSnap.docs
+      .map((d) => mapRequest(d.id, d.data()))
+      .filter((r) => !rated.has(r.id))
+      .sort((a, b) => a.updatedAt - b.updatedAt)[0];
+    return pending ?? null;
+  },
+
+  async hasReviewed(requestId: string, authorId: string): Promise<boolean> {
+    // Query by fields (not the deterministic id) so reviews seeded from the
+    // admin side with other ids still count — same check getPendingReview uses.
+    const q = query(
+      collection(db(), 'reviews'),
+      where('requestId', '==', requestId),
+      where('authorId', '==', authorId),
+      limit(1),
+    );
+    return !(await getDocs(q)).empty;
+  },
+
+  async submitReview(input): Promise<Review> {
+    // Deterministic id = one review per person per request. The rules only
+    // allow `create`, so a second write for the same pair is rejected.
+    const id = `${input.requestId}_${input.authorId}`;
+    const payload = { ...input, createdAt: Date.now() };
+    await setDoc(doc(db(), 'reviews', id), payload);
+    return { ...payload, id };
   },
 
   async getMessages(requestId: string): Promise<ChatMessage[]> {

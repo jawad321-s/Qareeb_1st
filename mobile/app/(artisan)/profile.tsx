@@ -15,6 +15,8 @@ import { useTheme } from '@/theme/ThemeProvider';
 import { useThemeStore } from '@/theme/ThemeProvider';
 import { useT } from '@/i18n';
 import { MOCK_ARTISAN_PROFILE } from '@/mock/data';
+import { useMySubscription } from '@/store/subscription';
+import { planById } from '@/lib/plans';
 
 export default function ArtisanProfile() {
   const { colors, isDark } = useTheme();
@@ -23,6 +25,8 @@ export default function ArtisanProfile() {
   const { mode, setMode } = useThemeStore();
   const { t, locale, toggle } = useT();
   const profile = MOCK_ARTISAN_PROFILE;
+  // The premium badge reflects the plan the artisan actually paid for.
+  const plan = useMySubscription(user?.uid);
 
   // See customer profile: guard against a null user during the sign-out redirect.
   if (!user) return null;
@@ -56,7 +60,7 @@ export default function ArtisanProfile() {
                 {user.fullName}
               </Text>
               <View style={{ flexDirection: 'row', gap: 8 }}>
-                {profile.premium && <Badge label={t('ad.premium')} variant="warning" icon="award" />}
+                {plan.planId !== 'free' && <Badge label={planById(plan.planId)?.name[locale] ?? t('ad.premium')} variant="warning" icon="award" />}
                 <Badge label={profile.verificationStatus === 'approved' ? t('ad.verified') : t('ap.pending')} variant={profile.verificationStatus === 'approved' ? 'success' : 'warning'} icon="shield" />
               </View>
               <View style={{ flexDirection: 'row', gap: 28, marginTop: 8 }}>

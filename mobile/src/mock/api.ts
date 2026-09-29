@@ -171,6 +171,21 @@ export const mockApi = {
     return clone(review);
   },
 
+  /** Record a (simulated) subscription purchase. The mock keeps plans on-device
+   *  via the subscription store, so there's nothing more to store here. */
+  async recordSubscription(_record: {
+    artisanId: string;
+    planId: string;
+    amount: number;
+    brand?: string;
+    last4?: string;
+    transactionId?: string;
+    activatedAt: number;
+    renewsAt: number | null;
+  }): Promise<void> {
+    await delay(200);
+  },
+
   async getMessages(requestId: string): Promise<ChatMessage[]> {
     await delay(250);
     return clone(messages.filter(() => true).sort((a, b) => a.createdAt - b.createdAt));

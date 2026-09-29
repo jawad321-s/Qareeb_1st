@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { View } from 'react-native';
+import { Pressable, View } from 'react-native';
+import { router } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { Screen } from '@/components/ui/Screen';
@@ -12,26 +13,32 @@ import { useToast } from '@/components/feedback/Toast';
 import { useTheme } from '@/theme/ThemeProvider';
 import { useT } from '@/i18n';
 import { config } from '@/lib/config';
-
-const PLANS = {
-  en: [
-    { id: 'free', name: 'Starter', price: 0, highlight: false, features: ['Receive nearby requests', 'Up to 10 offers / month', 'Standard support'] },
-    { id: 'pro', name: 'Pro', price: 49, highlight: true, features: ['Unlimited offers', 'Priority matching', 'Premium badge', 'Analytics dashboard', 'Faster payouts'] },
-    { id: 'elite', name: 'Elite', price: 99, highlight: false, features: ['Everything in Pro', 'Top of search results', 'Dedicated account manager', 'Featured on homepage'] },
-  ],
-  ar: [
-    { id: 'free', name: 'المبتدئ', price: 0, highlight: false, features: ['استقبال الطلبات القريبة', 'حتى 10 عروض شهرياً', 'دعم قياسي'] },
-    { id: 'pro', name: 'المحترف', price: 49, highlight: true, features: ['عروض غير محدودة', 'أولوية في المطابقة', 'شارة مميّزة', 'لوحة تحليلات', 'دفعات أسرع'] },
-    { id: 'elite', name: 'النخبة', price: 99, highlight: false, features: ['كل مزايا المحترف', 'الظهور أعلى نتائج البحث', 'مدير حساب مخصّص', 'ظهور في الصفحة الرئيسية'] },
-  ],
-};
+import { PLANS } from '@/lib/plans';
+import { useAuth } from '@/store/auth';
+import { useMySubscription, useSubscriptionStore } from '@/store/subscription';
 
 export default function Subscription() {
   const { colors, gradient } = useTheme();
   const toast = useToast();
   const { t, locale } = useT();
-  const [selected, setSelected] = useState('pro');
-  const plans = PLANS[locale];
+  const user = useAuth((s) => s.user);
+  const current = useMySubscription(user?.uid);
+  const activate = useSubscriptionStore((s) => s.activate);
+  // Preselect the most popular plan unless the artisan is already on it.
+  const [selected, setSelected] = useState<string>(current.planId === 'pro' ? 'elite' : 'pro');
+  const chosen = PLANS.find((p) => p.id === selected)!;
+  const isCurrent = chosen.id === current.planId;
+
+  const onSubscribe = () => {
+    if (!user || isCurrent) return;
+    if (chosen.price === 0) {
+      // Downgrading to the free plan costs nothing — no checkout needed.
+      activate(user.uid, { planId: 'free', amount: 0 });
+      toast('success', t('sub.switchedFree'));
+      return;
+    }
+    router.push({ pathname: '/(shared)/checkout', params: { plan: chosen.id } });
+  };
 
   return (
     <Screen scroll>
@@ -46,12 +53,13 @@ export default function Subscription() {
       </View>
 
       <View style={{ gap: 14 }}>
-        {plans.map((plan, i) => {
+        {PLANS.map((plan, i) => {
           const active = selected === plan.id;
+          const mine = current.planId === plan.id;
           return (
             <Animated.View key={plan.id} entering={FadeInDown.delay(i * 80).duration(400)}>
-              <View
-                onTouchEnd={() => setSelected(plan.id)}
+              <Pressable
+                onPress={() => setSelected(plan.id)}
                 style={{ borderRadius: 24, borderWidth: 2, borderColor: active ? colors.tint : colors.border, overflow: 'hidden' }}
               >
                 <LinearGradient
@@ -60,13 +68,17 @@ export default function Subscription() {
                 >
                   <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
                     <Text variant="h3" tone={plan.highlight ? 'inverse' : 'default'}>
-                      {plan.name}
+                      {plan.name[locale]}
                     </Text>
-                    {plan.highlight && <Badge label={t('sub.popular')} variant="warning" icon="award" />}
+                    {mine ? (
+                      <Badge label={t('sub.current')} variant="success" icon="check-circle" />
+                    ) : (
+                      plan.highlight && <Badge label={t('sub.popular')} variant="warning" icon="award" />
+                    )}
                   </View>
                   <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: 4 }}>
                     <Text variant="display" tone={plan.highlight ? 'inverse' : 'default'}>
-                      {plan.price === 0 ? t('sub.free') : `${plan.price}`}
+                      {plan.price === 0 ? t('sub.free') : `${plan.price / config.currencyMinorPerMajor}`}
                     </Text>
                     {plan.price > 0 && (
                       <Text variant="body" style={{ color: plan.highlight ? 'rgba(255,255,255,0.85)' : colors.muted, marginBottom: 6 }}>
@@ -75,7 +87,7 @@ export default function Subscription() {
                     )}
                   </View>
                   <View style={{ gap: 8 }}>
-                    {plan.features.map((f) => (
+                    {plan.features[locale].map((f) => (
                       <View key={f} style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
                         <Icon name="check-circle" size={16} color={plan.highlight ? '#FFF' : colors.tint} />
                         <Text variant="caption" tone={plan.highlight ? 'inverse' : 'muted'}>
@@ -85,7 +97,7 @@ export default function Subscription() {
                     ))}
                   </View>
                 </LinearGradient>
-              </View>
+              </Pressable>
             </Animated.View>
           );
         })}
@@ -93,11 +105,24 @@ export default function Subscription() {
 
       <View style={{ marginTop: 24 }}>
         <Button
-          label={`${t('sub.subscribe')} ${plans.find((p) => p.id === selected)?.name}`}
-          iconRight="arrow-right"
-          onPress={() => toast('success', 'Subscription updated')}
+          label={
+            isCurrent
+              ? t('sub.current')
+              : chosen.price === 0
+                ? t('sub.switchToFree')
+                : `${t('sub.subscribe')} ${chosen.name[locale]} · ${t('sub.continuePay')}`
+          }
+          iconRight={isCurrent ? 'check' : chosen.price === 0 ? 'arrow-right' : 'credit-card'}
+          onPress={onSubscribe}
+          disabled={isCurrent}
         />
-        <Text variant="caption" tone="muted" center style={{ marginTop: 12 }}>
+        {current.renewsAt && (
+          <Text variant="caption" tone="muted" center style={{ marginTop: 12 }}>
+            {PLANS.find((p) => p.id === current.planId)?.name[locale]} · {t('sub.renewsOn')}{' '}
+            {new Date(current.renewsAt).toLocaleDateString(locale === 'ar' ? 'ar' : 'en', { year: 'numeric', month: 'long', day: 'numeric' })}
+          </Text>
+        )}
+        <Text variant="caption" tone="muted" center style={{ marginTop: 8 }}>
           {t('sub.cancelAnytime')}
         </Text>
       </View>

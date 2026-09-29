@@ -204,6 +204,12 @@ export const firebaseApi: typeof mockApi = {
     return { ...payload, id };
   },
 
+  async recordSubscription(record): Promise<void> {
+    // Rules: an artisan may create subscriptions for themselves only. Marked
+    // `simulated` because checkout runs the payment simulator, not a gateway.
+    await addDoc(collection(db(), 'subscriptions'), { ...record, status: 'active', simulated: true });
+  },
+
   async getMessages(requestId: string): Promise<ChatMessage[]> {
     const q = query(collection(db(), 'messages'), where('requestId', '==', requestId));
     const snap = await getDocs(q);

@@ -19,12 +19,16 @@ import { useAuth } from '@/store/auth';
 import { useTheme } from '@/theme/ThemeProvider';
 import { useT } from '@/i18n';
 import { formatMoney } from '@/lib/format';
+import { planById } from '@/lib/plans';
+import { useMySubscription } from '@/store/subscription';
 
 export default function ArtisanDashboard() {
   const { colors, isDark, hero } = useTheme();
   const user = useAuth((s) => s.user)!;
-  const { t } = useT();
+  const { t, locale } = useT();
   const [online, setOnline] = useState(true);
+  const subscription = useMySubscription(user.uid);
+  const paidPlan = subscription.planId !== 'free' ? planById(subscription.planId) : undefined;
   const nearby = useNearbyRequests(user.uid);
   const tabBarSpace = useTabBarSpace();
 
@@ -106,21 +110,23 @@ export default function ArtisanDashboard() {
           </View>
         </View>
 
-        {/* Subscription CTA */}
-        <View style={{ paddingHorizontal: 20, marginTop: 24 }}>
+        {/* Subscription: upsell on the free plan, current plan once paid. Opens the plans screen. */}
+        <Pressable onPress={() => router.push('/(shared)/subscription')} style={{ paddingHorizontal: 20, marginTop: 24 }}>
           <LinearGradient colors={['#F59E0B', '#EF4444']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ borderRadius: 20, padding: 20, flexDirection: 'row', alignItems: 'center', gap: 14 }}>
             <Icon name="award" size={32} color="#FFF" />
             <View style={{ flex: 1 }}>
               <Text variant="bodyMedium" tone="inverse">
-                {t('artisan.goPremium')}
+                {paidPlan ? `${t('sub.current')}: ${paidPlan.name[locale]}` : t('artisan.goPremium')}
               </Text>
               <Text variant="caption" style={{ color: 'rgba(255,255,255,0.9)' }}>
-                {t('artisan.premiumDesc')}
+                {paidPlan && subscription.renewsAt
+                  ? `${t('sub.renewsOn')} ${new Date(subscription.renewsAt).toLocaleDateString(locale === 'ar' ? 'ar' : 'en', { month: 'long', day: 'numeric' })}`
+                  : t('artisan.premiumDesc')}
               </Text>
             </View>
-            <Badge label="★" variant="warning" />
+            {paidPlan ? <Badge label="✓" variant="success" /> : <Icon name="chevron-right" size={22} color="#FFF" />}
           </LinearGradient>
-        </View>
+        </Pressable>
       </ScrollView>
     </View>
   );

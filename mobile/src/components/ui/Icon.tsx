@@ -21,7 +21,7 @@ export type IconName =
   | 'lock' | 'mail' | 'edit' | 'trash' | 'log-out' | 'moon' | 'sun' | 'globe'
   | 'droplet' | 'zap' | 'hammer' | 'wind' | 'paintbrush' | 'sparkles'
   | 'wrench' | 'tools' | 'plug' | 'leaf' | 'satellite' | 'truck' | 'briefcase'
-  | 'more-horizontal' | 'info' | 'alert-circle' | 'help-circle' | 'flag';
+  | 'more-horizontal' | 'info' | 'alert-circle' | 'help-circle' | 'flag' | 'credit-card';
 
 interface IconProps {
   name: IconName;
@@ -88,6 +88,7 @@ function renderPaths(name: IconName, c: string, p: object) {
     case 'calendar': return <><Rect x="3" y="4" width="18" height="18" rx="2" ry="2" {...p} /><Line x1="16" y1="2" x2="16" y2="6" {...p} /><Line x1="8" y1="2" x2="8" y2="6" {...p} /><Line x1="3" y1="10" x2="21" y2="10" {...p} /></>;
     case 'eye': return <><Path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" {...p} /><Circle cx="12" cy="12" r="3" {...p} /></>;
     case 'eye-off': return <><Path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" {...p} /><Line x1="1" y1="1" x2="23" y2="23" {...p} /></>;
+    case 'credit-card': return <><Rect x="1" y="4" width="22" height="16" rx="2" ry="2" {...p} /><Line x1="1" y1="10" x2="23" y2="10" {...p} /></>;
     case 'lock': return <><Rect x="3" y="11" width="18" height="11" rx="2" ry="2" {...p} /><Path d="M7 11V7a5 5 0 0 1 10 0v4" {...p} /></>;
     case 'mail': return <><Path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" {...p} /><Polyline points="22,6 12,13 2,6" {...p} /></>;
     case 'edit': return <><Path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" {...p} /><Path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" {...p} /></>;

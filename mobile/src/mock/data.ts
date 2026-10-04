@@ -40,9 +40,8 @@ export const MOCK_ARTISANS: AppUser[] = [
 export const MOCK_ARTISAN_PROFILE: ArtisanProfile = {
   uid: 'art_1',
   bio: 'سبّاك معتمد بخبرة 12 عاماً. عمل سريع ونظيف ومضمون.',
-  serviceIds: ['plumbing_leak', 'plumbing_install'],
+  serviceIds: ['plumbing_repair', 'plumbing_install'],
   categoryIds: ['plumbing'],
-  basePrices: { plumbing_leak: 12000, plumbing_install: 25000 },
   availability: { days: [0, 1, 2, 3, 4], from: '08:00', to: '20:00' },
   gallery: [
     'https://images.unsplash.com/photo-1607472586893-edb57bdc0e39?w=600',
@@ -134,6 +133,25 @@ export const MOCK_REQUESTS: ServiceRequest[] = [
     updatedAt: mins(60 * 24 * 4),
   },
   {
+    // Active job between the demo accounts (Layla ↔ Omar): Omar can mark it on
+    // the way → working → finished, and both can chat about it.
+    id: 'req_5',
+    customerId: 'cust_1',
+    serviceId: 'plumbing_install',
+    categoryId: 'plumbing',
+    title: 'تركيب سخان ماء',
+    description: 'سخان كهربائي جديد بحاجة لتركيب في الحمّام مع توصيل المواسير.',
+    images: [],
+    location: MOCK_CUSTOMER.location!,
+    preferredTime: now + 3600_000 * 5,
+    budget: { min: 15000, max: 30000 },
+    status: 'ACCEPTED',
+    acceptedArtisanId: 'art_1',
+    offerCount: 3,
+    createdAt: mins(60 * 6),
+    updatedAt: mins(40),
+  },
+  {
     // Finished job between the two demo accounts (Layla ↔ Omar) that neither
     // side has rated yet — signing in as either one opens the mandatory review.
     id: 'req_4',
@@ -180,7 +198,11 @@ export const MOCK_REVIEWS: Review[] = [
 
 // ── Chat ─────────────────────────────────────────────────────────────────────
 export const MOCK_MESSAGES: ChatMessage[] = [
-  { id: 'm1', senderId: 'art_4', type: 'text', text: 'مرحباً! قبلت طلب المكيّف، بوصل خلال 25 دقيقة تقريباً.', read: true, createdAt: mins(115) },
-  { id: 'm2', senderId: 'cust_1', type: 'text', text: 'ممتاز، شكراً! المكيّف في الصالون.', read: true, createdAt: mins(112) },
-  { id: 'm3', senderId: 'art_4', type: 'text', text: 'تمام. رجاءً أبقي المكيّف مطفأ لحين وصولي.', read: true, createdAt: mins(110) },
+  { id: 'm1', requestId: 'req_2', senderId: 'art_4', type: 'text', text: 'مرحباً! قبلت طلب المكيّف، بوصل خلال 25 دقيقة تقريباً.', read: true, createdAt: mins(115) },
+  { id: 'm2', requestId: 'req_2', senderId: 'cust_1', type: 'text', text: 'ممتاز، شكراً! المكيّف في الصالون.', read: true, createdAt: mins(112) },
+  { id: 'm3', requestId: 'req_2', senderId: 'art_4', type: 'text', text: 'تمام. رجاءً أبقي المكيّف مطفأ لحين وصولي.', read: true, createdAt: mins(110) },
+  { id: 'm4', requestId: 'req_5', senderId: 'art_1', type: 'text', text: 'أهلاً، السخان موجود عندك ولا أجيبه معي؟', read: true, createdAt: mins(38) },
+  { id: 'm5', requestId: 'req_5', senderId: 'cust_1', type: 'text', text: 'موجود، اشتريته امبارح.', read: false, createdAt: mins(35) },
+  { id: 'm6', requestId: 'req_4', senderId: 'art_1', type: 'text', text: 'تم تركيب الخلاط وفحصه، ما في أي تسريب.', read: true, createdAt: mins(60 * 26 + 5) },
+  { id: 'm7', requestId: 'req_4', senderId: 'cust_1', type: 'text', text: 'شكراً كثير، شغل نظيف!', read: true, createdAt: mins(60 * 26) },
 ];

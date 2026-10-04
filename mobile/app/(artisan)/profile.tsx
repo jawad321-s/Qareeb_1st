@@ -34,7 +34,8 @@ export default function ArtisanProfile() {
   const items: { icon: IconName; label: string; danger?: boolean; onPress?: () => void; route?: string }[] = [
     { icon: 'shield', label: t('ap.verification'), route: '/(shared)/verification' },
     { icon: 'image', label: t('ap.gallery'), route: '/(shared)/gallery' },
-    { icon: 'sliders', label: t('ap.servicesPricing'), route: '/(shared)/services-pricing' },
+    { icon: 'message', label: t('ap.conversations'), route: '/(shared)/conversations' },
+    { icon: 'sliders', label: t('ap.services'), route: '/(shared)/my-services' },
     { icon: 'calendar', label: t('ap.availability'), route: '/(shared)/availability' },
     { icon: 'award', label: t('ap.subscription'), route: '/(shared)/subscription' },
     { icon: 'globe', label: `${t('profile.language')}: ${locale === 'ar' ? 'العربية' : 'English'}`, onPress: toggle },
@@ -60,7 +61,7 @@ export default function ArtisanProfile() {
                 {user.fullName}
               </Text>
               <View style={{ flexDirection: 'row', gap: 8 }}>
-                {plan.planId !== 'free' && <Badge label={planById(plan.planId)?.name[locale] ?? t('ad.premium')} variant="warning" icon="award" />}
+                {plan.isPaid && plan.record && <Badge label={planById(plan.record.planId)?.name[locale] ?? t('ad.premium')} variant="warning" icon="award" />}
                 <Badge label={profile.verificationStatus === 'approved' ? t('ad.verified') : t('ap.pending')} variant={profile.verificationStatus === 'approved' ? 'success' : 'warning'} icon="shield" />
               </View>
               <View style={{ flexDirection: 'row', gap: 28, marginTop: 8 }}>

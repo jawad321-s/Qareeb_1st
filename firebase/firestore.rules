@@ -107,9 +107,11 @@ service cloud.firestore {
           return get(/databases/$(database)/documents/requests/$(requestId)).data;
         }
         allow read: if isSignedIn() && (req().customerId == uid() || req().acceptedArtisanId == uid() || isAdmin());
+        // The thread closes once the job is completed or cancelled.
         allow create: if isSignedIn()
                       && incoming().senderId == uid()
-                      && (req().customerId == uid() || req().acceptedArtisanId == uid());
+                      && (req().customerId == uid() || req().acceptedArtisanId == uid())
+                      && req().status in ['ACCEPTED', 'ON_THE_WAY', 'WORKING'];
         allow update: if isSignedIn() && (req().customerId == uid() || req().acceptedArtisanId == uid());
       }
     }
@@ -158,7 +160,13 @@ service cloud.firestore {
     match /subscriptions/{id} {
       allow read: if isSignedIn() && (existing().artisanId == uid() || isAdmin());
       allow create: if isArtisan() && incoming().artisanId == uid();
-      allow update, delete: if isAdmin();
+      // The artisan may cancel their own plan (ends it at once, no refund) —
+      // and change nothing else on it.
+      allow update: if isAdmin()
+                    || (isArtisan() && existing().artisanId == uid()
+                        && incoming().status == 'cancelled'
+                        && incoming().diff(existing()).affectedKeys().hasOnly(['status', 'cancelledAt']));
+      allow delete: if isAdmin();
     }
 
     // ── complaints ───────────────────────────────────────────────────────────

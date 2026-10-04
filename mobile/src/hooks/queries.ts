@@ -1,15 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/services/api';
 import { qk } from '@/lib/queryClient';
-import type { AppUser, Offer, Review, ServiceRequest, ChatMessage } from '@/types';
-
-export function useServices(categoryId?: string) {
-  return useQuery({ queryKey: qk.services(categoryId), queryFn: () => api.getServices(categoryId) });
-}
-
-export function useService(id: string) {
-  return useQuery({ queryKey: qk.service(id), queryFn: () => api.getService(id), enabled: !!id });
-}
+import type { AppUser, GeoLocation, Offer, RequestStatus, Review, ServiceRequest, ChatMessage } from '@/types';
+import { distanceKm } from '@/lib/geo';
 
 export function useArtisan(id: string) {
   return useQuery({ queryKey: qk.artisan(id), queryFn: () => api.getArtisan(id), enabled: !!id });
@@ -31,8 +24,23 @@ export function useRequest(id: string) {
   return useQuery({ queryKey: qk.request(id), queryFn: () => api.getRequest(id), enabled: !!id });
 }
 
-export function useNearbyRequests(artisanId: string) {
-  return useQuery({ queryKey: qk.nearbyRequests(artisanId), queryFn: () => api.getNearbyRequests() });
+export type NearbyRequest = ServiceRequest & { distanceKm?: number };
+
+/**
+ * Open requests for an artisan, nearest first. Distances are measured from the
+ * artisan's saved location; without one the list keeps its server order.
+ */
+export function useNearbyRequests(artisanId: string, origin?: GeoLocation | null) {
+  return useQuery({
+    queryKey: qk.nearbyRequests(artisanId),
+    queryFn: () => api.getNearbyRequests(),
+    select: (list): NearbyRequest[] =>
+      origin
+        ? list
+            .map((r) => ({ ...r, distanceKm: distanceKm(origin, r.location) }))
+            .sort((a, b) => a.distanceKm - b.distanceKm)
+        : list,
+  });
 }
 
 export function useOffers(requestId: string) {
@@ -58,6 +66,8 @@ export function usePendingReview(user: Pick<AppUser, 'uid' | 'role'> | null) {
     queryKey: qk.pendingReview(user?.uid ?? ''),
     queryFn: () => api.getPendingReview(user!.uid, role),
     enabled: !!user,
+    // Re-check now and then: a job can be auto-completed while the app is open.
+    refetchInterval: 2 * 60_000,
   });
 }
 
@@ -152,6 +162,43 @@ export function useSendMessage(requestId: string) {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (msg: Omit<ChatMessage, 'id' | 'read' | 'createdAt'>) => api.sendMessage(requestId, msg),
-    onSuccess: () => qc.invalidateQueries({ queryKey: qk.messages(requestId) }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: qk.messages(requestId) });
+      qc.invalidateQueries({ queryKey: ['conversations'] });
+    },
+  });
+}
+
+/** The user's chat threads, most recent first. */
+export function useConversations(user: Pick<AppUser, 'uid' | 'role'> | null) {
+  const role = user?.role === 'artisan' ? 'artisan' : 'customer';
+  return useQuery({
+    queryKey: qk.conversations(user?.uid ?? ''),
+    queryFn: () => api.getConversations(user!.uid, role),
+    enabled: !!user,
+    refetchInterval: 8000,
+  });
+}
+
+/** Jobs assigned to the artisan that are still in progress. */
+export function useArtisanJobs(artisanId: string) {
+  return useQuery({ queryKey: qk.artisanJobs(artisanId), queryFn: () => api.getArtisanJobs(artisanId), enabled: !!artisanId });
+}
+
+/** The assigned artisan moves a job on (on the way → working → finished). */
+export function useUpdateRequestStatus(requestId: string, userId: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (status: RequestStatus) => api.updateRequestStatus(requestId, status),
+    onSuccess: async () => {
+      await Promise.all([
+        qc.invalidateQueries({ queryKey: qk.request(requestId) }),
+        qc.invalidateQueries({ queryKey: qk.artisanJobs(userId) }),
+        qc.invalidateQueries({ queryKey: ['conversations'] }),
+        qc.invalidateQueries({ queryKey: ['requests'] }),
+        // Finishing a job opens the mandatory rating.
+        qc.invalidateQueries({ queryKey: qk.pendingReview(userId) }),
+      ]);
+    },
   });
 }

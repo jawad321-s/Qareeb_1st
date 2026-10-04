@@ -6,11 +6,20 @@ import { Icon } from '../ui/Icon';
 import { StatusBadge } from './StatusBadge';
 import type { ServiceRequest } from '@/types';
 import { categoryById } from '@/constants/categories';
-import { formatMoney, timeAgo } from '@/lib/format';
+import { formatDistance, formatMoney, timeAgo } from '@/lib/format';
 import { useT } from '@/i18n';
 import { useTheme } from '@/theme/ThemeProvider';
 
-export function RequestCard({ request, onPress }: { request: ServiceRequest; onPress?: () => void }) {
+export function RequestCard({
+  request,
+  onPress,
+  distanceKm,
+}: {
+  request: ServiceRequest;
+  onPress?: () => void;
+  /** Shown on the artisan side: how far the job is from the artisan. */
+  distanceKm?: number;
+}) {
   const cat = categoryById(request.categoryId);
   const { t } = useT();
   const { isDark } = useTheme();
@@ -49,6 +58,14 @@ export function RequestCard({ request, onPress }: { request: ServiceRequest; onP
             {formatMoney(request.budget.min)}–{formatMoney(request.budget.max)}
           </Text>
         </View>
+        {distanceKm !== undefined && (
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+            <Icon name="map-pin" size={14} color="#94A3B8" />
+            <Text variant="caption" tone="muted">
+              {formatDistance(distanceKm)}
+            </Text>
+          </View>
+        )}
         {request.status === 'PENDING' && (
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
             <Icon name="message" size={14} color="#94A3B8" />

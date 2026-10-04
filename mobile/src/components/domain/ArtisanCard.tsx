@@ -33,7 +33,7 @@ export function ArtisanCard({ artisan, subtitle, distanceKm, onPress, compact }:
 
   return (
     <Card onPress={onPress}>
-      {/* Plain inner row — see ServiceCard for why the row isn't on the Card. */}
+      {/* Plain inner row: a row set on the Card itself didn't lay out on native. */}
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14 }}>
         <Avatar uri={artisan.photoUrl} name={artisan.fullName} size={56} verified={artisan.verified} />
         <View style={{ flex: 1, gap: 4 }}>

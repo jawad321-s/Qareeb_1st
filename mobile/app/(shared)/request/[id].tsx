@@ -15,16 +15,15 @@ import { StatusBadge } from '@/components/domain/StatusBadge';
 import { TrackingTimeline } from '@/components/domain/TrackingTimeline';
 import { OfferCard } from '@/components/domain/OfferCard';
 import { CardSkeleton } from '@/components/feedback/Skeleton';
-import { useRequest, useOffers, useAcceptOffer, useRejectOffer, useCancelRequest, useHasReviewed } from '@/hooks/queries';
+import { useRequest, useOffers, useAcceptOffer, useRejectOffer, useCancelRequest, useHasReviewed, useUser } from '@/hooks/queries';
 import { useAuth } from '@/store/auth';
 import { useToast } from '@/components/feedback/Toast';
 import { categoryById } from '@/constants/categories';
 import { formatMoney } from '@/lib/format';
-import { canCancelRequest } from '@/lib/requestRules';
+import { AUTO_COMPLETE_HOURS, canCancelRequest } from '@/lib/requestRules';
 import { confirmAction } from '@/lib/confirm';
 import { useTheme } from '@/theme/ThemeProvider';
 import { useT } from '@/i18n';
-import { MOCK_ARTISANS } from '@/mock/data';
 
 export default function RequestDetail() {
   const { colors } = useTheme();
@@ -39,6 +38,7 @@ export default function RequestDetail() {
   const reject = useRejectOffer(id!);
   const cancel = useCancelRequest(id!);
   const [acceptingId, setAcceptingId] = useState<string | null>(null);
+  const { data: acceptedArtisan } = useUser(request?.acceptedArtisanId);
 
   if (isLoading || !request) {
     return (
@@ -55,7 +55,6 @@ export default function RequestDetail() {
   const cat = categoryById(request.categoryId);
   const isPending = request.status === 'PENDING';
   const isCancelled = request.status === 'CANCELLED';
-  const acceptedArtisan = MOCK_ARTISANS.find((a) => a.uid === request.acceptedArtisanId);
   const bestPrice = Math.min(...(offers.data ?? []).map((o) => o.price));
 
   const onAccept = async (offerId: string) => {
@@ -198,7 +197,12 @@ export default function RequestDetail() {
 
       {/* Completed → review CTA (rating is mandatory; once done it's just a label) */}
       {request.status === 'COMPLETED' && (
-        <View style={{ marginTop: 20 }}>
+        <View style={{ marginTop: 20, gap: 10 }}>
+          {request.autoCompleted && (
+            <Text variant="caption" tone="muted" center>
+              {t('req.autoCompleted').replace('{h}', String(AUTO_COMPLETE_HOURS))}
+            </Text>
+          )}
           {rated ? (
             <Button label={t('review.done')} iconLeft="check-circle" variant="secondary" disabled />
           ) : (

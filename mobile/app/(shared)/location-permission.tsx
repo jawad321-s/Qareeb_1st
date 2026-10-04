@@ -11,35 +11,51 @@ import { Icon } from '@/components/ui/Icon';
 import { useLocation } from '@/hooks/useLocation';
 import { useToast } from '@/components/feedback/Toast';
 import { useAuth } from '@/store/auth';
+import { api } from '@/services/api';
 import { useT } from '@/i18n';
+import { useTheme } from '@/theme/ThemeProvider';
 
 export default function LocationPermission() {
   const { request, loading } = useLocation();
   const toast = useToast();
   const updateUser = useAuth((s) => s.updateUser);
+  const uid = useAuth((s) => s.user?.uid);
+  const isArtisan = useAuth((s) => s.user?.role === 'artisan');
+  const { gradient } = useTheme();
   const { t } = useT();
 
-  const BENEFITS = [
-    { icon: 'map-pin', text: t('loc.b1') },
-    { icon: 'clock', text: t('loc.b2') },
-    { icon: 'navigation', text: t('loc.b3') },
-  ] as const;
+  // Customers find artisans near them; artisans find jobs near them.
+  const BENEFITS = (
+    isArtisan
+      ? [
+          { icon: 'briefcase', text: t('loc.a1') },
+          { icon: 'map-pin', text: t('loc.a2') },
+          { icon: 'clock', text: t('loc.a3') },
+        ]
+      : [
+          { icon: 'map-pin', text: t('loc.b1') },
+          { icon: 'clock', text: t('loc.b2') },
+          { icon: 'navigation', text: t('loc.b3') },
+        ]
+  ) as { icon: 'briefcase' | 'map-pin' | 'clock' | 'navigation'; text: string }[];
 
   const enable = async () => {
     const geo = await request();
     if (geo) {
       updateUser({ location: geo });
-      toast('success', 'Location enabled');
+      // Firebase mode: save it on the user so distances work across devices.
+      if (uid) api.updateUserLocation(uid, geo).catch(() => {});
+      toast('success', t('loc.enabled'));
       router.back();
     } else {
-      toast('error', 'Location permission denied');
+      toast('error', t('loc.denied'));
     }
   };
 
   return (
     <View style={{ flex: 1 }}>
       <StatusBar style="light" />
-      <LinearGradient colors={['#1E3A8A', '#2563EB', '#0EA5E9']} style={{ flex: 1 }}>
+      <LinearGradient colors={gradient} style={{ flex: 1 }}>
         <SafeAreaView style={{ flex: 1, paddingHorizontal: 24, justifyContent: 'space-between' }}>
           <View style={{ flex: 1, justifyContent: 'center', gap: 28 }}>
             <Animated.View entering={FadeIn.duration(500)} style={{ alignItems: 'center', gap: 16 }}>
@@ -50,7 +66,7 @@ export default function LocationPermission() {
                 {t('loc.title')}
               </Text>
               <Text variant="body" center style={{ color: 'rgba(255,255,255,0.85)', maxWidth: 300 }}>
-                {t('loc.subtitle')}
+                {isArtisan ? t('loc.subtitleArtisan') : t('loc.subtitle')}
               </Text>
             </Animated.View>
 

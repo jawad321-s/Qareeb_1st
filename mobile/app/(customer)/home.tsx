@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { View, ScrollView, Pressable } from 'react-native';
 import { router } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -8,16 +8,12 @@ import Animated, { FadeInDown } from 'react-native-reanimated';
 import { Text } from '@/components/ui/Text';
 import { Icon } from '@/components/ui/Icon';
 import { Avatar } from '@/components/ui/Avatar';
-import { SearchBar } from '@/components/ui/SearchBar';
 import { useTabBarSpace } from '@/components/ui/TabBar';
 import { SectionHeader } from '@/components/ui/SectionHeader';
 import { CategoryTile } from '@/components/domain/CategoryTile';
-import { ServiceCard } from '@/components/domain/ServiceCard';
-import { ArtisanCard } from '@/components/domain/ArtisanCard';
 import { RequestCard } from '@/components/domain/RequestCard';
-import { CardSkeleton } from '@/components/feedback/Skeleton';
 import { CATEGORIES } from '@/constants/categories';
-import { useServices, useRecommendedArtisans, useMyRequests } from '@/hooks/queries';
+import { useConversations, useMyRequests } from '@/hooks/queries';
 import { useAuth } from '@/store/auth';
 import { useTheme } from '@/theme/ThemeProvider';
 import { useT } from '@/i18n';
@@ -27,7 +23,6 @@ export default function Home() {
   const tabBarSpace = useTabBarSpace();
   const user = useAuth((s) => s.user);
   const { t, locale } = useT();
-  const [refreshing, setRefreshing] = useState(false);
 
   const greeting = () => {
     const h = new Date().getHours();
@@ -36,18 +31,13 @@ export default function Home() {
     return t('home.evening');
   };
 
-  const services = useServices();
-  const artisans = useRecommendedArtisans();
   const requests = useMyRequests(user?.uid ?? '');
+  const conversations = useConversations(user);
 
-  const popular = (services.data ?? []).filter((s) => s.popular).slice(0, 4);
   const recent = (requests.data ?? []).slice(0, 2);
-
-  const onRefresh = async () => {
-    setRefreshing(true);
-    await Promise.all([services.refetch(), artisans.refetch(), requests.refetch()]);
-    setRefreshing(false);
-  };
+  const unread = (conversations.data ?? []).filter(
+    (c) => c.lastMessage && !c.lastMessage.read && c.lastMessage.senderId !== user?.uid,
+  ).length;
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
@@ -95,7 +85,37 @@ export default function Home() {
               </Text>
               <Icon name="chevron-down" size={13} color={colors.muted} />
             </Pressable>
-            <SearchBar placeholder={t('home.searchPlaceholder')} onPress={() => router.push('/(customer)/search')} onFilter={() => router.push('/(customer)/search')} />
+            {/* Messages — takes the place of the old search box. */}
+            <Pressable
+              onPress={() => router.push('/(customer)/messages')}
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                gap: 12,
+                height: 56,
+                paddingHorizontal: 16,
+                borderRadius: 18,
+                backgroundColor: colors.surface,
+                borderWidth: 1,
+                borderColor: colors.border,
+              }}
+            >
+              <Icon name="message" size={20} color={colors.tint} />
+              <View style={{ flex: 1 }}>
+                <Text variant="bodyMedium">{t('home.messages')}</Text>
+                <Text variant="caption" tone="muted" numberOfLines={1}>
+                  {conversations.data?.length ? `${conversations.data.length} ${t('home.chats')}` : t('home.messagesHint')}
+                </Text>
+              </View>
+              {unread > 0 && (
+                <View style={{ minWidth: 22, height: 22, borderRadius: 11, paddingHorizontal: 6, backgroundColor: '#EF4444', alignItems: 'center', justifyContent: 'center' }}>
+                  <Text variant="caption" style={{ color: '#FFF', fontFamily: 'Inter_600SemiBold' }}>
+                    {unread}
+                  </Text>
+                </View>
+              )}
+              <Icon name="chevron-right" size={18} color={colors.muted} />
+            </Pressable>
           </View>
         </SafeAreaView>
       </LinearGradient>
@@ -103,7 +123,7 @@ export default function Home() {
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: tabBarSpace + 16, paddingTop: 20 }}>
         {/* Categories */}
         <View style={{ paddingHorizontal: 20 }}>
-          <SectionHeader title={t('home.categories')} actionLabel={t('common.seeAll')} onAction={() => router.push('/(customer)/search')} />
+          <SectionHeader title={t('home.categories')} />
         </View>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingHorizontal: 16, gap: 8 }}>
           {CATEGORIES.map((cat, i) => (
@@ -111,7 +131,8 @@ export default function Home() {
               <CategoryTile
                 category={cat}
                 locale={locale}
-                onPress={() => router.push({ pathname: '/(customer)/search', params: { category: cat.id } })}
+                // Picking a category starts a request for it.
+                onPress={() => router.push({ pathname: '/(customer)/create', params: { category: cat.id } })}
               />
             </Animated.View>
           ))}
@@ -157,30 +178,6 @@ export default function Home() {
             </View>
           </LinearGradient>
         </View>
-
-        {/* Popular services */}
-        <View style={{ paddingHorizontal: 20, marginTop: 24 }}>
-          <SectionHeader title={t('home.popular')} actionLabel={t('common.seeAll')} onAction={() => router.push('/(customer)/search')} />
-          <View style={{ gap: 12 }}>
-            {services.isLoading
-              ? [0, 1, 2].map((i) => <CardSkeleton key={i} />)
-              : popular.map((s) => (
-                  <ServiceCard key={s.id} service={s} locale={user?.locale ?? 'en'} onPress={() => router.push(`/(shared)/service/${s.id}`)} />
-                ))}
-          </View>
-        </View>
-
-        {/* Recommended artisans */}
-        <View style={{ paddingHorizontal: 20, marginTop: 24 }}>
-          <SectionHeader title={t('home.topArtisans')} actionLabel={t('common.seeAll')} onAction={() => router.push('/(customer)/search')} />
-        </View>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingHorizontal: 16, gap: 12 }}>
-          {artisans.isLoading
-            ? [0, 1, 2].map((i) => <View key={i} style={{ width: 160, height: 150 }}><CardSkeleton /></View>)
-            : (artisans.data ?? []).map((a) => (
-                <ArtisanCard key={a.uid} artisan={a} compact onPress={() => router.push(`/(shared)/artisan/${a.uid}`)} />
-              ))}
-        </ScrollView>
 
         {/* Recent requests */}
         {recent.length > 0 && (

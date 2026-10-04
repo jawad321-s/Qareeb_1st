@@ -10,9 +10,8 @@ import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { Icon } from '@/components/ui/Icon';
 import { Input } from '@/components/ui/Input';
-import { api } from '@/services/api';
 import { useAuth } from '@/store/auth';
-import { useSubscriptionStore, type ActiveSubscription } from '@/store/subscription';
+import { useSubscriptionStore, type SubscriptionRecord } from '@/store/subscription';
 import { planById } from '@/lib/plans';
 import { formatMoney } from '@/lib/format';
 import {
@@ -43,7 +42,7 @@ export default function Checkout() {
   const [showErrors, setShowErrors] = useState(false);
   const [phase, setPhase] = useState<Phase>('form');
   const [step, setStep] = useState(0);
-  const [receipt, setReceipt] = useState<ActiveSubscription | null>(null);
+  const [receipt, setReceipt] = useState<SubscriptionRecord | null>(null);
   const [failure, setFailure] = useState<DeclineReason | null>(null);
 
   // A payment in flight must not be abandoned halfway with the back button.
@@ -91,20 +90,7 @@ export default function Checkout() {
       transactionId: result.transactionId,
       activatedAt: result.paidAt,
     });
-    // Firebase mode also records it for the admin dashboard; the plan is
-    // already active on the device, so a failed write doesn't undo it.
-    api
-      .recordSubscription({
-        artisanId: user.uid,
-        planId: sub.planId,
-        amount: sub.amount,
-        brand: sub.brand,
-        last4: sub.last4,
-        transactionId: sub.transactionId,
-        activatedAt: sub.activatedAt,
-        renewsAt: sub.renewsAt,
-      })
-      .catch(() => {});
+    // (The store also records it in Firestore for the admin dashboard.)
     setReceipt(sub);
     setPhase('success');
   };
@@ -140,7 +126,7 @@ export default function Checkout() {
       [t('pay.method'), `${BRAND_LABEL[receipt.brand ?? 'unknown']} •••• ${receipt.last4}`.trim()],
       [t('pay.txn'), receipt.transactionId ?? ''],
       [t('pay.date'), date(receipt.activatedAt)],
-      [t('pay.renews'), receipt.renewsAt ? date(receipt.renewsAt) : '—'],
+      [t('pay.validUntil'), date(receipt.expiresAt)],
     ];
     return (
       <Screen scroll>
@@ -227,7 +213,7 @@ export default function Checkout() {
           {t('pay.summary')}
         </Text>
         <Row label={t('pay.plan')} value={plan.name[locale]} />
-        <Row label={t('pay.billing')} value={t('pay.monthly')} />
+        <Row label={t('pay.period')} value={plan.name[locale]} />
         <View style={{ height: 1, backgroundColor: colors.border }} />
         <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
           <View>

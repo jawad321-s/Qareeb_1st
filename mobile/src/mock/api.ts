@@ -1,4 +1,4 @@
-import type { AppUser, Offer, Review, Service, ServiceRequest, ChatMessage, ArtisanProfile } from '@/types';
+import type { AppUser, Offer, Review, Service, ServiceRequest, ChatMessage, ArtisanProfile, GeoLocation, Conversation, RequestStatus } from '@/types';
 import {
   MOCK_ARTISANS,
   MOCK_ARTISAN_PROFILE,
@@ -9,7 +9,7 @@ import {
   MOCK_REVIEWS,
   MOCK_SERVICES,
 } from './data';
-import { canCancelRequest } from '@/lib/requestRules';
+import { NEXT_STATUS, canCancelRequest, isChatOpen, isOverdue } from '@/lib/requestRules';
 import { kv } from '@/lib/mmkv';
 
 // In-memory mutable stores so the app behaves like a real backend during a session.
@@ -25,6 +25,18 @@ let reviews: Review[] = [...(kv.get<Review[]>(SUBMITTED_REVIEWS_KEY) ?? []), ...
 const delay = (ms = 450) => new Promise((r) => setTimeout(r, ms));
 const clone = <T>(v: T): T => JSON.parse(JSON.stringify(v));
 const uid = (p: string) => `${p}_${Math.random().toString(36).slice(2, 9)}`;
+
+/**
+ * Completes active jobs the artisan never finished (see AUTO_COMPLETE_HOURS).
+ * Runs before every read, standing in for the scheduled job a real backend
+ * would use.
+ */
+function autoCompleteOverdue() {
+  const now = Date.now();
+  requests = requests.map((r) =>
+    isOverdue(r, now) ? { ...r, status: 'COMPLETED', completedAt: now, updatedAt: now, autoCompleted: true } : r,
+  );
+}
 
 export const mockApi = {
   async getCurrentUser(): Promise<AppUser> {
@@ -55,16 +67,19 @@ export const mockApi = {
 
   async getMyRequests(customerId: string): Promise<ServiceRequest[]> {
     await delay();
+    autoCompleteOverdue();
     return clone(requests.filter((r) => r.customerId === customerId).sort((a, b) => b.createdAt - a.createdAt));
   },
 
   async getRequest(id: string): Promise<ServiceRequest | undefined> {
     await delay(250);
+    autoCompleteOverdue();
     return clone(requests.find((r) => r.id === id));
   },
 
   async getNearbyRequests(): Promise<ServiceRequest[]> {
     await delay();
+    autoCompleteOverdue();
     return clone(requests.filter((r) => r.status === 'PENDING'));
   },
 
@@ -147,6 +162,7 @@ export const mockApi = {
    */
   async getPendingReview(uid: string, role: 'customer' | 'artisan'): Promise<ServiceRequest | null> {
     await delay(200);
+    autoCompleteOverdue();
     const rated = new Set(reviews.filter((r) => r.authorId === uid).map((r) => r.requestId));
     const pending = requests
       .filter((r) => r.status === 'COMPLETED' && !rated.has(r.id))
@@ -171,8 +187,8 @@ export const mockApi = {
     return clone(review);
   },
 
-  /** Record a (simulated) subscription purchase. The mock keeps plans on-device
-   *  via the subscription store, so there's nothing more to store here. */
+  /** Record a (simulated) subscription purchase. The mock keeps plans on the
+   *  device via the subscription store, so there is nothing more to store. */
   async recordSubscription(_record: {
     artisanId: string;
     planId: string;
@@ -181,20 +197,74 @@ export const mockApi = {
     last4?: string;
     transactionId?: string;
     activatedAt: number;
-    renewsAt: number | null;
-  }): Promise<void> {
+    expiresAt: number;
+  }): Promise<string | undefined> {
     await delay(200);
+    return undefined;
+  },
+
+  async cancelSubscription(_docId: string, _cancelledAt: number): Promise<void> {
+    await delay(200);
+  },
+
+  /** Save the user's location (the session store already holds it locally). */
+  async updateUserLocation(_uid: string, _location: GeoLocation): Promise<void> {
+    await delay(150);
   },
 
   async getMessages(requestId: string): Promise<ChatMessage[]> {
     await delay(250);
-    return clone(messages.filter(() => true).sort((a, b) => a.createdAt - b.createdAt));
+    return clone(messages.filter((m) => m.requestId === requestId).sort((a, b) => a.createdAt - b.createdAt));
   },
 
   async sendMessage(requestId: string, msg: Omit<ChatMessage, 'id' | 'read' | 'createdAt'>): Promise<ChatMessage> {
     await delay(150);
-    const m: ChatMessage = { ...msg, id: uid('m'), read: false, createdAt: Date.now() };
+    const req = requests.find((r) => r.id === requestId);
+    // The thread closes when the job ends.
+    if (!req || !isChatOpen(req.status)) throw new Error('chat-closed');
+    const m: ChatMessage = { ...msg, requestId, id: uid('m'), read: false, createdAt: Date.now() };
     messages = [...messages, m];
     return clone(m);
+  },
+
+  /** Every chat the user is part of: one per request with an assigned artisan. */
+  async getConversations(userId: string, role: 'customer' | 'artisan'): Promise<Conversation[]> {
+    await delay(250);
+    autoCompleteOverdue();
+    return clone(
+      requests
+        .filter((r) => r.acceptedArtisanId && (role === 'customer' ? r.customerId === userId : r.acceptedArtisanId === userId))
+        .map((r) => {
+          const thread = messages.filter((m) => m.requestId === r.id).sort((a, b) => a.createdAt - b.createdAt);
+          return {
+            request: r,
+            otherUserId: role === 'customer' ? r.acceptedArtisanId! : r.customerId,
+            lastMessage: thread[thread.length - 1],
+          };
+        })
+        .sort((a, b) => (b.lastMessage?.createdAt ?? b.request.updatedAt) - (a.lastMessage?.createdAt ?? a.request.updatedAt)),
+    );
+  },
+
+  /** Jobs assigned to an artisan that are still in progress. */
+  async getArtisanJobs(artisanId: string): Promise<ServiceRequest[]> {
+    await delay(250);
+    autoCompleteOverdue();
+    return clone(
+      requests
+        .filter((r) => r.acceptedArtisanId === artisanId && ['ACCEPTED', 'ON_THE_WAY', 'WORKING'].includes(r.status))
+        .sort((a, b) => b.updatedAt - a.updatedAt),
+    );
+  },
+
+  /** The assigned artisan moves the job one step on: on the way → working → done. */
+  async updateRequestStatus(requestId: string, status: RequestStatus): Promise<void> {
+    await delay(350);
+    const now = Date.now();
+    requests = requests.map((r) =>
+      r.id === requestId && NEXT_STATUS[r.status] === status
+        ? { ...r, status, updatedAt: now, ...(status === 'COMPLETED' ? { completedAt: now } : {}) }
+        : r,
+    );
   },
 };

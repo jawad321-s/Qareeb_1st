@@ -30,6 +30,8 @@ export const qk = {
   reviews: (targetId: string) => ['reviews', targetId] as const,
   user: (uid: string) => ['user', uid] as const,
   pendingReview: (uid: string) => ['pendingReview', uid] as const,
+  conversations: (uid: string) => ['conversations', uid] as const,
+  artisanJobs: (uid: string) => ['artisanJobs', uid] as const,
   hasReviewed: (requestId: string, uid: string) => ['hasReviewed', requestId, uid] as const,
   notifications: (uid: string) => ['notifications', uid] as const,
 };

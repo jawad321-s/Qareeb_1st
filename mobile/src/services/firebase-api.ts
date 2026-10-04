@@ -7,13 +7,13 @@ import {
   setDoc, updateDoc, where, writeBatch,
 } from 'firebase/firestore';
 import type {
-  AppUser, ArtisanProfile, ChatMessage, Offer, Review, Service, ServiceRequest,
+  AppUser, ArtisanProfile, ChatMessage, Conversation, Offer, Review, Service, ServiceRequest,
 } from '@/types';
 import type { mockApi } from '@/mock/api';
 import { getDb } from '@/lib/firebase';
 import { useAuth } from '@/store/auth';
 import { MOCK_CUSTOMER } from '@/mock/data';
-import { canCancelRequest } from '@/lib/requestRules';
+import { ACTIVE_STATUSES, NEXT_STATUS, canCancelRequest, isOverdue } from '@/lib/requestRules';
 
 function db() {
   const d = getDb();
@@ -35,6 +35,27 @@ async function collectData<T>(col: string): Promise<T[]> {
 function mapRequest(id: string, v: any): ServiceRequest {
   return { ...v, id, createdAt: ms(v.createdAt), updatedAt: ms(v.updatedAt), preferredTime: ms(v.preferredTime) };
 }
+
+/**
+ * Completes active jobs the artisan never finished (see AUTO_COMPLETE_HOURS).
+ * Whichever party reads the request first performs the write — the rules let
+ * the customer and the assigned artisan update it. A scheduled Cloud Function
+ * could take this over without changing the app.
+ */
+async function settleOverdue(list: ServiceRequest[]): Promise<ServiceRequest[]> {
+  const now = Date.now();
+  return Promise.all(
+    list.map(async (r) => {
+      if (!isOverdue(r, now)) return r;
+      const patch = { status: 'COMPLETED' as const, completedAt: now, updatedAt: now, autoCompleted: true };
+      await updateDoc(doc(db(), 'requests', r.id), patch).catch(() => {});
+      return { ...r, ...patch };
+    }),
+  );
+}
+
+// Chat threads live under their request: requests/{id}/messages (see rules).
+const messagesOf = (requestId: string) => collection(db(), 'requests', requestId, 'messages');
 
 export const firebaseApi: typeof mockApi = {
   async getCurrentUser(): Promise<AppUser> {
@@ -74,12 +95,14 @@ export const firebaseApi: typeof mockApi = {
   async getMyRequests(customerId: string): Promise<ServiceRequest[]> {
     const q = query(collection(db(), 'requests'), where('customerId', '==', customerId), orderBy('createdAt', 'desc'));
     const snap = await getDocs(q);
-    return snap.docs.map((d) => mapRequest(d.id, d.data()));
+    return settleOverdue(snap.docs.map((d) => mapRequest(d.id, d.data())));
   },
 
   async getRequest(id: string): Promise<ServiceRequest | undefined> {
     const snap = await getDoc(doc(db(), 'requests', id));
-    return snap.exists() ? mapRequest(snap.id, snap.data()) : undefined;
+    if (!snap.exists()) return undefined;
+    const [req] = await settleOverdue([mapRequest(snap.id, snap.data())]);
+    return req;
   },
 
   async getNearbyRequests(): Promise<ServiceRequest[]> {
@@ -171,6 +194,9 @@ export const firebaseApi: typeof mockApi = {
 
   async getPendingReview(uid: string, role: 'customer' | 'artisan'): Promise<ServiceRequest | null> {
     const party = role === 'customer' ? 'customerId' : 'acceptedArtisanId';
+    // Settle overdue jobs first so an auto-completed one asks for its rating.
+    const active = await getDocs(query(collection(db(), 'requests'), where(party, '==', uid), where('status', 'in', ACTIVE_STATUSES)));
+    await settleOverdue(active.docs.map((d) => mapRequest(d.id, d.data())));
     const [reqSnap, revSnap] = await Promise.all([
       getDocs(query(collection(db(), 'requests'), where(party, '==', uid), where('status', '==', 'COMPLETED'))),
       getDocs(query(collection(db(), 'reviews'), where('authorId', '==', uid))),
@@ -204,25 +230,70 @@ export const firebaseApi: typeof mockApi = {
     return { ...payload, id };
   },
 
-  async recordSubscription(record): Promise<void> {
+  async recordSubscription(record): Promise<string | undefined> {
     // Rules: an artisan may create subscriptions for themselves only. Marked
     // `simulated` because checkout runs the payment simulator, not a gateway.
-    await addDoc(collection(db(), 'subscriptions'), { ...record, status: 'active', simulated: true });
+    const id = `${record.artisanId}_${record.activatedAt}`;
+    const { docId: _local, cancelledAt: _c, ...data } = record as typeof record & { docId?: string; cancelledAt?: number };
+    await setDoc(doc(db(), 'subscriptions', id), { ...data, status: 'active', simulated: true });
+    return id;
+  },
+
+  async cancelSubscription(docId, cancelledAt): Promise<void> {
+    // Cancelling ends the plan immediately; the amount paid is not refunded.
+    await updateDoc(doc(db(), 'subscriptions', docId), { status: 'cancelled', cancelledAt });
+  },
+
+  async updateUserLocation(uid, location): Promise<void> {
+    await updateDoc(doc(db(), 'users', uid), { location, updatedAt: Date.now() });
   },
 
   async getMessages(requestId: string): Promise<ChatMessage[]> {
-    const q = query(collection(db(), 'messages'), where('requestId', '==', requestId));
-    const snap = await getDocs(q);
+    const snap = await getDocs(messagesOf(requestId));
     return snap.docs
-      .map((d) => withId<ChatMessage>(d.id, { ...d.data(), createdAt: ms(d.data().createdAt) }))
+      .map((d) => withId<ChatMessage>(d.id, { ...d.data(), requestId, createdAt: ms(d.data().createdAt) }))
       .sort((a, b) => a.createdAt - b.createdAt);
   },
 
   async sendMessage(requestId, msg): Promise<ChatMessage> {
     const now = Date.now();
-    const payload = { ...msg, requestId, read: false, createdAt: now };
-    const refDoc = await addDoc(collection(db(), 'messages'), payload);
-    const { requestId: _omit, ...rest } = payload as any;
-    return { ...rest, id: refDoc.id } as ChatMessage;
+    const payload = { ...msg, read: false, createdAt: now };
+    const refDoc = await addDoc(messagesOf(requestId), payload);
+    return { ...payload, requestId, id: refDoc.id } as ChatMessage;
+  },
+
+  async getConversations(userId, role): Promise<Conversation[]> {
+    const party = role === 'customer' ? 'customerId' : 'acceptedArtisanId';
+    const snap = await getDocs(query(collection(db(), 'requests'), where(party, '==', userId)));
+    const withArtisan = await settleOverdue(snap.docs.map((d) => mapRequest(d.id, d.data())).filter((r) => r.acceptedArtisanId));
+    const convos = await Promise.all(
+      withArtisan.map(async (r) => {
+        const thread = await firebaseApi.getMessages(r.id).catch(() => [] as ChatMessage[]);
+        return {
+          request: r,
+          otherUserId: role === 'customer' ? r.acceptedArtisanId! : r.customerId,
+          lastMessage: thread[thread.length - 1],
+        };
+      }),
+    );
+    return convos.sort(
+      (a, b) => (b.lastMessage?.createdAt ?? b.request.updatedAt) - (a.lastMessage?.createdAt ?? a.request.updatedAt),
+    );
+  },
+
+  async getArtisanJobs(artisanId): Promise<ServiceRequest[]> {
+    const snap = await getDocs(
+      query(collection(db(), 'requests'), where('acceptedArtisanId', '==', artisanId), where('status', 'in', ACTIVE_STATUSES)),
+    );
+    const settled = await settleOverdue(snap.docs.map((d) => mapRequest(d.id, d.data())));
+    return settled.filter((r) => ACTIVE_STATUSES.includes(r.status)).sort((a, b) => b.updatedAt - a.updatedAt);
+  },
+
+  async updateRequestStatus(requestId, status): Promise<void> {
+    const ref = doc(db(), 'requests', requestId);
+    const snap = await getDoc(ref);
+    if (!snap.exists() || NEXT_STATUS[snap.data().status as ServiceRequest['status']] !== status) return;
+    const now = Date.now();
+    await updateDoc(ref, { status, updatedAt: now, ...(status === 'COMPLETED' ? { completedAt: now } : {}) });
   },
 };

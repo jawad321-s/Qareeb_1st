@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, ScrollView, Pressable } from 'react-native';
 import { router } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -19,8 +19,9 @@ import { useAuth } from '@/store/auth';
 import { useTheme } from '@/theme/ThemeProvider';
 import { useT } from '@/i18n';
 import { formatMoney } from '@/lib/format';
-import { planById } from '@/lib/plans';
+import { daysLabel, planById } from '@/lib/plans';
 import { useMySubscription } from '@/store/subscription';
+import { storage } from '@/lib/mmkv';
 
 export default function ArtisanDashboard() {
   const { colors, isDark, hero } = useTheme();
@@ -28,9 +29,23 @@ export default function ArtisanDashboard() {
   const { t, locale } = useT();
   const [online, setOnline] = useState(true);
   const subscription = useMySubscription(user.uid);
-  const paidPlan = subscription.planId !== 'free' ? planById(subscription.planId) : undefined;
-  const nearby = useNearbyRequests(user.uid);
+  const currentPlan = subscription.isActive && subscription.record ? planById(subscription.record.planId) : undefined;
+  const nearby = useNearbyRequests(user.uid, user.location);
   const tabBarSpace = useTabBarSpace();
+
+  // Artisans are matched to jobs by distance, so ask for the device location
+  // the first time the app opens (once per account; the chip below re-opens it).
+  useEffect(() => {
+    const key = `qareeb.locationAsked.${user.uid}`;
+    if (storage.getString(key)) return;
+    // Marked only when the prompt actually opens — if the screen goes away
+    // first (e.g. the mandatory rating takes over), it is asked next time.
+    const id = setTimeout(() => {
+      storage.set(key, '1');
+      router.push('/(shared)/location-permission');
+    }, 600);
+    return () => clearTimeout(id);
+  }, [user.uid]);
 
   const stats = [
     { icon: 'wallet' as const, label: t('artisan.thisMonth'), value: formatMoney(1240000), color: colors.tint },
@@ -58,6 +73,29 @@ export default function ArtisanDashboard() {
                 <Icon name="bell" size={20} color={colors.fg} />
               </Pressable>
             </View>
+
+            {/* Where the artisan works from — distances to jobs are measured from here. */}
+            <Pressable
+              onPress={() => router.push('/(shared)/location-permission')}
+              style={{
+                alignSelf: 'flex-start',
+                flexDirection: 'row',
+                alignItems: 'center',
+                gap: 6,
+                paddingHorizontal: 12,
+                paddingVertical: 7,
+                borderRadius: 999,
+                backgroundColor: colors.surface,
+                borderWidth: 1,
+                borderColor: colors.border,
+              }}
+            >
+              <Icon name="map-pin" size={13} color={colors.tint} />
+              <Text variant="caption" style={{ fontFamily: 'Inter_500Medium' }} numberOfLines={1}>
+                {user.location?.address ?? t('home.setLocation')}
+              </Text>
+              <Icon name="chevron-down" size={13} color={colors.muted} />
+            </Pressable>
 
             {/* Availability toggle */}
             <Pressable onPress={() => setOnline((o) => !o)}>
@@ -104,27 +142,33 @@ export default function ArtisanDashboard() {
               [0, 1].map((i) => <CardSkeleton key={i} />)
             ) : (
               (nearby.data ?? []).slice(0, 3).map((r) => (
-                <RequestCard key={r.id} request={r} onPress={() => router.push(`/(artisan)/job/${r.id}`)} />
+                <RequestCard key={r.id} request={r} distanceKm={r.distanceKm} onPress={() => router.push(`/(artisan)/job/${r.id}`)} />
               ))
             )}
           </View>
         </View>
 
-        {/* Subscription: upsell on the free plan, current plan once paid. Opens the plans screen. */}
+        {/* Subscription status: trial days left, the paid plan, or — once it has
+            ended — a prompt to subscribe. Opens the plans screen. */}
         <Pressable onPress={() => router.push('/(shared)/subscription')} style={{ paddingHorizontal: 20, marginTop: 24 }}>
-          <LinearGradient colors={['#F59E0B', '#EF4444']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ borderRadius: 20, padding: 20, flexDirection: 'row', alignItems: 'center', gap: 14 }}>
-            <Icon name="award" size={32} color="#FFF" />
+          <LinearGradient
+            colors={currentPlan ? ['#F59E0B', '#EF4444'] : ['#DC2626', '#B91C1C']}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={{ borderRadius: 20, padding: 20, flexDirection: 'row', alignItems: 'center', gap: 14 }}
+          >
+            <Icon name={currentPlan ? 'award' : 'alert-circle'} size={32} color="#FFF" />
             <View style={{ flex: 1 }}>
               <Text variant="bodyMedium" tone="inverse">
-                {paidPlan ? `${t('sub.current')}: ${paidPlan.name[locale]}` : t('artisan.goPremium')}
+                {currentPlan ? `${t('sub.yourPlan')}: ${currentPlan.name[locale]}` : t('sub.expired')}
               </Text>
               <Text variant="caption" style={{ color: 'rgba(255,255,255,0.9)' }}>
-                {paidPlan && subscription.renewsAt
-                  ? `${t('sub.renewsOn')} ${new Date(subscription.renewsAt).toLocaleDateString(locale === 'ar' ? 'ar' : 'en', { month: 'long', day: 'numeric' })}`
-                  : t('artisan.premiumDesc')}
+                {currentPlan
+                  ? `${daysLabel(subscription.daysLeft, locale)} ${t('sub.left')}`
+                  : t('sub.needPlanTitle')}
               </Text>
             </View>
-            {paidPlan ? <Badge label="✓" variant="success" /> : <Icon name="chevron-right" size={22} color="#FFF" />}
+            {currentPlan ? <Badge label="✓" variant="success" /> : <Icon name="chevron-right" size={22} color="#FFF" />}
           </LinearGradient>
         </Pressable>
       </ScrollView>

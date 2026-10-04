@@ -48,7 +48,6 @@ export interface ArtisanProfile {
   bio: string;
   serviceIds: string[];
   categoryIds: string[];
-  basePrices: Record<string, number>;
   availability: Availability;
   gallery: string[];
   certificates: { name: string; url: string; verified: boolean }[];
@@ -108,6 +107,9 @@ export interface ServiceRequest {
   acceptedOfferId?: string;
   acceptedArtisanId?: string;
   offerCount: number;
+  completedAt?: number;
+  /** Completed by the system because the artisan didn't finish it in time. */
+  autoCompleted?: boolean;
   createdAt: number;
   updatedAt: number;
 }
@@ -133,6 +135,7 @@ export type MessageType = 'text' | 'image' | 'voice';
 
 export interface ChatMessage {
   id: string;
+  requestId?: string;
   senderId: string;
   type: MessageType;
   text?: string;
@@ -140,6 +143,14 @@ export interface ChatMessage {
   durationMs?: number;
   read: boolean;
   createdAt: number;
+}
+
+/** One chat thread — every request with an assigned artisan has one. */
+export interface Conversation {
+  request: ServiceRequest;
+  /** The other party: the artisan for a customer, the customer for an artisan. */
+  otherUserId: string;
+  lastMessage?: ChatMessage;
 }
 
 export interface Review {

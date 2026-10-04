@@ -1,10 +1,13 @@
 import React from 'react';
+import { View } from 'react-native';
 import { Redirect } from 'expo-router';
 // SDK 57 moved the JS tab navigator out of the root entry point.
 import { Tabs } from 'expo-router/js-tabs';
 import { TabBar } from '@/components/ui/TabBar';
 import { useAuth } from '@/store/auth';
+import { useTheme } from '@/theme/ThemeProvider';
 import { usePendingReview } from '@/hooks/queries';
+import { useEnsureTrial } from '@/store/subscription';
 
 const META = {
   dashboard: { icon: 'home' as const, label: 'tab.home' as const },
@@ -18,8 +21,11 @@ export default function ArtisanLayout() {
   // Auth gate for the whole artisan stack — see the customer layout for why this
   // ancestor guard prevents a null-user crash on sign-out.
   const user = useAuth((s) => s.user);
+  const { colors } = useTheme();
   // Called before the early returns below (rules of hooks); idle until signed in.
   const pendingReview = usePendingReview(user);
+  // Every artisan starts on the one-time 7-day free trial.
+  useEnsureTrial(user?.uid, user?.role === 'artisan');
   if (!user) return <Redirect href="/(auth)/welcome" />;
   // Role gate — see the customer layout: ambiguous tab paths must not land a
   // customer inside the artisan app.
@@ -27,6 +33,8 @@ export default function ArtisanLayout() {
   // Rating is mandatory once a job is completed — for both sides. Until this
   // user has rated every finished job they took part in, the app opens the
   // review instead of the tabs.
+  // Hold the tabs until the check is done, so they don't flash before the review.
+  if (pendingReview.isLoading) return <View style={{ flex: 1, backgroundColor: colors.bg }} />;
   if (pendingReview.data) {
     return <Redirect href={{ pathname: '/(shared)/review/[id]', params: { id: pendingReview.data.id } }} />;
   }

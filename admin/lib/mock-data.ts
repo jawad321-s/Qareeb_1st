@@ -131,7 +131,7 @@ export const KPIS = {
 export const ACTIVITY = [
   { id: 1, text: 'New artisan verification submitted by Omar Khalid', time: Date.now() - 12 * 6e4, type: 'verify' },
   { id: 2, text: 'Complaint resolved: overcharge dispute #c_2', time: Date.now() - 55 * 6e4, type: 'complaint' },
-  { id: 3, text: 'Tariq Mansour upgraded to Elite plan', time: Date.now() - 3 * 36e5, type: 'subscription' },
+  { id: 3, text: 'Tariq Mansour subscribed to the 1-year plan', time: Date.now() - 3 * 36e5, type: 'subscription' },
   { id: 4, text: '320 new requests created today', time: Date.now() - 5 * 36e5, type: 'request' },
   { id: 5, text: 'Category "Satellite" added to catalog', time: Date.now() - 26 * 36e5, type: 'category' },
 ];

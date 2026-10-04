@@ -11,7 +11,7 @@ import { useTheme } from '@/theme/ThemeProvider';
 // an artisan into the customer app after the language-switch restart. Pin the
 // saved path to the signed-in role's group explicitly.
 const ARTISAN_PATHS = ['dashboard', 'requests', 'offers', 'income', 'profile', 'job'];
-const CUSTOMER_PATHS = ['home', 'search', 'create', 'requests', 'profile'];
+const CUSTOMER_PATHS = ['home', 'messages', 'create', 'requests', 'profile'];
 
 function resolveForRole(path: string, role?: 'customer' | 'artisan' | string) {
   const seg = path.split('/')[1] ?? '';

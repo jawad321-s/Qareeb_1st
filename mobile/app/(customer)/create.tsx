@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { I18nManager, View, ScrollView, Pressable, TextInput } from 'react-native';
-import { router } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
 import { Image } from 'expo-image';
 import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
@@ -31,7 +31,15 @@ export default function CreateRequest() {
   const STEPS = [t('create.step.service'), t('create.step.details'), t('create.step.budget'), t('create.step.review')];
 
   const [step, setStep] = useState(0);
-  const [categoryId, setCategoryId] = useState<string | null>(null);
+  // A category tapped on the home screen arrives as ?category=… and is preselected.
+  const params = useLocalSearchParams<{ category?: string }>();
+  const [categoryId, setCategoryId] = useState<string | null>(params.category ?? null);
+  useEffect(() => {
+    if (params.category) {
+      setCategoryId(params.category);
+      setStep(0);
+    }
+  }, [params.category]);
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [images, setImages] = useState<string[]>([]);

@@ -14,6 +14,7 @@ import { loginSchema, type LoginInput } from '@/lib/validation';
 import { useAuth } from '@/store/auth';
 import { AuthError } from '@/services/auth.service';
 import { useT } from '@/i18n';
+import type { TranslationKey } from '@/i18n/translations';
 import { roleAccents } from '@/theme/tokens';
 import { useTheme } from '@/theme/ThemeProvider';
 import type { UserRole } from '@/types';
@@ -94,7 +95,7 @@ export default function Login() {
                 value={value}
                 onChangeText={onChange}
                 onBlur={onBlur}
-                error={errors.phone?.message}
+                error={errors.phone?.message && t(errors.phone.message as TranslationKey)}
               />
             )}
           />

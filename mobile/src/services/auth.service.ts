@@ -10,20 +10,10 @@ import {
 } from 'firebase/auth';
 import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
 import { getAuthClient, getDb } from '@/lib/firebase';
+import { normalizePhone } from '@/lib/validation';
 import type { AppUser, UserRole } from '@/types';
 
 const LOGIN_DOMAIN = 'phone.qareeb.app';
-
-/**
- * Normalises local and international forms of the same number to one key:
- * 0599123456, +970599123456, 00972599123456 → 599123456.
- */
-export function normalizePhone(phone: string): string {
-  let d = phone.replace(/\D/g, '');
-  if (d.startsWith('00')) d = d.slice(2);
-  if (d.startsWith('970') || d.startsWith('972')) d = d.slice(3);
-  return d.replace(/^0+/, '');
-}
 
 const loginEmail = (phone: string) => `p${normalizePhone(phone)}@${LOGIN_DOMAIN}`;
 

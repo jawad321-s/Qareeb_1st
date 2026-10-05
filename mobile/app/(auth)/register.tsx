@@ -19,6 +19,7 @@ import { config } from '@/lib/config';
 import { CATEGORIES } from '@/constants/categories';
 import { useTheme } from '@/theme/ThemeProvider';
 import { useT, useLocaleStore } from '@/i18n';
+import type { TranslationKey } from '@/i18n/translations';
 import { radius } from '@/theme/tokens';
 import type { UserRole } from '@/types';
 
@@ -137,7 +138,7 @@ export default function Register() {
                   value={value}
                   onChangeText={onChange}
                   onBlur={onBlur}
-                  error={errors[f.name]?.message as string | undefined}
+                  error={errors[f.name]?.message ? t(errors[f.name]?.message as TranslationKey) : undefined}
                 />
               )}
             />

@@ -37,9 +37,12 @@ changes required.
 
 Customers and artisans sign in with **phone number + password**
 (`mobile/src/services/auth.service.ts`). Each phone number maps to an internal
-login on Firebase's **Email/Password** provider (`p599123456@phone.qareeb.app`),
-so no SMS is needed and it works in Expo Go. `0599123456`, `+970599123456` and
-`+972599123456` all resolve to the same account. The real email is kept on
+login on Firebase's **Email/Password** provider, scoped per role
+(`customer-599123456@phone.qareeb.app`, `artisan-599123456@phone.qareeb.app`),
+so no SMS is needed and it works in Expo Go. One phone number can therefore
+hold **both** a customer and an artisan account (separate profiles and
+passwords). Only Palestinian mobiles (059 / 056) are accepted; `0599123456`,
+`+970599123456` and `+972599123456` all resolve to the same login. The real email is kept on
 `users/{uid}.email`.
 
 - **Sign-up** creates the Auth account, `users/{uid}` (role `customer` or

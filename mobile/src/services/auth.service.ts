@@ -1,6 +1,8 @@
 // Firebase Auth for the live backend. Users sign in with phone + password:
 // each phone number maps to an internal email-style login on Firebase's
 // Email/Password provider, so no SMS is needed and it works in Expo Go.
+// The login is per role, so one phone number can hold both a customer and an
+// artisan account (separate uids, profiles and passwords).
 // The user's real email stays on their profile (users/{uid}.email).
 import {
   createUserWithEmailAndPassword,
@@ -15,7 +17,7 @@ import type { AppUser, UserRole } from '@/types';
 
 const LOGIN_DOMAIN = 'phone.qareeb.app';
 
-const loginEmail = (phone: string) => `p${normalizePhone(phone)}@${LOGIN_DOMAIN}`;
+const loginEmail = (phone: string, role: UserRole) => `${role}-${normalizePhone(phone)}@${LOGIN_DOMAIN}`;
 
 /** Thrown with a translation key so screens can show a localised message. */
 export class AuthError extends Error {
@@ -71,10 +73,10 @@ export async function loadProfile(uid: string): Promise<AppUser | null> {
 
 export async function signInWithPhone(phone: string, password: string, role: UserRole): Promise<AppUser> {
   try {
-    const { user } = await signInWithEmailAndPassword(auth(), loginEmail(phone), password);
+    const { user } = await signInWithEmailAndPassword(auth(), loginEmail(phone, role), password);
     const profile = await loadProfile(user.uid);
     if (!profile) throw new AuthError('auth.errInvalidCredentials');
-    // Customer and artisan accounts each have their own sign-in entry.
+    // Defensive: the login is role-scoped, so this only trips on bad data.
     if (profile.role !== role) {
       await fbSignOut(auth());
       throw new AuthError('auth.errWrongRole');
@@ -97,7 +99,7 @@ export interface RegisterParams {
 
 export async function registerWithPhone(p: RegisterParams): Promise<AppUser> {
   try {
-    const { user } = await createUserWithEmailAndPassword(auth(), loginEmail(p.phone), p.password);
+    const { user } = await createUserWithEmailAndPassword(auth(), loginEmail(p.phone, p.role), p.password);
     await updateProfile(user, { displayName: p.fullName }).catch(() => {});
 
     const now = Date.now();

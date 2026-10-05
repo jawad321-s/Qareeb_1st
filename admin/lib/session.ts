@@ -18,7 +18,8 @@ export interface AdminSession {
 export type SignInErrorCode = 'invalid' | 'notAdmin' | 'network' | 'tooMany' | 'generic';
 
 export class SignInError extends Error {
-  constructor(public code: SignInErrorCode) {
+  /** `detail` carries the raw Firebase error code for diagnosis. */
+  constructor(public code: SignInErrorCode, public detail?: string) {
     super(code);
   }
 }
@@ -80,7 +81,8 @@ export async function signIn(email: string, password: string): Promise<AdminSess
     }
     if (code === 'auth/network-request-failed') throw new SignInError('network');
     if (code === 'auth/too-many-requests') throw new SignInError('tooMany');
-    throw new SignInError('generic');
+    console.error('[admin sign-in]', err);
+    throw new SignInError('generic', code || (err as Error)?.message);
   }
 }
 

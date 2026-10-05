@@ -27,6 +27,7 @@ export default function LoginPage() {
       router.push('/');
     } catch (err) {
       const code = err instanceof SignInError ? err.code : 'generic';
+      const detail = err instanceof SignInError && err.detail ? ` (${err.detail})` : '';
       setError(
         t(
           code === 'invalid'
@@ -38,7 +39,7 @@ export default function LoginPage() {
                 : code === 'tooMany'
                   ? 'login.errTooMany'
                   : 'login.errGeneric',
-        ),
+        ) + (code === 'generic' ? detail : ''),
       );
     } finally {
       setLoading(false);

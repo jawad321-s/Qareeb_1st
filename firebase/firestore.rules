@@ -114,7 +114,11 @@ service cloud.firestore {
       allow update: if isSignedIn() && (
                       existing().customerId == uid()   // cancel / accept an offer
                       || isAdmin()
-                      || (isArtisan() && existing().acceptedArtisanId == uid())); // status progression
+                      || (isArtisan() && existing().acceptedArtisanId == uid()) // status progression
+                      // Any artisan bumps the counter by one when sending an offer.
+                      || (isArtisan() && existing().status == 'PENDING'
+                          && incoming().diff(existing()).affectedKeys().hasOnly(['offerCount', 'updatedAt'])
+                          && incoming().offerCount == existing().offerCount + 1));
       allow delete: if isAdmin();
 
       match /messages/{messageId} {

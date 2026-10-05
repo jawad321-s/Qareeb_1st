@@ -6,7 +6,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getApps, initializeApp, type FirebaseApp } from 'firebase/app';
 import * as firebaseAuth from 'firebase/auth';
 import type { Auth } from 'firebase/auth';
-import { getFirestore, type Firestore } from 'firebase/firestore';
+import { getFirestore, initializeFirestore, type Firestore } from 'firebase/firestore';
 import { getStorage, type FirebaseStorage } from 'firebase/storage';
 import { config } from './config';
 
@@ -27,7 +27,14 @@ export function getDb(): Firestore | null {
   if (db) return db;
   const a = ensureApp();
   if (!a) return null;
-  db = getFirestore(a);
+  try {
+    // Optional fields (e.g. an offer without a note) are sent as `undefined`;
+    // drop them instead of failing the whole write.
+    db = initializeFirestore(a, { ignoreUndefinedProperties: true });
+  } catch {
+    // Already initialised (e.g. after a fast refresh).
+    db = getFirestore(a);
+  }
   return db;
 }
 

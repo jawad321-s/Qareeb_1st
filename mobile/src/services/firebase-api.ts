@@ -121,9 +121,17 @@ export const firebaseApi: typeof mockApi = {
   },
 
   async getOffers(requestId: string): Promise<Offer[]> {
-    const q = query(collection(db(), 'offers'), where('requestId', '==', requestId), orderBy('price', 'asc'));
+    // The rules only let a user read offers they are a party to, so the query
+    // must be scoped to the caller: the customer sees all offers on their
+    // request, an artisan only their own.
+    const me = useAuth.getState().user;
+    if (!me) return [];
+    const party = me.role === 'artisan' ? 'artisanId' : 'customerId';
+    const q = query(collection(db(), 'offers'), where('requestId', '==', requestId), where(party, '==', me.uid));
     const snap = await getDocs(q);
-    return snap.docs.map((d) => withId<Offer>(d.id, { ...d.data(), createdAt: ms(d.data().createdAt) }));
+    return snap.docs
+      .map((d) => withId<Offer>(d.id, { ...d.data(), createdAt: ms(d.data().createdAt) }))
+      .sort((a, b) => a.price - b.price);
   },
 
   async acceptOffer(offerId: string): Promise<void> {
@@ -132,7 +140,9 @@ export const firebaseApi: typeof mockApi = {
     const offer = offSnap.data() as Offer;
     const batch = writeBatch(db());
     // Accept this offer, reject the siblings.
-    const siblings = await getDocs(query(collection(db(), 'offers'), where('requestId', '==', offer.requestId)));
+    const siblings = await getDocs(
+      query(collection(db(), 'offers'), where('requestId', '==', offer.requestId), where('customerId', '==', offer.customerId)),
+    );
     siblings.forEach((s) => batch.update(s.ref, { status: s.id === offerId ? 'ACCEPTED' : 'REJECTED' }));
     batch.update(doc(db(), 'requests', offer.requestId), {
       status: 'ACCEPTED',
@@ -153,10 +163,19 @@ export const firebaseApi: typeof mockApi = {
 
     const batch = writeBatch(db());
     batch.update(reqSnap.ref, { status: 'CANCELLED', updatedAt: Date.now() });
-    const open = await getDocs(
-      query(collection(db(), 'offers'), where('requestId', '==', requestId), where('status', '==', 'PENDING')),
-    );
-    open.forEach((o) => batch.update(o.ref, { status: 'REJECTED' }));
+    // Only the customer can read/close the other offers; once an artisan is
+    // assigned (the only time they can cancel) none are still pending anyway.
+    if (useAuth.getState().user?.uid === current.customerId) {
+      const open = await getDocs(
+        query(
+          collection(db(), 'offers'),
+          where('requestId', '==', requestId),
+          where('customerId', '==', current.customerId),
+          where('status', '==', 'PENDING'),
+        ),
+      );
+      open.forEach((o) => batch.update(o.ref, { status: 'REJECTED' }));
+    }
     await batch.commit();
   },
 

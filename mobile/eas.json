@@ -1,0 +1,24 @@
+{
+  "cli": {
+    "version": ">= 16.0.0",
+    "appVersionSource": "remote"
+  },
+  "build": {
+    "preview": {
+      "distribution": "internal",
+      "android": { "buildType": "apk" },
+      "env": {
+        "EXPO_PUBLIC_FIREBASE_API_KEY": "AIzaSyAj6c-ZdgYYgxs-i7o-9WdqlnytRupwywA",
+        "EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN": "qareeb-b9a54.firebaseapp.com",
+        "EXPO_PUBLIC_FIREBASE_PROJECT_ID": "qareeb-b9a54",
+        "EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET": "qareeb-b9a54.firebasestorage.app",
+        "EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID": "274723476834",
+        "EXPO_PUBLIC_FIREBASE_APP_ID": "1:274723476834:web:5e8557cedb3f3fed47083b",
+        "EXPO_PUBLIC_USE_MOCK": "false"
+      }
+    },
+    "production": {
+      "autoIncrement": true
+    }
+  }
+}

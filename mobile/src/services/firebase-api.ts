@@ -106,7 +106,16 @@ export const firebaseApi: typeof mockApi = {
   },
 
   async getNearbyRequests(): Promise<ServiceRequest[]> {
-    const q = query(collection(db(), 'requests'), where('status', '==', 'PENDING'), orderBy('createdAt', 'desc'));
+    // Cloud Functions dispatch each request to the nearest matching artisans
+    // (widening the radius over time); an artisan sees the ones sent to them.
+    const me = useAuth.getState().user;
+    if (!me) return [];
+    const q = query(
+      collection(db(), 'requests'),
+      where('status', '==', 'PENDING'),
+      where('notifiedArtisanIds', 'array-contains', me.uid),
+      orderBy('createdAt', 'desc'),
+    );
     const snap = await getDocs(q);
     return snap.docs.map((d) => mapRequest(d.id, d.data()));
   },
@@ -162,7 +171,8 @@ export const firebaseApi: typeof mockApi = {
     if (!canCancelRequest(current.status)) return;
 
     const batch = writeBatch(db());
-    batch.update(reqSnap.ref, { status: 'CANCELLED', updatedAt: Date.now() });
+    // cancelledBy lets Cloud Functions notify the other party.
+    batch.update(reqSnap.ref, { status: 'CANCELLED', cancelledBy: useAuth.getState().user?.uid ?? null, updatedAt: Date.now() });
     // Only the customer can read/close the other offers; once an artisan is
     // assigned (the only time they can cancel) none are still pending anyway.
     if (useAuth.getState().user?.uid === current.customerId) {

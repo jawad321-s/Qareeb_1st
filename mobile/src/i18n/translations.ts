@@ -239,6 +239,8 @@ export const translations = {
     // request detail
     'req.title': 'Request details',
     'req.tracking': 'Order tracking',
+    'req.searching': 'Looking for artisans within {km} km · the request closes in {min} min if no offers arrive',
+    'req.noOffersCancelled': 'No artisan sent an offer in time, so this request was cancelled. You can post it again.',
     'req.yourArtisan': 'Your artisan',
     'req.chat': 'Chat',
     'req.offers': 'Offers',
@@ -767,6 +769,8 @@ export const translations = {
     // request detail
     'req.title': 'تفاصيل الطلب',
     'req.tracking': 'تتبّع الطلب',
+    'req.searching': 'نبحث عن حرفيين ضمن {km} كم · يُلغى الطلب بعد {min} دقيقة إذا لم تصل عروض',
+    'req.noOffersCancelled': 'لم يقدّم أي حرفي عرضاً خلال المهلة، فتم إلغاء الطلب. يمكنك نشره مرة أخرى.',
     'req.yourArtisan': 'الحرفي الخاص بك',
     'req.chat': 'محادثة',
     'req.offers': 'العروض',

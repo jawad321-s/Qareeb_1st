@@ -127,3 +127,31 @@ gated by `config.useMock`, plus the `firebaseApi` facade on mobile) extends to
 `reviews`, `complaints`, `subscriptions`, `notifications`, etc. —
 all already defined in `firebase/firestore.rules` and
 `docs/DATABASE_SCHEMA.md`.
+
+## Request dispatch & notifications (Cloud Functions)
+
+`firebase/functions` (Node 22, deployed to `europe-west1`) runs the
+server-side logic. It needs the **Blaze** plan.
+
+| Function | Trigger | What it does |
+|---|---|---|
+| `onRequestCreated` | `requests/{id}` created | Offers the request to **verified** artisans of its category within **2 km** of the customer; stores `dispatch` + `notifiedArtisanIds` |
+| `dispatchTick` | every minute | While a request has **no offers**: widens the radius by **2 km every 5 min** (max **12 km**), notifying only newly reached artisans. After **30 min** with no offers: `status: CANCELLED`, `cancelReason: NO_OFFERS` |
+| `onOfferCreated` | `offers/{id}` created | Notifies the customer |
+| `onRequestUpdated` | status change | Accepted → artisan; on the way / working / completed → customer (completed → both); cancelled → the other party, or the customer on timeout |
+| `onMessageCreated` | chat message | Notifies the other party |
+
+Tunables live in `firebase/functions/src/config.js`.
+
+- Artisans only see (and can only quote on) requests dispatched to them
+  (`notifiedArtisanIds`, enforced by the rules). Their location is refreshed
+  on app open when permission is granted.
+- Every notification is stored in `users/{uid}/notifications` (the bell
+  screen, works in Expo Go) and pushed via the Expo push service to the tokens
+  in `users/{uid}/fcmTokens`.
+- Remote push needs an installed build (not Expo Go on Android):
+  `eas init`, add `mobile/google-services.json` (Firebase Android app
+  `com.qareeb.app`), upload the FCM V1 key with `eas credentials`, then
+  `eas build -p android --profile preview`.
+
+Tests: `cd firebase && firebase emulators:exec --only firestore "cd functions && npm test"`.

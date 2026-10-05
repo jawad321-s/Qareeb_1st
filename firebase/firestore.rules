@@ -66,7 +66,7 @@ service cloud.firestore {
 
       match /notifications/{notifId} {
         allow read, update: if isSignedIn() && uid() == userId;
-        allow create: if isSignedIn(); // fan-out from server/other users
+        allow create: if isAdmin(); // written by Cloud Functions (admin SDK)
         allow delete: if isSignedIn() && uid() == userId;
       }
       match /fcmTokens/{tokenId} {
@@ -105,20 +105,24 @@ service cloud.firestore {
                     || isAdmin()
                     || (isArtisan() && (existing().status == 'PENDING'
                           || existing().acceptedArtisanId == uid())));
+      // Dispatch state (radius, who was notified) is owned by Cloud Functions.
+      function dispatchUntouched() {
+        return !incoming().diff(existing()).affectedKeys().hasAny(['dispatch', 'notifiedArtisanIds']);
+      }
       allow create: if isSignedIn()
                     && incoming().customerId == uid()
                     && incoming().status == 'PENDING'
                     && incoming().offerCount == 0
+                    && !incoming().keys().hasAny(['dispatch', 'notifiedArtisanIds'])
                     && isValidString(incoming().title, 120)
                     && isValidString(incoming().description, 2000);
-      allow update: if isSignedIn() && (
+      allow update: if isAdmin() || (isSignedIn() && dispatchUntouched() && (
                       existing().customerId == uid()   // cancel / accept an offer
-                      || isAdmin()
                       || (isArtisan() && existing().acceptedArtisanId == uid()) // status progression
                       // Any artisan bumps the counter by one when sending an offer.
                       || (isArtisan() && existing().status == 'PENDING'
                           && incoming().diff(existing()).affectedKeys().hasOnly(['offerCount', 'updatedAt'])
-                          && incoming().offerCount == existing().offerCount + 1));
+                          && incoming().offerCount == existing().offerCount + 1)));
       allow delete: if isAdmin();
 
       match /messages/{messageId} {
@@ -142,10 +146,17 @@ service cloud.firestore {
                     existing().artisanId == uid()
                     || existing().customerId == uid()
                     || isAdmin());
+      // Only artisans the request was dispatched to (see Cloud Functions) can
+      // quote on it, and only while it is still open.
+      function dispatchedTo(requestId) {
+        let req = get(/databases/$(database)/documents/requests/$(requestId)).data;
+        return req.status == 'PENDING' && uid() in req.get('notifiedArtisanIds', []);
+      }
       allow create: if isArtisan()
                     && incoming().artisanId == uid()
                     && incoming().status == 'PENDING'
-                    && incoming().price is number && incoming().price > 0;
+                    && incoming().price is number && incoming().price > 0
+                    && dispatchedTo(incoming().requestId);
       // Artisan may withdraw; customer may accept/reject (status transitions only).
       allow update: if isSignedIn() && (
                       (existing().artisanId == uid() && incoming().status == 'WITHDRAWN')

@@ -3,6 +3,7 @@ import { onAuthStateChanged } from 'firebase/auth';
 import { kv } from '@/lib/mmkv';
 import { config } from '@/lib/config';
 import { getAuthClient } from '@/lib/firebase';
+import { unregisterPush } from '@/lib/push';
 import {
   loadProfile,
   registerWithPhone,
@@ -84,7 +85,11 @@ export const useAuth = create<AuthState>((set, get) => ({
   },
 
   signOut: () => {
-    if (!config.useMock) signOutFirebase().catch(() => {});
+    if (!config.useMock) {
+      // Remove this device's push token first, while still signed in.
+      const uid = get().user?.uid;
+      (uid ? unregisterPush(uid) : Promise.resolve()).finally(() => signOutFirebase().catch(() => {}));
+    }
     kv.remove(SESSION_KEY);
     set({ user: null });
   },

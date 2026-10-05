@@ -12,6 +12,7 @@ import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
 import { EmptyState } from '@/components/feedback/EmptyState';
 import { useT } from '@/i18n';
+import { config } from '@/lib/config';
 
 const schema = z.object({ email: z.string().email('Enter a valid email') });
 type Form = z.infer<typeof schema>;
@@ -50,29 +51,31 @@ export default function Forgot() {
           <Animated.View entering={FadeInDown.duration(400)} style={{ gap: 8, marginBottom: 28 }}>
             <Text variant="h1">{t('forgot.title')}</Text>
             <Text variant="body" tone="muted">
-              {t('forgot.subtitle')}
+              {config.useMock ? t('forgot.subtitle') : t('forgot.liveNote')}
             </Text>
           </Animated.View>
-          <View style={{ gap: 16 }}>
-            <Controller
-              control={control}
-              name="email"
-              render={({ field: { onChange, value, onBlur } }) => (
-                <Input
-                  label={t('auth.email')}
-                  placeholder="you@example.com"
-                  iconLeft="mail"
-                  autoCapitalize="none"
-                  keyboardType="email-address"
-                  value={value}
-                  onChangeText={onChange}
-                  onBlur={onBlur}
-                  error={errors.email?.message}
-                />
-              )}
-            />
-            <Button label={t('forgot.send')} onPress={handleSubmit(onSubmit)} loading={loading} />
-          </View>
+          {config.useMock && (
+            <View style={{ gap: 16 }}>
+              <Controller
+                control={control}
+                name="email"
+                render={({ field: { onChange, value, onBlur } }) => (
+                  <Input
+                    label={t('auth.email')}
+                    placeholder="you@example.com"
+                    iconLeft="mail"
+                    autoCapitalize="none"
+                    keyboardType="email-address"
+                    value={value}
+                    onChangeText={onChange}
+                    onBlur={onBlur}
+                    error={errors.email?.message}
+                  />
+                )}
+              />
+              <Button label={t('forgot.send')} onPress={handleSubmit(onSubmit)} loading={loading} />
+            </View>
+          )}
         </>
       )}
     </Screen>

@@ -33,6 +33,28 @@ changes required.
    ```
 5. Restart both apps. They now read/write the same data.
 
+## Authentication — phone + password
+
+Customers and artisans sign in with **phone number + password**
+(`mobile/src/services/auth.service.ts`). Each phone number maps to an internal
+login on Firebase's **Email/Password** provider (`p599123456@phone.qareeb.app`),
+so no SMS is needed and it works in Expo Go. `0599123456`, `+970599123456` and
+`+972599123456` all resolve to the same account. The real email is kept on
+`users/{uid}.email`.
+
+- **Sign-up** creates the Auth account, `users/{uid}` (role `customer` or
+  `artisan`) and, for artisans, `artisanProfiles/{uid}`.
+- **Roles:** customer/artisan come from `users/{uid}.role` (locked after
+  sign-up by the rules). **Admins** use the `role: "admin"` custom claim:
+  ```bash
+  cd firebase && npm run set-role -- admin@example.com admin
+  ```
+  The admin must sign out and back in afterwards.
+- **Not yet:** password reset by SMS (planned with Phone Auth). Until then an
+  admin sets a new password with the Admin SDK
+  (`admin.auth().updateUser(uid, { password })`) — the console's "reset
+  password" email cannot reach the internal login address.
+
 ## First integrated flow — Artisan verification
 
 The vertical slice wired end-to-end:

@@ -16,10 +16,18 @@ service cloud.firestore {
       return request.auth.uid;
     }
     function isAdmin() {
-      return isSignedIn() && request.auth.token.role == 'admin';
+      return isSignedIn() && request.auth.token.get('role', '') == 'admin';
+    }
+    // Customer/artisan roles live on users/{uid}.role, written once at sign-up
+    // and locked by the users update rule below, so no Cloud Function is needed
+    // to issue claims. Admins still use the `role` custom claim (set-role script).
+    function userDoc() {
+      return /databases/$(database)/documents/users/$(uid());
     }
     function isArtisan() {
-      return isSignedIn() && request.auth.token.role == 'artisan';
+      return isSignedIn() && (
+        request.auth.token.get('role', '') == 'artisan'
+        || (exists(userDoc()) && get(userDoc()).data.role == 'artisan'));
     }
     function existing() {
       return resource.data;
@@ -64,8 +72,8 @@ service cloud.firestore {
       allow create, update: if isSignedIn() && (
                               (uid() == artisanId
                                 // verificationStatus & premium are admin-controlled.
-                                && incoming().verificationStatus == (existing() != null ? existing().verificationStatus : 'unsubmitted')
-                                && incoming().premium == (existing() != null ? existing().premium : false))
+                                && incoming().verificationStatus == (resource == null ? 'unsubmitted' : existing().verificationStatus)
+                                && incoming().premium == (resource == null ? false : existing().premium))
                               || isAdmin());
       allow delete: if isAdmin();
     }

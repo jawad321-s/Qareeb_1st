@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "seed": "node seed/seed.mjs",
+    "set-role": "node scripts/set-role.mjs",
     "deploy": "firebase deploy --only firestore:rules,firestore:indexes,storage",
     "emulate": "firebase emulators:start"
   },

@@ -151,8 +151,8 @@ export default function JobDetail() {
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
               <Icon name="map-pin" size={16} color="#94A3B8" />
               <Text variant="caption" tone="muted">
-                {request.location.address}
-                {user.location ? ` · ${formatDistance(distanceKm(user.location, request.location))}` : ''}
+                {request.location?.address ?? '—'}
+                {user.location && request.location ? ` · ${formatDistance(distanceKm(user.location, request.location))}` : ''}
               </Text>
             </View>
           </View>

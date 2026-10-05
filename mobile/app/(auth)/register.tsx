@@ -209,7 +209,7 @@ export default function Register() {
             <Text variant="body" tone="muted">
               {t('auth.haveAccount')}
             </Text>
-            <Text variant="body" tone="primary" style={{ fontFamily: 'Inter_600SemiBold' }} onPress={() => router.replace('/(auth)/login')}>
+            <Text variant="body" tone="primary" style={{ fontFamily: 'Inter_600SemiBold' }} onPress={() => router.replace({ pathname: '/(auth)/login', params: { role } })}>
               {t('auth.signIn')}
             </Text>
           </View>

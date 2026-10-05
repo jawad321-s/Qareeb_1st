@@ -42,9 +42,17 @@ service cloud.firestore {
 
     // ── users/{uid} ──────────────────────────────────────────────────────────
     match /users/{userId} {
-      // A user reads their own doc; admins read all. Public profile fields of
-      // artisans are exposed through a separate query path in the app.
-      allow read: if isSignedIn() && (uid() == userId || isAdmin());
+      // A user reads their own doc; admins read all. Artisans are public
+      // service providers, so any signed-in user can read an artisan's doc
+      // (listings, profiles, chat headers). Artisans can read customer docs to
+      // show who they are chatting with / reviewing.
+      // TODO: split public fields into a separate collection so phone/email
+      // aren't exposed beyond the parties of an accepted job.
+      allow read: if isSignedIn() && (
+                    uid() == userId
+                    || isAdmin()
+                    || resource.data.role == 'artisan'
+                    || isArtisan());
       allow create: if isSignedIn() && uid() == userId
                     && incoming().role in ['customer', 'artisan'];
       allow update: if isSignedIn() && (

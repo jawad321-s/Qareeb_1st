@@ -49,7 +49,9 @@ so no SMS is needed and it works in Expo Go. `0599123456`, `+970599123456` and
   ```bash
   cd firebase && npm run set-role -- admin@example.com admin
   ```
-  The admin must sign out and back in afterwards.
+  The admin must sign out and back in afterwards. The admin dashboard
+  (`admin/lib/session.ts`) signs in with Firebase email/password and rejects
+  any account without this claim.
 - **Not yet:** password reset by SMS (planned with Phone Auth). Until then an
   admin sets a new password with the Admin SDK
   (`admin.auth().updateUser(uid, { password })`) — the console's "reset

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { View } from 'react-native';
-import { router } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -13,17 +13,26 @@ import { Button } from '@/components/ui/Button';
 import { EmptyState } from '@/components/feedback/EmptyState';
 import { useT } from '@/i18n';
 import { config } from '@/lib/config';
+import { useTheme } from '@/theme/ThemeProvider';
+import { roleAccents } from '@/theme/tokens';
 
-const schema = z.object({ email: z.string().email('Enter a valid email') });
+// Sign-in is by phone number, so the reset goes to the phone too.
+const schema = z.object({ phone: z.string().min(9, 'Enter a valid phone number') });
 type Form = z.infer<typeof schema>;
 
 export default function Forgot() {
+  // Keep the account type so "back to sign in" returns to the same login.
+  const { role: roleParam } = useLocalSearchParams<{ role?: string }>();
+  const role = roleParam === 'artisan' ? 'artisan' : 'customer';
+  const { isDark } = useTheme();
+  const accent = roleAccents[role];
+  const tint = isDark ? accent.tintDark : accent.tintLight;
   const [sent, setSent] = useState(false);
   const [loading, setLoading] = useState(false);
   const { t } = useT();
   const { control, handleSubmit, formState: { errors } } = useForm<Form>({
     resolver: zodResolver(schema),
-    defaultValues: { email: '' },
+    defaultValues: { phone: '' },
   });
 
   const onSubmit = async () => {
@@ -39,11 +48,11 @@ export default function Forgot() {
       {sent ? (
         <View style={{ marginTop: 40 }}>
           <EmptyState
-            icon="mail"
+            icon="message"
             title={t('forgot.sentTitle')}
             description={t('forgot.sentDesc')}
             actionLabel={t('forgot.backToSignIn')}
-            onAction={() => router.replace('/(auth)/login')}
+            onAction={() => router.replace({ pathname: '/(auth)/login', params: { role } })}
           />
         </View>
       ) : (
@@ -54,26 +63,27 @@ export default function Forgot() {
               {config.useMock ? t('forgot.subtitle') : t('forgot.liveNote')}
             </Text>
           </Animated.View>
+          {/* Live: no reset by SMS yet — the subtitle explains how to get help. */}
           {config.useMock && (
             <View style={{ gap: 16 }}>
               <Controller
                 control={control}
-                name="email"
+                name="phone"
                 render={({ field: { onChange, value, onBlur } }) => (
                   <Input
-                    label={t('auth.email')}
-                    placeholder="you@example.com"
-                    iconLeft="mail"
+                    label={t('auth.phone')}
+                    placeholder="+970 5X XXX XXXX"
+                    iconLeft="phone"
                     autoCapitalize="none"
-                    keyboardType="email-address"
+                    keyboardType="phone-pad"
                     value={value}
                     onChangeText={onChange}
                     onBlur={onBlur}
-                    error={errors.email?.message}
+                    error={errors.phone?.message}
                   />
                 )}
               />
-              <Button label={t('forgot.send')} onPress={handleSubmit(onSubmit)} loading={loading} />
+              <Button label={t('forgot.send')} onPress={handleSubmit(onSubmit)} loading={loading} accent={{ gradient: accent.gradient, tint }} />
             </View>
           )}
         </>

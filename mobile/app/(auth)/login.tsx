@@ -118,7 +118,7 @@ export default function Login() {
           <Text
             variant="caption"
             style={{ color: tint, fontFamily: 'Inter_500Medium' }}
-            onPress={() => router.push('/(auth)/forgot')}
+            onPress={() => router.push({ pathname: '/(auth)/forgot', params: { role } })}
           >
             {t('auth.forgot')}
           </Text>

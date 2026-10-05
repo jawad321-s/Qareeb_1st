@@ -230,10 +230,10 @@ export const translations = {
 
     // forgot password
     'forgot.title': 'Reset password',
-    'forgot.subtitle': "Enter your email and we'll send you a reset link.",
+    'forgot.subtitle': "Enter your phone number and we'll text you a reset link.",
     'forgot.send': 'Send reset link',
-    'forgot.sentTitle': 'Check your inbox',
-    'forgot.sentDesc': "We've sent a password reset link to your email address.",
+    'forgot.sentTitle': 'Check your messages',
+    'forgot.sentDesc': "We've texted a password reset link to your phone number.",
     'forgot.backToSignIn': 'Back to sign in',
 
     // request detail
@@ -758,10 +758,10 @@ export const translations = {
 
     // forgot password
     'forgot.title': 'إعادة تعيين كلمة المرور',
-    'forgot.subtitle': 'أدخل بريدك وسنرسل لك رابط إعادة التعيين.',
+    'forgot.subtitle': 'أدخل رقم جوالك وسنرسل لك رسالة فيها رابط إعادة التعيين.',
     'forgot.send': 'إرسال الرابط',
-    'forgot.sentTitle': 'تحقّق من بريدك',
-    'forgot.sentDesc': 'أرسلنا رابط إعادة تعيين كلمة المرور إلى بريدك الإلكتروني.',
+    'forgot.sentTitle': 'تحقّق من رسائلك',
+    'forgot.sentDesc': 'أرسلنا رسالة نصية فيها رابط إعادة تعيين كلمة المرور إلى رقم جوالك.',
     'forgot.backToSignIn': 'العودة لتسجيل الدخول',
 
     // request detail

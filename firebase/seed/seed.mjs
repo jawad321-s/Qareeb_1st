@@ -61,7 +61,13 @@ async function seedCategoriesAndServices() {
       popular: c.order <= 6,
     });
   }
+  // Remove the old per-category "<id>_repair" / "<id>_install" services left
+  // over from earlier seeds.
+  const old = await db.collection('services').get();
+  const stale = old.docs.filter((d) => /_(repair|install)$/.test(d.id));
+  stale.forEach((d) => batch.delete(d.ref));
   await batch.commit();
+  if (stale.length) console.log(`✓ Removed ${stale.length} old repair/install services`);
   console.log(`✓ Seeded ${CATEGORIES.length} categories and ${CATEGORIES.length} services`);
 }
 

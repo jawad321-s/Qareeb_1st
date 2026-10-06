@@ -12,6 +12,7 @@ import type {
 import type { mockApi } from '@/mock/api';
 import { getDb } from '@/lib/firebase';
 import { useAuth } from '@/store/auth';
+import { isExpiredWithoutOffers, isVisibleToArtisan } from '@/lib/dispatch';
 import { MOCK_CUSTOMER } from '@/mock/data';
 import { ACTIVE_STATUSES, NEXT_STATUS, canCancelRequest, isOverdue } from '@/lib/requestRules';
 
@@ -46,6 +47,13 @@ async function settleOverdue(list: ServiceRequest[]): Promise<ServiceRequest[]> 
   const now = Date.now();
   return Promise.all(
     list.map(async (r) => {
+      // No Cloud Functions: close requests nobody answered in time (the
+      // customer's read performs the write; the rules reject anyone else).
+      if (!r.dispatch && isExpiredWithoutOffers(r, now)) {
+        const cancel = { status: 'CANCELLED' as const, cancelReason: 'NO_OFFERS' as const, updatedAt: now };
+        await updateDoc(doc(db(), 'requests', r.id), cancel).catch(() => {});
+        return { ...r, ...cancel };
+      }
       if (!isOverdue(r, now)) return r;
       const patch = { status: 'COMPLETED' as const, completedAt: now, updatedAt: now, autoCompleted: true };
       await updateDoc(doc(db(), 'requests', r.id), patch).catch(() => {});
@@ -106,17 +114,18 @@ export const firebaseApi: typeof mockApi = {
   },
 
   async getNearbyRequests(): Promise<ServiceRequest[]> {
-    // Cloud Functions dispatch each request to the nearest matching artisans
-    // (widening the radius over time) and record them in notifiedArtisanIds;
-    // an artisan sees the requests sent to them. Requests without `dispatch`
-    // (functions not deployed, e.g. on the Spark plan) stay visible to all.
+    // Only requests meant for this artisan: dispatched to them by Cloud
+    // Functions, or — when the functions aren't running — matching the same
+    // policy locally (category, verified, radius growing over time).
     const me = useAuth.getState().user;
     if (!me) return [];
-    const q = query(collection(db(), 'requests'), where('status', '==', 'PENDING'), orderBy('createdAt', 'desc'));
-    const snap = await getDocs(q);
-    return snap.docs
-      .map((d) => mapRequest(d.id, d.data()))
-      .filter((r) => !r.dispatch || (r.notifiedArtisanIds ?? []).includes(me.uid));
+    const [snap, profile] = await Promise.all([
+      getDocs(query(collection(db(), 'requests'), where('status', '==', 'PENDING'), orderBy('createdAt', 'desc'))),
+      getDoc(doc(db(), 'artisanProfiles', me.uid)),
+    ]);
+    const categoryIds: string[] = profile.exists() ? (profile.data().categoryIds ?? []) : [];
+    const now = Date.now();
+    return snap.docs.map((d) => mapRequest(d.id, d.data())).filter((r) => isVisibleToArtisan(r, me, categoryIds, now));
   },
 
   async createRequest(input): Promise<ServiceRequest> {

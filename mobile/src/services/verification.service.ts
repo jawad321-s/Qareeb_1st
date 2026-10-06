@@ -83,8 +83,14 @@ export function watchVerificationStatus(
 ): () => void {
   const db = getDb();
   if (!db || !isLive()) return () => {};
-  return onSnapshot(doc(db, VERIFICATION_COLLECTION, uid), (snap) => {
-    const data = snap.data();
-    if (data?.status) cb(data.status as VerificationStatus);
-  });
+  return onSnapshot(
+    doc(db, VERIFICATION_COLLECTION, uid),
+    (snap) => {
+      const data = snap.data();
+      if (data?.status) cb(data.status as VerificationStatus);
+    },
+    // Without a Firebase sign-in the rules refuse the read; keep the status
+    // the app already has instead of surfacing an uncaught listener error.
+    () => {},
+  );
 }

@@ -212,6 +212,11 @@ export const mockApi = {
     await delay(150);
   },
 
+  /** Save which services the artisan offers (the mock keeps them on the device). */
+  async updateArtisanServices(_uid: string, _serviceIds: string[], _categoryIds: string[]): Promise<void> {
+    await delay(150);
+  },
+
   async getMessages(requestId: string): Promise<ChatMessage[]> {
     await delay(250);
     return clone(messages.filter((m) => m.requestId === requestId).sort((a, b) => a.createdAt - b.createdAt));

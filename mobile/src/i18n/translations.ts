@@ -376,6 +376,18 @@ export const translations = {
 
     // services & pricing
     'sp.desc': 'Choose the services you offer. You set the price for each request when you send your offer.',
+    'sp.add': 'Add a service',
+    'sp.addTitle': 'Add services',
+    'sp.addDesc': 'Pick one or more services to add to the ones you offer.',
+    'sp.added': 'Added',
+    'sp.addSelected': 'Add',
+    'sp.addedToast': 'Services added',
+    'sp.remove': 'Remove',
+    'sp.removeTitle': 'Remove this service?',
+    'sp.removeBody': 'It will no longer be listed among your services.',
+    'sp.empty': "You haven't added any services yet",
+    'sp.emptyDesc': 'Add the services you offer to get their requests.',
+    'sp.allAdded': "You've added every available service.",
 
     // availability
     'av.desc': 'Days and hours customers can book you.',
@@ -896,6 +908,18 @@ export const translations = {
 
     // services & pricing
     'sp.desc': 'اختر الخدمات التي تقدمها. السعر تحدده لكل طلب عند إرسال عرضك.',
+    'sp.add': 'إضافة خدمة',
+    'sp.addTitle': 'إضافة خدمات',
+    'sp.addDesc': 'اختر خدمة أو أكثر لإضافتها إلى الخدمات التي تقدمها.',
+    'sp.added': 'مضافة',
+    'sp.addSelected': 'إضافة',
+    'sp.addedToast': 'تمت إضافة الخدمات',
+    'sp.remove': 'إزالة',
+    'sp.removeTitle': 'إزالة هذه الخدمة؟',
+    'sp.removeBody': 'لن تظهر بعد الآن ضمن خدماتك.',
+    'sp.empty': 'لم تضف أي خدمة بعد',
+    'sp.emptyDesc': 'أضف الخدمات التي تقدمها لتصلك طلباتها.',
+    'sp.allAdded': 'أضفت كل الخدمات المتاحة.',
 
     // availability
     'av.desc': 'الأيام والساعات التي يمكن للزبائن حجزك فيها.',

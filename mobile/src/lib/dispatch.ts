@@ -9,6 +9,12 @@ export const STEP_KM = 2;
 export const STEP_MS = 5 * 60_000;
 export const TIMEOUT_MS = 30 * 60_000;
 export const MAX_RADIUS_KM = 12;
+/**
+ * Only admin-verified artisans receive requests. Off while testing (artisan
+ * document upload needs Storage / the Blaze plan); set
+ * EXPO_PUBLIC_REQUIRE_VERIFIED=true before launch.
+ */
+export const REQUIRE_VERIFIED = process.env.EXPO_PUBLIC_REQUIRE_VERIFIED === 'true';
 
 export function targetRadiusKm(elapsedMs: number): number {
   const steps = Math.max(0, Math.floor(elapsedMs / STEP_MS));
@@ -23,12 +29,12 @@ export function isExpiredWithoutOffers(r: ServiceRequest, now = Date.now()): boo
 /**
  * Whether an artisan should see a PENDING request. Dispatched requests (Cloud
  * Functions) go to the artisans recorded on them; otherwise the same rules
- * are applied here: verified artisan, same category, within the radius the
+ * are applied here: verified artisan (when required), same category, within the radius the
  * search has reached, and not past the response window.
  */
 export function isVisibleToArtisan(r: ServiceRequest, me: AppUser, categoryIds: string[], now = Date.now()): boolean {
   if (r.dispatch) return (r.notifiedArtisanIds ?? []).includes(me.uid);
-  if (!me.verified || !categoryIds.includes(r.categoryId)) return false;
+  if ((REQUIRE_VERIFIED && !me.verified) || !categoryIds.includes(r.categoryId)) return false;
   if (isExpiredWithoutOffers(r, now)) return false;
   if (!me.location || !r.location) return false;
   return distanceKm(me.location, r.location) <= targetRadiusKm(now - r.createdAt);

@@ -3,16 +3,16 @@
 // the response window runs out. Pure Firestore logic so it can be tested
 // against the emulator without the Functions runtime.
 import { FieldValue } from 'firebase-admin/firestore';
-import { INITIAL_RADIUS_KM, TIMEOUT_MS, targetRadiusKm } from './config.js';
+import { INITIAL_RADIUS_KM, REQUIRE_VERIFIED, TIMEOUT_MS, targetRadiusKm } from './config.js';
 import { distanceKm, normalizePhone } from './geo.js';
 import { notifyUsers } from './notify.js';
 
 /**
- * Verified, active artisans of `categoryId` within `radiusKm` of `origin`,
+ * Active (and, when required, verified) artisans of `categoryId` within `radiusKm` of `origin`,
  * excluding `excludeIds` and the customer's own artisan account (same phone).
  * Returns [{ uid, distanceKm }] nearest first.
  */
-export async function findArtisans(db, { categoryId, origin, radiusKm, excludeIds = [], customerPhone }) {
+export async function findArtisans(db, { categoryId, origin, radiusKm, excludeIds = [], customerPhone, requireVerified = REQUIRE_VERIFIED }) {
   const profiles = await db.collection('artisanProfiles').where('categoryIds', 'array-contains', categoryId).get();
   const ids = profiles.docs.map((d) => d.id).filter((id) => !excludeIds.includes(id));
   if (ids.length === 0) return [];
@@ -21,7 +21,7 @@ export async function findArtisans(db, { categoryId, origin, radiusKm, excludeId
   return users
     .filter((u) => u.exists)
     .map((u) => ({ uid: u.id, ...u.data() }))
-    .filter((u) => u.role === 'artisan' && u.verified === true && u.status !== 'suspended' && u.location)
+    .filter((u) => u.role === 'artisan' && (!requireVerified || u.verified === true) && u.status !== 'suspended' && u.location)
     .filter((u) => !ownPhone || normalizePhone(u.phone) !== ownPhone)
     .map((u) => ({ uid: u.uid, distanceKm: distanceKm(origin, u.location) }))
     .filter((u) => u.distanceKm <= radiusKm)

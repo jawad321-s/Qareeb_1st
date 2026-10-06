@@ -4,9 +4,10 @@ import { test, before } from 'node:test';
 import assert from 'node:assert/strict';
 import { initializeApp } from 'firebase-admin/app';
 import { getFirestore } from 'firebase-admin/firestore';
-import { startDispatch, runDispatchTick } from '../src/dispatch.js';
 
 process.env.PUSH_DRY_RUN = 'true';
+process.env.REQUIRE_VERIFIED = 'true'; // exercise the launch policy
+const { startDispatch, runDispatchTick, findArtisans } = await import('../src/dispatch.js');
 initializeApp({ projectId: 'demo-dispatch' });
 const db = getFirestore();
 const MIN = 60_000;
@@ -90,4 +91,9 @@ test('a request with an offer stops expanding and is not cancelled', async () =>
   const r = await get('r4');
   assert.equal(r.status, 'PENDING');
   assert.equal(r.dispatch.radiusKm, 2);
+});
+
+test('with verification off, unverified artisans are included', async () => {
+  const found = await findArtisans(db, { categoryId: 'plumbing', origin: at(0), radiusKm: 2, requireVerified: false });
+  assert.deepEqual(found.map((f) => f.uid).sort(), ['a_1km', 'a_self', 'a_unverified']);
 });

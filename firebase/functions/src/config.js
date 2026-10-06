@@ -7,6 +7,10 @@ export const STEP_KM = 2;
 export const STEP_MS = 5 * 60_000;
 export const TIMEOUT_MS = 30 * 60_000;
 export const MAX_RADIUS_KM = 12;
+// Only admin-verified artisans receive requests. false while testing (artisan
+// documents can't be uploaded yet); set to true before launch — together with
+// EXPO_PUBLIC_REQUIRE_VERIFIED=true in the mobile app.
+export const REQUIRE_VERIFIED = process.env.REQUIRE_VERIFIED ? process.env.REQUIRE_VERIFIED === 'true' : false;
 
 // Must match the Firestore database location (Firebase console →
 // Firestore → the location shown at the top).

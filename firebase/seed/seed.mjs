@@ -49,22 +49,20 @@ async function seedCategoriesAndServices() {
   const batch = db.batch();
   for (const c of CATEGORIES) {
     batch.set(db.collection('categories').doc(c.id), { ...c, active: true });
-    for (const kind of ['repair', 'install']) {
-      const id = `${c.id}_${kind}`;
-      batch.set(db.collection('services').doc(id), {
-        id,
-        categoryId: c.id,
-        name: { ar: `${kind === 'repair' ? 'إصلاح' : 'تركيب'} ${c.name.ar}`, en: `${c.name.en} ${kind === 'repair' ? 'Repair' : 'Installation'}` },
-        description: { ar: 'خدمة احترافية بضمان', en: 'Professional service with warranty' },
-        icon: c.icon,
-        basePriceFrom: (kind === 'repair' ? 8000 : 15000) + c.order * 1000,
-        active: true,
-        popular: c.order <= 6,
-      });
-    }
+    // One general service per category, with the category's id.
+    batch.set(db.collection('services').doc(c.id), {
+      id: c.id,
+      categoryId: c.id,
+      name: { ar: c.name.ar, en: c.name.en },
+      description: { ar: `كل أعمال ${c.name.ar}`, en: `All ${c.name.en.toLowerCase()} work` },
+      icon: c.icon,
+      basePriceFrom: 8000 + c.order * 1000,
+      active: true,
+      popular: c.order <= 6,
+    });
   }
   await batch.commit();
-  console.log(`✓ Seeded ${CATEGORIES.length} categories and ${CATEGORIES.length * 2} services`);
+  console.log(`✓ Seeded ${CATEGORIES.length} categories and ${CATEGORIES.length} services`);
 }
 
 async function seedUsers() {
@@ -91,7 +89,7 @@ async function seedUsers() {
     });
     await db.collection('artisanProfiles').doc(a.uid).set({
       uid: a.uid, bio: 'Experienced, reliable and highly rated professional.',
-      serviceIds: a.cats.map((c) => `${c}_repair`), categoryIds: a.cats,
+      serviceIds: a.cats, categoryIds: a.cats,
       availability: { days: [0, 1, 2, 3, 4], from: '08:00', to: '20:00' },
       gallery: [], certificates: [], verificationStatus: a.verified ? 'approved' : 'pending',
       premium: a.premium, completedJobs: a.ratingCount, rating: a.rating, ratingCount: a.ratingCount,
@@ -102,7 +100,7 @@ async function seedUsers() {
 
 async function seedRequestsAndOffers() {
   const req = {
-    id: 'seed_req_1', customerId: 'seed_customer', serviceId: 'plumbing_repair', categoryId: 'plumbing',
+    id: 'seed_req_1', customerId: 'seed_customer', serviceId: 'plumbing', categoryId: 'plumbing',
     title: 'Kitchen sink leaking', description: 'Water leaking under the kitchen sink since yesterday.',
     images: [], location: { geopoint: new admin.firestore.GeoPoint(31.9038, 35.2034), geohash: 'sv9hv', address: 'الماصيون، رام الله' },
     preferredTime: ts(-3 * 36e5), budget: { min: 8000, max: 20000 }, status: 'PENDING', offerCount: 2,

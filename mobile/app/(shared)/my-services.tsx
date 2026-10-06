@@ -96,7 +96,7 @@ export default function MyServices() {
                       {s.name[locale]}
                     </Text>
                     <Text variant="caption" tone="muted" numberOfLines={1}>
-                      {cat?.name[locale]} · {s.description[locale]}
+                      {s.description[locale]}
                     </Text>
                   </View>
                   {/* Same toggle as the dashboard's online switch — the web Switch

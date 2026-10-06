@@ -3,7 +3,9 @@ import { kv } from '@/lib/mmkv';
 import { api } from '@/services/api';
 import type { Service } from '@/types';
 
-const STORE_KEY = 'qareeb.artisan.services.v2';
+// v3: services became one per category, so lists saved with the old
+// repair/installation ids are dropped and re-seeded from the profile.
+const STORE_KEY = 'qareeb.artisan.services.v3';
 
 /** serviceId → whether the artisan currently offers it. A service that is in
  *  the map is on the artisan's list; the flag pauses it without removing it. */

@@ -17,8 +17,8 @@ import { useTheme } from '@/theme/ThemeProvider';
 import { useT } from '@/i18n';
 
 /**
- * Add services to the artisan's list from the full catalog, grouped by
- * category. Services already on the list are shown as added.
+ * Add services to the artisan's list from the catalog (one general service
+ * per category). Services already on the list are shown as added.
  */
 export default function AddService() {
   const { colors, isDark } = useTheme();
@@ -47,68 +47,59 @@ export default function AddService() {
         </Text>
       </View>
 
-      <ScrollView contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 24, gap: 18 }} showsVerticalScrollIndicator={false}>
+      <ScrollView contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 24, gap: 10 }} showsVerticalScrollIndicator={false}>
         {catalog.isLoading
           ? [0, 1, 2].map((i) => <CardSkeleton key={i} />)
-          : CATEGORIES.map((cat) => {
-              const services = (catalog.data ?? []).filter((s) => s.categoryId === cat.id);
-              if (!services.length) return null;
+          : (catalog.data ?? []).map((s) => {
+              const cat = CATEGORIES.find((c) => c.id === s.categoryId);
+              const color = cat?.colorHex ?? colors.tint;
+              const already = s.id in offered;
+              const on = picked.includes(s.id);
               return (
-                <View key={cat.id} style={{ gap: 8 }}>
-                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-                    <Icon name={cat.icon as any} size={16} color={cat.colorHex} />
-                    <Text variant="overline" tone="muted">
-                      {cat.name[locale]}
+                <Pressable
+                  key={s.id}
+                  disabled={already}
+                  onPress={() => toggle(s.id)}
+                  style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    gap: 12,
+                    padding: 14,
+                    borderRadius: 16,
+                    borderWidth: 1.5,
+                    borderColor: on ? colors.tint : colors.border,
+                    backgroundColor: on ? colors.tint + (isDark ? '22' : '10') : colors.card,
+                    opacity: already ? 0.6 : 1,
+                  }}
+                >
+                  <View style={{ width: 40, height: 40, borderRadius: 12, alignItems: 'center', justifyContent: 'center', backgroundColor: color + (isDark ? '26' : '14') }}>
+                    <Icon name={s.icon as any} size={19} color={color} />
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Text variant="bodyMedium">{s.name[locale]}</Text>
+                    <Text variant="caption" tone="muted" numberOfLines={1}>
+                      {s.description[locale]}
                     </Text>
                   </View>
-                  {services.map((s) => {
-                    const already = s.id in offered;
-                    const on = picked.includes(s.id);
-                    return (
-                      <Pressable
-                        key={s.id}
-                        disabled={already}
-                        onPress={() => toggle(s.id)}
-                        style={{
-                          flexDirection: 'row',
-                          alignItems: 'center',
-                          gap: 12,
-                          padding: 14,
-                          borderRadius: 16,
-                          borderWidth: 1.5,
-                          borderColor: on ? colors.tint : colors.border,
-                          backgroundColor: on ? colors.tint + (isDark ? '22' : '10') : colors.card,
-                          opacity: already ? 0.6 : 1,
-                        }}
-                      >
-                        <View style={{ flex: 1 }}>
-                          <Text variant="bodyMedium">{s.name[locale]}</Text>
-                          <Text variant="caption" tone="muted" numberOfLines={1}>
-                            {s.description[locale]}
-                          </Text>
-                        </View>
-                        {already ? (
-                          <Badge label={t('sp.added')} variant="success" icon="check-circle" />
-                        ) : (
-                          <View
-                            style={{
-                              width: 24,
-                              height: 24,
-                              borderRadius: 8,
-                              borderWidth: 2,
-                              borderColor: on ? colors.tint : colors.border,
-                              backgroundColor: on ? colors.tint : 'transparent',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                            }}
-                          >
-                            {on && <Icon name="check" size={14} color="#FFF" />}
-                          </View>
-                        )}
-                      </Pressable>
-                    );
-                  })}
-                </View>
+                  {already ? (
+                    <Badge label={t('sp.added')} variant="success" icon="check-circle" />
+                  ) : (
+                    <View
+                      style={{
+                        width: 24,
+                        height: 24,
+                        borderRadius: 8,
+                        borderWidth: 2,
+                        borderColor: on ? colors.tint : colors.border,
+                        backgroundColor: on ? colors.tint : 'transparent',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                      }}
+                    >
+                      {on && <Icon name="check" size={14} color="#FFF" />}
+                    </View>
+                  )}
+                </Pressable>
               );
             })}
       </ScrollView>

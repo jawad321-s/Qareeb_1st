@@ -8,7 +8,7 @@ import { distanceKm, normalizePhone } from './geo.js';
 import { notifyUsers } from './notify.js';
 
 /**
- * Active (and, when required, verified) artisans of `categoryId` within `radiusKm` of `origin`,
+ * Verified, active artisans of `categoryId` within `radiusKm` of `origin`,
  * excluding `excludeIds` and the customer's own artisan account (same phone).
  * Returns [{ uid, distanceKm }] nearest first.
  */

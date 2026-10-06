@@ -119,13 +119,19 @@ export const firebaseApi: typeof mockApi = {
     // policy locally (category, verified, radius growing over time).
     const me = useAuth.getState().user;
     if (!me) return [];
-    const [snap, profile] = await Promise.all([
+    const [snap, profile, self] = await Promise.all([
       getDocs(query(collection(db(), 'requests'), where('status', '==', 'PENDING'), orderBy('createdAt', 'desc'))),
       getDoc(doc(db(), 'artisanProfiles', me.uid)),
+      getDoc(doc(db(), 'users', me.uid)),
     ]);
     const categoryIds: string[] = profile.exists() ? (profile.data().categoryIds ?? []) : [];
+    // Pick up an admin approval made since sign-in.
+    const verified = self.exists() ? self.data().verified === true : me.verified;
+    if (verified !== me.verified) useAuth.getState().updateUser({ verified });
     const now = Date.now();
-    return snap.docs.map((d) => mapRequest(d.id, d.data())).filter((r) => isVisibleToArtisan(r, me, categoryIds, now));
+    return snap.docs
+      .map((d) => mapRequest(d.id, d.data()))
+      .filter((r) => isVisibleToArtisan(r, { ...me, verified }, categoryIds, now));
   },
 
   async createRequest(input): Promise<ServiceRequest> {

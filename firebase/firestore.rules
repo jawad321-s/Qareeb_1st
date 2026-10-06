@@ -210,8 +210,15 @@ service cloud.firestore {
     // ── verificationRequests ─────────────────────────────────────────────────
     match /verificationRequests/{id} {
       allow read: if isSignedIn() && (existing().artisanId == uid() || isAdmin());
-      allow create: if isArtisan() && incoming().artisanId == uid();
-      allow update, delete: if isAdmin();
+      // An artisan opens/updates their own request (e.g. adds documents or
+      // resubmits after a rejection) but can only ever set it to pending;
+      // approving or rejecting is the admin's call.
+      allow create: if isArtisan() && id == uid() && incoming().artisanId == uid()
+                    && incoming().status == 'pending';
+      allow update: if isAdmin()
+                    || (isArtisan() && id == uid() && existing().artisanId == uid()
+                        && incoming().artisanId == uid() && incoming().status == 'pending');
+      allow delete: if isAdmin();
     }
 
     // ── auditLogs / cms (admin only) ─────────────────────────────────────────

@@ -88,6 +88,7 @@ const dict = {
     'ver.idFront': 'ID front',
     'ver.idBack': 'ID back',
     'ver.certificate': 'Certificate',
+    'ver.noDocs': 'No documents uploaded yet — review the profile and phone before approving.',
     // requests
     'req.title': 'Requests',
     'req.subtitle': 'All service requests across the platform.',
@@ -237,6 +238,7 @@ const dict = {
     'ver.idFront': 'الهوية (أمام)',
     'ver.idBack': 'الهوية (خلف)',
     'ver.certificate': 'الشهادة',
+    'ver.noDocs': 'لم تُرفع مستندات بعد — راجع الملف ورقم الجوال قبل القبول.',
     'req.title': 'الطلبات',
     'req.subtitle': 'جميع طلبات الخدمة عبر المنصّة.',
     'req.search': 'ابحث عن طلبات…',

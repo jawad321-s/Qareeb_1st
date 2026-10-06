@@ -2,7 +2,7 @@
 // admin dashboard. When Firebase is configured, artisan submissions land in the
 // `verificationRequests` collection that the admin reads in real time, and the
 // admin's decision flows back here via a live snapshot. On mock, it's a no-op.
-import { doc, onSnapshot, serverTimestamp, setDoc, updateDoc } from 'firebase/firestore';
+import { doc, getDoc, onSnapshot, serverTimestamp, setDoc, updateDoc } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { getDb, getBucket, isLive } from '@/lib/firebase';
 import type { AppUser, VerificationStatus } from '@/types';
@@ -71,6 +71,39 @@ export async function submitVerification(payload: VerificationSubmission): Promi
   // Reflect the pending state on the user profile the admin also sees.
   await updateDoc(doc(db, 'users', uid), { status: 'pending', updatedAt: serverTimestamp() }).catch(() => {});
   return true;
+}
+
+/**
+ * Puts a new artisan in the admin's verification queue (dashboard → Artisans)
+ * right away, before any documents are uploaded. No-op if a request already
+ * exists — submitVerification later adds the documents to the same record.
+ */
+export async function openVerificationRequest(
+  user: Pick<AppUser, 'uid' | 'fullName' | 'email' | 'phone'>,
+  categoryIds: string[],
+): Promise<void> {
+  const db = getDb();
+  if (!db || !isLive()) return;
+  const ref = doc(db, VERIFICATION_COLLECTION, user.uid);
+  // The rules deny reading a missing request, so an error means "none yet".
+  const exists = await getDoc(ref).then((s) => s.exists()).catch(() => false);
+  if (exists) return;
+  await setDoc(ref, {
+    id: user.uid,
+    artisanId: user.uid,
+    name: user.fullName,
+    email: user.email,
+    phone: user.phone,
+    categoryIds,
+    category: categoryIds[0] ?? '',
+    status: 'pending' as VerificationStatus,
+    idFrontUrl: null,
+    idBackUrl: null,
+    selfieUrl: null,
+    certificateUrls: [],
+    submittedAt: serverTimestamp(),
+    reviewedAt: null,
+  });
 }
 
 /**

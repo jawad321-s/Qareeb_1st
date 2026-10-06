@@ -6,7 +6,6 @@ import { initializeApp } from 'firebase-admin/app';
 import { getFirestore } from 'firebase-admin/firestore';
 
 process.env.PUSH_DRY_RUN = 'true';
-process.env.REQUIRE_VERIFIED = 'true'; // exercise the launch policy
 const { startDispatch, runDispatchTick, findArtisans } = await import('../src/dispatch.js');
 initializeApp({ projectId: 'demo-dispatch' });
 const db = getFirestore();

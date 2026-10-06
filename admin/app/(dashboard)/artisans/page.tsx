@@ -50,18 +50,23 @@ export default function ArtisansPage() {
                     <div>
                       <p className="font-semibold">{v.name}</p>
                       <p className="text-xs text-muted">{v.category} · {t('ver.submitted')} {timeAgo(v.submittedAt, locale)}</p>
+                      {v.phone && <p className="text-xs text-muted" dir="ltr">{v.phone}</p>}
                     </div>
                   </div>
                   <StatusPill status={v.status} />
                 </div>
 
-                <div className="mt-4 flex gap-2">
-                  {[t('ver.idFront'), t('ver.idBack'), t('ver.certificate')].map((doc) => (
-                    <div key={doc} className="flex flex-1 items-center gap-2 rounded-xl border border-base px-3 py-2 text-xs text-muted">
-                      <FileText className="h-4 w-4" /> {doc}
-                    </div>
-                  ))}
-                </div>
+                {v.hasDocuments === false ? (
+                  <p className="mt-4 rounded-xl border border-dashed border-base px-3 py-2 text-xs text-muted">{t('ver.noDocs')}</p>
+                ) : (
+                  <div className="mt-4 flex gap-2">
+                    {[t('ver.idFront'), t('ver.idBack'), t('ver.certificate')].map((doc) => (
+                      <div key={doc} className="flex flex-1 items-center gap-2 rounded-xl border border-base px-3 py-2 text-xs text-muted">
+                        <FileText className="h-4 w-4" /> {doc}
+                      </div>
+                    ))}
+                  </div>
+                )}
 
                 {v.status === 'pending' && (
                   <div className="mt-4 flex gap-2">

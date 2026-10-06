@@ -13,6 +13,7 @@ import {
 import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
 import { getAuthClient, getDb } from '@/lib/firebase';
 import { normalizePhone } from '@/lib/validation';
+import { openVerificationRequest } from './verification.service';
 import type { AppUser, UserRole } from '@/types';
 
 const LOGIN_DOMAIN = 'phone.qareeb.app';
@@ -135,6 +136,8 @@ export async function registerWithPhone(p: RegisterParams): Promise<AppUser> {
         rating: 0,
         ratingCount: 0,
       });
+      // Show up in the admin's verification queue immediately.
+      await openVerificationRequest(profile, p.artisan.categoryIds).catch(() => {});
     }
     return profile;
   } catch (err) {

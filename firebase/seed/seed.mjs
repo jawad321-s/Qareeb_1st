@@ -47,6 +47,12 @@ const CATEGORIES = [
 
 async function seedCategoriesAndServices() {
   const batch = db.batch();
+  // Remove what earlier seeds left behind: the split repair/installation
+  // services and categories that no longer exist (e.g. "maintenance").
+  const keep = new Set(CATEGORIES.map((c) => c.id));
+  const [oldServices, oldCategories] = await Promise.all([db.collection('services').get(), db.collection('categories').get()]);
+  for (const d of oldServices.docs) if (!keep.has(d.id)) batch.delete(d.ref);
+  for (const d of oldCategories.docs) if (!keep.has(d.id)) batch.delete(d.ref);
   for (const c of CATEGORIES) {
     batch.set(db.collection('categories').doc(c.id), { ...c, active: true });
     // One general service per category, with the category's id.
@@ -61,13 +67,7 @@ async function seedCategoriesAndServices() {
       popular: c.order <= 6,
     });
   }
-  // Remove the old per-category "<id>_repair" / "<id>_install" services left
-  // over from earlier seeds.
-  const old = await db.collection('services').get();
-  const stale = old.docs.filter((d) => /_(repair|install)$/.test(d.id));
-  stale.forEach((d) => batch.delete(d.ref));
   await batch.commit();
-  if (stale.length) console.log(`✓ Removed ${stale.length} old repair/install services`);
   console.log(`✓ Seeded ${CATEGORIES.length} categories and ${CATEGORIES.length} services`);
 }
 

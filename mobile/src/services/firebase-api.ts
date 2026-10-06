@@ -14,6 +14,7 @@ import { getDb } from '@/lib/firebase';
 import { useAuth } from '@/store/auth';
 import { isExpiredWithoutOffers, isVisibleToArtisan } from '@/lib/dispatch';
 import { MOCK_CUSTOMER } from '@/mock/data';
+import { SERVICES, toServiceId } from '@/constants/services';
 import { ACTIVE_STATUSES, NEXT_STATUS, canCancelRequest, isOverdue } from '@/lib/requestRules';
 
 function db() {
@@ -27,11 +28,6 @@ const ms = (v: any): number =>
   v && typeof v.toMillis === 'function' ? v.toMillis() : typeof v === 'number' ? v : Date.now();
 
 const withId = <T>(id: string, data: any): T => ({ id, ...data }) as T;
-
-async function collectData<T>(col: string): Promise<T[]> {
-  const snap = await getDocs(collection(db(), col));
-  return snap.docs.map((d) => withId<T>(d.id, d.data()));
-}
 
 function mapRequest(id: string, v: any): ServiceRequest {
   return { ...v, id, createdAt: ms(v.createdAt), updatedAt: ms(v.updatedAt), preferredTime: ms(v.preferredTime) };
@@ -71,14 +67,15 @@ export const firebaseApi: typeof mockApi = {
     return useAuth.getState().user ?? MOCK_CUSTOMER;
   },
 
+  // The catalog comes from the app (constants/services), not Firestore: a
+  // database seeded before services were merged still holds the old split
+  // repair/installation services and the removed "Maintenance" category.
   async getServices(categoryId?: string): Promise<Service[]> {
-    const all = await collectData<Service>('services');
-    return categoryId ? all.filter((s) => s.categoryId === categoryId) : all;
+    return categoryId ? SERVICES.filter((s) => s.categoryId === categoryId) : SERVICES;
   },
 
   async getService(id: string): Promise<Service | undefined> {
-    const snap = await getDoc(doc(db(), 'services', id));
-    return snap.exists() ? withId<Service>(snap.id, snap.data()) : undefined;
+    return SERVICES.find((s) => s.id === toServiceId(id));
   },
 
   async getArtisan(id: string): Promise<{ user: AppUser; profile: ArtisanProfile } | undefined> {

@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/Button';
 import { CardSkeleton } from '@/components/feedback/Skeleton';
 import { EmptyState } from '@/components/feedback/EmptyState';
 import { categoryById } from '@/constants/categories';
+import { toServiceId } from '@/constants/services';
 import { useArtisan, useServices } from '@/hooks/queries';
 import { confirmAction } from '@/lib/confirm';
 import { useAuth } from '@/store/auth';
@@ -37,9 +38,11 @@ export default function MyServices() {
   useEffect(() => {
     if (!uid || offered || !catalog.data || !profile.data) return;
     const p = profile.data.profile;
+    // Profiles saved before services were merged hold ids like "plumbing_repair".
+    const offeredIds = new Set((p.serviceIds ?? []).map(toServiceId));
     const initial: Record<string, boolean> = {};
     for (const s of catalog.data) {
-      if (p.categoryIds.includes(s.categoryId) || p.serviceIds.includes(s.id)) initial[s.id] = p.serviceIds.includes(s.id);
+      if ((p.categoryIds ?? []).includes(s.categoryId) || offeredIds.has(s.id)) initial[s.id] = offeredIds.has(s.id);
     }
     seed(uid, initial);
   }, [uid, offered, catalog.data, profile.data, seed]);

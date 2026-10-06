@@ -121,7 +121,8 @@ export function watchVerificationStatus(
       const data = snap.data();
       if (data?.status) cb(data.status as VerificationStatus);
     },
-    // e.g. signed out while listening — nothing to update.
+    // Refused reads (e.g. signed out mid-listen) keep the status the app
+    // already has instead of surfacing an uncaught listener error.
     () => {},
   );
 }

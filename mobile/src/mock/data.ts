@@ -8,6 +8,7 @@ import type {
   ChatMessage,
 } from '@/types';
 import { CATEGORIES } from '@/constants/categories';
+import { SERVICES } from '@/constants/services';
 
 const now = Date.now();
 const mins = (m: number) => now - m * 60_000;
@@ -56,18 +57,8 @@ export const MOCK_ARTISAN_PROFILE: ArtisanProfile = {
 };
 
 // ── Services (2 per category = 24) ───────────────────────────────────────────
-// One general service per category (e.g. "Plumbing") — not split into repair
-// and installation. Its id is the category id.
-export const MOCK_SERVICES: Service[] = CATEGORIES.map((cat) => ({
-  id: cat.id,
-  categoryId: cat.id,
-  name: { ar: cat.name.ar, en: cat.name.en },
-  description: { ar: `كل أعمال ${cat.name.ar}`, en: `All ${cat.name.en.toLowerCase()} work` },
-  icon: cat.icon,
-  basePriceFrom: 8000 + cat.order * 1000,
-  active: true,
-  popular: cat.order <= 6,
-}));
+// One general service per category — see constants/services.
+export const MOCK_SERVICES: Service[] = SERVICES;
 
 // ── Requests ─────────────────────────────────────────────────────────────────
 export const MOCK_REQUESTS: ServiceRequest[] = [

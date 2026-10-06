@@ -47,6 +47,12 @@ const CATEGORIES = [
 
 async function seedCategoriesAndServices() {
   const batch = db.batch();
+  // Remove what earlier seeds left behind: the split repair/installation
+  // services and categories that no longer exist (e.g. "maintenance").
+  const keep = new Set(CATEGORIES.map((c) => c.id));
+  const [oldServices, oldCategories] = await Promise.all([db.collection('services').get(), db.collection('categories').get()]);
+  for (const d of oldServices.docs) if (!keep.has(d.id)) batch.delete(d.ref);
+  for (const d of oldCategories.docs) if (!keep.has(d.id)) batch.delete(d.ref);
   for (const c of CATEGORIES) {
     batch.set(db.collection('categories').doc(c.id), { ...c, active: true });
     // One general service per category, with the category's id.

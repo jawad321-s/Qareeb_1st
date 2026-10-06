@@ -52,7 +52,8 @@
     },
     "extra": {
       "router": {},
-      "eas": {}
+      "eas": {},
+      "supportsRTL": true
     }
   }
 }

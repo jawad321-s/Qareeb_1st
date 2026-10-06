@@ -147,10 +147,13 @@ service cloud.firestore {
                     || existing().customerId == uid()
                     || isAdmin());
       // Only artisans the request was dispatched to (see Cloud Functions) can
-      // quote on it, and only while it is still open.
+      // quote on it, and only while it is still open. Requests the functions
+      // never dispatched (not deployed, e.g. Spark plan) are open to artisans;
+      // the app applies the same category/radius policy itself.
       function dispatchedTo(requestId) {
         let req = get(/databases/$(database)/documents/requests/$(requestId)).data;
-        return req.status == 'PENDING' && uid() in req.get('notifiedArtisanIds', []);
+        return req.status == 'PENDING'
+          && (!('dispatch' in req) || uid() in req.get('notifiedArtisanIds', []));
       }
       allow create: if isArtisan()
                     && incoming().artisanId == uid()

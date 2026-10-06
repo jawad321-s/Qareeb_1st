@@ -71,7 +71,7 @@ export default function CreateRequest() {
     const preferredTime = when === 'asap' ? Date.now() + 3600_000 : when === 'today' ? Date.now() + 3600_000 * 5 : Date.now() + 3600_000 * 24;
     const req = await create.mutateAsync({
       customerId: user.uid,
-      serviceId: `${categoryId}_repair`,
+      serviceId: categoryId!,
       categoryId: categoryId!,
       title: title.trim(),
       description: description.trim(),

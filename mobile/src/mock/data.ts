@@ -40,7 +40,7 @@ export const MOCK_ARTISANS: AppUser[] = [
 export const MOCK_ARTISAN_PROFILE: ArtisanProfile = {
   uid: 'art_1',
   bio: 'سبّاك معتمد بخبرة 12 عاماً. عمل سريع ونظيف ومضمون.',
-  serviceIds: ['plumbing_repair', 'plumbing_install'],
+  serviceIds: ['plumbing'],
   categoryIds: ['plumbing'],
   availability: { days: [0, 1, 2, 3, 4], from: '08:00', to: '20:00' },
   gallery: [
@@ -56,35 +56,25 @@ export const MOCK_ARTISAN_PROFILE: ArtisanProfile = {
 };
 
 // ── Services (2 per category = 24) ───────────────────────────────────────────
-export const MOCK_SERVICES: Service[] = CATEGORIES.flatMap((cat) => [
-  {
-    id: `${cat.id}_repair`,
-    categoryId: cat.id,
-    name: { ar: `إصلاح ${cat.name.ar}`, en: `${cat.name.en} Repair` },
-    description: { ar: 'خدمة إصلاح احترافية سريعة', en: 'Fast professional repair service' },
-    icon: cat.icon,
-    basePriceFrom: 8000 + cat.order * 1000,
-    active: true,
-    popular: cat.order <= 6,
-  },
-  {
-    id: `${cat.id}_install`,
-    categoryId: cat.id,
-    name: { ar: `تركيب ${cat.name.ar}`, en: `${cat.name.en} Installation` },
-    description: { ar: 'تركيب وتجهيز بضمان', en: 'Installation & setup with warranty' },
-    icon: cat.icon,
-    basePriceFrom: 15000 + cat.order * 1200,
-    active: true,
-    popular: cat.order <= 3,
-  },
-]);
+// One general service per category (e.g. "Plumbing") — not split into repair
+// and installation. Its id is the category id.
+export const MOCK_SERVICES: Service[] = CATEGORIES.map((cat) => ({
+  id: cat.id,
+  categoryId: cat.id,
+  name: { ar: cat.name.ar, en: cat.name.en },
+  description: { ar: `كل أعمال ${cat.name.ar}`, en: `All ${cat.name.en.toLowerCase()} work` },
+  icon: cat.icon,
+  basePriceFrom: 8000 + cat.order * 1000,
+  active: true,
+  popular: cat.order <= 6,
+}));
 
 // ── Requests ─────────────────────────────────────────────────────────────────
 export const MOCK_REQUESTS: ServiceRequest[] = [
   {
     id: 'req_1',
     customerId: 'cust_1',
-    serviceId: 'plumbing_repair',
+    serviceId: 'plumbing',
     categoryId: 'plumbing',
     title: 'تسريب في مغسلة المطبخ',
     description: 'يوجد تسريب ماء تحت مغسلة المطبخ ويزداد منذ الأمس.',
@@ -100,7 +90,7 @@ export const MOCK_REQUESTS: ServiceRequest[] = [
   {
     id: 'req_2',
     customerId: 'cust_1',
-    serviceId: 'ac_repair',
+    serviceId: 'ac',
     categoryId: 'ac',
     title: 'المكيّف لا يبرّد',
     description: 'مكيّف الصالون يعمل لكن الهواء غير بارد.',
@@ -118,7 +108,7 @@ export const MOCK_REQUESTS: ServiceRequest[] = [
   {
     id: 'req_3',
     customerId: 'cust_1',
-    serviceId: 'cleaning_repair',
+    serviceId: 'cleaning',
     categoryId: 'cleaning',
     title: 'تنظيف شامل لشقة 3 غرف',
     description: 'تنظيف عميق قبل الإخلاء، مطبخ + حمّامان.',
@@ -137,7 +127,7 @@ export const MOCK_REQUESTS: ServiceRequest[] = [
     // the way → working → finished, and both can chat about it.
     id: 'req_5',
     customerId: 'cust_1',
-    serviceId: 'plumbing_install',
+    serviceId: 'plumbing',
     categoryId: 'plumbing',
     title: 'تركيب سخان ماء',
     description: 'سخان كهربائي جديد بحاجة لتركيب في الحمّام مع توصيل المواسير.',
@@ -156,7 +146,7 @@ export const MOCK_REQUESTS: ServiceRequest[] = [
     // side has rated yet — signing in as either one opens the mandatory review.
     id: 'req_4',
     customerId: 'cust_1',
-    serviceId: 'plumbing_install',
+    serviceId: 'plumbing',
     categoryId: 'plumbing',
     title: 'تبديل خلاط الحمّام',
     description: 'الخلاط القديم يسرّب ماء ونحتاج تركيب خلاط جديد.',

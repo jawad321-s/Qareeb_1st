@@ -4,6 +4,11 @@ import { qk } from '@/lib/queryClient';
 import type { AppUser, GeoLocation, Offer, RequestStatus, Review, ServiceRequest, ChatMessage } from '@/types';
 import { distanceKm } from '@/lib/geo';
 
+/** The service catalog (every category's services). */
+export function useServices() {
+  return useQuery({ queryKey: qk.services(), queryFn: () => api.getServices() });
+}
+
 export function useArtisan(id: string) {
   return useQuery({ queryKey: qk.artisan(id), queryFn: () => api.getArtisan(id), enabled: !!id });
 }

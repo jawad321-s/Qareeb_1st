@@ -291,6 +291,10 @@ export const firebaseApi: typeof mockApi = {
     await updateDoc(doc(db(), 'users', uid), { location, updatedAt: Date.now() });
   },
 
+  async updateArtisanServices(uid, serviceIds, categoryIds): Promise<void> {
+    await updateDoc(doc(db(), 'artisanProfiles', uid), { serviceIds, categoryIds, updatedAt: Date.now() });
+  },
+
   async getMessages(requestId: string): Promise<ChatMessage[]> {
     const snap = await getDocs(messagesOf(requestId));
     return snap.docs

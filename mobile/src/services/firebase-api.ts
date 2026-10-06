@@ -107,17 +107,16 @@ export const firebaseApi: typeof mockApi = {
 
   async getNearbyRequests(): Promise<ServiceRequest[]> {
     // Cloud Functions dispatch each request to the nearest matching artisans
-    // (widening the radius over time); an artisan sees the ones sent to them.
+    // (widening the radius over time) and record them in notifiedArtisanIds;
+    // an artisan sees the requests sent to them. Requests without `dispatch`
+    // (functions not deployed, e.g. on the Spark plan) stay visible to all.
     const me = useAuth.getState().user;
     if (!me) return [];
-    const q = query(
-      collection(db(), 'requests'),
-      where('status', '==', 'PENDING'),
-      where('notifiedArtisanIds', 'array-contains', me.uid),
-      orderBy('createdAt', 'desc'),
-    );
+    const q = query(collection(db(), 'requests'), where('status', '==', 'PENDING'), orderBy('createdAt', 'desc'));
     const snap = await getDocs(q);
-    return snap.docs.map((d) => mapRequest(d.id, d.data()));
+    return snap.docs
+      .map((d) => mapRequest(d.id, d.data()))
+      .filter((r) => !r.dispatch || (r.notifiedArtisanIds ?? []).includes(me.uid));
   },
 
   async createRequest(input): Promise<ServiceRequest> {

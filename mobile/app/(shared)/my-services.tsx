@@ -42,7 +42,9 @@ export default function MyServices() {
     const offeredIds = new Set((p.serviceIds ?? []).map(toServiceId));
     const initial: Record<string, boolean> = {};
     for (const s of catalog.data) {
-      if ((p.categoryIds ?? []).includes(s.categoryId) || offeredIds.has(s.id)) initial[s.id] = offeredIds.has(s.id);
+      // A category on the profile means its (single) service is offered —
+      // seeding it paused would drop the category on the next sync.
+      if ((p.categoryIds ?? []).includes(s.categoryId) || offeredIds.has(s.id)) initial[s.id] = true;
     }
     seed(uid, initial);
   }, [uid, offered, catalog.data, profile.data, seed]);

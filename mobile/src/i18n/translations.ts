@@ -423,6 +423,12 @@ export const translations = {
     'aJobs.subtitle': 'Requests within your service radius',
     'aJobs.empty': 'No requests nearby',
     'aJobs.emptyDesc': 'New jobs in your area will appear here in real time.',
+    'aJobs.notVerified': 'Your account is awaiting verification',
+    'aJobs.notVerifiedDesc': 'Requests reach verified artisans only. You will start receiving them as soon as the Qareeb team approves your account.',
+    'aJobs.noLocation': 'Turn on your location',
+    'aJobs.noLocationDesc': 'Requests are sent to the nearest artisans. Allow location access from the dashboard so we know where you are.',
+    'aJobs.noServices': 'Add your services',
+    'aJobs.noServicesDesc': 'You only receive requests in the categories you offer. Add them from Profile → My services.',
 
     // job detail
     'job.title': 'Job details',
@@ -965,6 +971,12 @@ export const translations = {
     'aJobs.subtitle': 'طلبات ضمن نطاق خدمتك',
     'aJobs.empty': 'لا توجد طلبات قريبة',
     'aJobs.emptyDesc': 'ستظهر الأعمال الجديدة في منطقتك هنا فوراً.',
+    'aJobs.notVerified': 'حسابك بانتظار التوثيق',
+    'aJobs.notVerifiedDesc': 'تصل الطلبات للحرفيين الموثّقين فقط. ستبدأ باستلامها فور موافقة فريق قريب على حسابك.',
+    'aJobs.noLocation': 'فعّل موقعك',
+    'aJobs.noLocationDesc': 'تُرسل الطلبات لأقرب الحرفيين. اسمح بالوصول للموقع من الرئيسية حتى نعرف مكانك.',
+    'aJobs.noServices': 'أضف خدماتك',
+    'aJobs.noServicesDesc': 'تصلك الطلبات فقط في الفئات التي تقدّمها. أضفها من الملف الشخصي ← خدماتي.',
 
     // job detail
     'job.title': 'تفاصيل العمل',

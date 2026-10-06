@@ -39,6 +39,9 @@ export function useNearbyRequests(artisanId: string, origin?: GeoLocation | null
   return useQuery({
     queryKey: qk.nearbyRequests(artisanId),
     queryFn: () => api.getNearbyRequests(),
+    // The radius widens with time and new requests arrive — keep it fresh.
+    refetchInterval: 30_000,
+    staleTime: 0,
     select: (list): NearbyRequest[] =>
       origin
         ? list

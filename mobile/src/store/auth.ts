@@ -4,6 +4,7 @@ import { kv } from '@/lib/mmkv';
 import { config } from '@/lib/config';
 import { getAuthClient } from '@/lib/firebase';
 import { unregisterPush } from '@/lib/push';
+import { queryClient } from '@/lib/queryClient';
 import {
   loadProfile,
   registerWithPhone,
@@ -85,6 +86,8 @@ export const useAuth = create<AuthState>((set, get) => ({
   },
 
   signOut: () => {
+    // Don't show the next account (same device) the previous one's data.
+    queryClient.clear();
     if (!config.useMock) {
       // Remove this device's push token first, while still signed in.
       const uid = get().user?.uid;

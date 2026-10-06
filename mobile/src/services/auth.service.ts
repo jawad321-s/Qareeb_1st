@@ -126,7 +126,8 @@ export async function registerWithPhone(p: RegisterParams): Promise<AppUser> {
         bio: p.artisan.bio ?? '',
         experienceYears: p.artisan.experienceYears ?? 0,
         categoryIds: p.artisan.categoryIds,
-        serviceIds: [],
+        // One service per category, with the category's id.
+        serviceIds: p.artisan.categoryIds,
         availability: { days: [0, 1, 2, 3, 4, 5, 6], from: '08:00', to: '20:00' },
         gallery: [],
         certificates: [],

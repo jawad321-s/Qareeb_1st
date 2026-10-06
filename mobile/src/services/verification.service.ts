@@ -85,7 +85,6 @@ export async function openVerificationRequest(
   const db = getDb();
   if (!db || !isLive()) return;
   const ref = doc(db, VERIFICATION_COLLECTION, user.uid);
-  // The rules deny reading a missing request, so an error means "none yet".
   const exists = await getDoc(ref).then((s) => s.exists()).catch(() => false);
   if (exists) return;
   await setDoc(ref, {
@@ -116,8 +115,13 @@ export function watchVerificationStatus(
 ): () => void {
   const db = getDb();
   if (!db || !isLive()) return () => {};
-  return onSnapshot(doc(db, VERIFICATION_COLLECTION, uid), (snap) => {
-    const data = snap.data();
-    if (data?.status) cb(data.status as VerificationStatus);
-  });
+  return onSnapshot(
+    doc(db, VERIFICATION_COLLECTION, uid),
+    (snap) => {
+      const data = snap.data();
+      if (data?.status) cb(data.status as VerificationStatus);
+    },
+    // e.g. signed out while listening — nothing to update.
+    () => {},
+  );
 }

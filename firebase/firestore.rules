@@ -212,7 +212,9 @@ service cloud.firestore {
 
     // ── verificationRequests ─────────────────────────────────────────────────
     match /verificationRequests/{id} {
-      allow read: if isSignedIn() && (existing().artisanId == uid() || isAdmin());
+      // The doc id is the artisan's uid, so this also lets an artisan check
+      // for (or listen to) a request that doesn't exist yet.
+      allow read: if isSignedIn() && (id == uid() || isAdmin());
       // An artisan opens/updates their own request (e.g. adds documents or
       // resubmits after a rejection) but can only ever set it to pending;
       // approving or rejecting is the admin's call.

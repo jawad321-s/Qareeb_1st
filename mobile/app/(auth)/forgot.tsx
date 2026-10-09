@@ -12,6 +12,7 @@ import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
 import { EmptyState } from '@/components/feedback/EmptyState';
 import { useT } from '@/i18n';
+import { config } from '@/lib/config';
 import { useTheme } from '@/theme/ThemeProvider';
 import { roleAccents } from '@/theme/tokens';
 
@@ -59,29 +60,32 @@ export default function Forgot() {
           <Animated.View entering={FadeInDown.duration(400)} style={{ gap: 8, marginBottom: 28 }}>
             <Text variant="h1">{t('forgot.title')}</Text>
             <Text variant="body" tone="muted">
-              {t('forgot.subtitle')}
+              {config.useMock ? t('forgot.subtitle') : t('forgot.liveNote')}
             </Text>
           </Animated.View>
-          <View style={{ gap: 16 }}>
-            <Controller
-              control={control}
-              name="phone"
-              render={({ field: { onChange, value, onBlur } }) => (
-                <Input
-                  label={t('auth.phone')}
-                  placeholder="+970 5X XXX XXXX"
-                  iconLeft="phone"
-                  autoCapitalize="none"
-                  keyboardType="phone-pad"
-                  value={value}
-                  onChangeText={onChange}
-                  onBlur={onBlur}
-                  error={errors.phone?.message}
-                />
-              )}
-            />
-            <Button label={t('forgot.send')} onPress={handleSubmit(onSubmit)} loading={loading} accent={{ gradient: accent.gradient, tint }} />
-          </View>
+          {/* Live: no reset by SMS yet — the subtitle explains how to get help. */}
+          {config.useMock && (
+            <View style={{ gap: 16 }}>
+              <Controller
+                control={control}
+                name="phone"
+                render={({ field: { onChange, value, onBlur } }) => (
+                  <Input
+                    label={t('auth.phone')}
+                    placeholder="+970 5X XXX XXXX"
+                    iconLeft="phone"
+                    autoCapitalize="none"
+                    keyboardType="phone-pad"
+                    value={value}
+                    onChangeText={onChange}
+                    onBlur={onBlur}
+                    error={errors.phone?.message}
+                  />
+                )}
+              />
+              <Button label={t('forgot.send')} onPress={handleSubmit(onSubmit)} loading={loading} accent={{ gradient: accent.gradient, tint }} />
+            </View>
+          )}
         </>
       )}
     </Screen>

@@ -38,6 +38,8 @@ export function subscribeVerifications(cb: (items: VerificationItem[]) => void):
         category: v.category ?? (Array.isArray(v.categoryIds) ? v.categoryIds[0] : '') ?? '',
         submittedAt,
         status: v.status ?? 'pending',
+        phone: v.phone ?? undefined,
+        hasDocuments: !!(v.idFrontUrl || v.idBackUrl || (Array.isArray(v.certificateUrls) && v.certificateUrls.length)),
       };
     });
     cb(items);

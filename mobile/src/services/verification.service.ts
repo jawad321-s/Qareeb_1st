@@ -2,7 +2,7 @@
 // admin dashboard. When Firebase is configured, artisan submissions land in the
 // `verificationRequests` collection that the admin reads in real time, and the
 // admin's decision flows back here via a live snapshot. On mock, it's a no-op.
-import { doc, onSnapshot, serverTimestamp, setDoc, updateDoc } from 'firebase/firestore';
+import { doc, getDoc, onSnapshot, serverTimestamp, setDoc, updateDoc } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { getDb, getBucket, isLive } from '@/lib/firebase';
 import type { AppUser, VerificationStatus } from '@/types';
@@ -74,6 +74,38 @@ export async function submitVerification(payload: VerificationSubmission): Promi
 }
 
 /**
+ * Puts a new artisan in the admin's verification queue (dashboard → Artisans)
+ * right away, before any documents are uploaded. No-op if a request already
+ * exists — submitVerification later adds the documents to the same record.
+ */
+export async function openVerificationRequest(
+  user: Pick<AppUser, 'uid' | 'fullName' | 'email' | 'phone'>,
+  categoryIds: string[],
+): Promise<void> {
+  const db = getDb();
+  if (!db || !isLive()) return;
+  const ref = doc(db, VERIFICATION_COLLECTION, user.uid);
+  const exists = await getDoc(ref).then((s) => s.exists()).catch(() => false);
+  if (exists) return;
+  await setDoc(ref, {
+    id: user.uid,
+    artisanId: user.uid,
+    name: user.fullName,
+    email: user.email,
+    phone: user.phone,
+    categoryIds,
+    category: categoryIds[0] ?? '',
+    status: 'pending' as VerificationStatus,
+    idFrontUrl: null,
+    idBackUrl: null,
+    selfieUrl: null,
+    certificateUrls: [],
+    submittedAt: serverTimestamp(),
+    reviewedAt: null,
+  });
+}
+
+/**
  * Subscribes to the artisan's own verification status so the UI updates the
  * moment an admin approves or rejects. Returns an unsubscribe function.
  */
@@ -89,8 +121,8 @@ export function watchVerificationStatus(
       const data = snap.data();
       if (data?.status) cb(data.status as VerificationStatus);
     },
-    // Without a Firebase sign-in the rules refuse the read; keep the status
-    // the app already has instead of surfacing an uncaught listener error.
+    // Refused reads (e.g. signed out mid-listen) keep the status the app
+    // already has instead of surfacing an uncaught listener error.
     () => {},
   );
 }

@@ -13,9 +13,13 @@ import { Button } from '@/components/ui/Button';
 import { Icon } from '@/components/ui/Icon';
 import { registerSchema, artisanRegisterSchema } from '@/lib/validation';
 import { useVerification } from '@/store/verification';
+import { useAuth } from '@/store/auth';
+import { AuthError } from '@/services/auth.service';
+import { config } from '@/lib/config';
 import { CATEGORIES } from '@/constants/categories';
 import { useTheme } from '@/theme/ThemeProvider';
 import { useT, useLocaleStore } from '@/i18n';
+import type { TranslationKey } from '@/i18n/translations';
 import { radius } from '@/theme/tokens';
 import type { UserRole } from '@/types';
 
@@ -27,6 +31,7 @@ export default function Register() {
   const [loading, setLoading] = useState(false);
   const [categoryIds, setCategoryIds] = useState<string[]>([]);
   const [catError, setCatError] = useState<string | undefined>();
+  const [formError, setFormError] = useState<string | undefined>();
   const { t } = useT();
   const { colors } = useTheme();
   const locale = useLocaleStore((s) => s.locale);
@@ -51,6 +56,7 @@ export default function Register() {
   };
 
   const setArtisanDraft = useVerification((s) => s.setArtisanDraft);
+  const register = useAuth((s) => s.register);
 
   const onSubmit = async () => {
     if (isArtisan && categoryIds.length === 0) {
@@ -58,15 +64,42 @@ export default function Register() {
       return;
     }
     setLoading(true);
+    setFormError(undefined);
+    const artisan = isArtisan
+      ? {
+          categoryIds,
+          experienceYears: Number(getValues('experience')) || undefined,
+          bio: (getValues('bio') as string) || undefined,
+        }
+      : undefined;
     // Persist the professional profile so verification (and Firestore) get it.
-    if (isArtisan) {
-      setArtisanDraft({
-        categoryIds,
-        experienceYears: Number(getValues('experience')) || undefined,
-        bio: (getValues('bio') as string) || undefined,
-      });
+    if (artisan) setArtisanDraft(artisan);
+
+    if (!config.useMock) {
+      // Live: create the Firebase account + profile, then enter the app.
+      try {
+        await register({
+          role: isArtisan ? 'artisan' : 'customer',
+          fullName: getValues('fullName'),
+          email: getValues('email'),
+          phone: getValues('phone'),
+          password: getValues('password'),
+          locale,
+          artisan,
+        });
+      } catch (err) {
+        setFormError(t(err instanceof AuthError ? err.key : 'auth.errGeneric'));
+        setLoading(false);
+        return;
+      }
+      setLoading(false);
+      router.replace('/');
+      // New artisans continue to document verification as the next step.
+      if (isArtisan) setTimeout(() => router.push('/(shared)/verification'), 350);
+      return;
     }
-    // Simulate account creation, then move to OTP verification.
+
+    // Mock: simulate account creation, then move to OTP verification.
     await new Promise((r) => setTimeout(r, 700));
     setLoading(false);
     router.push({ pathname: '/(auth)/otp', params: { phone: getValues('phone'), role } });
@@ -105,7 +138,7 @@ export default function Register() {
                   value={value}
                   onChangeText={onChange}
                   onBlur={onBlur}
-                  error={errors[f.name]?.message as string | undefined}
+                  error={errors[f.name]?.message ? t(errors[f.name]?.message as TranslationKey) : undefined}
                 />
               )}
             />
@@ -197,6 +230,12 @@ export default function Register() {
                 </Text>
               </View>
             </Animated.View>
+          )}
+
+          {formError && (
+            <Text variant="caption" tone="danger" center>
+              {formError}
+            </Text>
           )}
 
           <Button label={t('common.continue')} onPress={handleSubmit(onSubmit)} loading={loading} style={{ marginTop: 4 }} />

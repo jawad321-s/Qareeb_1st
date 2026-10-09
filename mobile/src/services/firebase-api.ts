@@ -12,6 +12,7 @@ import type {
 import type { mockApi } from '@/mock/api';
 import { getDb } from '@/lib/firebase';
 import { useAuth } from '@/store/auth';
+import { isExpiredWithoutOffers, isVisibleToArtisan } from '@/lib/dispatch';
 import { MOCK_CUSTOMER } from '@/mock/data';
 import { SERVICES, toServiceId } from '@/constants/services';
 import { ACTIVE_STATUSES, NEXT_STATUS, canCancelRequest, isOverdue } from '@/lib/requestRules';
@@ -43,6 +44,13 @@ async function settleOverdue(list: ServiceRequest[]): Promise<ServiceRequest[]> 
   const now = Date.now();
   return Promise.all(
     list.map(async (r) => {
+      // No Cloud Functions: close requests nobody answered in time (the
+      // customer's read performs the write; the rules reject anyone else).
+      if (!r.dispatch && isExpiredWithoutOffers(r, now)) {
+        const cancel = { status: 'CANCELLED' as const, cancelReason: 'NO_OFFERS' as const, updatedAt: now };
+        await updateDoc(doc(db(), 'requests', r.id), cancel).catch(() => {});
+        return { ...r, ...cancel };
+      }
       if (!isOverdue(r, now)) return r;
       const patch = { status: 'COMPLETED' as const, completedAt: now, updatedAt: now, autoCompleted: true };
       await updateDoc(doc(db(), 'requests', r.id), patch).catch(() => {});
@@ -104,9 +112,24 @@ export const firebaseApi: typeof mockApi = {
   },
 
   async getNearbyRequests(): Promise<ServiceRequest[]> {
-    const q = query(collection(db(), 'requests'), where('status', '==', 'PENDING'), orderBy('createdAt', 'desc'));
-    const snap = await getDocs(q);
-    return snap.docs.map((d) => mapRequest(d.id, d.data()));
+    // Only requests meant for this artisan: dispatched to them by Cloud
+    // Functions, or — when the functions aren't running — matching the same
+    // policy locally (category, verified, radius growing over time).
+    const me = useAuth.getState().user;
+    if (!me) return [];
+    const [snap, profile, self] = await Promise.all([
+      getDocs(query(collection(db(), 'requests'), where('status', '==', 'PENDING'), orderBy('createdAt', 'desc'))),
+      getDoc(doc(db(), 'artisanProfiles', me.uid)),
+      getDoc(doc(db(), 'users', me.uid)),
+    ]);
+    const categoryIds: string[] = profile.exists() ? (profile.data().categoryIds ?? []) : [];
+    // Pick up an admin approval made since sign-in.
+    const verified = self.exists() ? self.data().verified === true : me.verified;
+    if (verified !== me.verified) useAuth.getState().updateUser({ verified });
+    const now = Date.now();
+    return snap.docs
+      .map((d) => mapRequest(d.id, d.data()))
+      .filter((r) => isVisibleToArtisan(r, { ...me, verified }, categoryIds, now));
   },
 
   async createRequest(input): Promise<ServiceRequest> {
@@ -119,9 +142,17 @@ export const firebaseApi: typeof mockApi = {
   },
 
   async getOffers(requestId: string): Promise<Offer[]> {
-    const q = query(collection(db(), 'offers'), where('requestId', '==', requestId), orderBy('price', 'asc'));
+    // The rules only let a user read offers they are a party to, so the query
+    // must be scoped to the caller: the customer sees all offers on their
+    // request, an artisan only their own.
+    const me = useAuth.getState().user;
+    if (!me) return [];
+    const party = me.role === 'artisan' ? 'artisanId' : 'customerId';
+    const q = query(collection(db(), 'offers'), where('requestId', '==', requestId), where(party, '==', me.uid));
     const snap = await getDocs(q);
-    return snap.docs.map((d) => withId<Offer>(d.id, { ...d.data(), createdAt: ms(d.data().createdAt) }));
+    return snap.docs
+      .map((d) => withId<Offer>(d.id, { ...d.data(), createdAt: ms(d.data().createdAt) }))
+      .sort((a, b) => a.price - b.price);
   },
 
   async acceptOffer(offerId: string): Promise<void> {
@@ -130,7 +161,9 @@ export const firebaseApi: typeof mockApi = {
     const offer = offSnap.data() as Offer;
     const batch = writeBatch(db());
     // Accept this offer, reject the siblings.
-    const siblings = await getDocs(query(collection(db(), 'offers'), where('requestId', '==', offer.requestId)));
+    const siblings = await getDocs(
+      query(collection(db(), 'offers'), where('requestId', '==', offer.requestId), where('customerId', '==', offer.customerId)),
+    );
     siblings.forEach((s) => batch.update(s.ref, { status: s.id === offerId ? 'ACCEPTED' : 'REJECTED' }));
     batch.update(doc(db(), 'requests', offer.requestId), {
       status: 'ACCEPTED',
@@ -150,11 +183,21 @@ export const firebaseApi: typeof mockApi = {
     if (!canCancelRequest(current.status)) return;
 
     const batch = writeBatch(db());
-    batch.update(reqSnap.ref, { status: 'CANCELLED', updatedAt: Date.now() });
-    const open = await getDocs(
-      query(collection(db(), 'offers'), where('requestId', '==', requestId), where('status', '==', 'PENDING')),
-    );
-    open.forEach((o) => batch.update(o.ref, { status: 'REJECTED' }));
+    // cancelledBy lets Cloud Functions notify the other party.
+    batch.update(reqSnap.ref, { status: 'CANCELLED', cancelledBy: useAuth.getState().user?.uid ?? null, updatedAt: Date.now() });
+    // Only the customer can read/close the other offers; once an artisan is
+    // assigned (the only time they can cancel) none are still pending anyway.
+    if (useAuth.getState().user?.uid === current.customerId) {
+      const open = await getDocs(
+        query(
+          collection(db(), 'offers'),
+          where('requestId', '==', requestId),
+          where('customerId', '==', current.customerId),
+          where('status', '==', 'PENDING'),
+        ),
+      );
+      open.forEach((o) => batch.update(o.ref, { status: 'REJECTED' }));
+    }
     await batch.commit();
   },
 

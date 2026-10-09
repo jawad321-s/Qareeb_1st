@@ -39,11 +39,15 @@ export function useNearbyRequests(artisanId: string, origin?: GeoLocation | null
   return useQuery({
     queryKey: qk.nearbyRequests(artisanId),
     queryFn: () => api.getNearbyRequests(),
+    // The radius widens with time and new requests arrive — keep it fresh.
+    refetchInterval: 30_000,
+    staleTime: 0,
     select: (list): NearbyRequest[] =>
       origin
         ? list
-            .map((r) => ({ ...r, distanceKm: distanceKm(origin, r.location) }))
-            .sort((a, b) => a.distanceKm - b.distanceKm)
+            .map((r) => ({ ...r, distanceKm: r.location ? distanceKm(origin, r.location) : undefined }))
+            // Requests without a location sort last.
+            .sort((a, b) => (a.distanceKm ?? Infinity) - (b.distanceKm ?? Infinity))
         : list,
   });
 }

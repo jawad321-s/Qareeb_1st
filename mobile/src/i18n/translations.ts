@@ -82,6 +82,14 @@ export const translations = {
     'auth.bioPlaceholder': 'e.g. Certified plumber with 8 years of experience…',
     'auth.verifyNote': 'After signup you can upload your ID & certificates to earn the verified badge.',
     'auth.errCategories': 'Select at least one service',
+    'auth.errPhoneFormat': 'Enter a valid Palestinian mobile number (059 / 056)',
+    'auth.errInvalidCredentials': 'Incorrect phone number or password',
+    'auth.errPhoneInUse': 'You already have an account of this type with this phone number. Sign in instead',
+    'auth.errWrongRole': 'This phone number is registered with a different account type',
+    'auth.errNetwork': 'No internet connection. Check your network and try again',
+    'auth.errTooMany': 'Too many attempts. Please wait a moment and try again',
+    'auth.errGeneric': 'Something went wrong. Please try again',
+    'forgot.liveNote': 'Password reset by SMS is coming soon. For now, contact Qareeb support to reset your password.',
     // verification (artisan document upload)
     'vrf.title': 'Account verification',
     'vrf.subtitle': 'Upload your documents to earn the verified badge and win customer trust.',
@@ -231,6 +239,8 @@ export const translations = {
     // request detail
     'req.title': 'Request details',
     'req.tracking': 'Order tracking',
+    'req.searching': 'Looking for artisans within {km} km · the request closes in {min} min if no offers arrive',
+    'req.noOffersCancelled': 'No artisan sent an offer in time, so this request was cancelled. You can post it again.',
     'req.yourArtisan': 'Your artisan',
     'req.chat': 'Chat',
     'req.offers': 'Offers',
@@ -415,6 +425,12 @@ export const translations = {
     'aJobs.subtitle': 'Requests within your service radius',
     'aJobs.empty': 'No requests nearby',
     'aJobs.emptyDesc': 'New jobs in your area will appear here in real time.',
+    'aJobs.notVerified': 'Your account is awaiting verification',
+    'aJobs.notVerifiedDesc': 'Requests reach verified artisans only. You will start receiving them as soon as the Qareeb team approves your account.',
+    'aJobs.noLocation': 'Turn on your location',
+    'aJobs.noLocationDesc': 'Requests are sent to the nearest artisans. Allow location access from the dashboard so we know where you are.',
+    'aJobs.noServices': 'Add your services',
+    'aJobs.noServicesDesc': 'You only receive requests in the categories you offer. Add them from Profile → My services.',
 
     // job detail
     'job.title': 'Job details',
@@ -640,6 +656,14 @@ export const translations = {
     'auth.bioPlaceholder': 'مثال: سبّاك معتمد بخبرة 8 سنوات…',
     'auth.verifyNote': 'بعد التسجيل يمكنك رفع الهوية والشهادات للحصول على شارة التوثيق.',
     'auth.errCategories': 'اختر خدمة واحدة على الأقل',
+    'auth.errPhoneFormat': 'أدخل رقم جوال فلسطيني صحيح (059 / 056)',
+    'auth.errInvalidCredentials': 'رقم الجوال أو كلمة المرور غير صحيحة',
+    'auth.errPhoneInUse': 'لديك حساب من هذا النوع بهذا الرقم مسبقاً. سجّل الدخول بدلاً من ذلك',
+    'auth.errWrongRole': 'هذا الرقم مسجّل بنوع حساب مختلف',
+    'auth.errNetwork': 'لا يوجد اتصال بالإنترنت. تحقق من الشبكة وحاول مجدداً',
+    'auth.errTooMany': 'محاولات كثيرة. انتظر قليلاً ثم حاول مجدداً',
+    'auth.errGeneric': 'حدث خطأ ما. حاول مجدداً',
+    'forgot.liveNote': 'استعادة كلمة المرور عبر SMS قريباً. حالياً تواصل مع دعم قريب لإعادة تعيين كلمة المرور.',
     // verification (artisan document upload)
     'vrf.title': 'توثيق الحساب',
     'vrf.subtitle': 'ارفع مستنداتك للحصول على شارة التوثيق وكسب ثقة الزبائن.',
@@ -789,6 +813,8 @@ export const translations = {
     // request detail
     'req.title': 'تفاصيل الطلب',
     'req.tracking': 'تتبّع الطلب',
+    'req.searching': 'نبحث عن حرفيين ضمن {km} كم · يُلغى الطلب بعد {min} دقيقة إذا لم تصل عروض',
+    'req.noOffersCancelled': 'لم يقدّم أي حرفي عرضاً خلال المهلة، فتم إلغاء الطلب. يمكنك نشره مرة أخرى.',
     'req.yourArtisan': 'الحرفي الخاص بك',
     'req.chat': 'محادثة',
     'req.offers': 'العروض',
@@ -973,6 +999,12 @@ export const translations = {
     'aJobs.subtitle': 'طلبات ضمن نطاق خدمتك',
     'aJobs.empty': 'لا توجد طلبات قريبة',
     'aJobs.emptyDesc': 'ستظهر الأعمال الجديدة في منطقتك هنا فوراً.',
+    'aJobs.notVerified': 'حسابك بانتظار التوثيق',
+    'aJobs.notVerifiedDesc': 'تصل الطلبات للحرفيين الموثّقين فقط. ستبدأ باستلامها فور موافقة فريق قريب على حسابك.',
+    'aJobs.noLocation': 'فعّل موقعك',
+    'aJobs.noLocationDesc': 'تُرسل الطلبات لأقرب الحرفيين. اسمح بالوصول للموقع من الرئيسية حتى نعرف مكانك.',
+    'aJobs.noServices': 'أضف خدماتك',
+    'aJobs.noServicesDesc': 'تصلك الطلبات فقط في الفئات التي تقدّمها. أضفها من الملف الشخصي ← خدماتي.',
 
     // job detail
     'job.title': 'تفاصيل العمل',

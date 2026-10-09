@@ -26,6 +26,13 @@ export function timeAgo(ts: number): string {
   return new Date(ts).toLocaleDateString(ar ? 'ar' : 'en');
 }
 
+/** Full date ("12 أيلول 2026" / "September 12, 2026") in the active UI language. */
+export function formatDate(ts: number): string {
+  const { useLocaleStore } = require('@/i18n') as typeof import('@/i18n');
+  const ar = useLocaleStore.getState().locale === 'ar';
+  return new Date(ts).toLocaleDateString(ar ? 'ar' : 'en', { year: 'numeric', month: 'long', day: 'numeric' });
+}
+
 export function formatDistance(km: number): string {
   const { useLocaleStore } = require('@/i18n') as typeof import('@/i18n');
   const ar = useLocaleStore.getState().locale === 'ar';

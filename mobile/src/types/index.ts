@@ -127,6 +127,10 @@ export interface Offer {
   message?: string;
   status: OfferStatus;
   createdAt: number;
+  // Denormalized request summary, so the artisan's history can name the job
+  // even after the request stops being readable to them (taken or cancelled).
+  requestTitle?: string;
+  categoryId?: string;
   // Denormalized artisan snapshot for fast rendering in the offers list.
   artisan?: Pick<AppUser, 'uid' | 'fullName' | 'photoUrl' | 'rating' | 'ratingCount'>;
 }
@@ -151,6 +155,34 @@ export interface Conversation {
   /** The other party: the artisan for a customer, the customer for an artisan. */
   otherUserId: string;
   lastMessage?: ChatMessage;
+}
+
+/** One entry in the artisan's work history (income → completed / rejected). */
+export interface JobRecord {
+  kind: 'completed' | 'rejected';
+  requestId: string;
+  title: string;
+  categoryId?: string;
+  description?: string;
+  address?: string;
+  customerId: string;
+  /** Completed: when the job finished. Rejected: when the offer was sent. */
+  date: number;
+  /** The artisan's offer, when it is known. */
+  price?: number;
+  etaMinutes?: number;
+  message?: string;
+  /** Rejected only: why the offer didn't go through. */
+  reason?: 'otherChosen' | 'cancelled' | 'declined';
+  /** Completed only: the customer's rating of the job, once given. */
+  rating?: number;
+  comment?: string;
+  autoCompleted?: boolean;
+}
+
+export interface JobHistory {
+  completed: JobRecord[];
+  rejected: JobRecord[];
 }
 
 export interface Review {

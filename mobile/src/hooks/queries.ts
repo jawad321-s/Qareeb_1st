@@ -159,7 +159,10 @@ export function useSubmitOffer(requestId: string) {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (input: Omit<Offer, 'id' | 'status' | 'createdAt'>) => api.submitOffer(input),
-    onSuccess: () => qc.invalidateQueries({ queryKey: qk.offers(requestId) }),
+    onSuccess: (offer) => {
+      qc.invalidateQueries({ queryKey: qk.offers(requestId) });
+      qc.invalidateQueries({ queryKey: qk.artisanOffers(offer.artisanId) });
+    },
   });
 }
 
@@ -190,6 +193,16 @@ export function useArtisanJobs(artisanId: string) {
   return useQuery({ queryKey: qk.artisanJobs(artisanId), queryFn: () => api.getArtisanJobs(artisanId), enabled: !!artisanId });
 }
 
+/** Every offer the artisan has sent (the Offers tab). */
+export function useArtisanOffers(artisanId: string) {
+  return useQuery({ queryKey: qk.artisanOffers(artisanId), queryFn: () => api.getArtisanOffers(artisanId), enabled: !!artisanId });
+}
+
+/** The artisan's completed jobs and turned-down offers (income → history). */
+export function useJobHistory(artisanId: string) {
+  return useQuery({ queryKey: qk.jobHistory(artisanId), queryFn: () => api.getJobHistory(artisanId), enabled: !!artisanId });
+}
+
 /** The assigned artisan moves a job on (on the way → working → finished). */
 export function useUpdateRequestStatus(requestId: string, userId: string) {
   const qc = useQueryClient();
@@ -199,6 +212,7 @@ export function useUpdateRequestStatus(requestId: string, userId: string) {
       await Promise.all([
         qc.invalidateQueries({ queryKey: qk.request(requestId) }),
         qc.invalidateQueries({ queryKey: qk.artisanJobs(userId) }),
+        qc.invalidateQueries({ queryKey: qk.jobHistory(userId) }),
         qc.invalidateQueries({ queryKey: ['conversations'] }),
         qc.invalidateQueries({ queryKey: ['requests'] }),
         // Finishing a job opens the mandatory rating.

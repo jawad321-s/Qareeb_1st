@@ -69,6 +69,9 @@ export default function JobDetail() {
       etaMinutes: Number(eta),
       // Optional — a quotation may be price + ETA only.
       message: message.trim() || undefined,
+      // Kept on the offer for the artisan's history (see JobRecord).
+      requestTitle: request.title,
+      categoryId: request.categoryId,
       artisan: { uid: user.uid, fullName: user.fullName, photoUrl: user.photoUrl, rating: user.rating, ratingCount: user.ratingCount },
     });
     setSent(true);

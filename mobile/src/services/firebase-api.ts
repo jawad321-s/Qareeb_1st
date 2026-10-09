@@ -7,7 +7,7 @@ import {
   setDoc, updateDoc, where, writeBatch,
 } from 'firebase/firestore';
 import type {
-  AppUser, ArtisanProfile, ChatMessage, Conversation, Offer, Review, Service, ServiceRequest,
+  AppUser, ArtisanProfile, ChatMessage, Conversation, JobHistory, Offer, Review, Service, ServiceRequest,
 } from '@/types';
 import type { mockApi } from '@/mock/api';
 import { getDb } from '@/lib/firebase';
@@ -15,6 +15,7 @@ import { useAuth } from '@/store/auth';
 import { MOCK_CUSTOMER } from '@/mock/data';
 import { SERVICES, toServiceId } from '@/constants/services';
 import { ACTIVE_STATUSES, NEXT_STATUS, canCancelRequest, isOverdue } from '@/lib/requestRules';
+import { completedRecord, rejectedRecord } from '@/lib/jobHistory';
 
 function db() {
   const d = getDb();
@@ -296,5 +297,50 @@ export const firebaseApi: typeof mockApi = {
     if (!snap.exists() || NEXT_STATUS[snap.data().status as ServiceRequest['status']] !== status) return;
     const now = Date.now();
     await updateDoc(ref, { status, updatedAt: now, ...(status === 'COMPLETED' ? { completedAt: now } : {}) });
+  },
+
+  async getArtisanOffers(artisanId): Promise<Offer[]> {
+    const snap = await getDocs(query(collection(db(), 'offers'), where('artisanId', '==', artisanId)));
+    const list = await Promise.all(
+      snap.docs.map(async (d) => {
+        const o = withId<Offer>(d.id, { ...d.data(), createdAt: ms(d.data().createdAt) });
+        if (o.requestTitle) return o;
+        // Offers sent before the title was copied onto them: read it from the request.
+        const r = await getDoc(doc(db(), 'requests', o.requestId)).catch(() => null);
+        return r?.exists() ? { ...o, requestTitle: r.data().title, categoryId: r.data().categoryId } : o;
+      }),
+    );
+    return list.sort((a, b) => b.createdAt - a.createdAt);
+  },
+
+  async getJobHistory(artisanId): Promise<JobHistory> {
+    const [doneSnap, offerSnap] = await Promise.all([
+      getDocs(query(collection(db(), 'requests'), where('acceptedArtisanId', '==', artisanId), where('status', '==', 'COMPLETED'))),
+      getDocs(query(collection(db(), 'offers'), where('artisanId', '==', artisanId))),
+    ]);
+    const myOffers = offerSnap.docs.map((d) => withId<Offer>(d.id, { ...d.data(), createdAt: ms(d.data().createdAt) }));
+    const completed = await Promise.all(
+      doneSnap.docs.map(async (d) => {
+        const r = mapRequest(d.id, d.data());
+        // The customer's review has a deterministic id (see submitReview).
+        const rev = await getDoc(doc(db(), 'reviews', `${r.id}_${r.customerId}`)).catch(() => null);
+        const review = rev?.exists() ? withId<Review>(rev.id, rev.data()) : undefined;
+        return completedRecord(r, myOffers.find((o) => o.id === r.acceptedOfferId), review);
+      }),
+    );
+    // A turned-down offer's request is often no longer readable to this artisan
+    // (assigned elsewhere or cancelled); the record then uses the offer's copy.
+    const rejected = await Promise.all(
+      myOffers
+        .filter((o) => o.status === 'REJECTED')
+        .map(async (o) => {
+          const snap = await getDoc(doc(db(), 'requests', o.requestId)).catch(() => null);
+          return rejectedRecord(o, snap?.exists() ? mapRequest(snap.id, snap.data()) : undefined);
+        }),
+    );
+    return {
+      completed: completed.sort((a, b) => b.date - a.date),
+      rejected: rejected.sort((a, b) => b.date - a.date),
+    };
   },
 };

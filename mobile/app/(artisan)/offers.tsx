@@ -7,7 +7,11 @@ import { Card } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
 import { Icon } from '@/components/ui/Icon';
 import { formatMoney, timeAgo } from '@/lib/format';
-import { MOCK_OFFERS, MOCK_REQUESTS } from '@/mock/data';
+import { CardSkeleton } from '@/components/feedback/Skeleton';
+import { EmptyState } from '@/components/feedback/EmptyState';
+import { categoryById } from '@/constants/categories';
+import { useArtisanOffers } from '@/hooks/queries';
+import { useAuth } from '@/store/auth';
 import { useT } from '@/i18n';
 import type { OfferStatus } from '@/types';
 
@@ -19,9 +23,10 @@ const STATUS_VARIANT: Record<OfferStatus, React.ComponentProps<typeof Badge>['va
 };
 
 export default function ArtisanOffers() {
-  const { t } = useT();
-  // Present the current artisan's submitted offers with their request context.
-  const offers = MOCK_OFFERS.map((o) => ({ ...o, request: MOCK_REQUESTS.find((r) => r.id === o.requestId) }));
+  const { t, locale } = useT();
+  const uid = useAuth((s) => s.user?.uid ?? '');
+  // The signed-in artisan's own offers, newest first.
+  const { data: offers, isLoading } = useArtisanOffers(uid);
 
   return (
     <Screen padded={false}>
@@ -29,11 +34,26 @@ export default function ArtisanOffers() {
         <Text variant="h1">{t('aOffers.title')}</Text>
       </View>
       <ScrollView contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 16, paddingBottom: 140, gap: 12 }} showsVerticalScrollIndicator={false}>
-        {offers.map((o) => (
-          <Card key={o.id} onPress={() => o.request && router.push(`/(artisan)/job/${o.request.id}`)} style={{ gap: 12 }}>
+        {isLoading && [0, 1, 2].map((i) => <CardSkeleton key={i} />)}
+        {!isLoading && !offers?.length && (
+          <View style={{ marginTop: 60 }}>
+            <EmptyState icon="send" title={t('aOffers.empty')} description={t('aOffers.emptyDesc')} />
+          </View>
+        )}
+        {offers?.map((o) => (
+          <Card
+            key={o.id}
+            onPress={() =>
+              // Turned-down offers open their history record; the rest open the job.
+              o.status === 'REJECTED'
+                ? router.push({ pathname: '/(shared)/job-history/[id]', params: { id: o.requestId, kind: 'rejected' } })
+                : router.push(`/(artisan)/job/${o.requestId}`)
+            }
+            style={{ gap: 12 }}
+          >
             <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 10 }}>
               <Text variant="bodyMedium" style={{ flex: 1 }} numberOfLines={1}>
-                {o.request?.title ?? ''}
+                {o.requestTitle ?? (o.categoryId ? categoryById(o.categoryId)?.name[locale] : undefined) ?? t('hist.untitled')}
               </Text>
               <Badge label={t(`ostatus.${o.status}` as any)} variant={STATUS_VARIANT[o.status]} />
             </View>

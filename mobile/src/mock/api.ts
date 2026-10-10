@@ -1,15 +1,17 @@
-import type { AppUser, Offer, Review, Service, ServiceRequest, ChatMessage, ArtisanProfile, GeoLocation, Conversation, RequestStatus } from '@/types';
+import type { AppUser, Offer, Review, Service, ServiceRequest, ChatMessage, ArtisanProfile, GeoLocation, Conversation, RequestStatus, JobHistory } from '@/types';
 import {
   MOCK_ARTISANS,
   MOCK_ARTISAN_PROFILE,
   MOCK_CUSTOMER,
   MOCK_MESSAGES,
   MOCK_OFFERS,
+  MOCK_PAST_CUSTOMERS,
   MOCK_REQUESTS,
   MOCK_REVIEWS,
   MOCK_SERVICES,
 } from './data';
 import { NEXT_STATUS, canCancelRequest, isChatOpen, isOverdue } from '@/lib/requestRules';
+import { completedRecord, rejectedRecord } from '@/lib/jobHistory';
 import { kv } from '@/lib/mmkv';
 
 // In-memory mutable stores so the app behaves like a real backend during a session.
@@ -153,7 +155,7 @@ export const mockApi = {
   /** Public profile of any user — used to show who is being rated. */
   async getUser(uid: string): Promise<AppUser | undefined> {
     await delay(200);
-    return clone([MOCK_CUSTOMER, ...MOCK_ARTISANS].find((u) => u.uid === uid));
+    return clone([MOCK_CUSTOMER, ...MOCK_PAST_CUSTOMERS, ...MOCK_ARTISANS].find((u) => u.uid === uid));
   },
 
   /**
@@ -271,5 +273,41 @@ export const mockApi = {
         ? { ...r, status, updatedAt: now, ...(status === 'COMPLETED' ? { completedAt: now } : {}) }
         : r,
     );
+  },
+
+  /** Every offer this artisan has sent, newest first. */
+  async getArtisanOffers(artisanId: string): Promise<Offer[]> {
+    await delay(250);
+    return clone(
+      offers
+        .filter((o) => o.artisanId === artisanId)
+        .map((o) => {
+          const r = requests.find((x) => x.id === o.requestId);
+          return { ...o, requestTitle: o.requestTitle ?? r?.title, categoryId: o.categoryId ?? r?.categoryId };
+        })
+        .sort((a, b) => b.createdAt - a.createdAt),
+    );
+  },
+
+  /** The artisan's finished jobs and the offers customers turned down. */
+  async getJobHistory(artisanId: string): Promise<JobHistory> {
+    await delay(300);
+    autoCompleteOverdue();
+    const completed = requests
+      .filter((r) => r.acceptedArtisanId === artisanId && r.status === 'COMPLETED')
+      .map((r) =>
+        completedRecord(
+          r,
+          offers.find((o) => o.id === r.acceptedOfferId),
+          reviews.find((v) => v.requestId === r.id && v.authorId === r.customerId),
+        ),
+      );
+    const rejected = offers
+      .filter((o) => o.artisanId === artisanId && o.status === 'REJECTED')
+      .map((o) => rejectedRecord(o, requests.find((r) => r.id === o.requestId)));
+    return clone({
+      completed: completed.sort((a, b) => b.date - a.date),
+      rejected: rejected.sort((a, b) => b.date - a.date),
+    });
   },
 };

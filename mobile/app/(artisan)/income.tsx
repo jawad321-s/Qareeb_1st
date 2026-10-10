@@ -1,5 +1,6 @@
 import React from 'react';
 import { View } from 'react-native';
+import { router } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { Screen } from '@/components/ui/Screen';
@@ -11,6 +12,8 @@ import { Icon } from '@/components/ui/Icon';
 import { BarChart } from '@/components/domain/BarChart';
 import { AnimatedNumber } from '@/components/ui/AnimatedNumber';
 import { formatMoney } from '@/lib/format';
+import { useJobHistory } from '@/hooks/queries';
+import { useAuth } from '@/store/auth';
 import { useT } from '@/i18n';
 import { useTheme } from '@/theme/ThemeProvider';
 
@@ -27,11 +30,15 @@ export default function Income() {
   const { colors } = useTheme();
   const { t } = useT();
   const tabBarSpace = useTabBarSpace();
+  const user = useAuth((s) => s.user)!;
+  const history = useJobHistory(user.uid);
+  const count = (n?: number) => (n === undefined ? '…' : String(n));
+  // The job counts open the work history on the matching tab.
   const BREAKDOWN = [
-    { icon: 'check-circle' as const, label: t('inc.completedJobs'), value: '214', color: '#10B981' },
-    { icon: 'x-circle' as const, label: t('inc.rejectedJobs'), value: '18', color: '#EF4444' },
+    { icon: 'check-circle' as const, label: t('inc.completedJobs'), value: count(history.data?.completed.length), color: '#10B981', tab: 'completed' },
+    { icon: 'x-circle' as const, label: t('inc.rejectedJobs'), value: count(history.data?.rejected.length), color: '#EF4444', tab: 'rejected' },
     { icon: 'clock' as const, label: t('inc.avgResponse'), value: '6 min', color: '#F59E0B' },
-    { icon: 'star' as const, label: t('inc.avgRating'), value: '4.8', color: colors.tint },
+    { icon: 'star' as const, label: t('inc.avgRating'), value: user.rating.toFixed(1), color: colors.tint },
   ];
   return (
     // Bottom padding must clear the floating tab bar (Screen's default doesn't).
@@ -62,15 +69,25 @@ export default function Income() {
 
       <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 12, marginTop: 20 }}>
         {BREAKDOWN.map((b) => (
-          <Card key={b.label} style={{ width: '47%', gap: 8, paddingVertical: 16 }}>
-            <View style={{ width: 38, height: 38, borderRadius: 10, backgroundColor: b.color + '20', alignItems: 'center', justifyContent: 'center' }}>
-              <Icon name={b.icon} size={20} color={b.color} />
-            </View>
-            <Text variant="h3">{b.value}</Text>
-            <Text variant="caption" tone="muted">
-              {b.label}
-            </Text>
-          </Card>
+          // Width sits on a wrapper: a pressable Card nests its surface inside a
+          // Pressable, so a percentage width on the Card itself collapses.
+          <View key={b.label} style={{ width: '47%' }}>
+            <Card
+              onPress={b.tab ? () => router.push({ pathname: '/(shared)/job-history', params: { tab: b.tab } }) : undefined}
+              style={{ gap: 8, paddingVertical: 16 }}
+            >
+              <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+                <View style={{ width: 38, height: 38, borderRadius: 10, backgroundColor: b.color + '20', alignItems: 'center', justifyContent: 'center' }}>
+                  <Icon name={b.icon} size={20} color={b.color} />
+                </View>
+                {b.tab && <Icon name="chevron-right" size={18} color={colors.muted} />}
+              </View>
+              <Text variant="h3">{b.value}</Text>
+              <Text variant="caption" tone="muted">
+                {b.label}
+              </Text>
+            </Card>
+          </View>
         ))}
       </View>
     </Screen>

@@ -31,6 +31,19 @@ export const MOCK_CUSTOMER: AppUser = {
   updatedAt: now,
 };
 
+// Customers from the demo artisan's past jobs (work history, conversations).
+const pastCustomer = (uid: string, fullName: string, address: string, latitude: number, longitude: number): AppUser => ({
+  uid, role: 'customer', fullName, email: `${uid}@example.com`, phone: '+97059000000' + uid.slice(-1),
+  location: { latitude, longitude, geohash: 'sv9hv', address },
+  locale: 'ar', status: 'active', verified: true, rating: 4.7, ratingCount: 6, createdAt: mins(99999), updatedAt: now,
+});
+
+export const MOCK_PAST_CUSTOMERS: AppUser[] = [
+  pastCustomer('cust_2', 'أحمد سليم', 'البيرة', 31.9106, 35.2160),
+  pastCustomer('cust_3', 'رنا عودة', 'الطيرة، رام الله', 31.9000, 35.1900),
+  pastCustomer('cust_4', 'محمود حمدان', 'المصايف، رام الله', 31.9120, 35.1950),
+];
+
 export const MOCK_ARTISANS: AppUser[] = [
   { uid: 'art_1', role: 'artisan', fullName: 'عمر خالد', email: 'omar@example.com', phone: '+970590000010', photoUrl: 'https://i.pravatar.cc/300?img=12', locale: 'ar', status: 'active', verified: true, rating: 4.8, ratingCount: 214, location: { latitude: 31.9075, longitude: 35.1997, geohash: 'sv9hv', address: 'رام الله' }, createdAt: mins(99999), updatedAt: now },
   { uid: 'art_2', role: 'artisan', fullName: 'يوسف ناصر', email: 'yousef@example.com', phone: '+970590000011', photoUrl: 'https://i.pravatar.cc/300?img=33', locale: 'ar', status: 'active', verified: true, rating: 4.6, ratingCount: 88, location: { latitude: 31.9106, longitude: 35.2160, geohash: 'sv9hv', address: 'البيرة' }, createdAt: mins(99999), updatedAt: now },
@@ -61,6 +74,25 @@ export const MOCK_ARTISAN_PROFILE: ArtisanProfile = {
 export const MOCK_SERVICES: Service[] = SERVICES;
 
 // ── Requests ─────────────────────────────────────────────────────────────────
+function pastJob(
+  id: string,
+  customerId: string,
+  title: string,
+  description: string,
+  outcome: Pick<ServiceRequest, 'status' | 'acceptedOfferId' | 'acceptedArtisanId'>,
+  createdMinsAgo: number,
+  closedMinsAgo: number,
+): ServiceRequest {
+  const customer = MOCK_PAST_CUSTOMERS.find((c) => c.uid === customerId)!;
+  return {
+    id, customerId, serviceId: 'plumbing', categoryId: 'plumbing', title, description, images: [],
+    location: customer.location!, preferredTime: mins(createdMinsAgo - 120), budget: { min: 8000, max: 40000 },
+    offerCount: 3, createdAt: mins(createdMinsAgo), updatedAt: mins(closedMinsAgo),
+    ...(outcome.status === 'COMPLETED' ? { completedAt: mins(closedMinsAgo) } : {}),
+    ...outcome,
+  };
+}
+
 export const MOCK_REQUESTS: ServiceRequest[] = [
   {
     id: 'req_1',
@@ -127,6 +159,7 @@ export const MOCK_REQUESTS: ServiceRequest[] = [
     preferredTime: now + 3600_000 * 5,
     budget: { min: 15000, max: 30000 },
     status: 'ACCEPTED',
+    acceptedOfferId: 'off_5',
     acceptedArtisanId: 'art_1',
     offerCount: 3,
     createdAt: mins(60 * 6),
@@ -146,12 +179,23 @@ export const MOCK_REQUESTS: ServiceRequest[] = [
     preferredTime: now - 3600_000 * 30,
     budget: { min: 10000, max: 25000 },
     status: 'COMPLETED',
+    acceptedOfferId: 'off_4',
     acceptedArtisanId: 'art_1',
     offerCount: 2,
+    completedAt: mins(60 * 26),
     createdAt: mins(60 * 24 * 2),
     updatedAt: mins(60 * 26),
   },
+  // ── Omar's (art_1) past work: three finished jobs and three offers that
+  // didn't go through. Shown in his income history. ──────────────────────────
+  pastJob('req_w', 'cust_4', 'تمديد مواسير مطبخ جديد', 'نقل المغسلة للجهة الثانية من المطبخ وتمديد مواسير جديدة لها.', { status: 'COMPLETED', acceptedOfferId: 'off_w', acceptedArtisanId: 'art_1' }, 60 * 24 * 5, 60 * 24 * 4),
+  pastJob('req_x', 'cust_2', 'تسليك مجاري الحمّام', 'المياه بتنزل ببطء في البانيو والمغسلة.', { status: 'COMPLETED', acceptedOfferId: 'off_x', acceptedArtisanId: 'art_1' }, 60 * 24 * 13, 60 * 24 * 12),
+  pastJob('req_y', 'cust_3', 'إصلاح خزان ماء على السطح', 'العوّامة خربانة والخزان بفيض.', { status: 'COMPLETED', acceptedOfferId: 'off_y', acceptedArtisanId: 'art_1' }, 60 * 24 * 21, 60 * 24 * 20),
+  pastJob('req_r1', 'cust_2', 'تركيب مغسلة جديدة', 'مغسلة حمّام جديدة مع الخلاط.', { status: 'COMPLETED', acceptedArtisanId: 'art_3' }, 60 * 24 * 9, 60 * 24 * 8),
+  pastJob('req_r2', 'cust_3', 'فحص تسريب في الجدار', 'في رطوبة بالجدار جنب الحمّام.', { status: 'CANCELLED' }, 60 * 24 * 16, 60 * 24 * 15),
+  pastJob('req_r3', 'cust_4', 'تبديل سيفون المرحاض', 'السيفون ما بوقف تعبئة.', { status: 'COMPLETED', acceptedArtisanId: 'art_2' }, 60 * 24 * 30, 60 * 24 * 29),
 ];
+
 
 // ── Offers ───────────────────────────────────────────────────────────────────
 const artisanSnap = (a: AppUser) => ({
@@ -166,6 +210,16 @@ export const MOCK_OFFERS: Offer[] = [
   { id: 'off_1', requestId: 'req_1', artisanId: 'art_1', customerId: 'cust_1', price: 12000, etaMinutes: 40, message: 'أقدر أوصل خلال ساعة، السعر نهائي شامل القطع.', status: 'PENDING', createdAt: mins(30), artisan: artisanSnap(MOCK_ARTISANS[0]) },
   { id: 'off_2', requestId: 'req_1', artisanId: 'art_4', customerId: 'cust_1', price: 15000, etaMinutes: 25, message: 'خدمة مميّزة مع ضمان 6 أشهر على الإصلاح.', status: 'PENDING', createdAt: mins(22), artisan: artisanSnap(MOCK_ARTISANS[3]) },
   { id: 'off_3', requestId: 'req_1', artisanId: 'art_3', customerId: 'cust_1', price: 9000, etaMinutes: 90, message: 'أفضل سعر بالمنطقة، متاح مساء اليوم.', status: 'PENDING', createdAt: mins(12), artisan: artisanSnap(MOCK_ARTISANS[2]) },
+  // Omar's accepted offers (his current and finished jobs)…
+  { id: 'off_5', requestId: 'req_5', artisanId: 'art_1', customerId: 'cust_1', price: 22000, etaMinutes: 45, message: 'التركيب مع توصيل المواسير وفحص الضغط.', status: 'ACCEPTED', createdAt: mins(60 * 5), artisan: artisanSnap(MOCK_ARTISANS[0]) },
+  { id: 'off_4', requestId: 'req_4', artisanId: 'art_1', customerId: 'cust_1', price: 18000, etaMinutes: 30, message: 'السعر شامل الخلاط الجديد والتركيب.', status: 'ACCEPTED', createdAt: mins(60 * 47), artisan: artisanSnap(MOCK_ARTISANS[0]) },
+  { id: 'off_w', requestId: 'req_w', artisanId: 'art_1', customerId: 'cust_4', price: 35000, etaMinutes: 60, message: 'المواسير والقطع عليّ، الشغل بخلص بنفس اليوم.', status: 'ACCEPTED', createdAt: mins(60 * 24 * 5 - 30), artisan: artisanSnap(MOCK_ARTISANS[0]) },
+  { id: 'off_x', requestId: 'req_x', artisanId: 'art_1', customerId: 'cust_2', price: 15000, etaMinutes: 40, status: 'ACCEPTED', createdAt: mins(60 * 24 * 13 - 20), artisan: artisanSnap(MOCK_ARTISANS[0]) },
+  { id: 'off_y', requestId: 'req_y', artisanId: 'art_1', customerId: 'cust_3', price: 26000, etaMinutes: 90, message: 'بجيب عوّامة جديدة معي.', status: 'ACCEPTED', createdAt: mins(60 * 24 * 21 - 45), artisan: artisanSnap(MOCK_ARTISANS[0]) },
+  // …and the ones that were turned down.
+  { id: 'off_r1', requestId: 'req_r1', artisanId: 'art_1', customerId: 'cust_2', price: 20000, etaMinutes: 45, message: 'بقدر أركّبها اليوم مساءً.', status: 'REJECTED', createdAt: mins(60 * 24 * 9 - 30), requestTitle: 'تركيب مغسلة جديدة', categoryId: 'plumbing', artisan: artisanSnap(MOCK_ARTISANS[0]) },
+  { id: 'off_r2', requestId: 'req_r2', artisanId: 'art_1', customerId: 'cust_3', price: 12000, etaMinutes: 30, status: 'REJECTED', createdAt: mins(60 * 24 * 16 - 40), requestTitle: 'فحص تسريب في الجدار', categoryId: 'plumbing', artisan: artisanSnap(MOCK_ARTISANS[0]) },
+  { id: 'off_r3', requestId: 'req_r3', artisanId: 'art_1', customerId: 'cust_4', price: 9000, etaMinutes: 60, message: 'معي سيفون أصلي بضمان سنة.', status: 'REJECTED', createdAt: mins(60 * 24 * 30 - 25), requestTitle: 'تبديل سيفون المرحاض', categoryId: 'plumbing', artisan: artisanSnap(MOCK_ARTISANS[0]) },
 ];
 
 // ── Reviews ──────────────────────────────────────────────────────────────────
@@ -175,6 +229,10 @@ export const MOCK_REVIEWS: Review[] = [
   { id: 'rev_3', requestId: 'req_y', authorId: 'cust_3', targetId: 'art_1', role: 'customer', rating: 4, comment: 'شغل ممتاز، تأخر قليلاً لكن النتيجة رائعة.', createdAt: mins(60 * 24 * 20) },
   // Layla already rated the cleaning job (req_3), so it doesn't reopen the review.
   { id: 'rev_4', requestId: 'req_3', authorId: 'cust_1', targetId: 'art_2', role: 'customer', rating: 5, comment: 'تنظيف ممتاز ودقيق.', createdAt: mins(60 * 24 * 4) },
+  // Omar rated the customers of his past jobs, so they don't reopen his review.
+  { id: 'rev_5', requestId: 'req_w', authorId: 'art_1', targetId: 'cust_4', role: 'artisan', rating: 5, comment: 'زبون محترم وواضح.', createdAt: mins(60 * 24 * 4) },
+  { id: 'rev_6', requestId: 'req_x', authorId: 'art_1', targetId: 'cust_2', role: 'artisan', rating: 5, comment: '', createdAt: mins(60 * 24 * 12) },
+  { id: 'rev_7', requestId: 'req_y', authorId: 'art_1', targetId: 'cust_3', role: 'artisan', rating: 4, comment: '', createdAt: mins(60 * 24 * 20) },
 ];
 
 // ── Chat ─────────────────────────────────────────────────────────────────────
@@ -186,4 +244,7 @@ export const MOCK_MESSAGES: ChatMessage[] = [
   { id: 'm5', requestId: 'req_5', senderId: 'cust_1', type: 'text', text: 'موجود، اشتريته امبارح.', read: false, createdAt: mins(35) },
   { id: 'm6', requestId: 'req_4', senderId: 'art_1', type: 'text', text: 'تم تركيب الخلاط وفحصه، ما في أي تسريب.', read: true, createdAt: mins(60 * 26 + 5) },
   { id: 'm7', requestId: 'req_4', senderId: 'cust_1', type: 'text', text: 'شكراً كثير، شغل نظيف!', read: true, createdAt: mins(60 * 26) },
+  { id: 'm8', requestId: 'req_w', senderId: 'cust_4', type: 'text', text: 'المواسير شغالة تمام، يعطيك العافية.', read: true, createdAt: mins(60 * 24 * 4) },
+  { id: 'm9', requestId: 'req_x', senderId: 'art_1', type: 'text', text: 'خلصت التسليك، جرّب المي هلأ.', read: true, createdAt: mins(60 * 24 * 12) },
+  { id: 'm10', requestId: 'req_y', senderId: 'cust_3', type: 'text', text: 'الخزان صار تمام، شكراً.', read: true, createdAt: mins(60 * 24 * 20) },
 ];

@@ -60,7 +60,7 @@ Verified badge  ◀──live snapshot── status: "approved"/"rejected" ◀�
 
 ```ts
 {
-  id, artisanId, name, email, phone,
+  id, artisanId, name, phone,
   categoryIds: string[], category: string,
   status: 'pending' | 'approved' | 'rejected',
   idFrontUrl, idBackUrl, selfieUrl,

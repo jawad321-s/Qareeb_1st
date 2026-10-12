@@ -6,7 +6,8 @@
 const KEY = 'qareeb.admin.session';
 
 export interface AdminSession {
-  email: string;
+  /** Admins sign in with their phone number, like every account on Qareeb. */
+  phone: string;
   signedInAt: number;
 }
 
@@ -20,8 +21,8 @@ export function getSession(): AdminSession | null {
   }
 }
 
-export function signIn(email: string): AdminSession {
-  const session: AdminSession = { email, signedInAt: Date.now() };
+export function signIn(phone: string): AdminSession {
+  const session: AdminSession = { phone, signedInAt: Date.now() };
   localStorage.setItem(KEY, JSON.stringify(session));
   return session;
 }

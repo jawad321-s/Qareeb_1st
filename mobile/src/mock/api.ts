@@ -13,6 +13,7 @@ import {
 import { NEXT_STATUS, canCancelRequest, isChatOpen, isOverdue } from '@/lib/requestRules';
 import { completedRecord, rejectedRecord } from '@/lib/jobHistory';
 import { kv } from '@/lib/mmkv';
+import { accountRole } from '@/store/auth';
 
 // In-memory mutable stores so the app behaves like a real backend during a session.
 let requests = [...MOCK_REQUESTS];
@@ -309,5 +310,11 @@ export const mockApi = {
       completed: completed.sort((a, b) => b.date - a.date),
       rejected: rejected.sort((a, b) => b.date - a.date),
     });
+  },
+
+  /** Whether a phone number already has an account — one account per number. */
+  async isPhoneRegistered(phone: string): Promise<boolean> {
+    await delay(300);
+    return !!accountRole(phone);
   },
 };

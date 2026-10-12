@@ -37,12 +37,11 @@ const CATEGORIES = [
   { id: 'ac', slug: 'air-conditioning', name: { ar: 'تكييف', en: 'Air Conditioning' }, icon: 'wind', colorHex: '#06B6D4', order: 4 },
   { id: 'painting', slug: 'painting', name: { ar: 'دهان', en: 'Painting' }, icon: 'paintbrush', colorHex: '#8B5CF6', order: 5 },
   { id: 'cleaning', slug: 'cleaning', name: { ar: 'تنظيف', en: 'Cleaning' }, icon: 'sparkles', colorHex: '#14B8A6', order: 6 },
-  { id: 'maintenance', slug: 'maintenance', name: { ar: 'صيانة', en: 'Maintenance' }, icon: 'wrench', colorHex: '#3B82F6', order: 7 },
-  { id: 'repair', slug: 'home-repair', name: { ar: 'إصلاح منزلي', en: 'Home Repair' }, icon: 'tools', colorHex: '#7C3AED', order: 8 },
-  { id: 'appliance', slug: 'appliance-repair', name: { ar: 'إصلاح أجهزة', en: 'Appliance Repair' }, icon: 'plug', colorHex: '#0284C7', order: 9 },
-  { id: 'gardening', slug: 'gardening', name: { ar: 'بستنة', en: 'Gardening' }, icon: 'leaf', colorHex: '#0D9488', order: 10 },
-  { id: 'satellite', slug: 'satellite', name: { ar: 'ستلايت', en: 'Satellite' }, icon: 'satellite', colorHex: '#475569', order: 11 },
-  { id: 'moving', slug: 'moving', name: { ar: 'نقل عفش', en: 'Moving' }, icon: 'truck', colorHex: '#4338CA', order: 12 },
+  { id: 'repair', slug: 'home-repair', name: { ar: 'إصلاح منزلي', en: 'Home Repair' }, icon: 'tools', colorHex: '#7C3AED', order: 7 },
+  { id: 'appliance', slug: 'appliance-repair', name: { ar: 'إصلاح أجهزة', en: 'Appliance Repair' }, icon: 'plug', colorHex: '#0284C7', order: 8 },
+  { id: 'gardening', slug: 'gardening', name: { ar: 'بستنة', en: 'Gardening' }, icon: 'leaf', colorHex: '#0D9488', order: 9 },
+  { id: 'satellite', slug: 'satellite', name: { ar: 'ستلايت', en: 'Satellite' }, icon: 'satellite', colorHex: '#475569', order: 10 },
+  { id: 'moving', slug: 'moving', name: { ar: 'نقل عفش', en: 'Moving' }, icon: 'truck', colorHex: '#4338CA', order: 11 },
 ];
 
 async function seedCategoriesAndServices() {
@@ -73,22 +72,23 @@ async function seedCategoriesAndServices() {
 
 async function seedUsers() {
   const customer = {
-    uid: 'seed_customer', role: 'customer', fullName: 'ليلى خالد', email: 'layla@qareeb.app',
-    phone: '+970500000001', locale: 'ar', status: 'active', verified: true, rating: 4.9, ratingCount: 12,
+    // Phone numbers are the account identity: unique and stored normalized (+970…).
+    uid: 'seed_customer', role: 'customer', fullName: 'ليلى خالد',
+    phone: '+970590000001', locale: 'ar', status: 'active', verified: true, rating: 4.9, ratingCount: 12,
     location: { geopoint: new admin.firestore.GeoPoint(31.9038, 35.2034), geohash: 'sv9hv', address: 'الماصيون، رام الله' },
     createdAt: ts(90 * 864e5), updatedAt: now,
   };
   await db.collection('users').doc(customer.uid).set(customer);
 
   const artisans = [
-    { uid: 'seed_art_1', fullName: 'عمر خالد', rating: 4.8, ratingCount: 214, cats: ['plumbing', 'maintenance'], verified: true, premium: true },
-    { uid: 'seed_art_2', fullName: 'يوسف ناصر', rating: 4.6, ratingCount: 88, cats: ['cleaning'], verified: true, premium: false },
-    { uid: 'seed_art_3', fullName: 'حسان علي', rating: 4.4, ratingCount: 41, cats: ['electrical'], verified: false, premium: false },
-    { uid: 'seed_art_4', fullName: 'طارق منصور', rating: 4.9, ratingCount: 302, cats: ['ac', 'appliance'], verified: true, premium: true },
+    { uid: 'seed_art_1', fullName: 'عمر خالد', phone: '+970590000010', rating: 4.8, ratingCount: 214, cats: ['plumbing', 'repair'], verified: true, premium: true },
+    { uid: 'seed_art_2', fullName: 'يوسف ناصر', phone: '+970590000011', rating: 4.6, ratingCount: 88, cats: ['cleaning'], verified: true, premium: false },
+    { uid: 'seed_art_3', fullName: 'حسان علي', phone: '+970590000012', rating: 4.4, ratingCount: 41, cats: ['electrical'], verified: false, premium: false },
+    { uid: 'seed_art_4', fullName: 'طارق منصور', phone: '+970590000013', rating: 4.9, ratingCount: 302, cats: ['ac', 'appliance'], verified: true, premium: true },
   ];
   for (const a of artisans) {
     await db.collection('users').doc(a.uid).set({
-      uid: a.uid, role: 'artisan', fullName: a.fullName, email: `${a.uid}@qareeb.app`, phone: '+9705000000',
+      uid: a.uid, role: 'artisan', fullName: a.fullName, phone: a.phone,
       locale: 'ar', status: 'active', verified: a.verified, rating: a.rating, ratingCount: a.ratingCount,
       location: { geopoint: new admin.firestore.GeoPoint(31.9075, 35.1997), geohash: 'sv9hv', address: 'رام الله' },
       createdAt: ts(120 * 864e5), updatedAt: now,

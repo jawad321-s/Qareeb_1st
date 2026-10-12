@@ -47,7 +47,6 @@ export const translations = {
     // auth
     'auth.welcomeBack': 'Welcome back',
     'auth.signInSubtitle': 'Sign in to continue to Qareeb.',
-    'auth.email': 'Email',
     'auth.password': 'Password',
     'auth.forgot': 'Forgot password?',
     'auth.signIn': 'Sign in',
@@ -82,6 +81,9 @@ export const translations = {
     'auth.bioPlaceholder': 'e.g. Certified plumber with 8 years of experience…',
     'auth.verifyNote': 'After signup you can upload your ID & certificates to earn the verified badge.',
     'auth.errCategories': 'Select at least one service',
+    'auth.errPhoneTaken': 'This number already has an account. Sign in instead.',
+    'auth.errRegisteredAsCustomer': 'This number is registered as a customer account. Sign in from the customer page.',
+    'auth.errRegisteredAsArtisan': 'This number is registered as an artisan account. Sign in from the artisan page.',
     // verification (artisan document upload)
     'vrf.title': 'Account verification',
     'vrf.subtitle': 'Upload your documents to earn the verified badge and win customer trust.',
@@ -175,7 +177,6 @@ export const translations = {
     'settings.english': 'English',
     'settings.notifications': 'NOTIFICATIONS',
     'settings.pushNotifs': 'Push notifications',
-    'settings.emailUpdates': 'Email updates',
     'settings.locationServices': 'Location services',
 
     // notifications
@@ -309,6 +310,7 @@ export const translations = {
     // edit profile
     'edit.title': 'Edit profile',
     'edit.changePhoto': 'Change photo',
+    'edit.phoneLocked': 'Your phone number is your account, so it can\'t be changed here.',
     'edit.changePassword': 'Change password',
 
     // change password
@@ -605,7 +607,6 @@ export const translations = {
     // auth
     'auth.welcomeBack': 'أهلاً بعودتك',
     'auth.signInSubtitle': 'سجّل الدخول للمتابعة إلى قريب.',
-    'auth.email': 'البريد الإلكتروني',
     'auth.password': 'كلمة المرور',
     'auth.forgot': 'نسيت كلمة المرور؟',
     'auth.signIn': 'تسجيل الدخول',
@@ -640,6 +641,9 @@ export const translations = {
     'auth.bioPlaceholder': 'مثال: سبّاك معتمد بخبرة 8 سنوات…',
     'auth.verifyNote': 'بعد التسجيل يمكنك رفع الهوية والشهادات للحصول على شارة التوثيق.',
     'auth.errCategories': 'اختر خدمة واحدة على الأقل',
+    'auth.errPhoneTaken': 'هذا الرقم مسجّل بحساب من قبل. سجّل الدخول بدلاً من ذلك.',
+    'auth.errRegisteredAsCustomer': 'هذا الرقم مسجّل كحساب زبون. ادخل من صفحة دخول الزبائن.',
+    'auth.errRegisteredAsArtisan': 'هذا الرقم مسجّل كحساب حرفي. ادخل من صفحة دخول الحرفيين.',
     // verification (artisan document upload)
     'vrf.title': 'توثيق الحساب',
     'vrf.subtitle': 'ارفع مستنداتك للحصول على شارة التوثيق وكسب ثقة الزبائن.',
@@ -733,7 +737,6 @@ export const translations = {
     'settings.english': 'English',
     'settings.notifications': 'الإشعارات',
     'settings.pushNotifs': 'الإشعارات الفورية',
-    'settings.emailUpdates': 'تحديثات البريد',
     'settings.locationServices': 'خدمات الموقع',
 
     // notifications
@@ -867,6 +870,7 @@ export const translations = {
     // edit profile
     'edit.title': 'تعديل الملف الشخصي',
     'edit.changePhoto': 'تغيير الصورة',
+    'edit.phoneLocked': 'رقم الجوال هو هوية حسابك، لذلك لا يمكن تغييره من هنا.',
     'edit.changePassword': 'تغيير كلمة المرور',
 
     // change password

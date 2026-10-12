@@ -1,7 +1,11 @@
 import { z } from 'zod';
+import { isValidPhone } from './phone';
+
+// The phone number is the only account identifier.
+const phone = z.string().refine(isValidPhone, 'Enter a valid phone number');
 
 export const loginSchema = z.object({
-  phone: z.string().min(9, 'Enter a valid phone number'),
+  phone,
   password: z.string().min(6, 'At least 6 characters'),
 });
 export type LoginInput = z.infer<typeof loginSchema>;
@@ -9,8 +13,7 @@ export type LoginInput = z.infer<typeof loginSchema>;
 export const registerSchema = z
   .object({
     fullName: z.string().min(2, 'Enter your full name'),
-    email: z.string().email('Enter a valid email'),
-    phone: z.string().min(9, 'Enter a valid phone number'),
+    phone,
     password: z.string().min(6, 'At least 6 characters'),
     confirmPassword: z.string(),
   })

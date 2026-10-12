@@ -12,6 +12,7 @@ import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
 import { Icon } from '@/components/ui/Icon';
 import { registerSchema, artisanRegisterSchema } from '@/lib/validation';
+import { api } from '@/services/api';
 import { useVerification } from '@/store/verification';
 import { CATEGORIES } from '@/constants/categories';
 import { useTheme } from '@/theme/ThemeProvider';
@@ -32,11 +33,10 @@ export default function Register() {
   const locale = useLocaleStore((s) => s.locale);
 
   const schema = useMemo(() => (isArtisan ? artisanRegisterSchema : registerSchema), [isArtisan]);
-  const { control, handleSubmit, getValues, formState: { errors } } = useForm<any>({
+  const { control, handleSubmit, getValues, setError, formState: { errors } } = useForm<any>({
     resolver: zodResolver(schema),
     defaultValues: {
       fullName: '',
-      email: '',
       phone: '',
       password: '',
       confirmPassword: '',
@@ -58,6 +58,13 @@ export default function Register() {
       return;
     }
     setLoading(true);
+    // One account per phone number: a number that already has one must sign in.
+    const taken = await api.isPhoneRegistered(getValues('phone')).catch(() => false);
+    if (taken) {
+      setLoading(false);
+      setError('phone', { message: t('auth.errPhoneTaken') });
+      return;
+    }
     // Persist the professional profile so verification (and Firestore) get it.
     if (isArtisan) {
       setArtisanDraft({
@@ -66,15 +73,13 @@ export default function Register() {
         bio: (getValues('bio') as string) || undefined,
       });
     }
-    // Simulate account creation, then move to OTP verification.
-    await new Promise((r) => setTimeout(r, 700));
+    // The account is created once the phone number is verified (OTP step).
     setLoading(false);
-    router.push({ pathname: '/(auth)/otp', params: { phone: getValues('phone'), role } });
+    router.push({ pathname: '/(auth)/otp', params: { phone: getValues('phone'), role, fullName: getValues('fullName') } });
   };
 
   const baseFields = [
     { name: 'fullName' as const, label: t('auth.fullName'), placeholder: 'ليلى خالد', icon: 'user' as const, kb: 'default' as const },
-    { name: 'email' as const, label: t('auth.email'), placeholder: 'you@example.com', icon: 'mail' as const, kb: 'email-address' as const },
     { name: 'phone' as const, label: t('auth.phone'), placeholder: '+970 5X XXX XXXX', icon: 'phone' as const, kb: 'phone-pad' as const },
   ];
 
@@ -101,7 +106,7 @@ export default function Register() {
                   placeholder={f.placeholder}
                   iconLeft={f.icon}
                   keyboardType={f.kb}
-                  autoCapitalize={f.name === 'email' ? 'none' : 'words'}
+                  autoCapitalize={f.name === 'phone' ? 'none' : 'words'}
                   value={value}
                   onChangeText={onChange}
                   onBlur={onBlur}

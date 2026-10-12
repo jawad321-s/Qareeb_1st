@@ -43,8 +43,7 @@ cms/{docId}
 | `uid` | string | == doc id |
 | `role` | `'customer' \| 'artisan' \| 'admin'` | drives app experience |
 | `fullName` | string | |
-| `email` | string | |
-| `phone` | string | E.164 |
+| `phone` | string | E.164 (`+970…`) — the account identity: one account per number, no email |
 | `photoUrl` | string? | Storage URL |
 | `location` | `{ geopoint: GeoPoint, geohash: string, address: string }` | last known |
 | `locale` | `'ar' \| 'en'` | default `ar` |

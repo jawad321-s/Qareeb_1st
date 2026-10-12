@@ -10,7 +10,9 @@ import { Avatar } from '@/components/ui/Avatar';
 import { Icon } from '@/components/ui/Icon';
 import { Text } from '@/components/ui/Text';
 import { useAuth } from '@/store/auth';
+import { displayPhone } from '@/lib/phone';
 import { useTheme } from '@/theme/ThemeProvider';
+import { radius } from '@/theme/tokens';
 import { useT } from '@/i18n';
 
 export default function EditProfile() {
@@ -19,8 +21,6 @@ export default function EditProfile() {
   const user = useAuth((s) => s.user)!;
   const updateUser = useAuth((s) => s.updateUser);
   const [fullName, setFullName] = useState(user.fullName);
-  const [email, setEmail] = useState(user.email);
-  const [phone, setPhone] = useState(user.phone);
   const [photo, setPhoto] = useState(user.photoUrl);
   const [saving, setSaving] = useState(false);
 
@@ -32,7 +32,7 @@ export default function EditProfile() {
   const save = async () => {
     setSaving(true);
     await new Promise((r) => setTimeout(r, 600));
-    updateUser({ fullName, email, phone, photoUrl: photo });
+    updateUser({ fullName, photoUrl: photo });
     setSaving(false);
     router.back();
   };
@@ -54,8 +54,22 @@ export default function EditProfile() {
 
       <View style={{ gap: 16 }}>
         <Input label={t('auth.fullName')} iconLeft="user" value={fullName} onChangeText={setFullName} />
-        <Input label={t('auth.email')} iconLeft="mail" value={email} onChangeText={setEmail} autoCapitalize="none" keyboardType="email-address" />
-        <Input label={t('auth.phone')} iconLeft="phone" value={phone} onChangeText={setPhone} keyboardType="phone-pad" />
+        {/* The phone number is the account itself, so it isn't editable here. */}
+        <View style={{ gap: 6 }}>
+          <Text variant="caption" tone="muted" style={{ marginLeft: 4 }}>
+            {t('auth.phone')}
+          </Text>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, height: 54, paddingHorizontal: 14, borderRadius: radius.lg, borderWidth: 1.5, borderColor: colors.border, backgroundColor: colors.surface2 }}>
+            <Icon name="phone" size={20} color={colors.muted} />
+            <Text variant="body" style={{ flex: 1 }}>
+              {displayPhone(user.phone)}
+            </Text>
+            <Icon name="lock" size={16} color={colors.muted} />
+          </View>
+          <Text variant="caption" tone="muted" style={{ marginLeft: 4 }}>
+            {t('edit.phoneLocked')}
+          </Text>
+        </View>
         <Button label={t('common.save')} onPress={save} loading={saving} style={{ marginTop: 8 }} />
         <Button label={t('edit.changePassword')} variant="ghost" iconLeft="lock" onPress={() => router.push('/(shared)/change-password')} />
       </View>

@@ -18,7 +18,6 @@ export const MOCK_CUSTOMER: AppUser = {
   uid: 'cust_1',
   role: 'customer',
   fullName: 'ليلى خالد',
-  email: 'layla@example.com',
   phone: '+970590000001',
   photoUrl: undefined,
   location: { latitude: 31.9038, longitude: 35.2034, geohash: 'sv9hv', address: 'الماصيون، رام الله' },
@@ -33,7 +32,7 @@ export const MOCK_CUSTOMER: AppUser = {
 
 // Customers from the demo artisan's past jobs (work history, conversations).
 const pastCustomer = (uid: string, fullName: string, address: string, latitude: number, longitude: number): AppUser => ({
-  uid, role: 'customer', fullName, email: `${uid}@example.com`, phone: '+97059000000' + uid.slice(-1),
+  uid, role: 'customer', fullName, phone: '+97059000000' + uid.slice(-1),
   location: { latitude, longitude, geohash: 'sv9hv', address },
   locale: 'ar', status: 'active', verified: true, rating: 4.7, ratingCount: 6, createdAt: mins(99999), updatedAt: now,
 });
@@ -45,10 +44,10 @@ export const MOCK_PAST_CUSTOMERS: AppUser[] = [
 ];
 
 export const MOCK_ARTISANS: AppUser[] = [
-  { uid: 'art_1', role: 'artisan', fullName: 'عمر خالد', email: 'omar@example.com', phone: '+970590000010', photoUrl: 'https://i.pravatar.cc/300?img=12', locale: 'ar', status: 'active', verified: true, rating: 4.8, ratingCount: 214, location: { latitude: 31.9075, longitude: 35.1997, geohash: 'sv9hv', address: 'رام الله' }, createdAt: mins(99999), updatedAt: now },
-  { uid: 'art_2', role: 'artisan', fullName: 'يوسف ناصر', email: 'yousef@example.com', phone: '+970590000011', photoUrl: 'https://i.pravatar.cc/300?img=33', locale: 'ar', status: 'active', verified: true, rating: 4.6, ratingCount: 88, location: { latitude: 31.9106, longitude: 35.2160, geohash: 'sv9hv', address: 'البيرة' }, createdAt: mins(99999), updatedAt: now },
-  { uid: 'art_3', role: 'artisan', fullName: 'حسان علي', email: 'hassan@example.com', phone: '+970590000012', photoUrl: 'https://i.pravatar.cc/300?img=15', locale: 'ar', status: 'active', verified: false, rating: 4.4, ratingCount: 41, location: { latitude: 31.8996, longitude: 35.2042, geohash: 'sv9hv', address: 'رام الله' }, createdAt: mins(99999), updatedAt: now },
-  { uid: 'art_4', role: 'artisan', fullName: 'طارق منصور', email: 'tariq@example.com', phone: '+970590000013', photoUrl: 'https://i.pravatar.cc/300?img=8', locale: 'ar', status: 'active', verified: true, rating: 4.9, ratingCount: 302, location: { latitude: 31.9152, longitude: 35.2071, geohash: 'sv9hv', address: 'رام الله' }, createdAt: mins(99999), updatedAt: now },
+  { uid: 'art_1', role: 'artisan', fullName: 'عمر خالد', phone: '+970590000010', photoUrl: 'https://i.pravatar.cc/300?img=12', locale: 'ar', status: 'active', verified: true, rating: 4.8, ratingCount: 214, location: { latitude: 31.9075, longitude: 35.1997, geohash: 'sv9hv', address: 'رام الله' }, createdAt: mins(99999), updatedAt: now },
+  { uid: 'art_2', role: 'artisan', fullName: 'يوسف ناصر', phone: '+970590000011', photoUrl: 'https://i.pravatar.cc/300?img=33', locale: 'ar', status: 'active', verified: true, rating: 4.6, ratingCount: 88, location: { latitude: 31.9106, longitude: 35.2160, geohash: 'sv9hv', address: 'البيرة' }, createdAt: mins(99999), updatedAt: now },
+  { uid: 'art_3', role: 'artisan', fullName: 'حسان علي', phone: '+970590000012', photoUrl: 'https://i.pravatar.cc/300?img=15', locale: 'ar', status: 'active', verified: false, rating: 4.4, ratingCount: 41, location: { latitude: 31.8996, longitude: 35.2042, geohash: 'sv9hv', address: 'رام الله' }, createdAt: mins(99999), updatedAt: now },
+  { uid: 'art_4', role: 'artisan', fullName: 'طارق منصور', phone: '+970590000013', photoUrl: 'https://i.pravatar.cc/300?img=8', locale: 'ar', status: 'active', verified: true, rating: 4.9, ratingCount: 302, location: { latitude: 31.9152, longitude: 35.2071, geohash: 'sv9hv', address: 'رام الله' }, createdAt: mins(99999), updatedAt: now },
 ];
 
 export const MOCK_ARTISAN_PROFILE: ArtisanProfile = {

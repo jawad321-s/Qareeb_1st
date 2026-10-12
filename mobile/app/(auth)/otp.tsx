@@ -8,14 +8,16 @@ import { Text } from '@/components/ui/Text';
 import { Button } from '@/components/ui/Button';
 import { useTheme } from '@/theme/ThemeProvider';
 import { useAuth } from '@/store/auth';
+import { displayPhone } from '@/lib/phone';
 import { useT } from '@/i18n';
 
 const LENGTH = 4;
 
 export default function Otp() {
   const { colors } = useTheme();
-  const { phone, role } = useLocalSearchParams<{ phone?: string; role?: string }>();
+  const { phone, role, fullName } = useLocalSearchParams<{ phone?: string; role?: string; fullName?: string }>();
   const signInAs = useAuth((s) => s.signInAs);
+  const register = useAuth((s) => s.register);
   const { t } = useT();
   const [code, setCode] = useState<string[]>(Array(LENGTH).fill(''));
   const [seconds, setSeconds] = useState(45);
@@ -41,9 +43,10 @@ export default function Otp() {
     setLoading(true);
     await new Promise((r) => setTimeout(r, 700));
     setLoading(false);
-    // Mock: any code verifies and signs the user into the matching app.
+    // Mock: any code verifies. The verified number becomes the new account.
     const isArtisan = role === 'artisan';
-    signInAs(isArtisan ? 'artisan' : 'customer');
+    if (phone && fullName) register({ phone, fullName, role: isArtisan ? 'artisan' : 'customer' });
+    else signInAs(isArtisan ? 'artisan' : 'customer');
     router.replace('/');
     // New artisans continue to document verification as the next step.
     if (isArtisan) setTimeout(() => router.push('/(shared)/verification'), 350);
@@ -55,7 +58,7 @@ export default function Otp() {
       <Animated.View entering={FadeInDown.duration(400)} style={{ gap: 8, marginBottom: 32 }}>
         <Text variant="h1">{t('otp.title')}</Text>
         <Text variant="body" tone="muted">
-          {t('otp.sentTo')} {phone ?? t('otp.yourPhone')}
+          {t('otp.sentTo')} {phone ? displayPhone(phone) : t('otp.yourPhone')}
         </Text>
       </Animated.View>
 

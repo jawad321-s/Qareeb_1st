@@ -53,7 +53,6 @@ export async function submitVerification(payload: VerificationSubmission): Promi
     id: uid,
     artisanId: uid,
     name: user.fullName,
-    email: user.email,
     phone: user.phone,
     categoryIds,
     category: categoryIds[0] ?? '',

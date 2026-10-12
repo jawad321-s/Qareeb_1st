@@ -25,7 +25,7 @@ export default function SettingsPage() {
         <div className="space-y-4">
           {[
             { label: t('set.platformName'), value: 'Qareeb' },
-            { label: t('set.supportEmail'), value: 'support@qareeb.app' },
+            { label: t('set.supportPhone'), value: '+970 59 000 0000' },
             { label: t('set.currency'), value: 'ILS (₪)' },
             { label: t('set.commission'), value: '12%' },
           ].map((f) => (

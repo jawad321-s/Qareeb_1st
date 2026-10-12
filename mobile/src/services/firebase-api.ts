@@ -11,7 +11,8 @@ import type {
 } from '@/types';
 import type { mockApi } from '@/mock/api';
 import { getDb } from '@/lib/firebase';
-import { useAuth } from '@/store/auth';
+import { accountRole, useAuth } from '@/store/auth';
+import { normalizePhone } from '@/lib/phone';
 import { MOCK_CUSTOMER } from '@/mock/data';
 import { SERVICES, toServiceId } from '@/constants/services';
 import { ACTIVE_STATUSES, NEXT_STATUS, canCancelRequest, isOverdue } from '@/lib/requestRules';
@@ -342,5 +343,13 @@ export const firebaseApi: typeof mockApi = {
       completed: completed.sort((a, b) => b.date - a.date),
       rejected: rejected.sort((a, b) => b.date - a.date),
     };
+  },
+
+  async isPhoneRegistered(phone): Promise<boolean> {
+    if (accountRole(phone)) return true;
+    // Phone numbers are stored normalized (see lib/phone). The rules may refuse
+    // this read without a Firebase sign-in; then only this device is checked.
+    const snap = await getDocs(query(collection(db(), 'users'), where('phone', '==', normalizePhone(phone)), limit(1))).catch(() => null);
+    return !!snap && !snap.empty;
   },
 };

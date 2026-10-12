@@ -28,7 +28,7 @@ export default function Login() {
   const tint = isDark ? accent.tintDark : accent.tintLight;
 
   const [loading, setLoading] = useState(false);
-  const { control, handleSubmit, formState: { errors } } = useForm<LoginInput>({
+  const { control, handleSubmit, setError, formState: { errors } } = useForm<LoginInput>({
     resolver: zodResolver(loginSchema),
     defaultValues: { phone: '', password: '' },
   });
@@ -38,6 +38,12 @@ export default function Login() {
     try {
       await signIn(data.phone, data.password, role);
       router.replace('/');
+    } catch (e) {
+      // The number belongs to an account of the other type.
+      const msg = String((e as Error)?.message);
+      if (msg.startsWith('registered-as-')) {
+        setError('phone', { message: t(msg === 'registered-as-artisan' ? 'auth.errRegisteredAsArtisan' : 'auth.errRegisteredAsCustomer') });
+      } else throw e;
     } finally {
       setLoading(false);
     }

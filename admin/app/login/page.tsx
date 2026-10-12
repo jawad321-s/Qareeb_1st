@@ -2,24 +2,25 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Languages, Lock, Mail } from 'lucide-react';
+import { Languages, Lock, Phone } from 'lucide-react';
 import { Button, Input } from '@/components/ui/primitives';
 import { signIn } from '@/lib/session';
+import { isValidPhone, normalizePhone } from '@/lib/phone';
 import { useT } from '@/lib/i18n';
 
 export default function LoginPage() {
   const router = useRouter();
   const { t, locale, toggle } = useT();
-  const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
 
   const submit = () => {
-    if (!/^\S+@\S+\.\S+$/.test(email) || password.length < 6) {
+    if (!isValidPhone(phone) || password.length < 6) {
       setError(t('login.errInvalid'));
       return;
     }
-    signIn(email);
+    signIn(normalizePhone(phone));
     router.push('/');
   };
 
@@ -61,14 +62,15 @@ export default function LoginPage() {
           </div>
           <div className="space-y-4">
             <div className="relative">
-              <Mail className="pointer-events-none absolute start-3 top-1/2 z-10 h-4 w-4 -translate-y-1/2 text-muted" />
+              <Phone className="pointer-events-none absolute start-3 top-1/2 z-10 h-4 w-4 -translate-y-1/2 text-muted" />
               <Input
-                value={email}
-                onChange={(e) => { setEmail(e.target.value); setError(''); }}
+                value={phone}
+                onChange={(e) => { setPhone(e.target.value); setError(''); }}
                 onKeyDown={(e) => e.key === 'Enter' && submit()}
-                placeholder={t('login.email')}
-                type="email"
-                autoComplete="email"
+                placeholder={t('login.phone')}
+                type="tel"
+                inputMode="tel"
+                autoComplete="tel"
                 className="ps-10"
               />
             </div>

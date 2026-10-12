@@ -162,7 +162,8 @@ request is matched to the artisans nearest its location.
 
 ## 6. Security Model
 
-- **Authentication** — Firebase Auth (email/password + phone OTP). Custom claims
+- **Authentication** — Firebase Auth by phone number (OTP). There is no email:
+  the phone number is the account identity, one account per number. Custom claims
   (`role`, `verified`) set via Cloud Functions on approval.
 - **Authorization** — Firestore Security Rules enforce per-collection access:
   customers read their own requests, artisans read requests in matched geohashes,

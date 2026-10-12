@@ -18,7 +18,7 @@ export interface AppUser {
   uid: string;
   role: UserRole;
   fullName: string;
-  email: string;
+  /** The account identity — one account per phone number. */
   phone: string;
   photoUrl?: string;
   location?: GeoLocation;

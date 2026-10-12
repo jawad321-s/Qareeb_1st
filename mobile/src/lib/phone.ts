@@ -1,6 +1,6 @@
-// The phone number is the account's identity: one account per number. Every
-// comparison goes through `normalizePhone`, so "0599 123 456", "+970599123456"
-// and "00970599123456" are the same account.
+// The phone number is the account's identity: a number holds one customer and
+// one separate artisan account. Every comparison goes through `normalizePhone`,
+// so "0599 123 456", "+970599123456" and "00970599123456" are the same number.
 
 /** Canonical form: "+" and digits only, with a local 05… number turned into +970 5…. */
 export function normalizePhone(input: string): string {

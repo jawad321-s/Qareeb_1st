@@ -81,9 +81,8 @@ export const translations = {
     'auth.bioPlaceholder': 'e.g. Certified plumber with 8 years of experience…',
     'auth.verifyNote': 'After signup you can upload your ID & certificates to earn the verified badge.',
     'auth.errCategories': 'Select at least one service',
-    'auth.errPhoneTaken': 'This number already has an account. Sign in instead.',
-    'auth.errRegisteredAsCustomer': 'This number is registered as a customer account. Sign in from the customer page.',
-    'auth.errRegisteredAsArtisan': 'This number is registered as an artisan account. Sign in from the artisan page.',
+    'auth.errPhoneTakenCustomer': 'This number already has a customer account. Sign in instead.',
+    'auth.errPhoneTakenArtisan': 'This number already has an artisan account. Sign in instead.',
     // verification (artisan document upload)
     'vrf.title': 'Account verification',
     'vrf.subtitle': 'Upload your documents to earn the verified badge and win customer trust.',
@@ -641,9 +640,8 @@ export const translations = {
     'auth.bioPlaceholder': 'مثال: سبّاك معتمد بخبرة 8 سنوات…',
     'auth.verifyNote': 'بعد التسجيل يمكنك رفع الهوية والشهادات للحصول على شارة التوثيق.',
     'auth.errCategories': 'اختر خدمة واحدة على الأقل',
-    'auth.errPhoneTaken': 'هذا الرقم مسجّل بحساب من قبل. سجّل الدخول بدلاً من ذلك.',
-    'auth.errRegisteredAsCustomer': 'هذا الرقم مسجّل كحساب زبون. ادخل من صفحة دخول الزبائن.',
-    'auth.errRegisteredAsArtisan': 'هذا الرقم مسجّل كحساب حرفي. ادخل من صفحة دخول الحرفيين.',
+    'auth.errPhoneTakenCustomer': 'هذا الرقم لديه حساب زبون من قبل. سجّل الدخول بدلاً من ذلك.',
+    'auth.errPhoneTakenArtisan': 'هذا الرقم لديه حساب حرفي من قبل. سجّل الدخول بدلاً من ذلك.',
     // verification (artisan document upload)
     'vrf.title': 'توثيق الحساب',
     'vrf.subtitle': 'ارفع مستنداتك للحصول على شارة التوثيق وكسب ثقة الزبائن.',

@@ -7,7 +7,7 @@ export type UserStatus = 'active' | 'suspended' | 'pending';
 export interface AdminUser {
   uid: string;
   fullName: string;
-  /** The account identity — one account per phone number. */
+  /** The account identity with the role: a number holds one customer and one artisan account. */
   phone: string;
   role: UserRole;
   status: UserStatus;

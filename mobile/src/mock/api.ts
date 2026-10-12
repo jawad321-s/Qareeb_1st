@@ -13,7 +13,7 @@ import {
 import { NEXT_STATUS, canCancelRequest, isChatOpen, isOverdue } from '@/lib/requestRules';
 import { completedRecord, rejectedRecord } from '@/lib/jobHistory';
 import { kv } from '@/lib/mmkv';
-import { accountRole } from '@/store/auth';
+import { hasAccount } from '@/store/auth';
 
 // In-memory mutable stores so the app behaves like a real backend during a session.
 let requests = [...MOCK_REQUESTS];
@@ -312,9 +312,9 @@ export const mockApi = {
     });
   },
 
-  /** Whether a phone number already has an account — one account per number. */
-  async isPhoneRegistered(phone: string): Promise<boolean> {
+  /** Whether a number already has an account of this type (one customer and one artisan account per number). */
+  async isPhoneRegistered(phone: string, role: 'customer' | 'artisan'): Promise<boolean> {
     await delay(300);
-    return !!accountRole(phone);
+    return hasAccount(phone, role);
   },
 };

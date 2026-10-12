@@ -19,11 +19,16 @@ interface AuthState {
   hydrate: () => void;
 }
 
-/** Which role a phone number is registered under: a demo account or one created on this device. */
-export function accountRole(phone: string): UserRole | undefined {
+/**
+ * Whether a number already has an account of this type — a demo account or one
+ * created on this device. A number can hold one customer and one artisan account.
+ */
+export function hasAccount(phone: string, role: UserRole): boolean {
   const n = normalizePhone(phone);
-  const demo = [MOCK_CUSTOMER, ...MOCK_PAST_CUSTOMERS, ...MOCK_ARTISANS].find((u) => normalizePhone(u.phone) === n);
-  return localAccounts.get(n)?.role ?? demo?.role;
+  return (
+    !!localAccounts.get(n, role) ||
+    [MOCK_CUSTOMER, ...MOCK_PAST_CUSTOMERS, ...MOCK_ARTISANS].some((u) => u.role === role && normalizePhone(u.phone) === n)
+  );
 }
 
 export const useAuth = create<AuthState>((set, get) => ({
@@ -42,20 +47,18 @@ export const useAuth = create<AuthState>((set, get) => ({
     set({ user });
   },
 
-  // Sign in with a phone number from the role's own sign-in page. A number
-  // belongs to one account, so a number already registered with the other
-  // role is refused (error 'registered-as-customer' / 'registered-as-artisan').
+  // Sign in with a phone number from the role's own sign-in page, which opens
+  // that number's account of this type (its customer and artisan accounts are
+  // separate).
   signIn: async (phone, _password, role) => {
-    const owner = accountRole(phone);
-    if (owner && owner !== role) throw new Error(`registered-as-${owner}`);
     const base = role === 'artisan' ? MOCK_ARTISANS[0] : MOCK_CUSTOMER;
-    const user = { ...base, fullName: localAccounts.get(phone)?.fullName ?? base.fullName, phone: normalizePhone(phone) };
+    const user = { ...base, fullName: localAccounts.get(phone, role)?.fullName ?? base.fullName, phone: normalizePhone(phone) };
     kv.set(SESSION_KEY, user);
     set({ user });
   },
 
   register: ({ phone, fullName, role }) => {
-    localAccounts.add(phone, { role, fullName });
+    localAccounts.add(phone, role, fullName);
     // The demo backs every new account with the role's demo data.
     const base = role === 'artisan' ? MOCK_ARTISANS[0] : MOCK_CUSTOMER;
     const user = { ...base, fullName, phone: normalizePhone(phone), createdAt: Date.now(), updatedAt: Date.now() };

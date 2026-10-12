@@ -58,11 +58,12 @@ export default function Register() {
       return;
     }
     setLoading(true);
-    // One account per phone number: a number that already has one must sign in.
-    const taken = await api.isPhoneRegistered(getValues('phone')).catch(() => false);
+    // A number holds one account of each type: a customer and an artisan
+    // account are separate, but the same type can't be registered twice.
+    const taken = await api.isPhoneRegistered(getValues('phone'), role).catch(() => false);
     if (taken) {
       setLoading(false);
-      setError('phone', { message: t('auth.errPhoneTaken') });
+      setError('phone', { message: t(isArtisan ? 'auth.errPhoneTakenArtisan' : 'auth.errPhoneTakenCustomer') });
       return;
     }
     // Persist the professional profile so verification (and Firestore) get it.

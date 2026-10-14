@@ -15,7 +15,7 @@ import { registerSchema, artisanRegisterSchema } from '@/lib/validation';
 import { api } from '@/services/api';
 import { useVerification } from '@/store/verification';
 import { useAuth } from '@/store/auth';
-import { AuthError } from '@/services/auth.service';
+import { authErrorMessage } from '@/services/auth.service';
 import { config } from '@/lib/config';
 import { CATEGORIES } from '@/constants/categories';
 import { useTheme } from '@/theme/ThemeProvider';
@@ -95,7 +95,7 @@ export default function Register() {
           artisan,
         });
       } catch (err) {
-        setFormError(t(err instanceof AuthError ? err.key : 'auth.errGeneric'));
+        setFormError(authErrorMessage(err, t));
         setLoading(false);
         return;
       }

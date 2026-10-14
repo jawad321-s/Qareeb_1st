@@ -12,7 +12,7 @@ import { Button } from '@/components/ui/Button';
 import { Icon } from '@/components/ui/Icon';
 import { loginSchema, type LoginInput } from '@/lib/validation';
 import { useAuth } from '@/store/auth';
-import { AuthError } from '@/services/auth.service';
+import { authErrorMessage } from '@/services/auth.service';
 import { useT } from '@/i18n';
 import type { TranslationKey } from '@/i18n/translations';
 import { roleAccents } from '@/theme/tokens';
@@ -43,7 +43,7 @@ export default function Login() {
       await signIn(data.phone, data.password, role);
       router.replace('/');
     } catch (err) {
-      setFormError(t(err instanceof AuthError ? err.key : 'auth.errGeneric'));
+      setFormError(authErrorMessage(err, t));
     } finally {
       setLoading(false);
     }

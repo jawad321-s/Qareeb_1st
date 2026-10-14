@@ -24,9 +24,16 @@ const loginEmail = (phone: string, role: UserRole) => `${role}-${nationalNumber(
 
 /** Thrown with a translation key so screens can show a localised message. */
 export class AuthError extends Error {
-  constructor(public key: AuthErrorKey) {
+  /** `detail` carries the raw Firebase error code for unexpected failures. */
+  constructor(public key: AuthErrorKey, public detail?: string) {
     super(key);
   }
+}
+
+/** Localised message for a failed sign-in/sign-up, with the raw code when unexpected. */
+export function authErrorMessage(err: unknown, t: (key: AuthErrorKey) => string): string {
+  if (!(err instanceof AuthError)) return t('auth.errGeneric');
+  return t(err.key) + (err.detail ? ` (${err.detail})` : '');
 }
 export type AuthErrorKey =
   | 'auth.errInvalidCredentials'
@@ -53,7 +60,8 @@ function toAuthError(err: unknown): AuthError {
     case 'auth/too-many-requests':
       return new AuthError('auth.errTooMany');
     default:
-      return new AuthError('auth.errGeneric');
+      console.warn('[auth]', err);
+      return new AuthError('auth.errGeneric', code || (err as Error)?.message || 'unknown');
   }
 }
 

@@ -2,8 +2,8 @@
 // each phone number maps to an internal email-style login on Firebase's
 // Email/Password provider, so no SMS is needed and it works in Expo Go.
 // The login is per role, so one phone number can hold both a customer and an
-// artisan account (separate uids, profiles and passwords).
-// The user's real email stays on their profile (users/{uid}.email).
+// artisan account (separate uids, profiles and passwords). The phone number is
+// the only account identity; the internal address is never shown.
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
@@ -12,13 +12,15 @@ import {
 } from 'firebase/auth';
 import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
 import { getAuthClient, getDb } from '@/lib/firebase';
-import { normalizePhone } from '@/lib/validation';
+import { nationalNumber, normalizePhone } from '@/lib/phone';
 import { openVerificationRequest } from './verification.service';
 import type { AppUser, UserRole } from '@/types';
 
 const LOGIN_DOMAIN = 'phone.qareeb.app';
 
-const loginEmail = (phone: string, role: UserRole) => `${role}-${normalizePhone(phone)}@${LOGIN_DOMAIN}`;
+// Keyed by the national number so accounts created before numbers were
+// stored as +970… keep signing in.
+const loginEmail = (phone: string, role: UserRole) => `${role}-${nationalNumber(phone)}@${LOGIN_DOMAIN}`;
 
 /** Thrown with a translation key so screens can show a localised message. */
 export class AuthError extends Error {
@@ -91,16 +93,16 @@ export async function signInWithPhone(phone: string, password: string, role: Use
 export interface RegisterParams {
   role: 'customer' | 'artisan';
   fullName: string;
-  email: string;
   phone: string;
-  password: string;
-  locale: AppUser['locale'];
+  /** Required on the live backend; the demo flow has no passwords. */
+  password?: string;
+  locale?: AppUser['locale'];
   artisan?: { categoryIds: string[]; experienceYears?: number; bio?: string };
 }
 
 export async function registerWithPhone(p: RegisterParams): Promise<AppUser> {
   try {
-    const { user } = await createUserWithEmailAndPassword(auth(), loginEmail(p.phone, p.role), p.password);
+    const { user } = await createUserWithEmailAndPassword(auth(), loginEmail(p.phone, p.role), p.password ?? '');
     await updateProfile(user, { displayName: p.fullName }).catch(() => {});
 
     const now = Date.now();
@@ -108,9 +110,8 @@ export async function registerWithPhone(p: RegisterParams): Promise<AppUser> {
       uid: user.uid,
       role: p.role,
       fullName: p.fullName.trim(),
-      email: p.email.trim(),
-      phone: p.phone.trim(),
-      locale: p.locale,
+      phone: normalizePhone(p.phone),
+      locale: p.locale ?? 'ar',
       status: 'active',
       verified: false,
       rating: 0,

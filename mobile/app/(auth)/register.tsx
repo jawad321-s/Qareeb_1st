@@ -12,6 +12,7 @@ import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
 import { Icon } from '@/components/ui/Icon';
 import { registerSchema, artisanRegisterSchema } from '@/lib/validation';
+import { api } from '@/services/api';
 import { useVerification } from '@/store/verification';
 import { useAuth } from '@/store/auth';
 import { AuthError } from '@/services/auth.service';
@@ -37,11 +38,10 @@ export default function Register() {
   const locale = useLocaleStore((s) => s.locale);
 
   const schema = useMemo(() => (isArtisan ? artisanRegisterSchema : registerSchema), [isArtisan]);
-  const { control, handleSubmit, getValues, formState: { errors } } = useForm<any>({
+  const { control, handleSubmit, getValues, setError, formState: { errors } } = useForm<any>({
     resolver: zodResolver(schema),
     defaultValues: {
       fullName: '',
-      email: '',
       phone: '',
       password: '',
       confirmPassword: '',
@@ -65,6 +65,14 @@ export default function Register() {
     }
     setLoading(true);
     setFormError(undefined);
+    // A number holds one account of each type: a customer and an artisan
+    // account are separate, but the same type can't be registered twice.
+    const taken = await api.isPhoneRegistered(getValues('phone'), role).catch(() => false);
+    if (taken) {
+      setLoading(false);
+      setError('phone', { message: t(isArtisan ? 'auth.errPhoneTakenArtisan' : 'auth.errPhoneTakenCustomer') });
+      return;
+    }
     const artisan = isArtisan
       ? {
           categoryIds,
@@ -81,7 +89,6 @@ export default function Register() {
         await register({
           role: isArtisan ? 'artisan' : 'customer',
           fullName: getValues('fullName'),
-          email: getValues('email'),
           phone: getValues('phone'),
           password: getValues('password'),
           locale,
@@ -99,15 +106,13 @@ export default function Register() {
       return;
     }
 
-    // Mock: simulate account creation, then move to OTP verification.
-    await new Promise((r) => setTimeout(r, 700));
+    // Demo: the account is created once the phone number is verified (OTP step).
     setLoading(false);
-    router.push({ pathname: '/(auth)/otp', params: { phone: getValues('phone'), role } });
+    router.push({ pathname: '/(auth)/otp', params: { phone: getValues('phone'), role, fullName: getValues('fullName') } });
   };
 
   const baseFields = [
     { name: 'fullName' as const, label: t('auth.fullName'), placeholder: 'ليلى خالد', icon: 'user' as const, kb: 'default' as const },
-    { name: 'email' as const, label: t('auth.email'), placeholder: 'you@example.com', icon: 'mail' as const, kb: 'email-address' as const },
     { name: 'phone' as const, label: t('auth.phone'), placeholder: '+970 5X XXX XXXX', icon: 'phone' as const, kb: 'phone-pad' as const },
   ];
 
@@ -134,7 +139,7 @@ export default function Register() {
                   placeholder={f.placeholder}
                   iconLeft={f.icon}
                   keyboardType={f.kb}
-                  autoCapitalize={f.name === 'email' ? 'none' : 'words'}
+                  autoCapitalize={f.name === 'phone' ? 'none' : 'words'}
                   value={value}
                   onChangeText={onChange}
                   onBlur={onBlur}

@@ -9,6 +9,7 @@ import { Avatar } from '@/components/ui/Avatar';
 import { Icon, type IconName } from '@/components/ui/Icon';
 import { Card } from '@/components/ui/Card';
 import { FloatingBlobs } from '@/components/ui/FloatingBlobs';
+import { displayPhone } from '@/lib/phone';
 import { useAuth } from '@/store/auth';
 import { useThemeStore } from '@/theme/ThemeProvider';
 import { useTheme } from '@/theme/ThemeProvider';
@@ -78,7 +79,7 @@ export default function Profile() {
                 {user.fullName}
               </Text>
               <Text variant="caption" style={{ color: 'rgba(255,255,255,0.85)' }}>
-                {user.email}
+                {displayPhone(user.phone)}
               </Text>
               <View style={{ flexDirection: 'row', gap: 24, marginTop: 8 }}>
                 <Stat label={t('profile.orders')} value="18" />

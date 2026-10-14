@@ -6,6 +6,7 @@
   "scripts": {
     "seed": "node seed/seed.mjs",
     "set-role": "node scripts/set-role.mjs",
+    "create-admin": "node scripts/create-admin.mjs",
     "deploy": "firebase deploy --only firestore:rules,firestore:indexes,storage",
     "emulate": "firebase emulators:start"
   },

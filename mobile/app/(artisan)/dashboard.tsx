@@ -14,7 +14,7 @@ import { SectionHeader } from '@/components/ui/SectionHeader';
 import { useTabBarSpace } from '@/components/ui/TabBar';
 import { RequestCard } from '@/components/domain/RequestCard';
 import { CardSkeleton } from '@/components/feedback/Skeleton';
-import { useNearbyRequests } from '@/hooks/queries';
+import { useJobHistory, useNearbyRequests } from '@/hooks/queries';
 import { useAuth } from '@/store/auth';
 import { useTheme } from '@/theme/ThemeProvider';
 import { useT } from '@/i18n';
@@ -31,6 +31,7 @@ export default function ArtisanDashboard() {
   const subscription = useMySubscription(user.uid);
   const currentPlan = subscription.isActive && subscription.record ? planById(subscription.record.planId) : undefined;
   const nearby = useNearbyRequests(user.uid, user.location);
+  const history = useJobHistory(user.uid);
   const tabBarSpace = useTabBarSpace();
 
   // Artisans are matched to jobs by distance, so ask for the device location
@@ -49,8 +50,9 @@ export default function ArtisanDashboard() {
 
   const stats = [
     { icon: 'wallet' as const, label: t('artisan.thisMonth'), value: formatMoney(1240000), color: colors.tint },
-    { icon: 'check-circle' as const, label: t('artisan.completed'), value: '214', color: '#10B981' },
-    { icon: 'star' as const, label: t('profile.rating'), value: '4.8', color: '#F59E0B' },
+    // Same count as the income screen's work history.
+    { icon: 'check-circle' as const, label: t('artisan.completed'), value: history.data ? String(history.data.completed.length) : '…', color: '#10B981' },
+    { icon: 'star' as const, label: t('profile.rating'), value: user.rating.toFixed(1), color: '#F59E0B' },
   ];
 
   return (

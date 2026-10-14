@@ -14,7 +14,9 @@ import {
   type RegisterParams,
 } from '@/services/auth.service';
 import type { AppUser, UserRole } from '@/types';
-import { MOCK_ARTISANS, MOCK_CUSTOMER } from '@/mock/data';
+import { MOCK_ARTISANS, MOCK_CUSTOMER, MOCK_PAST_CUSTOMERS } from '@/mock/data';
+import { normalizePhone } from '@/lib/phone';
+import { localAccounts } from './accounts';
 
 const SESSION_KEY = 'qareeb.session';
 
@@ -23,11 +25,26 @@ interface AuthState {
   hydrated: boolean;
   signInAs: (role: UserRole) => void;
   signIn: (phone: string, password: string, role: UserRole) => Promise<void>;
-  /** Live backend only: creates the Firebase account and profile documents. */
+  /**
+   * Create an account for a phone number. Live: the Firebase account and its
+   * profile documents. Demo: a device-local account (after the OTP step).
+   */
   register: (params: RegisterParams) => Promise<void>;
   signOut: () => void;
   updateUser: (patch: Partial<AppUser>) => void;
   hydrate: () => void;
+}
+
+/**
+ * Whether a number already has an account of this type — a demo account or one
+ * created on this device. A number can hold one customer and one artisan account.
+ */
+export function hasAccount(phone: string, role: UserRole): boolean {
+  const n = normalizePhone(phone);
+  return (
+    !!localAccounts.get(n, role) ||
+    [MOCK_CUSTOMER, ...MOCK_PAST_CUSTOMERS, ...MOCK_ARTISANS].some((u) => u.role === role && normalizePhone(u.phone) === n)
+  );
 }
 
 export const useAuth = create<AuthState>((set, get) => ({
@@ -64,8 +81,9 @@ export const useAuth = create<AuthState>((set, get) => ({
     set({ user });
   },
 
-  // Sign in with a phone number. Each account type has its own sign-in entry,
-  // so the chosen role — not the credentials — decides which app is opened.
+  // Sign in with a phone number from the role's own sign-in page, which opens
+  // that number's account of this type (its customer and artisan accounts are
+  // separate).
   signIn: async (phone, password, role) => {
     if (!config.useMock) {
       const user = await signInWithPhone(phone, password, role);
@@ -74,13 +92,23 @@ export const useAuth = create<AuthState>((set, get) => ({
       return;
     }
     const base = role === 'artisan' ? MOCK_ARTISANS[0] : MOCK_CUSTOMER;
-    const user = { ...base, phone };
+    const user = { ...base, fullName: localAccounts.get(phone, role)?.fullName ?? base.fullName, phone: normalizePhone(phone) };
     kv.set(SESSION_KEY, user);
     set({ user });
   },
 
   register: async (params) => {
-    const user = await registerWithPhone(params);
+    if (!config.useMock) {
+      const user = await registerWithPhone(params);
+      kv.set(SESSION_KEY, user);
+      set({ user });
+      return;
+    }
+    const { phone, fullName, role } = params;
+    localAccounts.add(phone, role, fullName);
+    // The demo backs every new account with the role's demo data.
+    const base = role === 'artisan' ? MOCK_ARTISANS[0] : MOCK_CUSTOMER;
+    const user = { ...base, fullName, phone: normalizePhone(phone), createdAt: Date.now(), updatedAt: Date.now() };
     kv.set(SESSION_KEY, user);
     set({ user });
   },

@@ -386,4 +386,11 @@ export const firebaseApi: typeof mockApi = {
       rejected: rejected.sort((a, b) => b.date - a.date),
     };
   },
+
+  async isPhoneRegistered(_phone, _role): Promise<boolean> {
+    // Firebase Auth already refuses a second account of the same type for a
+    // number (auth/email-already-in-use → auth.errPhoneInUse on sign-up), and
+    // the rules don't let a signed-out visitor look numbers up.
+    return false;
+  },
 };

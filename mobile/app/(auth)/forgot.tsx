@@ -4,6 +4,7 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
+import { isValidPhone } from '@/lib/phone';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { Screen } from '@/components/ui/Screen';
 import { Header } from '@/components/ui/Header';
@@ -17,7 +18,7 @@ import { useTheme } from '@/theme/ThemeProvider';
 import { roleAccents } from '@/theme/tokens';
 
 // Sign-in is by phone number, so the reset goes to the phone too.
-const schema = z.object({ phone: z.string().min(9, 'Enter a valid phone number') });
+const schema = z.object({ phone: z.string().refine(isValidPhone, 'Enter a valid phone number') });
 type Form = z.infer<typeof schema>;
 
 export default function Forgot() {

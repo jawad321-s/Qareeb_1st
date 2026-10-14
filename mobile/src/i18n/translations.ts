@@ -47,7 +47,6 @@ export const translations = {
     // auth
     'auth.welcomeBack': 'Welcome back',
     'auth.signInSubtitle': 'Sign in to continue to Qareeb.',
-    'auth.email': 'Email',
     'auth.password': 'Password',
     'auth.forgot': 'Forgot password?',
     'auth.signIn': 'Sign in',
@@ -90,6 +89,8 @@ export const translations = {
     'auth.errTooMany': 'Too many attempts. Please wait a moment and try again',
     'auth.errGeneric': 'Something went wrong. Please try again',
     'forgot.liveNote': 'Password reset by SMS is coming soon. For now, contact Qareeb support to reset your password.',
+    'auth.errPhoneTakenCustomer': 'This number already has a customer account. Sign in instead.',
+    'auth.errPhoneTakenArtisan': 'This number already has an artisan account. Sign in instead.',
     // verification (artisan document upload)
     'vrf.title': 'Account verification',
     'vrf.subtitle': 'Upload your documents to earn the verified badge and win customer trust.',
@@ -183,7 +184,6 @@ export const translations = {
     'settings.english': 'English',
     'settings.notifications': 'NOTIFICATIONS',
     'settings.pushNotifs': 'Push notifications',
-    'settings.emailUpdates': 'Email updates',
     'settings.locationServices': 'Location services',
 
     // notifications
@@ -319,6 +319,7 @@ export const translations = {
     // edit profile
     'edit.title': 'Edit profile',
     'edit.changePhoto': 'Change photo',
+    'edit.phoneLocked': 'Your phone number is your account, so it can\'t be changed here.',
     'edit.changePassword': 'Change password',
 
     // change password
@@ -621,7 +622,6 @@ export const translations = {
     // auth
     'auth.welcomeBack': 'أهلاً بعودتك',
     'auth.signInSubtitle': 'سجّل الدخول للمتابعة إلى قريب.',
-    'auth.email': 'البريد الإلكتروني',
     'auth.password': 'كلمة المرور',
     'auth.forgot': 'نسيت كلمة المرور؟',
     'auth.signIn': 'تسجيل الدخول',
@@ -664,6 +664,8 @@ export const translations = {
     'auth.errTooMany': 'محاولات كثيرة. انتظر قليلاً ثم حاول مجدداً',
     'auth.errGeneric': 'حدث خطأ ما. حاول مجدداً',
     'forgot.liveNote': 'استعادة كلمة المرور عبر SMS قريباً. حالياً تواصل مع دعم قريب لإعادة تعيين كلمة المرور.',
+    'auth.errPhoneTakenCustomer': 'هذا الرقم لديه حساب زبون من قبل. سجّل الدخول بدلاً من ذلك.',
+    'auth.errPhoneTakenArtisan': 'هذا الرقم لديه حساب حرفي من قبل. سجّل الدخول بدلاً من ذلك.',
     // verification (artisan document upload)
     'vrf.title': 'توثيق الحساب',
     'vrf.subtitle': 'ارفع مستنداتك للحصول على شارة التوثيق وكسب ثقة الزبائن.',
@@ -757,7 +759,6 @@ export const translations = {
     'settings.english': 'English',
     'settings.notifications': 'الإشعارات',
     'settings.pushNotifs': 'الإشعارات الفورية',
-    'settings.emailUpdates': 'تحديثات البريد',
     'settings.locationServices': 'خدمات الموقع',
 
     // notifications
@@ -893,6 +894,7 @@ export const translations = {
     // edit profile
     'edit.title': 'تعديل الملف الشخصي',
     'edit.changePhoto': 'تغيير الصورة',
+    'edit.phoneLocked': 'رقم الجوال هو هوية حسابك، لذلك لا يمكن تغييره من هنا.',
     'edit.changePassword': 'تغيير كلمة المرور',
 
     // change password

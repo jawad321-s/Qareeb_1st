@@ -53,7 +53,6 @@ export async function submitVerification(payload: VerificationSubmission): Promi
     id: uid,
     artisanId: uid,
     name: user.fullName,
-    email: user.email,
     phone: user.phone,
     categoryIds,
     category: categoryIds[0] ?? '',
@@ -79,7 +78,7 @@ export async function submitVerification(payload: VerificationSubmission): Promi
  * exists — submitVerification later adds the documents to the same record.
  */
 export async function openVerificationRequest(
-  user: Pick<AppUser, 'uid' | 'fullName' | 'email' | 'phone'>,
+  user: Pick<AppUser, 'uid' | 'fullName' | 'phone'>,
   categoryIds: string[],
 ): Promise<void> {
   const db = getDb();
@@ -91,7 +90,6 @@ export async function openVerificationRequest(
     id: user.uid,
     artisanId: user.uid,
     name: user.fullName,
-    email: user.email,
     phone: user.phone,
     categoryIds,
     category: categoryIds[0] ?? '',

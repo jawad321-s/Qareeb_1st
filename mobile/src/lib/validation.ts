@@ -1,24 +1,12 @@
 import { z } from 'zod';
+import { isValidPhone } from './phone';
 
-/**
- * Normalises local and international forms of the same number to one key:
- * 0599123456, +970599123456, 00972599123456 → 599123456.
- */
-export function normalizePhone(phone: string): string {
-  let d = phone.replace(/\D/g, '');
-  if (d.startsWith('00')) d = d.slice(2);
-  if (d.startsWith('970') || d.startsWith('972')) d = d.slice(3);
-  return d.replace(/^0+/, '');
-}
-
-/** Palestinian mobile numbers: Jawwal (059) and Ooredoo (056). */
-export const isPalestinianMobile = (phone: string) => /^5[69]\d{7}$/.test(normalizePhone(phone));
-
-// The message is a translation key; screens pass it through t().
-const phoneSchema = z.string().trim().refine(isPalestinianMobile, 'auth.errPhoneFormat');
+// The phone number is the only account identifier. The message is a
+// translation key; screens pass it through t().
+const phone = z.string().trim().refine(isValidPhone, 'auth.errPhoneFormat');
 
 export const loginSchema = z.object({
-  phone: phoneSchema,
+  phone,
   password: z.string().min(6, 'At least 6 characters'),
 });
 export type LoginInput = z.infer<typeof loginSchema>;
@@ -26,8 +14,7 @@ export type LoginInput = z.infer<typeof loginSchema>;
 export const registerSchema = z
   .object({
     fullName: z.string().min(2, 'Enter your full name'),
-    email: z.string().email('Enter a valid email'),
-    phone: phoneSchema,
+    phone,
     password: z.string().min(6, 'At least 6 characters'),
     confirmPassword: z.string(),
   })

@@ -7,7 +7,8 @@ export type UserStatus = 'active' | 'suspended' | 'pending';
 export interface AdminUser {
   uid: string;
   fullName: string;
-  email: string;
+  /** The account identity with the role: a number holds one customer and one artisan account. */
+  phone: string;
   role: UserRole;
   status: UserStatus;
   verified: boolean;
@@ -64,7 +65,7 @@ export const USERS: AdminUser[] = Array.from({ length: 48 }).map((_, i) => {
   return {
     uid: `u_${i + 1}`,
     fullName: n,
-    email: `user${i + 1}@qareeb.app`,
+    phone: `+97059${String(1000000 + i * 7919).slice(-7)}`,
     role,
     status: (['active', 'active', 'active', 'suspended', 'pending'] as UserStatus[])[rnd(0, 5)],
     verified: role === 'artisan' ? Math.random() > 0.35 : true,

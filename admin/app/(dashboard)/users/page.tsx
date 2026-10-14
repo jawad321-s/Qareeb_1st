@@ -7,6 +7,7 @@ import { DataTable } from '@/components/ui/data-table';
 import { Badge, StatusPill } from '@/components/ui/primitives';
 import { USERS, type AdminUser } from '@/lib/mock-data';
 import { timeAgo } from '@/lib/utils';
+import { formatPhone } from '@/lib/phone';
 import { useT } from '@/lib/i18n';
 
 export default function UsersPage() {
@@ -23,7 +24,9 @@ export default function UsersPage() {
             </div>
             <div>
               <p className="font-medium leading-tight">{row.original.fullName}</p>
-              <p className="text-xs text-muted">{row.original.email}</p>
+              <p className="text-xs text-muted">
+                <span dir="ltr">{formatPhone(row.original.phone)}</span>
+              </p>
             </div>
           </div>
         ),

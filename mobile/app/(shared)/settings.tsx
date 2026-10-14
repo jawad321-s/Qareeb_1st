@@ -16,7 +16,6 @@ export default function Settings() {
   const { mode, setMode } = useThemeStore();
   const { t, locale, setLocale } = useT();
   const [push, setPush] = useState(true);
-  const [email, setEmail] = useState(false);
   const [location, setLocation] = useState(true);
 
   const themeOptions: { key: ThemeMode; label: string; icon: IconName }[] = [
@@ -77,7 +76,6 @@ export default function Settings() {
       </Text>
       <Card padded={false} style={{ marginBottom: 22 }}>
         <ToggleRow icon="bell" label={t('settings.pushNotifs')} value={push} onChange={setPush} first />
-        <ToggleRow icon="mail" label={t('settings.emailUpdates')} value={email} onChange={setEmail} />
         <ToggleRow icon="map-pin" label={t('settings.locationServices')} value={location} onChange={setLocation} />
       </Card>
 

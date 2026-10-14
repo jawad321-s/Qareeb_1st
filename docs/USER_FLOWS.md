@@ -10,7 +10,10 @@ Welcome ─┬─► Pick account type ─► Register ─► OTP verify ─► 
          Login ─► Forgot password ─► reset link ─► Login
 ```
 
-- Sign-in is by **phone number** — there is no email login.
+- Accounts are by **phone number** only — there is no email anywhere. A number
+  can hold one customer account and one separate artisan account: registering
+  the same type twice for a number is refused, and each role's sign-in page
+  opens that number's account of its own type.
 - Each account type has its own sign-in entry: the role picker (`mode=login`)
   routes to `/(auth)/login?role=…`, and the chosen role decides which app opens.
 - Session persists in MMKV; the entry screen redirects by `role` on cold start.

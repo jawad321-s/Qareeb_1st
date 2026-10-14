@@ -12,6 +12,7 @@ import { Icon } from '@/components/ui/Icon';
 import { FloatingBlobs } from '@/components/ui/FloatingBlobs';
 import { GlassView } from '@/components/ui/GlassView';
 import { useAuth } from '@/store/auth';
+import { config } from '@/lib/config';
 import { useT } from '@/i18n';
 import { gradients } from '@/theme/tokens';
 
@@ -125,22 +126,25 @@ export default function Welcome() {
           <Animated.View entering={FadeInDown.delay(700).duration(500)} style={{ gap: 12, paddingBottom: 12 }}>
             <Button label={t('welcome.getStarted')} variant="secondary" iconRight="arrow-right" onPress={() => router.push('/(auth)/role')} />
             <Button label={t('welcome.haveAccount')} variant="ghost" onPress={() => router.push({ pathname: '/(auth)/role', params: { mode: 'login' } })} />
-            <View style={{ flexDirection: 'row', justifyContent: 'center', gap: 16, marginTop: 4 }}>
-              <Text
-                variant="caption"
-                style={{ color: 'rgba(255,255,255,0.85)', fontFamily: 'Inter_600SemiBold' }}
-                onPress={() => enterDemo('customer')}
-              >
-                Demo: Customer
-              </Text>
-              <Text
-                variant="caption"
-                style={{ color: 'rgba(255,255,255,0.85)', fontFamily: 'Inter_600SemiBold' }}
-                onPress={() => enterDemo('artisan')}
-              >
-                Demo: Artisan
-              </Text>
-            </View>
+            {/* Demo accounts only exist on mock data — hidden on the live backend. */}
+            {config.useMock && (
+              <View style={{ flexDirection: 'row', justifyContent: 'center', gap: 16, marginTop: 4 }}>
+                <Text
+                  variant="caption"
+                  style={{ color: 'rgba(255,255,255,0.85)', fontFamily: 'Inter_600SemiBold' }}
+                  onPress={() => enterDemo('customer')}
+                >
+                  Demo: Customer
+                </Text>
+                <Text
+                  variant="caption"
+                  style={{ color: 'rgba(255,255,255,0.85)', fontFamily: 'Inter_600SemiBold' }}
+                  onPress={() => enterDemo('artisan')}
+                >
+                  Demo: Artisan
+                </Text>
+              </View>
+            )}
           </Animated.View>
         </SafeAreaView>
       </LinearGradient>

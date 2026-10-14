@@ -11,6 +11,10 @@ import { EmptyState } from '@/components/feedback/EmptyState';
 import { timeAgo } from '@/lib/format';
 import { useTheme } from '@/theme/ThemeProvider';
 import { useT } from '@/i18n';
+import { config } from '@/lib/config';
+import { useAuth } from '@/store/auth';
+import { markAllNotificationsRead, markNotificationRead, useLiveNotifications } from '@/services/notifications.service';
+import type { AppNotification } from '@/types';
 
 type Notif = { id: string; icon: IconName; color: string; title: string; body: string; ts: number; read: boolean; route?: string };
 
@@ -49,14 +53,45 @@ const artisanNotifs = (tint: string): Record<'en' | 'ar', Notif[]> => ({
   ],
 });
 
+// Icon + colour per notification type sent by Cloud Functions.
+const TYPE_STYLE: Record<string, { icon: IconName; color?: string }> = {
+  newJob: { icon: 'briefcase' },
+  newOffer: { icon: 'wallet' },
+  offerAccepted: { icon: 'check-circle', color: '#10B981' },
+  onTheWay: { icon: 'navigation' },
+  working: { icon: 'tools' },
+  completed: { icon: 'star', color: '#F59E0B' },
+  cancelledByOther: { icon: 'x-circle', color: '#EF4444' },
+  noOffers: { icon: 'alert-circle', color: '#EF4444' },
+  newMessage: { icon: 'message' },
+};
+
+const toNotif = (n: AppNotification, tint: string): Notif => {
+  const style = TYPE_STYLE[n.type] ?? { icon: 'bell' as IconName };
+  return { id: n.id, icon: style.icon, color: style.color ?? tint, title: n.title, body: n.body, ts: n.createdAt, read: n.read, route: n.data?.route };
+};
+
 export default function Notifications() {
   const { colors, role } = useTheme();
   const { t, locale } = useT();
-  const notifs = (role === 'artisan' ? artisanNotifs : customerNotifs)(colors.tint)[locale];
+  const uid = useAuth((s) => s.user?.uid);
+  const live = useLiveNotifications(config.useMock ? undefined : uid);
+  const notifs = config.useMock
+    ? (role === 'artisan' ? artisanNotifs : customerNotifs)(colors.tint)[locale]
+    : (live ?? []).map((n) => toNotif(n, colors.tint));
+
+  const open = (n: Notif) => {
+    if (!config.useMock && uid && !n.read) markNotificationRead(uid, n.id).catch(() => {});
+    if (n.route) router.push(n.route as any);
+  };
+  const markAll = () => {
+    if (config.useMock || !uid) return;
+    markAllNotificationsRead(uid, notifs.filter((n) => !n.read).map((n) => n.id)).catch(() => {});
+  };
 
   return (
     <Screen scroll>
-      <Header showBack title={t('notif.title')} rightIcon="check-circle" />
+      <Header showBack title={t('notif.title')} rightIcon="check-circle" onRightPress={markAll} />
       {notifs.length === 0 ? (
         <View style={{ marginTop: 60 }}>
           <EmptyState icon="bell" title={t('notif.empty')} description={t('notif.emptyDesc')} />
@@ -65,7 +100,7 @@ export default function Notifications() {
         <View style={{ gap: 12 }}>
           {notifs.map((n, i) => (
             <Animated.View key={n.id} entering={FadeInDown.delay(i * 60).duration(400)}>
-              <Card onPress={n.route ? () => router.push(n.route as any) : undefined} style={{ flexDirection: 'row', gap: 12, alignItems: 'flex-start', backgroundColor: n.read ? undefined : colors.tint + '0C' }}>
+              <Card onPress={n.route || !n.read ? () => open(n) : undefined} style={{ flexDirection: 'row', gap: 12, alignItems: 'flex-start', backgroundColor: n.read ? undefined : colors.tint + '0C' }}>
                 <View style={{ width: 42, height: 42, borderRadius: 12, backgroundColor: n.color + '20', alignItems: 'center', justifyContent: 'center' }}>
                   <Icon name={n.icon} size={20} color={n.color} />
                 </View>

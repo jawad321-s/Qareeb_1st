@@ -117,10 +117,30 @@ export default function RequestDetail() {
           )}
           <View style={{ flexDirection: 'row', gap: 20, flexWrap: 'wrap' }}>
             <Info icon="wallet" label={`${formatMoney(request.budget.min)}–${formatMoney(request.budget.max)}`} />
-            <Info icon="map-pin" label={request.location.address} />
+            <Info icon="map-pin" label={request.location?.address ?? '—'} />
           </View>
         </Card>
       </Animated.View>
+
+      {/* Dispatch status (Cloud Functions): search radius and response deadline. */}
+      {isPending && request.dispatch && (request.offerCount ?? 0) === 0 && (
+        <Card style={{ marginTop: 16, flexDirection: 'row', gap: 10, alignItems: 'center', backgroundColor: colors.tint + '0C' }}>
+          <Icon name="navigation" size={18} color={colors.tint} />
+          <Text variant="caption" style={{ flex: 1 }}>
+            {t('req.searching')
+              .replace('{km}', String(request.dispatch.radiusKm))
+              .replace('{min}', String(Math.max(0, Math.ceil((request.dispatch.expiresAt - Date.now()) / 60_000))))}
+          </Text>
+        </Card>
+      )}
+      {isCancelled && request.cancelReason === 'NO_OFFERS' && (
+        <Card style={{ marginTop: 16, flexDirection: 'row', gap: 10, alignItems: 'center', backgroundColor: '#EF444412' }}>
+          <Icon name="alert-circle" size={18} color="#EF4444" />
+          <Text variant="caption" style={{ flex: 1 }}>
+            {t('req.noOffersCancelled')}
+          </Text>
+        </Card>
+      )}
 
       {/* Tracking (accepted through completed — nothing to track once cancelled) */}
       {!isPending && !isCancelled && (

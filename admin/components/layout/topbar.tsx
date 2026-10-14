@@ -13,8 +13,8 @@ export function Topbar() {
   const router = useRouter();
   const [dark, setDark] = useState(false);
 
-  const logout = () => {
-    signOut();
+  const logout = async () => {
+    await signOut();
     router.replace('/login');
   };
 

@@ -1,8 +1,9 @@
 import { z } from 'zod';
 import { isValidPhone } from './phone';
 
-// The phone number is the only account identifier.
-const phone = z.string().refine(isValidPhone, 'Enter a valid phone number');
+// The phone number is the only account identifier. The message is a
+// translation key; screens pass it through t().
+const phone = z.string().trim().refine(isValidPhone, 'auth.errPhoneFormat');
 
 export const loginSchema = z.object({
   phone,

@@ -106,6 +106,12 @@ export interface ServiceRequest {
   status: RequestStatus;
   acceptedOfferId?: string;
   acceptedArtisanId?: string;
+  /** Set by Cloud Functions: current search radius and response deadline. */
+  dispatch?: { radiusKm: number; startedAt: number; expiresAt: number };
+  notifiedArtisanIds?: string[];
+  /** NO_OFFERS when the response window ran out (Cloud Functions). */
+  cancelReason?: 'NO_OFFERS';
+  cancelledBy?: string | null;
   offerCount: number;
   completedAt?: number;
   /** Completed by the system because the artisan didn't finish it in time. */

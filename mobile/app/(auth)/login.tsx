@@ -12,7 +12,9 @@ import { Button } from '@/components/ui/Button';
 import { Icon } from '@/components/ui/Icon';
 import { loginSchema, type LoginInput } from '@/lib/validation';
 import { useAuth } from '@/store/auth';
+import { AuthError } from '@/services/auth.service';
 import { useT } from '@/i18n';
+import type { TranslationKey } from '@/i18n/translations';
 import { roleAccents } from '@/theme/tokens';
 import { useTheme } from '@/theme/ThemeProvider';
 import type { UserRole } from '@/types';
@@ -28,6 +30,7 @@ export default function Login() {
   const tint = isDark ? accent.tintDark : accent.tintLight;
 
   const [loading, setLoading] = useState(false);
+  const [formError, setFormError] = useState<string | undefined>();
   const { control, handleSubmit, formState: { errors } } = useForm<LoginInput>({
     resolver: zodResolver(loginSchema),
     defaultValues: { phone: '', password: '' },
@@ -35,9 +38,12 @@ export default function Login() {
 
   const onSubmit = async (data: LoginInput) => {
     setLoading(true);
+    setFormError(undefined);
     try {
       await signIn(data.phone, data.password, role);
       router.replace('/');
+    } catch (err) {
+      setFormError(t(err instanceof AuthError ? err.key : 'auth.errGeneric'));
     } finally {
       setLoading(false);
     }
@@ -89,7 +95,7 @@ export default function Login() {
                 value={value}
                 onChangeText={onChange}
                 onBlur={onBlur}
-                error={errors.phone?.message}
+                error={errors.phone?.message && t(errors.phone.message as TranslationKey)}
               />
             )}
           />
@@ -116,6 +122,12 @@ export default function Login() {
           >
             {t('auth.forgot')}
           </Text>
+
+          {formError && (
+            <Text variant="caption" tone="danger" center>
+              {formError}
+            </Text>
+          )}
 
           <Button
             label={t('auth.signIn')}

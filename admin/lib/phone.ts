@@ -10,8 +10,11 @@ export function normalizePhone(input: string): string {
   return d ? '+' + d : '';
 }
 
-/** A Palestinian mobile number (+970 or +972, then 5 and eight more digits). */
-export const isValidPhone = (input: string) => /^\+97[02]5\d{8}$/.test(normalizePhone(input));
+/** A Palestinian mobile number: Jawwal (059) or Ooredoo (056), as +970 or +972. */
+export const isValidPhone = (input: string) => /^\+97[02]5[69]\d{7}$/.test(normalizePhone(input));
+
+/** The number without its country code ("599123456") — the sign-in key. */
+export const nationalNumber = (input: string) => normalizePhone(input).replace(/^\+97[02]/, '');
 
 /** "+970 59 000 0001" */
 export function formatPhone(phone: string): string {

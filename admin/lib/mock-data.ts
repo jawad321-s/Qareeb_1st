@@ -25,6 +25,9 @@ export interface VerificationItem {
   category: string;
   submittedAt: number;
   status: 'pending' | 'approved' | 'rejected';
+  phone?: string;
+  /** False until the artisan uploads ID / certificates (needs Storage). */
+  hasDocuments?: boolean;
 }
 
 export interface AdminRequest {

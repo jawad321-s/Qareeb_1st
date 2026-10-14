@@ -62,6 +62,12 @@ export default function CreateRequest() {
   };
 
   const submit = async () => {
+    // Artisans are matched by distance, so a request needs the customer's
+    // location. New accounts have none until they grant it.
+    if (!user.location) {
+      router.push('/(shared)/location-permission');
+      return;
+    }
     const preferredTime = when === 'asap' ? Date.now() + 3600_000 : when === 'today' ? Date.now() + 3600_000 * 5 : Date.now() + 3600_000 * 24;
     const req = await create.mutateAsync({
       customerId: user.uid,
@@ -70,7 +76,7 @@ export default function CreateRequest() {
       title: title.trim(),
       description: description.trim(),
       images,
-      location: user.location!,
+      location: user.location,
       preferredTime,
       budget: { min: Number(budgetMin) * 100, max: Number(budgetMax) * 100 },
     });
@@ -245,7 +251,12 @@ export default function CreateRequest() {
           </View>
         ) : (
           <View style={{ flex: 1 }}>
-            <Button label={t('create.submit')} iconRight="send" loading={create.isPending} onPress={submit} />
+            <Button
+              label={user.location ? t('create.submit') : t('home.setLocation')}
+              iconRight={user.location ? 'send' : 'map-pin'}
+              loading={create.isPending}
+              onPress={submit}
+            />
           </View>
         )}
       </View>

@@ -4,8 +4,8 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Languages, Lock, Phone } from 'lucide-react';
 import { Button, Input } from '@/components/ui/primitives';
-import { signIn } from '@/lib/session';
-import { isValidPhone, normalizePhone } from '@/lib/phone';
+import { signIn, SignInError } from '@/lib/session';
+import { isValidPhone } from '@/lib/phone';
 import { useT } from '@/lib/i18n';
 
 export default function LoginPage() {
@@ -14,14 +14,37 @@ export default function LoginPage() {
   const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  const submit = () => {
+  const submit = async () => {
+    if (loading) return;
     if (!isValidPhone(phone) || password.length < 6) {
       setError(t('login.errInvalid'));
       return;
     }
-    signIn(normalizePhone(phone));
-    router.push('/');
+    setLoading(true);
+    try {
+      await signIn(phone, password);
+      router.push('/');
+    } catch (err) {
+      const code = err instanceof SignInError ? err.code : 'generic';
+      const detail = err instanceof SignInError && err.detail ? ` (${err.detail})` : '';
+      setError(
+        t(
+          code === 'invalid'
+            ? 'login.errCredentials'
+            : code === 'notAdmin'
+              ? 'login.errNotAdmin'
+              : code === 'network'
+                ? 'login.errNetwork'
+                : code === 'tooMany'
+                  ? 'login.errTooMany'
+                  : 'login.errGeneric',
+        ) + (code === 'generic' ? detail : ''),
+      );
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -87,7 +110,7 @@ export default function LoginPage() {
               />
             </div>
             {error && <p className="text-xs font-medium text-red-500">{error}</p>}
-            <Button className="w-full" onClick={submit}>
+            <Button className="w-full" onClick={submit} disabled={loading}>
               {t('login.signIn')}
             </Button>
           </div>

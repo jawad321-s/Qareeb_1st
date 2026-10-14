@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { getSession } from '@/lib/session';
+import { waitForSession } from '@/lib/session';
 
 /**
  * Client-side gate for the dashboard: unauthenticated visitors are bounced to
@@ -13,11 +13,15 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    if (!getSession()) {
-      router.replace('/login');
-      return;
-    }
-    setReady(true);
+    let active = true;
+    waitForSession().then((session) => {
+      if (!active) return;
+      if (!session) router.replace('/login');
+      else setReady(true);
+    });
+    return () => {
+      active = false;
+    };
   }, [router]);
 
   if (!ready) return null;

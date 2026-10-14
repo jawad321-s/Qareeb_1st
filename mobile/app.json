@@ -19,6 +19,7 @@
     },
     "android": {
       "package": "com.qareeb.app",
+      "googleServicesFile": "./google-services.json",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#031746"
@@ -38,6 +39,12 @@
       "expo-router",
       "expo-location",
       "expo-font",
+      [
+        "expo-notifications",
+        {
+          "color": "#2563EB"
+        }
+      ],
       [
         "expo-splash-screen",
         {

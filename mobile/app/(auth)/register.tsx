@@ -12,7 +12,8 @@ import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
 import { Icon } from '@/components/ui/Icon';
 import { registerSchema, artisanRegisterSchema } from '@/lib/validation';
-import { api } from '@/services/api';
+import { useAuth } from '@/store/auth';
+import { authErrorKey, AuthError } from '@/services/auth.service';
 import { useVerification } from '@/store/verification';
 import { CATEGORIES } from '@/constants/categories';
 import { useTheme } from '@/theme/ThemeProvider';
@@ -51,6 +52,7 @@ export default function Register() {
   };
 
   const setArtisanDraft = useVerification((s) => s.setArtisanDraft);
+  const createAccount = useAuth((s) => s.createAccount);
 
   const onSubmit = async () => {
     if (isArtisan && categoryIds.length === 0) {
@@ -58,25 +60,24 @@ export default function Register() {
       return;
     }
     setLoading(true);
+    const artisan = isArtisan
+      ? { categoryIds, experienceYears: Number(getValues('experience')) || undefined, bio: (getValues('bio') as string) || undefined }
+      : undefined;
     // A number holds one account of each type: a customer and an artisan
     // account are separate, but the same type can't be registered twice.
-    const taken = await api.isPhoneRegistered(getValues('phone'), role).catch(() => false);
-    if (taken) {
+    try {
+      await createAccount({ phone: getValues('phone'), password: getValues('password'), fullName: getValues('fullName'), role, artisan });
+    } catch (e) {
       setLoading(false);
-      setError('phone', { message: t(isArtisan ? 'auth.errPhoneTakenArtisan' : 'auth.errPhoneTakenCustomer') });
+      const taken = e instanceof AuthError && e.code === 'phone-taken';
+      setError('phone', { message: t(taken ? (isArtisan ? 'auth.errPhoneTakenArtisan' : 'auth.errPhoneTakenCustomer') : authErrorKey(e)) });
       return;
     }
-    // Persist the professional profile so verification (and Firestore) get it.
-    if (isArtisan) {
-      setArtisanDraft({
-        categoryIds,
-        experienceYears: Number(getValues('experience')) || undefined,
-        bio: (getValues('bio') as string) || undefined,
-      });
-    }
-    // The account is created once the phone number is verified (OTP step).
+    // Persist the professional profile so verification gets it.
+    if (artisan) setArtisanDraft(artisan);
     setLoading(false);
-    router.push({ pathname: '/(auth)/otp', params: { phone: getValues('phone'), role, fullName: getValues('fullName') } });
+    // The new account opens once the number is confirmed (OTP step).
+    router.push({ pathname: '/(auth)/otp', params: { phone: getValues('phone'), role } });
   };
 
   const baseFields = [

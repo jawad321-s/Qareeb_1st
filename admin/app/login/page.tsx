@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Languages, Lock, Phone } from 'lucide-react';
 import { Button, Input } from '@/components/ui/primitives';
 import { signIn } from '@/lib/session';
-import { isValidPhone, normalizePhone } from '@/lib/phone';
+import { isValidPhone } from '@/lib/phone';
 import { useT } from '@/lib/i18n';
 
 export default function LoginPage() {
@@ -15,13 +15,22 @@ export default function LoginPage() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
 
-  const submit = () => {
+  const [loading, setLoading] = useState(false);
+
+  const submit = async () => {
     if (!isValidPhone(phone) || password.length < 6) {
       setError(t('login.errInvalid'));
       return;
     }
-    signIn(normalizePhone(phone));
-    router.push('/');
+    setLoading(true);
+    try {
+      await signIn(phone, password);
+      router.push('/');
+    } catch (e) {
+      const code = (e as Error).message;
+      setError(t(code === 'not-admin' ? 'login.errNotAdmin' : code === 'network' ? 'login.errNetwork' : 'login.errCredentials'));
+      setLoading(false);
+    }
   };
 
   return (
@@ -87,7 +96,7 @@ export default function LoginPage() {
               />
             </div>
             {error && <p className="text-xs font-medium text-red-500">{error}</p>}
-            <Button className="w-full" onClick={submit}>
+            <Button className="w-full" onClick={submit} disabled={loading}>
               {t('login.signIn')}
             </Button>
           </div>

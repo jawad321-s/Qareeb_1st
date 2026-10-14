@@ -10,7 +10,8 @@ Welcome ─┬─► Pick account type ─► Register ─► OTP verify ─► 
          Login ─► Forgot password ─► reset link ─► Login
 ```
 
-- Accounts are by **phone number** only — there is no email anywhere. A number
+- Accounts are by **phone number** + password — no email is asked for or shown
+  anywhere (Firebase keeps an internal id derived from the number). A number
   can hold one customer account and one separate artisan account: registering
   the same type twice for a number is refused, and each role's sign-in page
   opens that number's account of its own type.

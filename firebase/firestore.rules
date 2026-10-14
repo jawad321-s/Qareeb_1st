@@ -3,7 +3,9 @@ rules_version = '2';
 // ─────────────────────────────────────────────────────────────────────────────
 // Qareeb — Cloud Firestore Security Rules
 // Model: customers own their requests; artisans read pending requests & manage
-// their own offers; admins (custom claim) have full read + moderated writes.
+// their own offers; admins have full read + moderated writes.
+// Accounts sign in with Firebase Auth (phone number + password); a user's role
+// comes from their users/{uid} doc, which they can never change themselves.
 // ─────────────────────────────────────────────────────────────────────────────
 service cloud.firestore {
   match /databases/{database}/documents {
@@ -15,11 +17,16 @@ service cloud.firestore {
     function uid() {
       return request.auth.uid;
     }
+    // The signed-in user's role, from their own users doc (no Cloud Functions
+    // needed to set custom claims). An admin custom claim is honoured too.
+    function userRole() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role;
+    }
     function isAdmin() {
-      return isSignedIn() && request.auth.token.role == 'admin';
+      return isSignedIn() && (request.auth.token.get('role', '') == 'admin' || userRole() == 'admin');
     }
     function isArtisan() {
-      return isSignedIn() && request.auth.token.role == 'artisan';
+      return isSignedIn() && userRole() == 'artisan';
     }
     function existing() {
       return resource.data;
@@ -34,9 +41,9 @@ service cloud.firestore {
 
     // ── users/{uid} ──────────────────────────────────────────────────────────
     match /users/{userId} {
-      // A user reads their own doc; admins read all. Public profile fields of
-      // artisans are exposed through a separate query path in the app.
-      allow read: if isSignedIn() && (uid() == userId || isAdmin());
+      // Any signed-in user can read profiles: customers see the artisans they
+      // deal with and artisans see their customers (name, rating, photo).
+      allow read: if isSignedIn();
       allow create: if isSignedIn() && uid() == userId
                     && incoming().role in ['customer', 'artisan'];
       allow update: if isSignedIn() && (
@@ -61,12 +68,17 @@ service cloud.firestore {
     // ── artisanProfiles/{uid} ────────────────────────────────────────────────
     match /artisanProfiles/{artisanId} {
       allow read: if isSignedIn();
-      allow create, update: if isSignedIn() && (
-                              (uid() == artisanId
-                                // verificationStatus & premium are admin-controlled.
-                                && incoming().verificationStatus == (existing() != null ? existing().verificationStatus : 'unsubmitted')
-                                && incoming().premium == (existing() != null ? existing().premium : false))
-                              || isAdmin());
+      // verificationStatus & premium are admin-controlled.
+      allow create: if isSignedIn() && (
+                      (uid() == artisanId
+                        && incoming().verificationStatus == 'unsubmitted'
+                        && incoming().premium == false)
+                      || isAdmin());
+      allow update: if isSignedIn() && (
+                      (uid() == artisanId
+                        && incoming().verificationStatus == existing().verificationStatus
+                        && incoming().premium == existing().premium)
+                      || isAdmin());
       allow delete: if isAdmin();
     }
 
@@ -98,7 +110,11 @@ service cloud.firestore {
       allow update: if isSignedIn() && (
                       existing().customerId == uid()   // cancel / accept an offer
                       || isAdmin()
-                      || (isArtisan() && existing().acceptedArtisanId == uid())); // status progression
+                      || (isArtisan() && existing().acceptedArtisanId == uid()) // status progression
+                      // An artisan sending an offer bumps the open request's offer count.
+                      || (isArtisan() && existing().status == 'PENDING'
+                          && incoming().diff(existing()).affectedKeys().hasOnly(['offerCount', 'updatedAt'])
+                          && incoming().offerCount == existing().offerCount + 1));
       allow delete: if isAdmin();
 
       match /messages/{messageId} {

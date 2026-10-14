@@ -15,9 +15,8 @@ const LENGTH = 4;
 
 export default function Otp() {
   const { colors } = useTheme();
-  const { phone, role, fullName } = useLocalSearchParams<{ phone?: string; role?: string; fullName?: string }>();
-  const signInAs = useAuth((s) => s.signInAs);
-  const register = useAuth((s) => s.register);
+  const { phone, role } = useLocalSearchParams<{ phone?: string; role?: string }>();
+  const finishRegistration = useAuth((s) => s.finishRegistration);
   const { t } = useT();
   const [code, setCode] = useState<string[]>(Array(LENGTH).fill(''));
   const [seconds, setSeconds] = useState(45);
@@ -43,10 +42,13 @@ export default function Otp() {
     setLoading(true);
     await new Promise((r) => setTimeout(r, 700));
     setLoading(false);
-    // Mock: any code verifies. The verified number becomes the new account.
+    // Mock: any code verifies. It opens the account created on the register
+    // screen; without one (e.g. the app was reloaded here) sign in instead.
     const isArtisan = role === 'artisan';
-    if (phone && fullName) register({ phone, fullName, role: isArtisan ? 'artisan' : 'customer' });
-    else signInAs(isArtisan ? 'artisan' : 'customer');
+    if (!finishRegistration()) {
+      router.replace({ pathname: '/(auth)/login', params: { role: isArtisan ? 'artisan' : 'customer' } });
+      return;
+    }
     router.replace('/');
     // New artisans continue to document verification as the next step.
     if (isArtisan) setTimeout(() => router.push('/(shared)/verification'), 350);

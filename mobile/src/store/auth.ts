@@ -1,81 +1,87 @@
 import { create } from 'zustand';
 import { kv } from '@/lib/mmkv';
-import type { AppUser, UserRole } from '@/types';
-import { MOCK_ARTISANS, MOCK_CUSTOMER, MOCK_PAST_CUSTOMERS } from '@/mock/data';
-import { normalizePhone } from '@/lib/phone';
-import { localAccounts } from './accounts';
+import { config } from '@/lib/config';
+import { authService, type AccountRole, type NewAccount } from '@/services/auth.service';
+import type { AppUser } from '@/types';
 
 const SESSION_KEY = 'qareeb.session';
 
 interface AuthState {
   user: AppUser | null;
   hydrated: boolean;
-  signInAs: (role: UserRole) => void;
-  signIn: (phone: string, password: string, role: UserRole) => Promise<void>;
-  /** Create the account for a verified phone number (after the OTP step). */
-  register: (input: { phone: string; fullName: string; role: UserRole }) => void;
+  /** Account just created on the register screen, waiting for the OTP step. */
+  pending: AppUser | null;
+  /** Demo entry: the role's demo account. */
+  signInAs: (role: AccountRole) => Promise<void>;
+  signIn: (phone: string, password: string, role: AccountRole) => Promise<void>;
+  /** Create the account (throws AuthError('phone-taken')); it opens after the OTP step. */
+  createAccount: (input: NewAccount) => Promise<void>;
+  /** Called by the OTP step: opens the account just created. False if there is none. */
+  finishRegistration: () => boolean;
   signOut: () => void;
   updateUser: (patch: Partial<AppUser>) => void;
   hydrate: () => void;
 }
 
-/**
- * Whether a number already has an account of this type — a demo account or one
- * created on this device. A number can hold one customer and one artisan account.
- */
-export function hasAccount(phone: string, role: UserRole): boolean {
-  const n = normalizePhone(phone);
-  return (
-    !!localAccounts.get(n, role) ||
-    [MOCK_CUSTOMER, ...MOCK_PAST_CUSTOMERS, ...MOCK_ARTISANS].some((u) => u.role === role && normalizePhone(u.phone) === n)
-  );
-}
+let unwatch: (() => void) | null = null;
 
-export const useAuth = create<AuthState>((set, get) => ({
-  user: null,
-  hydrated: false,
-
-  hydrate: () => {
-    const saved = kv.get<AppUser>(SESSION_KEY);
-    set({ user: saved ?? null, hydrated: true });
-  },
-
-  // Demo helper: instantly enter the app as a customer or artisan.
-  signInAs: (role) => {
-    const user = role === 'artisan' ? { ...MOCK_ARTISANS[0] } : { ...MOCK_CUSTOMER };
+export const useAuth = create<AuthState>((set, get) => {
+  const open = (user: AppUser) => {
     kv.set(SESSION_KEY, user);
-    set({ user });
-  },
-
-  // Sign in with a phone number from the role's own sign-in page, which opens
-  // that number's account of this type (its customer and artisan accounts are
-  // separate).
-  signIn: async (phone, _password, role) => {
-    const base = role === 'artisan' ? MOCK_ARTISANS[0] : MOCK_CUSTOMER;
-    const user = { ...base, fullName: localAccounts.get(phone, role)?.fullName ?? base.fullName, phone: normalizePhone(phone) };
-    kv.set(SESSION_KEY, user);
-    set({ user });
-  },
-
-  register: ({ phone, fullName, role }) => {
-    localAccounts.add(phone, role, fullName);
-    // The demo backs every new account with the role's demo data.
-    const base = role === 'artisan' ? MOCK_ARTISANS[0] : MOCK_CUSTOMER;
-    const user = { ...base, fullName, phone: normalizePhone(phone), createdAt: Date.now(), updatedAt: Date.now() };
-    kv.set(SESSION_KEY, user);
-    set({ user });
-  },
-
-  signOut: () => {
+    set({ user, pending: null });
+  };
+  const clear = () => {
     kv.remove(SESSION_KEY);
     set({ user: null });
-  },
+  };
 
-  updateUser: (patch) => {
-    const current = get().user;
-    if (!current) return;
-    const next = { ...current, ...patch, updatedAt: Date.now() };
-    kv.set(SESSION_KEY, next);
-    set({ user: next });
-  },
-}));
+  return {
+    user: null,
+    hydrated: false,
+    pending: null,
+
+    hydrate: () => {
+      const saved = kv.get<AppUser>(SESSION_KEY);
+      set({ user: saved ?? null, hydrated: true });
+      // Firebase: the app's session is only good while Firebase is signed into
+      // the same account — otherwise every read would be refused. Drop it so
+      // the user signs in again.
+      if (!config.useMock && !unwatch) {
+        unwatch = authService.watch((uid) => {
+          const current = get().user;
+          if (current && current.uid !== uid) clear();
+        });
+      }
+    },
+
+    signInAs: async (role) => open(await authService.signInDemo(role)),
+
+    // Each role's sign-in page opens that number's account of its own type.
+    signIn: async (phone, password, role) => open(await authService.signIn(phone, password, role)),
+
+    createAccount: async (input) => {
+      const user = await authService.createAccount(input);
+      set({ pending: user });
+    },
+
+    finishRegistration: () => {
+      const { pending } = get();
+      if (!pending) return false;
+      open(pending);
+      return true;
+    },
+
+    signOut: () => {
+      authService.signOut().catch(() => {});
+      clear();
+    },
+
+    updateUser: (patch) => {
+      const current = get().user;
+      if (!current) return;
+      const next = { ...current, ...patch, updatedAt: Date.now() };
+      kv.set(SESSION_KEY, next);
+      set({ user: next });
+    },
+  };
+});

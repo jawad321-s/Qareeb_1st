@@ -15,6 +15,10 @@ const hasFirebase = !!firebase.projectId && !!firebase.apiKey;
 export const config = {
   useMock: process.env.EXPO_PUBLIC_USE_MOCK === 'true' || !hasFirebase,
   firebase,
+  // Host running `firebase emulators:start` (e.g. your computer's LAN IP).
+  // When set, Auth/Firestore/Storage talk to the local emulators instead of
+  // the real project — for testing without touching live data.
+  firebaseEmulatorHost: process.env.EXPO_PUBLIC_FIREBASE_EMULATOR_HOST ?? '',
   googleMapsApiKey: process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY ?? '',
   currency: '₪', // Israeli new shekel (ILS)
   currencyCode: 'ILS',

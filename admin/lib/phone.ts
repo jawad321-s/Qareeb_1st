@@ -13,6 +13,15 @@ export function normalizePhone(input: string): string {
 /** A Palestinian mobile number (+970 or +972, then 5 and eight more digits). */
 export const isValidPhone = (input: string) => /^\+97[02]5\d{8}$/.test(normalizePhone(input));
 
+/**
+ * The internal sign-in id Firebase Auth keeps for an account (its password
+ * sign-in needs an email-shaped id). Never shown to anyone. Must match
+ * mobile/src/lib/phone.ts and firebase/seed.
+ */
+export function authIdFor(phone: string, role: 'customer' | 'artisan' | 'admin'): string {
+  return `${normalizePhone(phone).slice(1)}.${role}@qareeb.app`;
+}
+
 /** "+970 59 000 0001" */
 export function formatPhone(phone: string): string {
   const m = normalizePhone(phone).match(/^\+(\d{3})(\d{2})(\d{3})(\d{4})$/);

@@ -3,7 +3,7 @@
 // Firebase project is configured. Reads/writes the shared collections the admin
 // dashboard also uses, giving live mobile ↔ admin integration.
 import {
-  addDoc, collection, doc, getDoc, getDocs, limit, orderBy, query,
+  addDoc, collection, doc, getDoc, getDocs, limit, query,
   setDoc, updateDoc, where, writeBatch,
 } from 'firebase/firestore';
 import type {
@@ -11,8 +11,8 @@ import type {
 } from '@/types';
 import type { mockApi } from '@/mock/api';
 import { getDb } from '@/lib/firebase';
-import { hasAccount, useAuth } from '@/store/auth';
-import { normalizePhone } from '@/lib/phone';
+import { mapLocation, mapUser, ms } from '@/lib/firestoreMap';
+import { useAuth } from '@/store/auth';
 import { MOCK_CUSTOMER } from '@/mock/data';
 import { SERVICES, toServiceId } from '@/constants/services';
 import { ACTIVE_STATUSES, NEXT_STATUS, canCancelRequest, isOverdue } from '@/lib/requestRules';
@@ -24,14 +24,19 @@ function db() {
   return d;
 }
 
-// Firestore stores timestamps as Timestamp; the app uses epoch millis.
-const ms = (v: any): number =>
-  v && typeof v.toMillis === 'function' ? v.toMillis() : typeof v === 'number' ? v : Date.now();
 
 const withId = <T>(id: string, data: any): T => ({ id, ...data }) as T;
 
 function mapRequest(id: string, v: any): ServiceRequest {
-  return { ...v, id, createdAt: ms(v.createdAt), updatedAt: ms(v.updatedAt), preferredTime: ms(v.preferredTime) };
+  return {
+    ...v,
+    id,
+    location: mapLocation(v.location) ?? v.location,
+    createdAt: ms(v.createdAt),
+    updatedAt: ms(v.updatedAt),
+    preferredTime: ms(v.preferredTime),
+    ...(v.completedAt ? { completedAt: ms(v.completedAt) } : {}),
+  };
 }
 
 /**
@@ -51,6 +56,13 @@ async function settleOverdue(list: ServiceRequest[]): Promise<ServiceRequest[]> 
     }),
   );
 }
+
+// Firestore rules are not filters: a query is refused unless its own filters
+// guarantee every result is readable. So list queries always filter by the
+// signed-in party (customerId / artisanId), and sort in the app instead of
+// with orderBy — equality-only queries also need no composite index.
+const me = () => useAuth.getState().user;
+const newestFirst = <T extends { createdAt: number }>(list: T[]) => list.sort((a, b) => b.createdAt - a.createdAt);
 
 // Chat threads live under their request: requests/{id}/messages (see rules).
 const messagesOf = (requestId: string) => collection(db(), 'requests', requestId, 'messages');
@@ -78,7 +90,7 @@ export const firebaseApi: typeof mockApi = {
       getDoc(doc(db(), 'artisanProfiles', id)),
     ]);
     if (!uSnap.exists()) return undefined;
-    const user = withId<AppUser>(uSnap.id, uSnap.data());
+    const user = mapUser(uSnap.id, uSnap.data());
     const profile = pSnap.exists()
       ? withId<ArtisanProfile>(pSnap.id, pSnap.data())
       : ({ uid: id, rating: user.rating, ratingCount: user.ratingCount } as ArtisanProfile);
@@ -86,15 +98,13 @@ export const firebaseApi: typeof mockApi = {
   },
 
   async getRecommendedArtisans(): Promise<AppUser[]> {
-    const q = query(collection(db(), 'users'), where('role', '==', 'artisan'), orderBy('rating', 'desc'), limit(20));
-    const snap = await getDocs(q);
-    return snap.docs.map((d) => withId<AppUser>(d.id, d.data()));
+    const snap = await getDocs(query(collection(db(), 'users'), where('role', '==', 'artisan')));
+    return snap.docs.map((d) => mapUser(d.id, d.data())).sort((a, b) => b.rating - a.rating).slice(0, 20);
   },
 
   async getMyRequests(customerId: string): Promise<ServiceRequest[]> {
-    const q = query(collection(db(), 'requests'), where('customerId', '==', customerId), orderBy('createdAt', 'desc'));
-    const snap = await getDocs(q);
-    return settleOverdue(snap.docs.map((d) => mapRequest(d.id, d.data())));
+    const snap = await getDocs(query(collection(db(), 'requests'), where('customerId', '==', customerId)));
+    return settleOverdue(newestFirst(snap.docs.map((d) => mapRequest(d.id, d.data()))));
   },
 
   async getRequest(id: string): Promise<ServiceRequest | undefined> {
@@ -105,9 +115,8 @@ export const firebaseApi: typeof mockApi = {
   },
 
   async getNearbyRequests(): Promise<ServiceRequest[]> {
-    const q = query(collection(db(), 'requests'), where('status', '==', 'PENDING'), orderBy('createdAt', 'desc'));
-    const snap = await getDocs(q);
-    return snap.docs.map((d) => mapRequest(d.id, d.data()));
+    const snap = await getDocs(query(collection(db(), 'requests'), where('status', '==', 'PENDING')));
+    return newestFirst(snap.docs.map((d) => mapRequest(d.id, d.data())));
   },
 
   async createRequest(input): Promise<ServiceRequest> {
@@ -120,9 +129,12 @@ export const firebaseApi: typeof mockApi = {
   },
 
   async getOffers(requestId: string): Promise<Offer[]> {
-    const q = query(collection(db(), 'offers'), where('requestId', '==', requestId), orderBy('price', 'asc'));
-    const snap = await getDocs(q);
-    return snap.docs.map((d) => withId<Offer>(d.id, { ...d.data(), createdAt: ms(d.data().createdAt) }));
+    const user = me();
+    const party = user?.role === 'artisan' ? 'artisanId' : 'customerId';
+    const snap = await getDocs(query(collection(db(), 'offers'), where('requestId', '==', requestId), where(party, '==', user?.uid ?? '')));
+    return snap.docs
+      .map((d) => withId<Offer>(d.id, { ...d.data(), createdAt: ms(d.data().createdAt) }))
+      .sort((a, b) => a.price - b.price);
   },
 
   async acceptOffer(offerId: string): Promise<void> {
@@ -131,7 +143,9 @@ export const firebaseApi: typeof mockApi = {
     const offer = offSnap.data() as Offer;
     const batch = writeBatch(db());
     // Accept this offer, reject the siblings.
-    const siblings = await getDocs(query(collection(db(), 'offers'), where('requestId', '==', offer.requestId)));
+    const siblings = await getDocs(
+      query(collection(db(), 'offers'), where('requestId', '==', offer.requestId), where('customerId', '==', offer.customerId)),
+    );
     siblings.forEach((s) => batch.update(s.ref, { status: s.id === offerId ? 'ACCEPTED' : 'REJECTED' }));
     batch.update(doc(db(), 'requests', offer.requestId), {
       status: 'ACCEPTED',
@@ -152,10 +166,20 @@ export const firebaseApi: typeof mockApi = {
 
     const batch = writeBatch(db());
     batch.update(reqSnap.ref, { status: 'CANCELLED', updatedAt: Date.now() });
-    const open = await getDocs(
-      query(collection(db(), 'offers'), where('requestId', '==', requestId), where('status', '==', 'PENDING')),
-    );
-    open.forEach((o) => batch.update(o.ref, { status: 'REJECTED' }));
+    // Only the customer can close the offers (the rules let an artisan touch
+    // only their own). Once an artisan is assigned, the rest were already
+    // rejected when the offer was accepted.
+    if (me()?.uid === current.customerId) {
+      const open = await getDocs(
+        query(
+          collection(db(), 'offers'),
+          where('requestId', '==', requestId),
+          where('customerId', '==', current.customerId),
+          where('status', '==', 'PENDING'),
+        ),
+      );
+      open.forEach((o) => batch.update(o.ref, { status: 'REJECTED' }));
+    }
     await batch.commit();
   },
 
@@ -182,13 +206,11 @@ export const firebaseApi: typeof mockApi = {
   },
 
   async getUser(uid: string): Promise<AppUser | undefined> {
-    // Users may only read their own doc (see firestore.rules), so reading the
-    // other party can be denied — callers fall back to a generic label.
+    // Signed-in users can read profiles (see firestore.rules); on failure
+    // callers fall back to a generic label.
     const snap = await getDoc(doc(db(), 'users', uid)).catch(() => null);
-    if (!snap) return undefined;
-    if (!snap.exists()) return undefined;
-    const v = snap.data();
-    return { ...(v as AppUser), uid: snap.id, createdAt: ms(v.createdAt), updatedAt: ms(v.updatedAt) };
+    if (!snap?.exists()) return undefined;
+    return mapUser(snap.id, snap.data());
   },
 
   async getPendingReview(uid: string, role: 'customer' | 'artisan'): Promise<ServiceRequest | null> {
@@ -245,6 +267,10 @@ export const firebaseApi: typeof mockApi = {
 
   async updateUserLocation(uid, location): Promise<void> {
     await updateDoc(doc(db(), 'users', uid), { location, updatedAt: Date.now() });
+  },
+
+  async updateUserProfile(uid, patch): Promise<void> {
+    await updateDoc(doc(db(), 'users', uid), { ...patch, updatedAt: Date.now() });
   },
 
   async updateArtisanServices(uid, serviceIds, categoryIds): Promise<void> {
@@ -345,13 +371,4 @@ export const firebaseApi: typeof mockApi = {
     };
   },
 
-  async isPhoneRegistered(phone, role): Promise<boolean> {
-    if (hasAccount(phone, role)) return true;
-    // Phone numbers are stored normalized (see lib/phone). The rules may refuse
-    // this read without a Firebase sign-in; then only this device is checked.
-    const snap = await getDocs(
-      query(collection(db(), 'users'), where('phone', '==', normalizePhone(phone)), where('role', '==', role), limit(1)),
-    ).catch(() => null);
-    return !!snap && !snap.empty;
-  },
 };

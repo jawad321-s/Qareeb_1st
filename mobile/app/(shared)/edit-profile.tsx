@@ -10,6 +10,7 @@ import { Avatar } from '@/components/ui/Avatar';
 import { Icon } from '@/components/ui/Icon';
 import { Text } from '@/components/ui/Text';
 import { useAuth } from '@/store/auth';
+import { api } from '@/services/api';
 import { displayPhone } from '@/lib/phone';
 import { useTheme } from '@/theme/ThemeProvider';
 import { radius } from '@/theme/tokens';
@@ -31,7 +32,7 @@ export default function EditProfile() {
 
   const save = async () => {
     setSaving(true);
-    await new Promise((r) => setTimeout(r, 600));
+    await api.updateUserProfile(user.uid, { fullName }).catch(() => {});
     updateUser({ fullName, photoUrl: photo });
     setSaving(false);
     router.back();

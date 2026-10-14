@@ -13,7 +13,6 @@ import {
 import { NEXT_STATUS, canCancelRequest, isChatOpen, isOverdue } from '@/lib/requestRules';
 import { completedRecord, rejectedRecord } from '@/lib/jobHistory';
 import { kv } from '@/lib/mmkv';
-import { hasAccount } from '@/store/auth';
 
 // In-memory mutable stores so the app behaves like a real backend during a session.
 let requests = [...MOCK_REQUESTS];
@@ -215,6 +214,11 @@ export const mockApi = {
     await delay(150);
   },
 
+  /** Save the editable profile fields (the session store already holds them locally). */
+  async updateUserProfile(_uid: string, _patch: { fullName: string }): Promise<void> {
+    await delay(150);
+  },
+
   /** Save which services the artisan offers (the mock keeps them on the device). */
   async updateArtisanServices(_uid: string, _serviceIds: string[], _categoryIds: string[]): Promise<void> {
     await delay(150);
@@ -312,9 +316,4 @@ export const mockApi = {
     });
   },
 
-  /** Whether a number already has an account of this type (one customer and one artisan account per number). */
-  async isPhoneRegistered(phone: string, role: 'customer' | 'artisan'): Promise<boolean> {
-    await delay(300);
-    return hasAccount(phone, role);
-  },
 };

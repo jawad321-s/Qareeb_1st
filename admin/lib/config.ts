@@ -15,4 +15,7 @@ const hasFirebase = !!firebase.projectId && !!firebase.apiKey;
 export const config = {
   useMock: process.env.NEXT_PUBLIC_USE_MOCK === 'true' || !hasFirebase,
   firebase,
+  // Host running `firebase emulators:start`; when set, the dashboard uses the
+  // local emulators instead of the real project.
+  emulatorHost: process.env.NEXT_PUBLIC_FIREBASE_EMULATOR_HOST ?? '',
 } as const;

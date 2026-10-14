@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Dimensions } from 'react-native';
+import { View, Dimensions, Alert } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
 import Animated, { FadeInDown, FadeIn } from 'react-native-reanimated';
@@ -13,6 +13,7 @@ import { FloatingBlobs } from '@/components/ui/FloatingBlobs';
 import { GlassView } from '@/components/ui/GlassView';
 import { useAuth } from '@/store/auth';
 import { useT } from '@/i18n';
+import { authErrorKey } from '@/services/auth.service';
 import { gradients } from '@/theme/tokens';
 
 const { height } = Dimensions.get('window');
@@ -23,9 +24,14 @@ export default function Welcome() {
 
   // Demo entry: sign in, then route to the root so index.tsx redirects into
   // the matching app. (Setting the session alone doesn't navigate.)
-  const enterDemo = (role: 'customer' | 'artisan') => {
-    signInAs(role);
-    router.replace('/');
+  const enterDemo = async (role: 'customer' | 'artisan') => {
+    try {
+      await signInAs(role);
+      router.replace('/');
+    } catch (e) {
+      // Firebase: the demo accounts exist only after the seed has run.
+      Alert.alert(t(authErrorKey(e)));
+    }
   };
 
   const FEATURES = [

@@ -12,6 +12,7 @@ import { Button } from '@/components/ui/Button';
 import { Icon } from '@/components/ui/Icon';
 import { loginSchema, type LoginInput } from '@/lib/validation';
 import { useAuth } from '@/store/auth';
+import { authErrorKey } from '@/services/auth.service';
 import { useT } from '@/i18n';
 import { roleAccents } from '@/theme/tokens';
 import { useTheme } from '@/theme/ThemeProvider';
@@ -28,7 +29,7 @@ export default function Login() {
   const tint = isDark ? accent.tintDark : accent.tintLight;
 
   const [loading, setLoading] = useState(false);
-  const { control, handleSubmit, formState: { errors } } = useForm<LoginInput>({
+  const { control, handleSubmit, setError, formState: { errors } } = useForm<LoginInput>({
     resolver: zodResolver(loginSchema),
     defaultValues: { phone: '', password: '' },
   });
@@ -38,6 +39,8 @@ export default function Login() {
     try {
       await signIn(data.phone, data.password, role);
       router.replace('/');
+    } catch (e) {
+      setError('password', { message: t(authErrorKey(e)) });
     } finally {
       setLoading(false);
     }

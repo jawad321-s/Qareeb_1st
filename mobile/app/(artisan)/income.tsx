@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import { View } from 'react-native';
-import { router } from 'expo-router';
+import { router, useFocusEffect } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { Screen } from '@/components/ui/Screen';
@@ -12,32 +12,34 @@ import { Icon } from '@/components/ui/Icon';
 import { BarChart } from '@/components/domain/BarChart';
 import { AnimatedNumber } from '@/components/ui/AnimatedNumber';
 import { formatMoney } from '@/lib/format';
+import { incomeSummary } from '@/lib/income';
 import { useJobHistory } from '@/hooks/queries';
 import { useAuth } from '@/store/auth';
 import { useT } from '@/i18n';
 import { useTheme } from '@/theme/ThemeProvider';
 
-const MONTHLY = [
-  { label: 'Jan', value: 8200 },
-  { label: 'Feb', value: 9600 },
-  { label: 'Mar', value: 7400 },
-  { label: 'Apr', value: 11200 },
-  { label: 'May', value: 10400 },
-  { label: 'Jun', value: 12400 },
-];
-
 export default function Income() {
   const { colors } = useTheme();
-  const { t } = useT();
+  const { t, locale } = useT();
   const tabBarSpace = useTabBarSpace();
   const user = useAuth((s) => s.user)!;
   const history = useJobHistory(user.uid);
+  // Tabs stay mounted, so pick up jobs finished since the screen was last shown.
+  const { refetch } = history;
+  useFocusEffect(
+    useCallback(() => {
+      refetch();
+    }, [refetch]),
+  );
+  // Income = the prices of completed jobs only (see lib/income).
+  const income = incomeSummary(history.data?.completed ?? [], locale);
+  const loading = !history.data;
   const count = (n?: number) => (n === undefined ? '…' : String(n));
   // The job counts open the work history on the matching tab.
   const BREAKDOWN = [
     { icon: 'check-circle' as const, label: t('inc.completedJobs'), value: count(history.data?.completed.length), color: '#10B981', tab: 'completed' },
     { icon: 'x-circle' as const, label: t('inc.rejectedJobs'), value: count(history.data?.rejected.length), color: '#EF4444', tab: 'rejected' },
-    { icon: 'clock' as const, label: t('inc.avgResponse'), value: '6 min', color: '#F59E0B' },
+    { icon: 'wallet' as const, label: t('inc.avgJob'), value: loading ? '…' : formatMoney(income.average), color: '#F59E0B' },
     { icon: 'star' as const, label: t('inc.avgRating'), value: user.rating.toFixed(1), color: colors.tint },
   ];
   return (
@@ -47,24 +49,34 @@ export default function Income() {
 
       <Animated.View entering={FadeInDown.duration(400)}>
         <LinearGradient colors={['#059669', '#34D399']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ borderRadius: 24, padding: 24, gap: 4 }}>
-          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-            <Text variant="caption" style={{ color: 'rgba(255,255,255,0.85)' }}>
-              {t('artisan.totalMonth')}
+          <Text variant="caption" style={{ color: 'rgba(255,255,255,0.85)' }}>
+            {t('inc.total')}
+          </Text>
+          <AnimatedNumber value={income.total} format={(n) => formatMoney(Math.round(n))} variant="display" tone="inverse" />
+          <Text variant="caption" style={{ color: 'rgba(255,255,255,0.85)' }}>
+            {t('inc.basis')}
+          </Text>
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 12, paddingTop: 12, borderTopWidth: 1, borderTopColor: 'rgba(255,255,255,0.25)' }}>
+            <Text variant="bodyMedium" tone="inverse">
+              {t('artisan.thisMonth')}: {formatMoney(income.thisMonth)}
             </Text>
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: 'rgba(255,255,255,0.2)', paddingHorizontal: 8, paddingVertical: 3, borderRadius: 999 }}>
-              <Icon name="trending-up" size={12} color="#FFF" />
-              <Text variant="overline" tone="inverse">
-                +19%
-              </Text>
-            </View>
+            {/* Change vs last month, once there is a last month to compare with. */}
+            {income.change !== undefined && (
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: 'rgba(255,255,255,0.2)', paddingHorizontal: 8, paddingVertical: 3, borderRadius: 999 }}>
+                <Icon name={income.change >= 0 ? 'trending-up' : 'trending-down'} size={12} color="#FFF" />
+                <Text variant="overline" tone="inverse">
+                  {income.change >= 0 ? '+' : ''}
+                  {income.change}%
+                </Text>
+              </View>
+            )}
           </View>
-          <AnimatedNumber value={1240000} format={(n) => formatMoney(n)} variant="display" tone="inverse" />
         </LinearGradient>
       </Animated.View>
 
       <Card style={{ marginTop: 20, gap: 16 }}>
         <Text variant="h3">{t('inc.last6')}</Text>
-        <BarChart data={MONTHLY} />
+        <BarChart data={income.monthly} />
       </Card>
 
       <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 12, marginTop: 20 }}>

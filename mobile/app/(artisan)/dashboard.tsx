@@ -19,6 +19,7 @@ import { useAuth } from '@/store/auth';
 import { useTheme } from '@/theme/ThemeProvider';
 import { useT } from '@/i18n';
 import { formatMoney } from '@/lib/format';
+import { incomeSummary } from '@/lib/income';
 import { daysLabel, planById } from '@/lib/plans';
 import { useMySubscription } from '@/store/subscription';
 import { storage } from '@/lib/mmkv';
@@ -49,7 +50,8 @@ export default function ArtisanDashboard() {
   }, [user.uid]);
 
   const stats = [
-    { icon: 'wallet' as const, label: t('artisan.thisMonth'), value: formatMoney(1240000), color: colors.tint },
+    // Income = the prices of completed jobs, the same total as the income screen.
+    { icon: 'wallet' as const, label: t('artisan.income'), value: history.data ? formatMoney(incomeSummary(history.data.completed, locale).total) : '…', color: colors.tint },
     // Same count as the income screen's work history.
     { icon: 'check-circle' as const, label: t('artisan.completed'), value: history.data ? String(history.data.completed.length) : '…', color: '#10B981' },
     { icon: 'star' as const, label: t('profile.rating'), value: user.rating.toFixed(1), color: '#F59E0B' },

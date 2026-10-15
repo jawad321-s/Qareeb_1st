@@ -45,6 +45,7 @@ export function subscribeVerifications(cb: (items: VerificationItem[]) => void):
           submittedAt,
           status: v.status ?? 'pending',
           phone: v.phone ?? undefined,
+          categoryIds: Array.isArray(v.categoryIds) ? v.categoryIds : undefined,
           hasDocuments: v.documentsSubmitted === true || files.length > 0 || Object.keys(legacyUrls).length > 0,
           files,
           legacyUrls,

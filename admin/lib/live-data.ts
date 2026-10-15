@@ -44,6 +44,25 @@ export const CATEGORY_NAMES: Record<string, { en: string; ar: string }> = {
   moving: { en: 'Moving', ar: 'نقل عفش' },
 };
 export const categoryName = (id: string, locale: 'en' | 'ar') => CATEGORY_NAMES[id]?.[locale] ?? id;
+/** Several categories as one line ("سباكة، نجارة، تنظيف"). */
+export const categoryNames = (ids: string[], locale: 'en' | 'ar') =>
+  ids.filter(Boolean).map((id) => categoryName(id, locale)).join(locale === 'ar' ? '، ' : ', ');
+
+/**
+ * An artisan's categories: what their profile lists now (they can add or
+ * remove services after asking for verification), else what the
+ * verification request recorded.
+ */
+export function artisanCategories(
+  artisanId: string,
+  profiles: LiveDoc[] | null,
+  fallback: { categoryIds?: string[]; category?: string },
+): string[] {
+  const current = profiles?.find((p) => p.id === artisanId)?.categoryIds;
+  if (Array.isArray(current) && current.length) return current;
+  if (fallback.categoryIds?.length) return fallback.categoryIds;
+  return fallback.category ? [fallback.category] : [];
+}
 
 // ── Derived figures ─────────────────────────────────────────────────────────
 const monthKey = (ms: number) => {

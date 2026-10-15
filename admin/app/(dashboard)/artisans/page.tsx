@@ -6,7 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Card, Button, StatusPill } from '@/components/ui/primitives';
 import { type VerificationItem } from '@/lib/mock-data';
 import { subscribeVerifications, decideVerification, loadVerificationPhotos, type VerificationPhoto } from '@/lib/verification.service';
-import { categoryName } from '@/lib/live-data';
+import { artisanCategories, categoryNames, useCollection } from '@/lib/live-data';
 import { isLive } from '@/lib/firebase';
 import { timeAgo } from '@/lib/utils';
 import { useT } from '@/lib/i18n';
@@ -15,6 +15,8 @@ export default function ArtisansPage() {
   const { t, locale } = useT();
   const [items, setItems] = useState<VerificationItem[]>([]);
   const [viewing, setViewing] = useState<VerificationItem | null>(null);
+  // Current categories per artisan (null on mock / while loading).
+  const profiles = useCollection('artisanProfiles');
 
   // Live queue from Firestore (falls back to the mock list on mock mode).
   useEffect(() => subscribeVerifications(setItems), []);
@@ -52,7 +54,7 @@ export default function ArtisansPage() {
                     </div>
                     <div>
                       <p className="font-semibold">{v.name}</p>
-                      <p className="text-xs text-muted">{categoryName(v.category, locale)} · {t('ver.submitted')} {timeAgo(v.submittedAt, locale)}</p>
+                      <p className="text-xs text-muted">{categoryNames(artisanCategories(v.artisanId, profiles, v), locale)} · {t('ver.submitted')} {timeAgo(v.submittedAt, locale)}</p>
                       {v.phone && <p className="text-xs text-muted" dir="ltr">{v.phone}</p>}
                     </div>
                   </div>

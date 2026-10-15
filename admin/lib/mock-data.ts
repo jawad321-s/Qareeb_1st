@@ -26,6 +26,8 @@ export interface VerificationItem {
   submittedAt: number;
   status: 'pending' | 'approved' | 'rejected';
   phone?: string;
+  /** Every category the artisan listed (`category` is the first). */
+  categoryIds?: string[];
   /** False until the artisan sends their ID / certificates. */
   hasDocuments?: boolean;
   /** Names of the photos under verificationRequests/{id}/files, in order. */

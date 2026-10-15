@@ -12,7 +12,7 @@ import { formatMoney, formatNumber, timeAgo } from '@/lib/utils';
 import { useT } from '@/lib/i18n';
 import { isLive } from '@/lib/firebase';
 import {
-  useCollection, monthOverMonth, monthlySeries, categorySplit, recentActivity, toMillis, categoryName,
+  useCollection, monthOverMonth, monthlySeries, categorySplit, recentActivity, toMillis, categoryNames, artisanCategories,
   type ActivityItem,
 } from '@/lib/live-data';
 
@@ -40,6 +40,7 @@ export default function OverviewPage() {
   const requests = useCollection('requests');
   const subscriptions = useCollection('subscriptions');
   const verifications = useCollection('verificationRequests');
+  const artisanProfiles = useCollection('artisanProfiles');
   const complaints = useCollection('complaints');
 
   const people = (users ?? []).filter((u) => u.role === 'customer' || u.role === 'artisan');
@@ -66,7 +67,12 @@ export default function OverviewPage() {
     ? (verifications ?? [])
         .filter((v) => (v.status ?? 'pending') === 'pending')
         .sort((a, b) => toMillis(b.submittedAt) - toMillis(a.submittedAt))
-        .map((v) => ({ id: v.id, name: String(v.name ?? '—'), category: categoryName(v.category ?? v.categoryIds?.[0] ?? '', locale), status: 'pending' }))
+        .map((v) => ({
+          id: v.id,
+          name: String(v.name ?? '—'),
+          category: categoryNames(artisanCategories(v.artisanId ?? v.id, artisanProfiles, { categoryIds: v.categoryIds, category: v.category }), locale),
+          status: 'pending',
+        }))
     : VERIFICATIONS;
 
   const KPI_CARDS = [

@@ -10,6 +10,7 @@ import { Icon, type IconName } from '@/components/ui/Icon';
 import { Card } from '@/components/ui/Card';
 import { FloatingBlobs } from '@/components/ui/FloatingBlobs';
 import { displayPhone } from '@/lib/phone';
+import { useMyRequests } from '@/hooks/queries';
 import { useAuth } from '@/store/auth';
 import { useThemeStore } from '@/theme/ThemeProvider';
 import { useTheme } from '@/theme/ThemeProvider';
@@ -29,6 +30,8 @@ export default function Profile() {
   const signOut = useAuth((s) => s.signOut);
   const { mode, setMode } = useThemeStore();
   const { t, locale, toggle } = useT();
+  // Every request this customer has posted, whatever its status.
+  const requests = useMyRequests(user?.uid ?? '');
 
   // Signing out clears `user`; the layout redirects to welcome, but guard here
   // too so this screen never dereferences a null user during that transition.
@@ -82,7 +85,7 @@ export default function Profile() {
                 {displayPhone(user.phone)}
               </Text>
               <View style={{ flexDirection: 'row', gap: 24, marginTop: 8 }}>
-                <Stat label={t('profile.orders')} value="18" />
+                <Stat label={t('profile.orders')} value={requests.data ? String(requests.data.length) : '…'} />
                 <Stat label={t('profile.rating')} value={user.rating.toFixed(1)} />
               </View>
             </View>

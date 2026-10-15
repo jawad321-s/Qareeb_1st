@@ -27,7 +27,8 @@ export default function Requests() {
   const filtered = useMemo(() => {
     const list = data ?? [];
     if (tab === 'active') return list.filter((r) => ACTIVE.includes(r.status));
-    if (tab === 'completed') return list.filter((r) => r.status === 'COMPLETED' || r.status === 'CANCELLED');
+    // Cancelled requests are only listed under "all".
+    if (tab === 'completed') return list.filter((r) => r.status === 'COMPLETED');
     return list;
   }, [data, tab]);
 

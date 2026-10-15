@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import {
   ArrowDownRight, ArrowUpRight, Users, Wrench, ClipboardList, Wallet,
   ShieldCheck, MessageSquareWarning, CreditCard, Layers,
@@ -161,11 +162,17 @@ export default function OverviewPage() {
           </div>
         </Card>
         <Card className="p-5">
-          <h2 className="mb-4 font-semibold">{t('ov.pendingVerifications')}</h2>
+          <div className="mb-4 flex items-center justify-between gap-2">
+            <h2 className="font-semibold">{t('ov.pendingVerifications')}</h2>
+            <Link href="/artisans" className="text-xs font-medium text-brand-500 hover:underline">
+              {t('ov.review')}
+            </Link>
+          </div>
           <div className="space-y-3">
             {pendingVerifications.length === 0 && <p className="py-8 text-center text-sm text-muted">{t('ov.noPending')}</p>}
+            {/* Each row opens the verification queue, where the documents are reviewed. */}
             {pendingVerifications.slice(0, 4).map((v) => (
-              <div key={v.id} className="flex items-center gap-3">
+              <Link key={v.id} href="/artisans" className="-m-1.5 flex items-center gap-3 rounded-xl p-1.5 hover:bg-slate-500/5">
                 <div className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-gradient-to-br from-brand-500 to-accent-500 text-xs font-bold text-white">
                   {v.name.split(' ').map((n: string) => n[0]).join('').slice(0, 2)}
                 </div>
@@ -174,7 +181,7 @@ export default function OverviewPage() {
                   <p className="text-xs text-muted">{v.category}</p>
                 </div>
                 <StatusPill status={v.status} />
-              </div>
+              </Link>
             ))}
           </div>
         </Card>

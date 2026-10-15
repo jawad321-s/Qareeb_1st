@@ -66,6 +66,7 @@ const dict = {
     'ov.pendingVerifications': 'Pending verifications',
     'ov.noData': 'No data yet.',
     'ov.noPending': 'No verification requests waiting for review.',
+    'ov.review': 'Review',
     // users
     'users.title': 'Users',
     'users.subtitle': 'total accounts — customers and artisans.',
@@ -227,6 +228,7 @@ const dict = {
     'ov.pendingVerifications': 'طلبات التوثيق المعلّقة',
     'ov.noData': 'لا توجد بيانات بعد.',
     'ov.noPending': 'لا توجد طلبات توثيق بانتظار المراجعة.',
+    'ov.review': 'مراجعة',
     'users.title': 'المستخدمون',
     'users.subtitle': 'إجمالي الحسابات — عملاء وحرفيون.',
     'users.search': 'ابحث عن مستخدمين…',

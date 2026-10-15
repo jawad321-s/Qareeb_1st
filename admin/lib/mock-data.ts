@@ -26,8 +26,12 @@ export interface VerificationItem {
   submittedAt: number;
   status: 'pending' | 'approved' | 'rejected';
   phone?: string;
-  /** False until the artisan uploads ID / certificates (needs Storage). */
+  /** False until the artisan sends their ID / certificates. */
   hasDocuments?: boolean;
+  /** Names of the photos under verificationRequests/{id}/files, in order. */
+  files?: string[];
+  /** Photos from the older Storage-based flow, by name. */
+  legacyUrls?: Record<string, string>;
 }
 
 export interface AdminRequest {

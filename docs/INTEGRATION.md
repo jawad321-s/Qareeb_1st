@@ -70,18 +70,27 @@ The vertical slice wired end-to-end:
 Mobile (artisan)                Firestore                    Admin
 ────────────────                ─────────                    ─────
 Verification screen  ──submit──▶ verificationRequests/{uid}  ──live──▶ Verification queue
-  • uploads ID + certs           status: "pending"                     (real-time cards)
-    to Storage                                                          approve / reject
+  • sends ID + certs             status: "pending"                     (real-time cards)
+    (compressed photos)          + files/{name} (photos)               view docs, approve / reject
                                                                               │
 Verified badge  ◀──live snapshot── status: "approved"/"rejected" ◀──write────┘
   (auto-updates)                   users/{uid}.verified = true
 ```
 
+- **Opened at sign-up:** a new artisan's request is created right away with
+  `documentsSubmitted: false`, so the admin sees them before any documents.
+  The app still treats it as "not submitted" so the artisan can send them.
 - **Mobile write:** `mobile/src/services/verification.service.ts` →
-  `submitVerification()` uploads documents to Storage and writes the request.
+  `submitVerification()` compresses each photo to a JPEG data URL (≤ 700 KB),
+  writes it to `verificationRequests/{uid}/files/{name}`, then marks the
+  request `documentsSubmitted: true` with the list of `files`. Photos live in
+  Firestore rather than Storage because Storage needs the Blaze plan; the
+  rules limit them to the artisan and admins. A failure is shown to the
+  artisan instead of a false "submitted".
 - **Admin read/decide:** `admin/lib/verification.service.ts` →
-  `subscribeVerifications()` (live) + `decideVerification()` (persists the
-  decision and flips the artisan's `verified` flag).
+  `subscribeVerifications()` (live) + `loadVerificationPhotos()` (the
+  "View documents" dialog) + `decideVerification()` (persists the decision
+  and flips the artisan's `verified` flag).
 - **Mobile read-back:** `watchVerificationStatus()` (`onSnapshot`) updates the
   status banner the instant the admin decides.
 
@@ -92,11 +101,17 @@ Verified badge  ◀──live snapshot── status: "approved"/"rejected" ◀�
   id, artisanId, name, phone,
   categoryIds: string[], category: string,
   status: 'pending' | 'approved' | 'rejected',
-  idFrontUrl, idBackUrl, selfieUrl,
-  certificateUrls: string[],
+  documentsSubmitted: boolean,
+  files: string[],            // 'idFront' | 'idBack' | 'selfie' | 'certificate-N'
   submittedAt: Timestamp, reviewedAt: Timestamp | null,
 }
+
+// verificationRequests/{artisanId}/files/{name}
+{ name, dataUrl: 'data:image/jpeg;base64,…', uploadedAt: Timestamp }
 ```
+
+Older requests may still carry `idFrontUrl` / `idBackUrl` / `selfieUrl` /
+`certificateUrls` (Storage URLs); the dashboard shows those too.
 
 ## Second integrated flow — Requests & Offers
 

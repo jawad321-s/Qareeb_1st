@@ -27,11 +27,14 @@ interface VerificationSnapshot {
   certificates: Certificate[];
   submittedAt?: number;
   draft: ArtisanDraft;
+  /** The account these photos and status belong to. */
+  owner?: string;
 }
 
 interface VerificationState extends VerificationSnapshot {
   hydrated: boolean;
   hydrate: () => void;
+  bind: (uid: string) => void;
   setDoc: (slot: DocSlot, uri: string) => void;
   addCertificate: (uri: string) => void;
   removeCertificate: (id: string) => void;
@@ -46,8 +49,8 @@ const EMPTY: VerificationSnapshot = { status: 'unsubmitted', certificates: [], d
 
 export const useVerification = create<VerificationState>((set, get) => {
   const save = () => {
-    const { status, idFront, idBack, selfie, certificates, submittedAt, draft } = get();
-    kv.set<VerificationSnapshot>(STORE_KEY, { status, idFront, idBack, selfie, certificates, submittedAt, draft });
+    const { status, idFront, idBack, selfie, certificates, submittedAt, draft, owner } = get();
+    kv.set<VerificationSnapshot>(STORE_KEY, { status, idFront, idBack, selfie, certificates, submittedAt, draft, owner });
   };
 
   return {
@@ -57,6 +60,14 @@ export const useVerification = create<VerificationState>((set, get) => {
     hydrate: () => {
       const saved = kv.get<VerificationSnapshot>(STORE_KEY);
       set({ ...EMPTY, ...(saved ?? {}), draft: saved?.draft ?? EMPTY.draft, hydrated: true });
+    },
+
+    // Another account on this device starts clean: its own photos and status
+    // (the sign-up draft is kept, it belongs to the account just created).
+    bind: (uid) => {
+      if (get().owner === uid) return;
+      set({ ...EMPTY, draft: get().draft, owner: uid });
+      save();
     },
 
     setDoc: (slot, uri) => {
@@ -81,23 +92,23 @@ export const useVerification = create<VerificationState>((set, get) => {
       save();
     },
 
+    // Sends the photos to the admin queue (no-op on mock). Throws on failure,
+    // leaving the status as it was so the artisan can try again.
     submit: async (user) => {
+      const { idFront, idBack, selfie, certificates, draft } = get();
+      if (!idFront || !idBack) return;
+      await submitVerification({
+        user,
+        categoryIds: draft.categoryIds,
+        experienceYears: draft.experienceYears,
+        bio: draft.bio,
+        idFront,
+        idBack,
+        selfie,
+        certificates: certificates.map((c) => c.uri),
+      });
       set({ status: 'pending', submittedAt: Date.now() });
       save();
-      const { idFront, idBack, selfie, certificates, draft } = get();
-      // Push to Firestore (no-op on mock) so the admin queue picks it up live.
-      if (idFront && idBack) {
-        await submitVerification({
-          user,
-          categoryIds: draft.categoryIds,
-          experienceYears: draft.experienceYears,
-          bio: draft.bio,
-          idFront,
-          idBack,
-          selfie,
-          certificates: certificates.map((c) => c.uri),
-        }).catch(() => {});
-      }
     },
 
     // Live-subscribe to admin decisions; keeps local status in sync.

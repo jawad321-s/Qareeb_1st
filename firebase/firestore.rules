@@ -224,6 +224,17 @@ service cloud.firestore {
                     || (isArtisan() && id == uid() && existing().artisanId == uid()
                         && incoming().artisanId == uid() && incoming().status == 'pending');
       allow delete: if isAdmin();
+
+      // The document photos (ID, selfie, certificates) as compressed image
+      // data URLs, one per doc. Private to the artisan and admins.
+      match /files/{fileId} {
+        allow read: if isSignedIn() && (id == uid() || isAdmin());
+        allow create, update: if isArtisan() && id == uid()
+                              && incoming().dataUrl is string
+                              && incoming().dataUrl.size() <= 900000
+                              && incoming().dataUrl[0:11] == 'data:image/';
+        allow delete: if isAdmin() || (isArtisan() && id == uid());
+      }
     }
 
     // ── auditLogs / cms (admin only) ─────────────────────────────────────────

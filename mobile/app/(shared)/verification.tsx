@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Pressable } from 'react-native';
 import { router } from 'expo-router';
 import { Image } from 'expo-image';
@@ -31,8 +31,9 @@ export default function Verification() {
   const { t } = useT();
   const showToast = useToast();
   const user = useAuth((s) => s.user);
-  const { status, idFront, idBack, selfie, certificates, setDoc, addCertificate, removeCertificate, submit, watch } =
+  const { status, idFront, idBack, selfie, certificates, setDoc, addCertificate, removeCertificate, submit, watch, bind } =
     useVerification();
+  const [submitting, setSubmitting] = useState(false);
 
   const docs: Record<DocSlot, string | undefined> = { idFront, idBack, selfie };
   const canSubmit = !!idFront && !!idBack && status !== 'pending' && status !== 'approved';
@@ -40,9 +41,10 @@ export default function Verification() {
   // Live-sync with the admin dashboard's decision (no-op on mock).
   useEffect(() => {
     if (!user) return;
+    bind(user.uid);
     const unsub = watch(user.uid);
     return unsub;
-  }, [user, watch]);
+  }, [user, watch, bind]);
 
   const onPickDoc = async (slot: DocSlot) => {
     const uri = await pickImage();
@@ -60,12 +62,23 @@ export default function Verification() {
     }
   };
 
-  const onSubmit = () => {
+  const onSubmit = async () => {
     if (!idFront || !idBack) {
       showToast('error', t('vrf.needId'));
       return;
     }
-    if (user) submit(user);
+    if (!user) return;
+    setSubmitting(true);
+    try {
+      await submit(user);
+    } catch (err) {
+      console.warn('[verification]', err);
+      const code = (err as { code?: string })?.code ?? (err as Error)?.message;
+      showToast('error', t('vrf.failed') + (code ? ` (${code})` : ''));
+      setSubmitting(false);
+      return;
+    }
+    setSubmitting(false);
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => {});
     showToast('success', t('vrf.submitted'));
     setTimeout(() => router.back(), 900);
@@ -149,7 +162,7 @@ export default function Verification() {
         </Text>
       </View>
 
-      <Button label={t('vrf.submit')} iconLeft="check" onPress={onSubmit} disabled={!canSubmit} style={{ marginTop: 20 }} />
+      <Button label={t('vrf.submit')} iconLeft="check" onPress={onSubmit} loading={submitting} disabled={!canSubmit} style={{ marginTop: 20 }} />
       <Pressable onPress={() => router.back()} style={{ paddingVertical: 14 }}>
         <Text variant="body" tone="muted" center>
           {t('vrf.skip')}

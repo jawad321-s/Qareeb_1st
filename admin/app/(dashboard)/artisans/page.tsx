@@ -1,7 +1,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Check, FileText, Loader2, ShieldCheck, X } from 'lucide-react';
+import Link from 'next/link';
+import { ArrowLeft, Check, FileText, Loader2, ShieldCheck, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Card, Button, StatusPill } from '@/components/ui/primitives';
 import { type VerificationItem } from '@/lib/mock-data';
@@ -32,6 +33,12 @@ export default function ArtisansPage() {
 
   return (
     <div className="space-y-6">
+      <Link
+        href="/"
+        className="inline-flex items-center gap-2 rounded-xl border border-base px-3 py-2 text-sm font-medium hover:bg-slate-500/10"
+      >
+        <ArrowLeft className="h-4 w-4 rtl:rotate-180" /> {t('nav.backHome')}
+      </Link>
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold">{t('ver.title')}</h1>

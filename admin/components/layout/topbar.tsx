@@ -7,6 +7,7 @@ import { Avatar } from '@heroui/react';
 import { Bell, LogOut, Moon, Search, Sun, Languages } from 'lucide-react';
 import { signOut } from '@/lib/session';
 import { useT } from '@/lib/i18n';
+import { MobileNav } from './sidebar';
 
 export function Topbar() {
   const { t, locale, toggle } = useT();
@@ -31,6 +32,7 @@ export function Topbar() {
 
   return (
     <header className="sticky top-0 z-10 flex h-16 items-center gap-3 border-b border-base glass px-6">
+      <MobileNav />
       <div className="relative max-w-md flex-1">
         <Search className="pointer-events-none absolute start-3 top-1/2 z-10 h-4 w-4 -translate-y-1/2 text-muted" />
         <Input fullWidth placeholder={t('topbar.search')} className="ps-10" />

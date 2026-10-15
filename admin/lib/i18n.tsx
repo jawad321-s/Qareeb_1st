@@ -19,6 +19,8 @@ const dict = {
     'nav.complaints': 'Complaints',
     'nav.subscriptions': 'Subscriptions',
     'nav.settings': 'Settings',
+    'nav.menu': 'Menu',
+    'nav.backHome': 'Back to overview',
     'sidebar.help': 'Need help?',
     'sidebar.helpDesc': 'Check the docs or contact support.',
     // topbar
@@ -185,6 +187,8 @@ const dict = {
     'nav.complaints': 'الشكاوى',
     'nav.subscriptions': 'الاشتراكات',
     'nav.settings': 'الإعدادات',
+    'nav.menu': 'القائمة',
+    'nav.backHome': 'الرجوع للرئيسية',
     'sidebar.help': 'تحتاج مساعدة؟',
     'sidebar.helpDesc': 'راجع الوثائق أو تواصل مع الدعم.',
     'topbar.search': 'ابحث عن مستخدمين، طلبات، حرفيين…',

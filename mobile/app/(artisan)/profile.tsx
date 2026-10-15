@@ -14,7 +14,7 @@ import { useAuth } from '@/store/auth';
 import { useTheme } from '@/theme/ThemeProvider';
 import { useThemeStore } from '@/theme/ThemeProvider';
 import { useT } from '@/i18n';
-import { MOCK_ARTISAN_PROFILE } from '@/mock/data';
+import { useJobHistory } from '@/hooks/queries';
 import { useMySubscription } from '@/store/subscription';
 import { planById } from '@/lib/plans';
 
@@ -24,7 +24,9 @@ export default function ArtisanProfile() {
   const signOut = useAuth((s) => s.signOut);
   const { mode, setMode } = useThemeStore();
   const { t, locale, toggle } = useT();
-  const profile = MOCK_ARTISAN_PROFILE;
+  // Real figures: verification from the account, jobs from the work history
+  // (same count as the dashboard and income screens).
+  const history = useJobHistory(user?.uid ?? '');
   // The premium badge reflects the plan the artisan actually paid for.
   const plan = useMySubscription(user?.uid);
 
@@ -62,10 +64,10 @@ export default function ArtisanProfile() {
               </Text>
               <View style={{ flexDirection: 'row', gap: 8 }}>
                 {plan.isPaid && plan.record && <Badge label={planById(plan.record.planId)?.name[locale] ?? t('ad.premium')} variant="warning" icon="award" />}
-                <Badge label={profile.verificationStatus === 'approved' ? t('ad.verified') : t('ap.pending')} variant={profile.verificationStatus === 'approved' ? 'success' : 'warning'} icon="shield" />
+                <Badge label={user.verified ? t('ad.verified') : t('ap.pending')} variant={user.verified ? 'success' : 'warning'} icon="shield" />
               </View>
               <View style={{ flexDirection: 'row', gap: 28, marginTop: 8 }}>
-                <Stat value={String(profile.completedJobs)} label={t('ad.jobs')} />
+                <Stat value={history.data ? String(history.data.completed.length) : '…'} label={t('ad.jobs')} />
                 <Stat value={user.rating.toFixed(1)} label={t('profile.rating')} />
               </View>
             </View>

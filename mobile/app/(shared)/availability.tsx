@@ -1,11 +1,15 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Pressable, View } from 'react-native';
 import { Screen } from '@/components/ui/Screen';
 import { Header } from '@/components/ui/Header';
 import { Text } from '@/components/ui/Text';
 import { Card } from '@/components/ui/Card';
 import { kv } from '@/lib/mmkv';
+import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import { MOCK_ARTISAN_PROFILE } from '@/mock/data';
+import { config } from '@/lib/config';
+import { getDb } from '@/lib/firebase';
+import { useAuth } from '@/store/auth';
 import { useTheme } from '@/theme/ThemeProvider';
 import { useT } from '@/i18n';
 import type { TranslationKey } from '@/i18n/translations';
@@ -18,17 +22,42 @@ interface Availability {
   to: string;
 }
 
+// New accounts start every day, 08:00–20:00 (same as registration).
+const DEFAULT_AVAILABILITY: Availability = { days: [0, 1, 2, 3, 4, 5, 6], from: '08:00', to: '20:00' };
+
 const HOURS = ['06:00', '07:00', '08:00', '09:00', '10:00', '12:00', '14:00', '16:00', '18:00', '20:00', '22:00'];
 
 /** Weekly working days + hours customers can book the artisan in. */
 export default function AvailabilityScreen() {
   const { colors } = useTheme();
   const { t } = useT();
-  const [av, setAv] = useState<Availability>(() => kv.get<Availability>(KEY) ?? { ...MOCK_ARTISAN_PROFILE.availability });
+  // Live: the artisan's own hours, kept on their profile (artisanProfiles) and
+  // cached per account on the device. Demo: the demo artisan's hours.
+  const uid = useAuth((s) => s.user?.uid ?? '');
+  const key = config.useMock ? KEY : `${KEY}.${uid}`;
+  const [av, setAv] = useState<Availability>(
+    () => kv.get<Availability>(key) ?? (config.useMock ? { ...MOCK_ARTISAN_PROFILE.availability } : { ...DEFAULT_AVAILABILITY }),
+  );
+
+  useEffect(() => {
+    const db = getDb();
+    if (config.useMock || !db || !uid) return;
+    getDoc(doc(db, 'artisanProfiles', uid))
+      .then((snap) => {
+        const saved = snap.data()?.availability as Availability | undefined;
+        if (saved?.days?.length) {
+          setAv(saved);
+          kv.set(key, saved);
+        }
+      })
+      .catch(() => {});
+  }, [uid, key]);
 
   const save = (next: Availability) => {
     setAv(next);
-    kv.set(KEY, next);
+    kv.set(key, next);
+    const db = getDb();
+    if (!config.useMock && db && uid) updateDoc(doc(db, 'artisanProfiles', uid), { availability: next }).catch(() => {});
   };
 
   const toggleDay = (d: number) => {

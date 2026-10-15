@@ -9,6 +9,11 @@ import { RevenueChart, CategoryPie } from '@/components/charts/charts';
 import { KPIS, REVENUE_SERIES, CATEGORY_SPLIT, ACTIVITY, VERIFICATIONS } from '@/lib/mock-data';
 import { formatMoney, formatNumber, timeAgo } from '@/lib/utils';
 import { useT } from '@/lib/i18n';
+import { isLive } from '@/lib/firebase';
+import {
+  useCollection, monthOverMonth, monthlySeries, categorySplit, recentActivity, toMillis, categoryName,
+  type ActivityItem,
+} from '@/lib/live-data';
 
 const ACTIVITY_AR: Record<number, string> = {
   1: 'قدّم عمر خالد طلب توثيق جديد',
@@ -18,13 +23,56 @@ const ACTIVITY_AR: Record<number, string> = {
   5: 'إضافة فئة "ستلايت" إلى الكتالوج',
 };
 
+// Demo activity (mock mode only), shaped like the live feed.
+const MOCK_ACTIVITY: ActivityItem[] = ACTIVITY.map((a) => ({
+  id: String(a.id),
+  type: a.type === 'category' ? 'request' : (a.type as ActivityItem['type']),
+  text: { en: a.text, ar: ACTIVITY_AR[a.id] },
+  time: a.time,
+}));
+
 export default function OverviewPage() {
   const { t, locale } = useT();
+  const live = isLive();
+  // Live: everything below is computed from Firestore (null while loading).
+  const users = useCollection('users');
+  const requests = useCollection('requests');
+  const subscriptions = useCollection('subscriptions');
+  const verifications = useCollection('verificationRequests');
+  const complaints = useCollection('complaints');
+
+  const people = (users ?? []).filter((u) => u.role === 'customer' || u.role === 'artisan');
+  const artisans = people.filter((u) => u.role === 'artisan');
+  const paid = subscriptions ?? [];
+  const kpis = live
+    ? {
+        revenue: paid.reduce((sum, s) => sum + (Number(s.amount) || 0), 0),
+        revenueDelta: monthOverMonth(paid, 'activatedAt', (s) => Number(s.amount) || 0),
+        users: people.length,
+        usersDelta: monthOverMonth(people),
+        artisans: artisans.length,
+        artisansDelta: monthOverMonth(artisans),
+        requests: (requests ?? []).length,
+        requestsDelta: monthOverMonth(requests ?? []),
+      }
+    : KPIS;
+  const series = live ? monthlySeries(paid, requests ?? [], locale) : REVENUE_SERIES;
+  const split = live ? categorySplit(requests ?? [], locale) : CATEGORY_SPLIT;
+  const activity = live
+    ? recentActivity({ users: users ?? [], requests: requests ?? [], verifications: verifications ?? [], complaints: complaints ?? [], subscriptions: paid })
+    : MOCK_ACTIVITY;
+  const pendingVerifications = live
+    ? (verifications ?? [])
+        .filter((v) => (v.status ?? 'pending') === 'pending')
+        .sort((a, b) => toMillis(b.submittedAt) - toMillis(a.submittedAt))
+        .map((v) => ({ id: v.id, name: String(v.name ?? '—'), category: categoryName(v.category ?? v.categoryIds?.[0] ?? '', locale), status: 'pending' }))
+    : VERIFICATIONS;
+
   const KPI_CARDS = [
-    { label: t('ov.totalRevenue'), value: formatMoney(KPIS.revenue), delta: KPIS.revenueDelta, icon: Wallet, iconCls: 'bg-brand-500/10 text-brand-600 dark:text-brand-400' },
-    { label: t('ov.totalUsers'), value: formatNumber(KPIS.users), delta: KPIS.usersDelta, icon: Users, iconCls: 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400' },
-    { label: t('ov.activeArtisans'), value: formatNumber(KPIS.artisans), delta: KPIS.artisansDelta, icon: Wrench, iconCls: 'bg-cyan-500/10 text-cyan-600 dark:text-cyan-400' },
-    { label: t('ov.totalRequests'), value: formatNumber(KPIS.requests), delta: KPIS.requestsDelta, icon: ClipboardList, iconCls: 'bg-violet-500/10 text-violet-600 dark:text-violet-400' },
+    { label: t('ov.totalRevenue'), value: formatMoney(kpis.revenue), delta: kpis.revenueDelta, icon: Wallet, iconCls: 'bg-brand-500/10 text-brand-600 dark:text-brand-400' },
+    { label: t('ov.totalUsers'), value: formatNumber(kpis.users), delta: kpis.usersDelta, icon: Users, iconCls: 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400' },
+    { label: t('ov.activeArtisans'), value: formatNumber(kpis.artisans), delta: kpis.artisansDelta, icon: Wrench, iconCls: 'bg-cyan-500/10 text-cyan-600 dark:text-cyan-400' },
+    { label: t('ov.totalRequests'), value: formatNumber(kpis.requests), delta: kpis.requestsDelta, icon: ClipboardList, iconCls: 'bg-violet-500/10 text-violet-600 dark:text-violet-400' },
   ];
   return (
     <div className="space-y-6">
@@ -72,12 +120,12 @@ export default function OverviewPage() {
               <p className="text-xs text-muted">{t('ov.monthlyGross')} (₪)</p>
             </div>
           </div>
-          <RevenueChart data={REVENUE_SERIES} />
+          <RevenueChart data={series} />
         </Card>
         <Card className="p-5">
           <h2 className="font-semibold">{t('ov.byCategory')}</h2>
           <p className="text-xs text-muted mb-2">{t('ov.distribution')}</p>
-          <CategoryPie data={CATEGORY_SPLIT} />
+          {split.length ? <CategoryPie data={split} /> : <p className="py-16 text-center text-sm text-muted">{t('ov.noData')}</p>}
         </Card>
       </div>
 
@@ -86,13 +134,15 @@ export default function OverviewPage() {
         <Card className="p-5 lg:col-span-2">
           <h2 className="mb-2 font-semibold">{t('ov.recentActivity')}</h2>
           <div className="divide-y divide-[rgb(var(--border))]">
-            {ACTIVITY.map((a) => {
+            {activity.length === 0 && <p className="py-8 text-center text-sm text-muted">{t('ov.noData')}</p>}
+            {activity.map((a) => {
               const meta: Record<string, { icon: any; cls: string }> = {
                 verify: { icon: ShieldCheck, cls: 'bg-brand-500/10 text-brand-600 dark:text-brand-400' },
                 complaint: { icon: MessageSquareWarning, cls: 'bg-amber-500/10 text-amber-600 dark:text-amber-400' },
                 subscription: { icon: CreditCard, cls: 'bg-violet-500/10 text-violet-600 dark:text-violet-400' },
                 request: { icon: ClipboardList, cls: 'bg-cyan-500/10 text-cyan-600 dark:text-cyan-400' },
                 category: { icon: Layers, cls: 'bg-slate-500/10 text-slate-600 dark:text-slate-400' },
+                user: { icon: Users, cls: 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400' },
               };
               const m = meta[a.type] ?? meta.request;
               const AIcon = m.icon;
@@ -102,7 +152,7 @@ export default function OverviewPage() {
                     <AIcon className="h-4 w-4" />
                   </div>
                   <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm font-medium">{locale === 'ar' ? ACTIVITY_AR[a.id] : a.text}</p>
+                    <p className="truncate text-sm font-medium">{a.text[locale]}</p>
                     <p className="text-xs text-muted">{timeAgo(a.time, locale)}</p>
                   </div>
                 </div>
@@ -113,10 +163,11 @@ export default function OverviewPage() {
         <Card className="p-5">
           <h2 className="mb-4 font-semibold">{t('ov.pendingVerifications')}</h2>
           <div className="space-y-3">
-            {VERIFICATIONS.slice(0, 4).map((v) => (
+            {pendingVerifications.length === 0 && <p className="py-8 text-center text-sm text-muted">{t('ov.noPending')}</p>}
+            {pendingVerifications.slice(0, 4).map((v) => (
               <div key={v.id} className="flex items-center gap-3">
                 <div className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-gradient-to-br from-brand-500 to-accent-500 text-xs font-bold text-white">
-                  {v.name.split(' ').map((n) => n[0]).join('').slice(0, 2)}
+                  {v.name.split(' ').map((n: string) => n[0]).join('').slice(0, 2)}
                 </div>
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-sm font-medium">{v.name}</p>

@@ -6,10 +6,13 @@
 //      firebase/seed/service-account.json  (git-ignored), OR set
 //      GOOGLE_APPLICATION_CREDENTIALS to its path.
 //   2. npm install  (inside firebase/)
-//   3. npm run seed
+//   3. npm run seed               → the catalog only (categories + services)
+//      npm run seed -- --demo     → also demo people, a request, offers, a review
+//      npm run seed -- --clean-demo → delete that demo data (ids starting
+//                                     with "seed_") from the database
 //
-// Seeds categories, services, a demo customer, demo artisans + profiles, a few
-// requests, offers and reviews so the apps and admin dashboard have live data.
+// The real database should hold the catalog plus real accounts only, so the
+// demo data is opt-in and can be removed again.
 // ─────────────────────────────────────────────────────────────────────────────
 import { readFileSync, existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
@@ -131,11 +134,45 @@ async function seedRequestsAndOffers() {
   console.log('✓ Seeded 1 request, 2 offers, 1 review');
 }
 
+/** Deletes every demo doc (id starting with "seed_"), including chat threads. */
+async function cleanDemo() {
+  let removed = 0;
+  for (const name of ['users', 'artisanProfiles', 'requests', 'offers', 'reviews', 'verificationRequests', 'subscriptions', 'complaints']) {
+    const snap = await db.collection(name).where(admin.firestore.FieldPath.documentId(), '>=', 'seed_').where(admin.firestore.FieldPath.documentId(), '<', 'seed`').get();
+    for (const d of snap.docs) {
+      if (name === 'requests') {
+        const msgs = await d.ref.collection('messages').get();
+        for (const m of msgs.docs) await m.ref.delete();
+      }
+      await d.ref.delete();
+      removed++;
+    }
+  }
+  // Demo reviews/offers can also point at demo people under other ids.
+  for (const [name, field] of [['offers', 'artisanId'], ['reviews', 'authorId'], ['reviews', 'targetId']]) {
+    const snap = await db.collection(name).where(field, 'in', ['seed_customer', 'seed_art_1', 'seed_art_2', 'seed_art_3', 'seed_art_4']).get();
+    for (const d of snap.docs) {
+      await d.ref.delete();
+      removed++;
+    }
+  }
+  console.log(`✓ Removed ${removed} demo documents`);
+}
+
 async function main() {
-  await seedCategoriesAndServices();
-  await seedUsers();
-  await seedRequestsAndOffers();
-  console.log('\n🎉 Seed complete.');
+  const args = process.argv.slice(2);
+  if (args.includes('--clean-demo')) {
+    await cleanDemo();
+  } else {
+    await seedCategoriesAndServices();
+    if (args.includes('--demo')) {
+      await seedUsers();
+      await seedRequestsAndOffers();
+    } else {
+      console.log('• Demo people/requests skipped (add --demo to include them)');
+    }
+  }
+  console.log('\n🎉 Done.');
   process.exit(0);
 }
 

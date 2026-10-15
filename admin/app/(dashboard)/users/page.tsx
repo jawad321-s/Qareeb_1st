@@ -9,6 +9,8 @@ import { USERS, type AdminUser } from '@/lib/mock-data';
 import { timeAgo } from '@/lib/utils';
 import { formatPhone } from '@/lib/phone';
 import { useT } from '@/lib/i18n';
+import { isLive } from '@/lib/firebase';
+import { useCollection, toAdminUsers } from '@/lib/live-data';
 
 export default function UsersPage() {
   const { t, locale } = useT();
@@ -66,13 +68,18 @@ export default function UsersPage() {
     [t, locale],
   );
 
+  // Live: every customer and artisan account in Firestore, newest first.
+  const users = useCollection('users');
+  const requests = useCollection('requests');
+  const rows = useMemo(() => (isLive() ? toAdminUsers(users ?? [], requests ?? []) : USERS), [users, requests]);
+
   return (
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold">{t('users.title')}</h1>
-        <p className="text-sm text-muted">{USERS.length} {t('users.subtitle')}</p>
+        <p className="text-sm text-muted">{rows.length} {t('users.subtitle')}</p>
       </div>
-      <DataTable columns={columns} data={USERS} searchPlaceholder={t('users.search')} />
+      <DataTable columns={columns} data={rows} searchPlaceholder={t('users.search')} />
     </div>
   );
 }

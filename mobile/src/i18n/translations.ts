@@ -339,6 +339,8 @@ export const translations = {
 
     // report
     'report.title': 'Report a problem',
+    'report.sent': 'Report sent — the Qareeb team will review it.',
+    'report.failed': 'Could not send the report. Please try again.',
     'report.subtitle': 'Tell us what went wrong. Reports are confidential.',
     'report.reason': 'REASON',
     'report.details': 'DETAILS',
@@ -914,6 +916,8 @@ export const translations = {
 
     // report
     'report.title': 'الإبلاغ عن مشكلة',
+    'report.sent': 'تم إرسال البلاغ، سيراجعه فريق قريب.',
+    'report.failed': 'تعذّر إرسال البلاغ. حاول مجدداً.',
     'report.subtitle': 'أخبرنا بما حدث. جميع البلاغات سرّية.',
     'report.reason': 'السبب',
     'report.details': 'التفاصيل',

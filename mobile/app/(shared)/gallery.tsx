@@ -8,6 +8,8 @@ import { Text } from '@/components/ui/Text';
 import { Icon } from '@/components/ui/Icon';
 import { kv } from '@/lib/mmkv';
 import { MOCK_ARTISAN_PROFILE } from '@/mock/data';
+import { config } from '@/lib/config';
+import { useAuth } from '@/store/auth';
 import { useTheme } from '@/theme/ThemeProvider';
 import { useT } from '@/i18n';
 
@@ -18,14 +20,18 @@ export default function Gallery() {
   const { colors } = useTheme();
   const { t } = useT();
   const { width } = useWindowDimensions();
-  const [photos, setPhotos] = useState<string[]>(() => kv.get<string[]>(KEY) ?? MOCK_ARTISAN_PROFILE.gallery);
+  // Live accounts start with an empty gallery (kept per account on this device
+  // until photo upload to Storage is enabled); the demo shows sample work.
+  const uid = useAuth((s) => s.user?.uid ?? '');
+  const key = config.useMock ? KEY : `${KEY}.${uid}`;
+  const [photos, setPhotos] = useState<string[]>(() => kv.get<string[]>(key) ?? (config.useMock ? MOCK_ARTISAN_PROFILE.gallery : []));
 
   // 2-column grid inside the 20px screen padding, with a 12px gutter.
   const tile = (width - 40 - 12) / 2;
 
   const save = (next: string[]) => {
     setPhotos(next);
-    kv.set(KEY, next);
+    kv.set(key, next);
   };
 
   const addPhoto = async () => {

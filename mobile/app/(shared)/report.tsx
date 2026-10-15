@@ -10,6 +10,7 @@ import { useToast } from '@/components/feedback/Toast';
 import { useTheme } from '@/theme/ThemeProvider';
 import { useFont, useT } from '@/i18n';
 import { localizedTextAlign } from '@/i18n/rtl';
+import { submitComplaint } from '@/services/complaints.service';
 
 export default function Report() {
   const { colors } = useTheme();
@@ -22,11 +23,17 @@ export default function Report() {
   const [loading, setLoading] = useState(false);
 
   const submit = async () => {
+    if (!reason) return;
     setLoading(true);
-    await new Promise((r) => setTimeout(r, 700));
-    setLoading(false);
-    toast('success', 'Report submitted — our team will review it');
-    router.back();
+    try {
+      await submitComplaint({ reason, details });
+      toast('success', t('report.sent'));
+      router.back();
+    } catch {
+      toast('error', t('report.failed'));
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (

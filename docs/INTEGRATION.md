@@ -29,7 +29,7 @@ changes required.
    cd firebase
    npm install
    firebase deploy --only firestore:rules,firestore:indexes,storage
-   npm run seed        # optional demo data
+   npm run seed        # the catalog (categories + services); --demo adds demo people, --clean-demo removes them
    ```
 5. Restart both apps. They now read/write the same data.
 

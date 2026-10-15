@@ -1,15 +1,15 @@
 import React, { useMemo, useState } from 'react';
-import { View, ScrollView, Pressable } from 'react-native';
+import { View, ScrollView } from 'react-native';
 import { router } from 'expo-router';
 import Animated, { FadeIn } from 'react-native-reanimated';
 import { Screen } from '@/components/ui/Screen';
 import { Text } from '@/components/ui/Text';
+import { Segmented } from '@/components/ui/Segmented';
 import { RequestCard } from '@/components/domain/RequestCard';
 import { CardSkeleton } from '@/components/feedback/Skeleton';
 import { EmptyState } from '@/components/feedback/EmptyState';
 import { useMyRequests } from '@/hooks/queries';
 import { useAuth } from '@/store/auth';
-import { useTheme } from '@/theme/ThemeProvider';
 import { useT } from '@/i18n';
 import type { RequestStatus } from '@/types';
 
@@ -17,7 +17,6 @@ type Tab = 'active' | 'completed' | 'all';
 const ACTIVE: RequestStatus[] = ['PENDING', 'ACCEPTED', 'ON_THE_WAY', 'WORKING'];
 
 export default function Requests() {
-  const { colors } = useTheme();
   const { t } = useT();
   const user = useAuth((s) => s.user)!;
   const { data, isLoading, refetch } = useMyRequests(user.uid);
@@ -44,23 +43,15 @@ export default function Requests() {
         <Text variant="h1" style={{ marginBottom: 16 }}>
           {t('orders.title')}
         </Text>
-        {/* Segmented control */}
-        <View style={{ flexDirection: 'row', backgroundColor: colors.surface2, borderRadius: 14, padding: 4 }}>
-          {(['active', 'completed', 'all'] as Tab[]).map((key) => {
-            const active = tab === key;
-            return (
-              <Pressable
-                key={key}
-                onPress={() => setTab(key)}
-                style={{ flex: 1, paddingVertical: 10, borderRadius: 10, backgroundColor: active ? colors.surface : 'transparent', alignItems: 'center', ...(active ? { shadowColor: '#0F172A', shadowOpacity: 0.06, shadowRadius: 6, shadowOffset: { width: 0, height: 2 }, elevation: 2 } : {}) }}
-              >
-                <Text variant="caption" tone={active ? 'default' : 'muted'} style={{ fontFamily: active ? 'Inter_600SemiBold' : 'Inter_400Regular' }}>
-                  {t(`orders.${key}` as any)}
-                </Text>
-              </Pressable>
-            );
-          })}
-        </View>
+        <Segmented<Tab>
+          options={[
+            { key: 'active', label: t('orders.active') },
+            { key: 'completed', label: t('orders.completed') },
+            { key: 'all', label: t('orders.all') },
+          ]}
+          value={tab}
+          onChange={setTab}
+        />
       </View>
 
       <ScrollView

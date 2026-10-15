@@ -131,7 +131,13 @@ export const mockApi = {
       r.id === requestId ? { ...r, status: 'CANCELLED', updatedAt: Date.now() } : r,
     );
     offers = offers.map((o) =>
-      o.requestId === requestId && o.status === 'PENDING' ? { ...o, status: 'REJECTED' } : o,
+      o.requestId !== requestId
+        ? o
+        : o.status === 'PENDING'
+          ? { ...o, status: 'REJECTED', requestStatus: 'CANCELLED' }
+          : o.status === 'ACCEPTED'
+            ? { ...o, requestStatus: 'CANCELLED' }
+            : o,
     );
   },
 
@@ -284,7 +290,7 @@ export const mockApi = {
         .filter((o) => o.artisanId === artisanId)
         .map((o) => {
           const r = requests.find((x) => x.id === o.requestId);
-          return { ...o, requestTitle: o.requestTitle ?? r?.title, categoryId: o.categoryId ?? r?.categoryId };
+          return { ...o, requestTitle: o.requestTitle ?? r?.title, categoryId: o.categoryId ?? r?.categoryId, requestStatus: r?.status ?? o.requestStatus };
         })
         .sort((a, b) => b.createdAt - a.createdAt),
     );

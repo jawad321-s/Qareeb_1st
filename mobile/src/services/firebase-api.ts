@@ -188,6 +188,8 @@ export const firebaseApi: typeof mockApi = {
     // Only the customer can read/close the other offers; once an artisan is
     // assigned (the only time they can cancel) none are still pending anyway.
     if (useAuth.getState().user?.uid === current.customerId) {
+      // The hired artisan's offer stays "accepted"; record that the job was cancelled.
+      if (current.acceptedOfferId) batch.update(doc(db(), 'offers', current.acceptedOfferId), { requestStatus: 'CANCELLED' });
       const open = await getDocs(
         query(
           collection(db(), 'offers'),
@@ -196,7 +198,7 @@ export const firebaseApi: typeof mockApi = {
           where('status', '==', 'PENDING'),
         ),
       );
-      open.forEach((o) => batch.update(o.ref, { status: 'REJECTED' }));
+      open.forEach((o) => batch.update(o.ref, { status: 'REJECTED', requestStatus: 'CANCELLED' }));
     }
     await batch.commit();
   },
@@ -347,10 +349,22 @@ export const firebaseApi: typeof mockApi = {
     const list = await Promise.all(
       snap.docs.map(async (d) => {
         const o = withId<Offer>(d.id, { ...d.data(), createdAt: ms(d.data().createdAt) });
-        if (o.requestTitle) return o;
-        // Offers sent before the title was copied onto them: read it from the request.
-        const r = await getDoc(doc(db(), 'requests', o.requestId)).catch(() => null);
-        return r?.exists() ? { ...o, requestTitle: r.data().title, categoryId: r.data().categoryId } : o;
+        // The job's current status (and the title, for offers sent before it
+        // was copied onto them). A customer can cancel after accepting, which
+        // leaves the offer itself "accepted".
+        try {
+          const r = await getDoc(doc(db(), 'requests', o.requestId));
+          if (!r.exists()) return o;
+          const [req] = await settleOverdue([mapRequest(r.id, r.data())]);
+          return { ...o, requestTitle: o.requestTitle ?? req.title, categoryId: o.categoryId ?? req.categoryId, requestStatus: req.status };
+        } catch (err) {
+          // Artisans read only open requests and the ones they were hired for:
+          // a still-pending offer whose request is unreadable was cancelled.
+          if ((err as { code?: string })?.code === 'permission-denied' && o.status === 'PENDING') {
+            return { ...o, requestStatus: 'CANCELLED' as const };
+          }
+          return o;
+        }
       }),
     );
     return list.sort((a, b) => b.createdAt - a.createdAt);

@@ -27,7 +27,7 @@ export function completedRecord(r: ServiceRequest, offer?: Offer, review?: Revie
  */
 export function rejectedRecord(o: Offer, r?: ServiceRequest): JobRecord {
   const reason: JobRecord['reason'] =
-    r?.status === 'CANCELLED' ? 'cancelled' : r?.acceptedArtisanId && r.acceptedArtisanId !== o.artisanId ? 'otherChosen' : 'declined';
+    r?.status === 'CANCELLED' || o.requestStatus === 'CANCELLED' ? 'cancelled' : r?.acceptedArtisanId && r.acceptedArtisanId !== o.artisanId ? 'otherChosen' : 'declined';
   return {
     kind: 'rejected',
     requestId: o.requestId,

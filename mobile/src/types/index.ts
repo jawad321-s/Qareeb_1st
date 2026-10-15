@@ -137,6 +137,12 @@ export interface Offer {
   // even after the request stops being readable to them (taken or cancelled).
   requestTitle?: string;
   categoryId?: string;
+  /**
+   * The job's status as the artisan last knew it: read from the request when
+   * it is still readable, and copied onto the offer when the customer cancels
+   * (a cancelled request is no longer readable to artisans who weren't hired).
+   */
+  requestStatus?: RequestStatus;
   // Denormalized artisan snapshot for fast rendering in the offers list.
   artisan?: Pick<AppUser, 'uid' | 'fullName' | 'photoUrl' | 'rating' | 'ratingCount'>;
 }

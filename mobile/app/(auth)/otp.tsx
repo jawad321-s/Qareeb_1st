@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { View, TextInput, Pressable } from 'react-native';
+import { View, TextInput, Pressable, type TextInputInstance } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { Screen } from '@/components/ui/Screen';
@@ -22,7 +22,7 @@ export default function Otp() {
   const [code, setCode] = useState<string[]>(Array(LENGTH).fill(''));
   const [seconds, setSeconds] = useState(45);
   const [loading, setLoading] = useState(false);
-  const inputs = useRef<(TextInput | null)[]>([]);
+  const inputs = useRef<(TextInputInstance | null)[]>([]);
 
   useEffect(() => {
     const t = setInterval(() => setSeconds((s) => (s > 0 ? s - 1 : 0)), 1000);

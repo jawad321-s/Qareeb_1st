@@ -47,7 +47,7 @@ const PILL_H = 40;
  * measured child layouts and translated a shared pill; native RTL flipped the
  * coordinate space and left the pill stranded outside the bar.)
  */
-export function TabBar({ state, navigation, meta }: BottomTabBarProps & { meta: Record<string, TabMeta> }) {
+export function TabBar({ state, emitter, navigateToTab, meta }: BottomTabBarProps & { meta: Record<string, TabMeta> }) {
   const { colors, gradient } = useTheme();
   const { t } = useT();
   const insets = useSafeAreaInsets();
@@ -90,8 +90,9 @@ export function TabBar({ state, navigation, meta }: BottomTabBarProps & { meta: 
                 gradient={gradient}
                 onPress={() => {
                   Haptics.selectionAsync().catch(() => {});
-                  const event = navigation.emit({ type: 'tabPress', target: x.route.key, canPreventDefault: true });
-                  if (!focused && !event.defaultPrevented) navigation.navigate(x.route.name);
+                  // Same press semantics as expo-router's own tab bar.
+                  const event = emitter.emit({ type: 'tabPress', target: x.route.key, canPreventDefault: true });
+                  if (!focused && !event.defaultPrevented) navigateToTab(x.route.key);
                 }}
                 tint={colors.tint}
                 inactive={colors.tabInactive}

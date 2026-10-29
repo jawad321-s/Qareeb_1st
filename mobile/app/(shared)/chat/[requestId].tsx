@@ -1,5 +1,5 @@
 import React, { useRef, useState } from 'react';
-import { View, ScrollView, TextInput, Pressable, KeyboardAvoidingView, Platform } from 'react-native';
+import { View, ScrollView, TextInput, Pressable, KeyboardAvoidingView, Platform, type ScrollViewInstance } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Animated, { FadeInUp } from 'react-native-reanimated';
@@ -26,7 +26,7 @@ export default function Chat() {
   const { t, isRTL } = useT();
   const font = useFont();
   const [text, setText] = useState('');
-  const scrollRef = useRef<ScrollView>(null);
+  const scrollRef = useRef<ScrollViewInstance>(null);
   const toast = useToast();
   const { data: request } = useRequest(requestId!);
   // The other party: the assigned artisan for a customer, the customer for an artisan.

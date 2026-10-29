@@ -31,13 +31,13 @@ export default function Verification() {
   const { t } = useT();
   const showToast = useToast();
   const user = useAuth((s) => s.user);
-  const { status, idFront, idBack, selfie, certificates, setDoc, addCertificate, removeCertificate, submit, watch, bind } =
+  const { status, idPhoto, selfie, certificates, setDoc, addCertificate, removeCertificate, submit, watch, bind } =
     useVerification();
   const [submitting, setSubmitting] = useState(false);
 
-  const docs: Record<DocSlot, string | undefined> = { idFront, idBack, selfie };
-  // ID (both sides) and a photo of the artisan are required; certificates are optional.
-  const canSubmit = !!idFront && !!idBack && !!selfie && status !== 'pending' && status !== 'approved';
+  const docs: Record<DocSlot, string | undefined> = { idPhoto, selfie };
+  // The ID photo and a photo of the artisan are required; certificates are optional.
+  const canSubmit = !!idPhoto && !!selfie && status !== 'pending' && status !== 'approved';
 
   // Live-sync with the admin dashboard's decision (no-op on mock).
   useEffect(() => {
@@ -64,7 +64,7 @@ export default function Verification() {
   };
 
   const onSubmit = async () => {
-    if (!idFront || !idBack) {
+    if (!idPhoto) {
       showToast('error', t('vrf.needId'));
       return;
     }
@@ -105,10 +105,9 @@ export default function Verification() {
       <Animated.View entering={FadeInDown.delay(120).duration(450)} style={{ gap: 12, marginTop: 20 }}>
         <SectionTitle icon="shield" title={t('vrf.idSection')} colors={colors} />
         <View style={{ flexDirection: 'row', gap: 12 }}>
-          <UploadTile style={{ flex: 1 }} label={t('vrf.idFront')} uri={docs.idFront} icon="camera" onPress={() => onPickDoc('idFront')} colors={colors} t={t} />
-          <UploadTile style={{ flex: 1 }} label={t('vrf.idBack')} uri={docs.idBack} icon="camera" onPress={() => onPickDoc('idBack')} colors={colors} t={t} />
+          <UploadTile style={{ flex: 1 }} label={t('vrf.idPhoto')} uri={docs.idPhoto} icon="camera" onPress={() => onPickDoc('idPhoto')} colors={colors} t={t} />
+          <UploadTile style={{ flex: 1 }} label={t('vrf.selfie')} uri={docs.selfie} icon="camera" onPress={() => onPickDoc('selfie')} colors={colors} t={t} />
         </View>
-        <UploadTile label={t('vrf.selfie')} uri={docs.selfie} icon="camera" onPress={() => onPickDoc('selfie')} colors={colors} t={t} tall={false} />
       </Animated.View>
 
       {/* Certificates section */}

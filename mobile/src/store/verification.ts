@@ -5,7 +5,8 @@ import { submitVerification, watchVerificationStatus } from '@/services/verifica
 
 const STORE_KEY = 'qareeb.verification';
 
-export type DocSlot = 'idFront' | 'idBack' | 'selfie';
+/** The two required photos: the ID card and the artisan themselves. */
+export type DocSlot = 'idPhoto' | 'selfie';
 
 interface Certificate {
   id: string;
@@ -21,8 +22,7 @@ export interface ArtisanDraft {
 
 interface VerificationSnapshot {
   status: VerificationStatus;
-  idFront?: string;
-  idBack?: string;
+  idPhoto?: string;
   selfie?: string;
   certificates: Certificate[];
   submittedAt?: number;
@@ -45,12 +45,22 @@ interface VerificationState extends VerificationSnapshot {
   reset: () => void;
 }
 
-const EMPTY: VerificationSnapshot = { status: 'unsubmitted', certificates: [], draft: { categoryIds: [] } };
+// Every field is listed, photos included: zustand's set() merges, so a field
+// left out would keep the previous account's value.
+const EMPTY: VerificationSnapshot = {
+  status: 'unsubmitted',
+  idPhoto: undefined,
+  selfie: undefined,
+  certificates: [],
+  submittedAt: undefined,
+  draft: { categoryIds: [] },
+  owner: undefined,
+};
 
 export const useVerification = create<VerificationState>((set, get) => {
   const save = () => {
-    const { status, idFront, idBack, selfie, certificates, submittedAt, draft, owner } = get();
-    kv.set<VerificationSnapshot>(STORE_KEY, { status, idFront, idBack, selfie, certificates, submittedAt, draft, owner });
+    const { status, idPhoto, selfie, certificates, submittedAt, draft, owner } = get();
+    kv.set<VerificationSnapshot>(STORE_KEY, { status, idPhoto, selfie, certificates, submittedAt, draft, owner });
   };
 
   return {
@@ -59,7 +69,18 @@ export const useVerification = create<VerificationState>((set, get) => {
 
     hydrate: () => {
       const saved = kv.get<VerificationSnapshot>(STORE_KEY);
-      set({ ...EMPTY, ...(saved ?? {}), draft: saved?.draft ?? EMPTY.draft, hydrated: true });
+      // Only known fields: older snapshots carried idFront/idBack.
+      set({
+        ...EMPTY,
+        status: saved?.status ?? EMPTY.status,
+        idPhoto: saved?.idPhoto,
+        selfie: saved?.selfie,
+        certificates: saved?.certificates ?? [],
+        submittedAt: saved?.submittedAt,
+        draft: saved?.draft ?? EMPTY.draft,
+        owner: saved?.owner,
+        hydrated: true,
+      });
     },
 
     // Another account on this device starts clean: its own photos and status
@@ -95,15 +116,14 @@ export const useVerification = create<VerificationState>((set, get) => {
     // Sends the photos to the admin queue (no-op on mock). Throws on failure,
     // leaving the status as it was so the artisan can try again.
     submit: async (user) => {
-      const { idFront, idBack, selfie, certificates, draft } = get();
-      if (!idFront || !idBack || !selfie) return;
+      const { idPhoto, selfie, certificates, draft } = get();
+      if (!idPhoto || !selfie) return;
       await submitVerification({
         user,
         categoryIds: draft.categoryIds,
         experienceYears: draft.experienceYears,
         bio: draft.bio,
-        idFront,
-        idBack,
+        idPhoto,
         selfie,
         certificates: certificates.map((c) => c.uri),
       });
@@ -123,6 +143,7 @@ export const useVerification = create<VerificationState>((set, get) => {
       save();
     },
 
+    // On sign-out: nothing of this account stays for the next one.
     reset: () => {
       set({ ...EMPTY });
       save();

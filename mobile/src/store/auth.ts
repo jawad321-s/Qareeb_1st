@@ -17,6 +17,7 @@ import type { AppUser, UserRole } from '@/types';
 import { MOCK_ARTISANS, MOCK_CUSTOMER, MOCK_PAST_CUSTOMERS } from '@/mock/data';
 import { normalizePhone } from '@/lib/phone';
 import { localAccounts } from './accounts';
+import { useVerification } from './verification';
 
 const SESSION_KEY = 'qareeb.session';
 
@@ -122,6 +123,8 @@ export const useAuth = create<AuthState>((set, get) => ({
       (uid ? unregisterPush(uid) : Promise.resolve()).finally(() => signOutFirebase().catch(() => {}));
     }
     kv.remove(SESSION_KEY);
+    // The verification photos picked on this device belong to this account.
+    useVerification.getState().reset();
     set({ user: null });
   },
 

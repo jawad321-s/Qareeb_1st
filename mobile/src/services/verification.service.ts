@@ -21,9 +21,8 @@ export interface VerificationSubmission {
   categoryIds: string[];
   experienceYears?: number;
   bio?: string;
-  idFront: string;
-  idBack: string;
-  selfie?: string;
+  idPhoto: string;
+  selfie: string;
   certificates: string[];
 }
 
@@ -58,12 +57,11 @@ export async function submitVerification(payload: VerificationSubmission): Promi
   const db = getDb();
   if (!db || !isLive()) return;
 
-  const { user, idFront, idBack, selfie, certificates } = payload;
+  const { user, idPhoto, selfie, certificates } = payload;
   const uid = user.uid;
   const photos: [string, string][] = [
-    ['idFront', idFront],
-    ['idBack', idBack],
-    ...(selfie ? ([['selfie', selfie]] as [string, string][]) : []),
+    ['id', idPhoto],
+    ['selfie', selfie],
     ...certificates.map((uri, i): [string, string] => [`certificate-${i + 1}`, uri]),
   ];
 

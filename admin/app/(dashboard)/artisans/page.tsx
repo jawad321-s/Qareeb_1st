@@ -141,6 +141,7 @@ function DocumentsModal({
   }, [zoomed, onClose]);
 
   const label = (name: string) => {
+    if (name === 'id') return t('ver.idPhoto');
     if (name === 'idFront') return t('ver.idFront');
     if (name === 'idBack') return t('ver.idBack');
     if (name === 'selfie') return t('ver.selfie');

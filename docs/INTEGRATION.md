@@ -101,7 +101,7 @@ Verified badge  ◀──live snapshot── status: "approved"/"rejected" ◀�
   categoryIds: string[], category: string,
   status: 'pending' | 'approved' | 'rejected',
   documentsSubmitted: boolean,
-  files: string[],            // 'idFront' | 'idBack' | 'selfie' | 'certificate-N'
+  files: string[],            // 'id' | 'selfie' | 'certificate-N'
   submittedAt: Timestamp, reviewedAt: Timestamp | null,
 }
 

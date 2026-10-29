@@ -162,10 +162,15 @@ request is matched to the artisans nearest its location.
 
 ## 6. Security Model
 
-- **Authentication** — Firebase Auth by phone number (OTP). There is no email:
-  the phone number is the account identity — one customer and one separate
-  artisan account per number. Custom claims
-  (`role`, `verified`) set via Cloud Functions on approval.
+- **Authentication** — Firebase Auth. Customers and artisans sign in by phone
+  number + password; the phone number is the account identity — one customer
+  and one separate artisan account per number. Firebase's password sign-in
+  needs an email-shaped id, so one is derived from the number and account type
+  (`customer-599123456@phone.qareeb.app`); it is internal and never shown. The
+  OTP step after sign-up is still simulated (no SMS). Customer/artisan roles
+  are read from `users/{uid}` by the rules. **Admins** sign in to the dashboard
+  with an email + password and need the `role: "admin"` custom claim
+  (`firebase/scripts/create-admin.mjs`). See [FIREBASE_SETUP.md](FIREBASE_SETUP.md).
 - **Authorization** — Firestore Security Rules enforce per-collection access:
   customers read their own requests, artisans read requests in matched geohashes,
   admins (custom claim) read everything. See [`firebase/firestore.rules`](../firebase/firestore.rules).

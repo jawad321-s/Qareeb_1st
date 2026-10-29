@@ -64,7 +64,7 @@ Moving Services
 ## 🚀 Quick Start
 
 ### Prerequisites
-- Node.js ≥ 20, npm ≥ 10
+- Node.js ≥ 22.13 (Expo SDK 58), npm ≥ 10
 - A Firebase project (Auth + Firestore + Storage enabled)
 - Expo Go app (for mobile) / Xcode / Android Studio
 

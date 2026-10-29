@@ -3,8 +3,8 @@
 'use client';
 
 import { getApps, initializeApp, type FirebaseApp } from 'firebase/app';
-import { getAuth, type Auth } from 'firebase/auth';
-import { getFirestore, type Firestore } from 'firebase/firestore';
+import { connectAuthEmulator, getAuth, type Auth } from 'firebase/auth';
+import { connectFirestoreEmulator, getFirestore, type Firestore } from 'firebase/firestore';
 import { config } from './config';
 
 let app: FirebaseApp | null = null;
@@ -20,6 +20,7 @@ export function getDb(): Firestore | null {
   if (config.useMock) return null;
   if (db) return db;
   db = getFirestore(ensureApp());
+  if (config.emulatorHost) connectFirestoreEmulator(db, config.emulatorHost, 8080);
   return db;
 }
 
@@ -27,6 +28,7 @@ export function getAuthClient(): Auth | null {
   if (config.useMock) return null;
   if (auth) return auth;
   auth = getAuth(ensureApp());
+  if (config.emulatorHost) connectAuthEmulator(auth, `http://${config.emulatorHost}:9099`, { disableWarnings: true });
   return auth;
 }
 

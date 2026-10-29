@@ -6,9 +6,12 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getApps, initializeApp, type FirebaseApp } from 'firebase/app';
 import * as firebaseAuth from 'firebase/auth';
 import type { Auth } from 'firebase/auth';
-import { getFirestore, initializeFirestore, type Firestore } from 'firebase/firestore';
-import { getStorage, type FirebaseStorage } from 'firebase/storage';
+import { connectFirestoreEmulator, getFirestore, initializeFirestore, type Firestore } from 'firebase/firestore';
+import { connectStorageEmulator, getStorage, type FirebaseStorage } from 'firebase/storage';
 import { config } from './config';
+
+/** Local emulators (firebase emulators:start) instead of the real project, when set. */
+const emulator = config.firebaseEmulatorHost;
 
 let app: FirebaseApp | null = null;
 let db: Firestore | null = null;
@@ -31,6 +34,7 @@ export function getDb(): Firestore | null {
     // Optional fields (e.g. an offer without a note) are sent as `undefined`;
     // drop them instead of failing the whole write.
     db = initializeFirestore(a, { ignoreUndefinedProperties: true });
+    if (emulator) connectFirestoreEmulator(db, emulator, 8080);
   } catch {
     // Already initialised (e.g. after a fast refresh).
     db = getFirestore(a);
@@ -44,6 +48,7 @@ export function getBucket(): FirebaseStorage | null {
   const a = ensureApp();
   if (!a) return null;
   storage = getStorage(a);
+  if (emulator) connectStorageEmulator(storage, emulator, 9199);
   return storage;
 }
 
@@ -54,6 +59,7 @@ export function getAuthClient(): Auth | null {
   if (!a) return null;
   if (Platform.OS === 'web') {
     auth = firebaseAuth.getAuth(a);
+    if (emulator) firebaseAuth.connectAuthEmulator(auth, `http://${emulator}:9099`, { disableWarnings: true });
   } else {
     // Persist the session across app restarts. `getReactNativePersistence`
     // only exists in the React Native build of firebase/auth, so it is
@@ -63,6 +69,7 @@ export function getAuthClient(): Auth | null {
     };
     try {
       auth = firebaseAuth.initializeAuth(a, { persistence: getReactNativePersistence(AsyncStorage) });
+      if (emulator) firebaseAuth.connectAuthEmulator(auth, `http://${emulator}:9099`, { disableWarnings: true });
     } catch {
       // Already initialised (e.g. after a fast refresh).
       auth = firebaseAuth.getAuth(a);

@@ -24,6 +24,9 @@ const keyPath = join(__dirname, 'service-account.json');
 
 if (existsSync(keyPath)) {
   admin.initializeApp({ credential: admin.credential.cert(JSON.parse(readFileSync(keyPath, 'utf8'))) });
+} else if (process.env.FIRESTORE_EMULATOR_HOST) {
+  // Local emulators: FIRESTORE_EMULATOR_HOST=127.0.0.1:8080 GCLOUD_PROJECT=demo-qareeb
+  admin.initializeApp({ projectId: process.env.GCLOUD_PROJECT ?? 'demo-qareeb' });
 } else {
   // Falls back to GOOGLE_APPLICATION_CREDENTIALS / ADC.
   admin.initializeApp();

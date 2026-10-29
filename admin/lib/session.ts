@@ -1,27 +1,24 @@
-// Client session for the admin console. Admins sign in with their phone
-// number, like every account on Qareeb.
-//  • Live: Firebase Auth. The number maps to an internal sign-in address
-//    (admin-<number>@phone.qareeb.app, as the mobile app does for customers
-//    and artisans), and only accounts carrying the `role: "admin"` custom
-//    claim get in. Create one with `npm run create-admin -- <phone> <password>`
-//    inside firebase/.
+// Client session for the admin console. Admins sign in with an email and a
+// password.
+//  • Live: Firebase Auth (Email/Password), and only accounts carrying the
+//    `role: "admin"` custom claim get in. Create one with
+//    `node scripts/create-admin.mjs <email> <password>` inside firebase/.
 //  • Mock: a local demo session, so the dashboard runs without a backend.
 'use client';
 
-import { onAuthStateChanged, signInWithEmailAndPassword, signOut as fbSignOut, type User } from 'firebase/auth';
+import {
+  onAuthStateChanged,
+  sendPasswordResetEmail,
+  signInWithEmailAndPassword,
+  signOut as fbSignOut,
+  type User,
+} from 'firebase/auth';
 import { getAuthClient } from './firebase';
-import { nationalNumber, normalizePhone } from './phone';
-
-const LOGIN_DOMAIN = 'phone.qareeb.app';
-const loginEmail = (phone: string) => `admin-${nationalNumber(phone)}@${LOGIN_DOMAIN}`;
-/** admin-599123456@phone.qareeb.app → +970599123456 */
-const phoneOf = (email: string | null) => normalizePhone(email?.match(/^admin-(\d+)@/)?.[1] ?? '');
 
 const KEY = 'qareeb.admin.session';
 
 export interface AdminSession {
-  /** Admins sign in with their phone number, like every account on Qareeb. */
-  phone: string;
+  email: string;
   signedInAt: number;
 }
 
@@ -34,6 +31,10 @@ export class SignInError extends Error {
   }
 }
 
+/** Loose shape check; Firebase has the final word. */
+export const isValidEmail = (email: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
+const normalizeEmail = (email: string) => email.trim().toLowerCase();
+
 function readLocal(): AdminSession | null {
   if (typeof window === 'undefined') return null;
   try {
@@ -44,8 +45,8 @@ function readLocal(): AdminSession | null {
   }
 }
 
-function writeLocal(phone: string): AdminSession {
-  const session: AdminSession = { phone, signedInAt: Date.now() };
+function writeLocal(email: string): AdminSession {
+  const session: AdminSession = { email, signedInAt: Date.now() };
   localStorage.setItem(KEY, JSON.stringify(session));
   return session;
 }
@@ -65,7 +66,7 @@ export function waitForSession(): Promise<AdminSession | null> {
       unsubscribe();
       if (!user) return resolve(null);
       try {
-        resolve((await isAdmin(user)) ? writeLocal(phoneOf(user.email)) : null);
+        resolve((await isAdmin(user)) ? writeLocal(user.email ?? '') : null);
       } catch {
         resolve(null);
       }
@@ -73,26 +74,45 @@ export function waitForSession(): Promise<AdminSession | null> {
   });
 }
 
-export async function signIn(phone: string, password: string): Promise<AdminSession> {
+function toSignInError(err: unknown): SignInError {
+  if (err instanceof SignInError) return err;
+  const code = (err as { code?: string })?.code ?? '';
+  if (['auth/invalid-credential', 'auth/invalid-login-credentials', 'auth/wrong-password', 'auth/user-not-found', 'auth/invalid-email'].includes(code)) {
+    return new SignInError('invalid');
+  }
+  if (code === 'auth/network-request-failed') return new SignInError('network');
+  if (code === 'auth/too-many-requests') return new SignInError('tooMany');
+  console.error('[admin auth]', err);
+  return new SignInError('generic', code || (err as Error)?.message);
+}
+
+export async function signIn(email: string, password: string): Promise<AdminSession> {
   const auth = getAuthClient();
-  if (!auth) return writeLocal(normalizePhone(phone));
+  if (!auth) return writeLocal(normalizeEmail(email));
   try {
-    const { user } = await signInWithEmailAndPassword(auth, loginEmail(phone), password);
+    const { user } = await signInWithEmailAndPassword(auth, normalizeEmail(email), password);
     if (!(await isAdmin(user))) {
       await fbSignOut(auth);
       throw new SignInError('notAdmin');
     }
-    return writeLocal(normalizePhone(phone));
+    return writeLocal(user.email ?? normalizeEmail(email));
   } catch (err) {
-    if (err instanceof SignInError) throw err;
-    const code = (err as { code?: string })?.code ?? '';
-    if (['auth/invalid-credential', 'auth/invalid-login-credentials', 'auth/wrong-password', 'auth/user-not-found', 'auth/invalid-email'].includes(code)) {
-      throw new SignInError('invalid');
-    }
-    if (code === 'auth/network-request-failed') throw new SignInError('network');
-    if (code === 'auth/too-many-requests') throw new SignInError('tooMany');
-    console.error('[admin sign-in]', err);
-    throw new SignInError('generic', code || (err as Error)?.message);
+    throw toSignInError(err);
+  }
+}
+
+/**
+ * Emails a password-reset link (Firebase's own email, no Blaze needed). With
+ * email enumeration protection on, Firebase answers the same way whether or
+ * not the address has an account.
+ */
+export async function sendPasswordReset(email: string): Promise<void> {
+  const auth = getAuthClient();
+  if (!auth) return;
+  try {
+    await sendPasswordResetEmail(auth, normalizeEmail(email));
+  } catch (err) {
+    throw toSignInError(err);
   }
 }
 

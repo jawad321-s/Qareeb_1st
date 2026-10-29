@@ -43,24 +43,23 @@ so no SMS is needed and it works in Expo Go. One phone number can therefore
 hold **both** a customer and an artisan account (separate profiles and
 passwords). Only Palestinian mobiles (059 / 056) are accepted; `0599123456`,
 `+970599123456` and `+972599123456` all resolve to the same login. There is no
-email anywhere: the phone number (stored as `+970…` in `users/{uid}.phone`) is
-the account identity.
+email in the apps: the phone number (stored as `+970…` in `users/{uid}.phone`)
+is the account identity.
 
 - **Sign-up** creates the Auth account, `users/{uid}` (role `customer` or
   `artisan`) and, for artisans, `artisanProfiles/{uid}`.
 - **Roles:** customer/artisan come from `users/{uid}.role` (locked after
-  sign-up by the rules). **Admins** sign in to the dashboard with a phone
-  number too (internal login `admin-599123456@phone.qareeb.app`) and need the
-  `role: "admin"` custom claim. One command creates the account and grants it
-  (re-running it resets the password):
+  sign-up by the rules). **Admins** sign in to the dashboard with an **email
+  and password** and need the `role: "admin"` custom claim. One command
+  creates the account and grants it (re-running it resets the password):
   ```bash
-  cd firebase && npm run create-admin -- 0599123456 'a-strong-password'
+  cd firebase && node scripts/create-admin.mjs admin@example.com 'a-strong-password'
   ```
-  `admin/lib/session.ts` rejects any account without the claim.
-- **Not yet:** password reset by SMS (planned with Phone Auth). Until then an
-  admin sets a new password with the Admin SDK
-  (`admin.auth().updateUser(uid, { password })`); for admins, re-run
-  `create-admin`.
+  `admin/lib/session.ts` rejects any account without the claim. The login
+  page's **Forgot password?** sends Firebase's reset email (works on Spark).
+- **Not yet:** password reset by SMS for customers/artisans (planned with
+  Phone Auth). Until then an admin sets a new password with the Admin SDK
+  (`admin.auth().updateUser(uid, { password })`).
 
 ## First integrated flow — Artisan verification
 

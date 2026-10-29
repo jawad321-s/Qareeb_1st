@@ -2,46 +2,66 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Languages, Lock, Phone } from 'lucide-react';
+import { Languages, Lock, Mail } from 'lucide-react';
 import { Button, Input } from '@/components/ui/primitives';
-import { signIn, SignInError } from '@/lib/session';
-import { isValidPhone } from '@/lib/phone';
-import { useT } from '@/lib/i18n';
+import { isValidEmail, sendPasswordReset, signIn, SignInError, type SignInErrorCode } from '@/lib/session';
+import { useT, type TKey } from '@/lib/i18n';
+
+const ERROR_KEY: Record<SignInErrorCode, TKey> = {
+  invalid: 'login.errCredentials',
+  notAdmin: 'login.errNotAdmin',
+  network: 'login.errNetwork',
+  tooMany: 'login.errTooMany',
+  generic: 'login.errGeneric',
+};
 
 export default function LoginPage() {
   const router = useRouter();
   const { t, locale, toggle } = useT();
-  const [phone, setPhone] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [notice, setNotice] = useState('');
   const [loading, setLoading] = useState(false);
+
+  const showError = (err: unknown) => {
+    const code = err instanceof SignInError ? err.code : 'generic';
+    const detail = err instanceof SignInError && err.detail ? ` (${err.detail})` : '';
+    setError(t(ERROR_KEY[code]) + (code === 'generic' ? detail : ''));
+  };
 
   const submit = async () => {
     if (loading) return;
-    if (!isValidPhone(phone) || password.length < 6) {
+    setNotice('');
+    if (!isValidEmail(email) || password.length < 6) {
       setError(t('login.errInvalid'));
       return;
     }
     setLoading(true);
     try {
-      await signIn(phone, password);
+      await signIn(email, password);
       router.push('/');
     } catch (err) {
-      const code = err instanceof SignInError ? err.code : 'generic';
-      const detail = err instanceof SignInError && err.detail ? ` (${err.detail})` : '';
-      setError(
-        t(
-          code === 'invalid'
-            ? 'login.errCredentials'
-            : code === 'notAdmin'
-              ? 'login.errNotAdmin'
-              : code === 'network'
-                ? 'login.errNetwork'
-                : code === 'tooMany'
-                  ? 'login.errTooMany'
-                  : 'login.errGeneric',
-        ) + (code === 'generic' ? detail : ''),
-      );
+      showError(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const forgot = async () => {
+    if (loading) return;
+    setError('');
+    setNotice('');
+    if (!isValidEmail(email)) {
+      setError(t('login.resetNeedEmail'));
+      return;
+    }
+    setLoading(true);
+    try {
+      await sendPasswordReset(email);
+      setNotice(t('login.resetSent'));
+    } catch (err) {
+      showError(err);
     } finally {
       setLoading(false);
     }
@@ -85,15 +105,15 @@ export default function LoginPage() {
           </div>
           <div className="space-y-4">
             <div className="relative">
-              <Phone className="pointer-events-none absolute start-3 top-1/2 z-10 h-4 w-4 -translate-y-1/2 text-muted" />
+              <Mail className="pointer-events-none absolute start-3 top-1/2 z-10 h-4 w-4 -translate-y-1/2 text-muted" />
               <Input
-                value={phone}
-                onChange={(e) => { setPhone(e.target.value); setError(''); }}
+                value={email}
+                onChange={(e) => { setEmail(e.target.value); setError(''); setNotice(''); }}
                 onKeyDown={(e) => e.key === 'Enter' && submit()}
-                placeholder={t('login.phone')}
-                type="tel"
-                inputMode="tel"
-                autoComplete="tel"
+                placeholder={t('login.email')}
+                type="email"
+                inputMode="email"
+                autoComplete="username"
                 className="ps-10"
               />
             </div>
@@ -109,7 +129,13 @@ export default function LoginPage() {
                 className="ps-10"
               />
             </div>
+            <div className="flex justify-end">
+              <button type="button" onClick={forgot} disabled={loading} className="text-xs font-medium text-brand-500 hover:underline disabled:opacity-50">
+                {t('login.forgot')}
+              </button>
+            </div>
             {error && <p className="text-xs font-medium text-red-500">{error}</p>}
+            {notice && <p className="text-xs font-medium text-emerald-600">{notice}</p>}
             <Button className="w-full" onClick={submit} disabled={loading}>
               {t('login.signIn')}
             </Button>

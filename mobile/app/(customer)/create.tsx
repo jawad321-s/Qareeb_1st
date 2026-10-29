@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { I18nManager, View, ScrollView, Pressable, TextInput, useWindowDimensions } from 'react-native';
+import { I18nManager, View, ScrollView, Pressable, TextInput } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
 import { Image } from 'expo-image';
@@ -10,7 +10,6 @@ import { Text } from '@/components/ui/Text';
 import { Button } from '@/components/ui/Button';
 import { Icon } from '@/components/ui/Icon';
 import { Card } from '@/components/ui/Card';
-import { CategoryTile } from '@/components/domain/CategoryTile';
 import { useTabBarSpace } from '@/components/ui/TabBar';
 import { CATEGORIES } from '@/constants/categories';
 import { useCreateRequest } from '@/hooks/queries';
@@ -21,14 +20,11 @@ import { config } from '@/lib/config';
 import { formatMoney } from '@/lib/format';
 import { localizedTextAlign } from '@/i18n/rtl';
 
-// Service picker: a regular grid in catalog order, so a short last row lines
-// up from the start instead of being spread to the edges.
-const GRID_COLUMNS = 3;
-const GRID_GAP = 12;
+// Service picker: one row per service, in catalog order.
 const SERVICES = [...CATEGORIES].sort((a, b) => a.order - b.order);
 
 export default function CreateRequest() {
-  const { colors } = useTheme();
+  const { colors, isDark } = useTheme();
   const user = useAuth((s) => s.user)!;
   const { t, locale, isRTL } = useT();
   const font = useFont();
@@ -55,9 +51,6 @@ export default function CreateRequest() {
   const [when, setWhen] = useState<'asap' | 'today' | 'tomorrow'>('asap');
 
   const category = CATEGORIES.find((c) => c.id === categoryId);
-  // The screen content has 20px side padding.
-  const { width } = useWindowDimensions();
-  const cellWidth = (width - 40 - GRID_GAP * (GRID_COLUMNS - 1)) / GRID_COLUMNS;
 
   const pickImage = async () => {
     const res = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ImagePicker.MediaTypeOptions.Images, quality: 0.7, allowsMultipleSelection: true });
@@ -114,19 +107,34 @@ export default function CreateRequest() {
         {step === 0 && (
           <Animated.View entering={FadeIn} style={{ gap: 16 }}>
             <Text variant="h3">{t('create.whatNeed')}</Text>
-            <View style={{ flexDirection: 'row', flexWrap: 'wrap', columnGap: GRID_GAP, rowGap: 16 }}>
-              {SERVICES.map((c) => (
-                <View key={c.id} style={{ width: cellWidth, alignItems: 'center', opacity: categoryId && categoryId !== c.id ? 0.5 : 1 }}>
-                  <View>
-                    <CategoryTile category={c} locale={locale} size={80} onPress={() => setCategoryId(c.id)} />
-                    {categoryId === c.id && (
-                      <View style={{ position: 'absolute', top: -4, right: 8, backgroundColor: colors.tint, borderRadius: 999, padding: 3 }}>
-                        <Icon name="check" size={12} color="#FFF" strokeWidth={3} />
-                      </View>
-                    )}
-                  </View>
-                </View>
-              ))}
+            <View style={{ gap: 10 }}>
+              {SERVICES.map((c) => {
+                const active = categoryId === c.id;
+                return (
+                  <Pressable
+                    key={c.id}
+                    onPress={() => setCategoryId(c.id)}
+                    style={{
+                      flexDirection: 'row',
+                      alignItems: 'center',
+                      gap: 12,
+                      padding: 12,
+                      borderRadius: 16,
+                      borderWidth: 1.5,
+                      borderColor: active ? colors.tint : colors.border,
+                      backgroundColor: active ? colors.tint + '15' : colors.surface,
+                    }}
+                  >
+                    <View style={{ width: 44, height: 44, borderRadius: 14, alignItems: 'center', justifyContent: 'center', backgroundColor: c.colorHex + (isDark ? '24' : '14') }}>
+                      <Icon name={c.icon as any} size={22} color={c.colorHex} />
+                    </View>
+                    <Text variant="bodyMedium" style={{ flex: 1 }}>
+                      {c.name[locale]}
+                    </Text>
+                    {active && <Icon name="check-circle" size={20} color={colors.tint} />}
+                  </Pressable>
+                );
+              })}
             </View>
           </Animated.View>
         )}

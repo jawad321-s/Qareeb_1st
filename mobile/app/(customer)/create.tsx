@@ -43,8 +43,9 @@ export default function CreateRequest() {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [images, setImages] = useState<string[]>([]);
-  const [budgetMin, setBudgetMin] = useState('100');
-  const [budgetMax, setBudgetMax] = useState('300');
+  // The customer types their own range (no pre-filled example figures).
+  const [budgetMin, setBudgetMin] = useState('');
+  const [budgetMax, setBudgetMax] = useState('');
   const [when, setWhen] = useState<'asap' | 'today' | 'tomorrow'>('asap');
 
   const category = CATEGORIES.find((c) => c.id === categoryId);
@@ -57,7 +58,7 @@ export default function CreateRequest() {
   const canNext = () => {
     if (step === 0) return !!categoryId;
     if (step === 1) return title.trim().length >= 4 && description.trim().length >= 10;
-    if (step === 2) return Number(budgetMax) >= Number(budgetMin) && Number(budgetMax) > 0;
+    if (step === 2) return Number(budgetMin) > 0 && Number(budgetMax) >= Number(budgetMin);
     return true;
   };
 
@@ -128,8 +129,6 @@ export default function CreateRequest() {
               <TextInput
                 value={title}
                 onChangeText={setTitle}
-                placeholder={category?.name[locale]}
-                placeholderTextColor={colors.muted}
                 style={{ height: 54, borderRadius: 16, borderWidth: 1.5, borderColor: colors.border, backgroundColor: colors.surface, paddingHorizontal: 14, color: colors.fg, fontSize: 15, fontFamily: font('Inter_400Regular'), textAlign: localizedTextAlign(isRTL) }}
               />
             </View>
@@ -140,8 +139,6 @@ export default function CreateRequest() {
               <TextInput
                 value={description}
                 onChangeText={setDescription}
-                placeholder={t('create.describePlaceholder')}
-                placeholderTextColor={colors.muted}
                 multiline
                 style={{ minHeight: 120, borderRadius: 16, borderWidth: 1.5, borderColor: colors.border, backgroundColor: colors.surface, padding: 14, color: colors.fg, fontSize: 15, fontFamily: font('Inter_400Regular'), textAlign: localizedTextAlign(isRTL), textAlignVertical: 'top' }}
               />

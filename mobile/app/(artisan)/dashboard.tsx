@@ -16,6 +16,7 @@ import { RequestCard } from '@/components/domain/RequestCard';
 import { CardSkeleton } from '@/components/feedback/Skeleton';
 import { useJobHistory, useNearbyRequests } from '@/hooks/queries';
 import { useMyRating } from '@/hooks/useMyRating';
+import { ratingLabel, ratingValue } from '@/lib/rating';
 import { useAuth } from '@/store/auth';
 import { useTheme } from '@/theme/ThemeProvider';
 import { useT } from '@/i18n';
@@ -56,7 +57,7 @@ export default function ArtisanDashboard() {
     { icon: 'wallet' as const, label: t('artisan.income'), value: history.data ? formatMoney(incomeSummary(history.data.completed, locale).total) : '…', color: colors.tint },
     // Same count as the income screen's work history.
     { icon: 'check-circle' as const, label: t('artisan.completed'), value: history.data ? String(history.data.completed.length) : '…', color: '#10B981' },
-    { icon: 'star' as const, label: t('profile.rating'), value: rating ? rating.average.toFixed(1) : '…', color: '#F59E0B' },
+    { icon: 'star' as const, label: ratingLabel(t('profile.rating'), rating), value: ratingValue(rating), color: '#F59E0B' },
   ];
 
   return (

@@ -13,3 +13,9 @@ export function ratingSummary(reviews: Pick<Review, 'rating'>[]): RatingSummary 
   const mean = ratings.reduce((sum, n) => sum + n, 0) / ratings.length;
   return { average: Math.round(mean * 10) / 10, count: ratings.length };
 }
+
+/** "4.5", or "—" before the first rating ("…" while loading). */
+export const ratingValue = (s?: RatingSummary) => (!s ? '…' : s.count ? s.average.toFixed(1) : '—');
+
+/** The label with how many ratings make up the average: "التقييم (3)". */
+export const ratingLabel = (label: string, s?: RatingSummary) => (s?.count ? `${label} (${s.count})` : label);

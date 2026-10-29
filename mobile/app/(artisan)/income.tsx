@@ -15,6 +15,7 @@ import { formatMoney } from '@/lib/format';
 import { incomeSummary } from '@/lib/income';
 import { useJobHistory } from '@/hooks/queries';
 import { useMyRating } from '@/hooks/useMyRating';
+import { ratingLabel, ratingValue } from '@/lib/rating';
 import { useAuth } from '@/store/auth';
 import { useT } from '@/i18n';
 import { useTheme } from '@/theme/ThemeProvider';
@@ -43,7 +44,7 @@ export default function Income() {
     { icon: 'x-circle' as const, label: t('inc.rejectedJobs'), value: count(history.data?.rejected.length), color: '#EF4444', tab: 'rejected' },
     { icon: 'wallet' as const, label: t('inc.avgJob'), value: loading ? '…' : formatMoney(income.average), color: '#F59E0B' },
     // Average of the customers' ratings, with how many there are.
-    { icon: 'star' as const, label: rating ? `${t('inc.avgRating')} (${rating.count})` : t('inc.avgRating'), value: rating ? rating.average.toFixed(1) : '…', color: colors.tint },
+    { icon: 'star' as const, label: ratingLabel(t('inc.avgRating'), rating), value: ratingValue(rating), color: colors.tint },
   ];
   return (
     // Bottom padding must clear the floating tab bar (Screen's default doesn't).

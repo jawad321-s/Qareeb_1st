@@ -20,7 +20,7 @@ import { useArtisan, useReviews } from '@/hooks/queries';
 import { categoryById } from '@/constants/categories';
 import { timeAgo } from '@/lib/format';
 import { config } from '@/lib/config';
-import { ratingSummary } from '@/lib/rating';
+import { ratingLabel, ratingSummary, ratingValue } from '@/lib/rating';
 import { useTheme } from '@/theme/ThemeProvider';
 import { useT } from '@/i18n';
 
@@ -71,7 +71,7 @@ export default function ArtisanDetail() {
                 {user.verified && <Badge label={t('ad.verified')} variant="success" icon="shield" />}
               </View>
               <View style={{ flexDirection: 'row', gap: 28, marginTop: 12 }}>
-                <Stat value={rating.average.toFixed(1)} label={t('profile.rating')} />
+                <Stat value={ratingValue(rating)} label={ratingLabel(t('profile.rating'), rating)} />
                 <Stat value={String(profile.completedJobs)} label={t('ad.jobs')} />
               </View>
             </View>

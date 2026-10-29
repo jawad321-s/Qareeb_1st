@@ -12,7 +12,7 @@ import { FloatingBlobs } from '@/components/ui/FloatingBlobs';
 import { displayPhone } from '@/lib/phone';
 import { useMyRequests } from '@/hooks/queries';
 import { useMyRating } from '@/hooks/useMyRating';
-import { ratingLabel, ratingValue } from '@/lib/rating';
+import { ratingValue } from '@/lib/rating';
 import { useAuth } from '@/store/auth';
 import { useThemeStore } from '@/theme/ThemeProvider';
 import { useTheme } from '@/theme/ThemeProvider';
@@ -89,7 +89,7 @@ export default function Profile() {
               </Text>
               <View style={{ flexDirection: 'row', gap: 24, marginTop: 8 }}>
                 <Stat label={t('profile.orders')} value={requests.data ? String(requests.data.length) : '…'} />
-                <Stat label={ratingLabel(t('profile.rating'), rating)} value={ratingValue(rating)} />
+                <Stat label={t('profile.rating')} value={ratingValue(rating)} />
               </View>
             </View>
           </SafeAreaView>

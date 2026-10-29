@@ -16,7 +16,7 @@ import { useThemeStore } from '@/theme/ThemeProvider';
 import { useT } from '@/i18n';
 import { useJobHistory } from '@/hooks/queries';
 import { useMyRating } from '@/hooks/useMyRating';
-import { ratingLabel, ratingValue } from '@/lib/rating';
+import { ratingValue } from '@/lib/rating';
 import { useMySubscription } from '@/store/subscription';
 import { planById } from '@/lib/plans';
 
@@ -71,7 +71,7 @@ export default function ArtisanProfile() {
               </View>
               <View style={{ flexDirection: 'row', gap: 28, marginTop: 8 }}>
                 <Stat value={history.data ? String(history.data.completed.length) : '…'} label={t('ad.jobs')} />
-                <Stat value={ratingValue(rating)} label={ratingLabel(t('profile.rating'), rating)} />
+                <Stat value={ratingValue(rating)} label={t('profile.rating')} />
               </View>
             </View>
           </SafeAreaView>

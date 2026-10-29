@@ -11,6 +11,7 @@ import { Card } from '@/components/ui/Card';
 import { FloatingBlobs } from '@/components/ui/FloatingBlobs';
 import { displayPhone } from '@/lib/phone';
 import { useMyRequests } from '@/hooks/queries';
+import { useMyRating } from '@/hooks/useMyRating';
 import { useAuth } from '@/store/auth';
 import { useThemeStore } from '@/theme/ThemeProvider';
 import { useTheme } from '@/theme/ThemeProvider';
@@ -32,6 +33,7 @@ export default function Profile() {
   const { t, locale, toggle } = useT();
   // Every request this customer has posted, whatever its status.
   const requests = useMyRequests(user?.uid ?? '');
+  const rating = useMyRating();
 
   // Signing out clears `user`; the layout redirects to welcome, but guard here
   // too so this screen never dereferences a null user during that transition.
@@ -86,7 +88,7 @@ export default function Profile() {
               </Text>
               <View style={{ flexDirection: 'row', gap: 24, marginTop: 8 }}>
                 <Stat label={t('profile.orders')} value={requests.data ? String(requests.data.length) : '…'} />
-                <Stat label={t('profile.rating')} value={user.rating.toFixed(1)} />
+                <Stat label={t('profile.rating')} value={rating ? rating.average.toFixed(1) : '…'} />
               </View>
             </View>
           </SafeAreaView>

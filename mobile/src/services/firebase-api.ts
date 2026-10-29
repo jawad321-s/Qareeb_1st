@@ -123,13 +123,14 @@ export const firebaseApi: typeof mockApi = {
       getDoc(doc(db(), 'users', me.uid)),
     ]);
     const categoryIds: string[] = profile.exists() ? (profile.data().categoryIds ?? []) : [];
+    const availability = profile.exists() ? profile.data().availability : undefined;
     // Pick up an admin approval made since sign-in.
     const verified = self.exists() ? self.data().verified === true : me.verified;
     if (verified !== me.verified) useAuth.getState().updateUser({ verified });
     const now = Date.now();
     return snap.docs
       .map((d) => mapRequest(d.id, d.data()))
-      .filter((r) => isVisibleToArtisan(r, { ...me, verified }, categoryIds, now));
+      .filter((r) => isVisibleToArtisan(r, { ...me, verified }, categoryIds, now, availability));
   },
 
   async createRequest(input): Promise<ServiceRequest> {
@@ -217,6 +218,12 @@ export const firebaseApi: typeof mockApi = {
       await updateDoc(reqSnap.ref, { offerCount: (reqSnap.data().offerCount ?? 0) + 1, updatedAt: now });
     }
     return { ...payload, id: refDoc.id };
+  },
+
+  async updateOfferPrice(offerId, price): Promise<void> {
+    // Rules: only the offer's artisan, only the price, and only while the job
+    // is still open (pending, accepted, on the way or in progress).
+    await updateDoc(doc(db(), 'offers', offerId), { price, priceUpdatedAt: Date.now() });
   },
 
   async getReviews(targetId: string): Promise<Review[]> {

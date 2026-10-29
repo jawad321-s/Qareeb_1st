@@ -11,6 +11,9 @@ export const MAX_RADIUS_KM = 12;
 // dashboard → Artisans). Keep in sync with EXPO_PUBLIC_REQUIRE_VERIFIED.
 export const REQUIRE_VERIFIED = process.env.REQUIRE_VERIFIED !== 'false';
 
+// Artisans' working hours (artisanProfiles.availability) are read in this zone.
+export const TIME_ZONE = 'Asia/Hebron';
+
 // Must match the Firestore database location (Firebase console →
 // Firestore → the location shown at the top).
 export const REGION = 'europe-west1';

@@ -36,7 +36,8 @@ export default function Verification() {
   const [submitting, setSubmitting] = useState(false);
 
   const docs: Record<DocSlot, string | undefined> = { idFront, idBack, selfie };
-  const canSubmit = !!idFront && !!idBack && status !== 'pending' && status !== 'approved';
+  // ID (both sides) and a photo of the artisan are required; certificates are optional.
+  const canSubmit = !!idFront && !!idBack && !!selfie && status !== 'pending' && status !== 'approved';
 
   // Live-sync with the admin dashboard's decision (no-op on mock).
   useEffect(() => {
@@ -65,6 +66,10 @@ export default function Verification() {
   const onSubmit = async () => {
     if (!idFront || !idBack) {
       showToast('error', t('vrf.needId'));
+      return;
+    }
+    if (!selfie) {
+      showToast('error', t('vrf.needSelfie'));
       return;
     }
     if (!user) return;
@@ -103,7 +108,7 @@ export default function Verification() {
           <UploadTile style={{ flex: 1 }} label={t('vrf.idFront')} uri={docs.idFront} icon="camera" onPress={() => onPickDoc('idFront')} colors={colors} t={t} />
           <UploadTile style={{ flex: 1 }} label={t('vrf.idBack')} uri={docs.idBack} icon="camera" onPress={() => onPickDoc('idBack')} colors={colors} t={t} />
         </View>
-        <UploadTile label={t('vrf.selfie')} optional uri={docs.selfie} icon="camera" onPress={() => onPickDoc('selfie')} colors={colors} t={t} tall={false} />
+        <UploadTile label={t('vrf.selfie')} uri={docs.selfie} icon="camera" onPress={() => onPickDoc('selfie')} colors={colors} t={t} tall={false} />
       </Animated.View>
 
       {/* Certificates section */}

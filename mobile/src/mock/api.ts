@@ -154,6 +154,12 @@ export const mockApi = {
     return clone(offer);
   },
 
+  /** The artisan changes their price before the job is completed. */
+  async updateOfferPrice(offerId: string, price: number): Promise<void> {
+    await delay(300);
+    offers = offers.map((o) => (o.id === offerId ? { ...o, price } : o));
+  },
+
   async getReviews(targetId: string): Promise<Review[]> {
     await delay();
     return clone(reviews.filter((r) => r.targetId === targetId));

@@ -24,6 +24,8 @@ before(async () => {
     artisan('a_unverified', 1, { verified: false }),
     { user: { uid: 'a_elec', role: 'artisan', fullName: 'e', verified: true, location: at(1) }, profile: { uid: 'a_elec', categoryIds: ['electrical'] } },
     artisan('a_self', 1, { phone: '0599123456' }), // the customer's own artisan account
+    // Works Mondays 08:00–09:00 only (Palestine time).
+    { ...artisan('a_offhours', 1), profile: { uid: 'a_offhours', categoryIds: ['plumbing'], availability: { days: [1], from: '08:00', to: '09:00' } } },
   ];
   for (const p of people) {
     await db.doc(`users/${p.user.uid}`).set(p.user);
@@ -95,4 +97,31 @@ test('a request with an offer stops expanding and is not cancelled', async () =>
 test('with verification off, unverified artisans are included', async () => {
   const found = await findArtisans(db, { categoryId: 'plumbing', origin: at(0), radiusKm: 2, requireVerified: false });
   assert.deepEqual(found.map((f) => f.uid).sort(), ['a_1km', 'a_self', 'a_unverified']);
+});
+
+test('working hours: requests reach artisans only inside their days and hours (Palestine time)', async () => {
+  const { isWithinAvailability } = await import('../src/availability.js');
+  // 2027-01-03 is a Sunday; Palestine is UTC+2 in January.
+  const sunNoon = Date.UTC(2027, 0, 3, 10, 0); // Sun 12:00
+  const sunNinePm = Date.UTC(2027, 0, 3, 19, 0); // Sun 21:00
+  const monOneAm = Date.UTC(2027, 0, 3, 23, 0); // Mon 01:00
+  const monThreeAm = Date.UTC(2027, 0, 4, 1, 0); // Mon 03:00
+  const monHalfEight = Date.UTC(2027, 0, 4, 6, 30); // Mon 08:30
+  const monNine = Date.UTC(2027, 0, 4, 7, 0); // Mon 09:00 (end is exclusive)
+
+  const dayShift = { days: [0], from: '08:00', to: '20:00' };
+  assert.equal(isWithinAvailability(dayShift, sunNoon), true);
+  assert.equal(isWithinAvailability(dayShift, sunNinePm), false);
+  assert.equal(isWithinAvailability(dayShift, monHalfEight), false);
+  const nightShift = { days: [0], from: '20:00', to: '02:00' };
+  assert.equal(isWithinAvailability(nightShift, sunNinePm), true);
+  assert.equal(isWithinAvailability(nightShift, monOneAm), true); // Sunday's shift, after midnight
+  assert.equal(isWithinAvailability(nightShift, monThreeAm), false);
+  assert.equal(isWithinAvailability(undefined, sunNoon), true); // no schedule saved
+
+  const search = async (now) =>
+    (await findArtisans(db, { categoryId: 'plumbing', origin: at(0), radiusKm: 2, customerPhone: '+970599123456', now })).map((a) => a.uid).sort();
+  assert.deepEqual(await search(sunNoon), ['a_1km']);
+  assert.deepEqual(await search(monHalfEight), ['a_1km', 'a_offhours']);
+  assert.deepEqual(await search(monNine), ['a_1km']);
 });

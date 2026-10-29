@@ -5,16 +5,21 @@
 import { FieldValue } from 'firebase-admin/firestore';
 import { INITIAL_RADIUS_KM, REQUIRE_VERIFIED, TIMEOUT_MS, targetRadiusKm } from './config.js';
 import { distanceKm, normalizePhone } from './geo.js';
+import { isWithinAvailability } from './availability.js';
 import { notifyUsers } from './notify.js';
 
 /**
- * Verified, active artisans of `categoryId` within `radiusKm` of `origin`,
- * excluding `excludeIds` and the customer's own artisan account (same phone).
+ * Verified, active artisans of `categoryId` within `radiusKm` of `origin` who
+ * are inside their working days and hours at `now`, excluding `excludeIds`
+ * and the customer's own artisan account (same phone).
  * Returns [{ uid, distanceKm }] nearest first.
  */
-export async function findArtisans(db, { categoryId, origin, radiusKm, excludeIds = [], customerPhone, requireVerified = REQUIRE_VERIFIED }) {
+export async function findArtisans(db, { categoryId, origin, radiusKm, excludeIds = [], customerPhone, requireVerified = REQUIRE_VERIFIED, now = Date.now() }) {
   const profiles = await db.collection('artisanProfiles').where('categoryIds', 'array-contains', categoryId).get();
-  const ids = profiles.docs.map((d) => d.id).filter((id) => !excludeIds.includes(id));
+  const ids = profiles.docs
+    .filter((d) => isWithinAvailability(d.get('availability'), now))
+    .map((d) => d.id)
+    .filter((id) => !excludeIds.includes(id));
   if (ids.length === 0) return [];
   const users = await db.getAll(...ids.map((id) => db.collection('users').doc(id)));
   const ownPhone = normalizePhone(customerPhone);
@@ -54,6 +59,7 @@ export async function startDispatch(db, requestId, request, now = Date.now()) {
         origin: request.location,
         radiusKm: INITIAL_RADIUS_KM,
         customerPhone: await customerPhoneOf(db, request.customerId),
+        now,
       })
     : [];
   await ref.update({
@@ -96,6 +102,7 @@ export async function runDispatchTick(db, now = Date.now()) {
       radiusKm,
       excludeIds: already,
       customerPhone: await customerPhoneOf(db, r.customerId),
+      now,
     });
     await doc.ref.update({
       'dispatch.radiusKm': radiusKm,

@@ -19,6 +19,8 @@ import { FloatingBlobs } from '@/components/ui/FloatingBlobs';
 import { useArtisan, useReviews } from '@/hooks/queries';
 import { categoryById } from '@/constants/categories';
 import { timeAgo } from '@/lib/format';
+import { config } from '@/lib/config';
+import { ratingSummary } from '@/lib/rating';
 import { useTheme } from '@/theme/ThemeProvider';
 import { useT } from '@/i18n';
 
@@ -41,6 +43,8 @@ export default function ArtisanDetail() {
   }
 
   const { user, profile } = data;
+  // The rating from the reviews themselves (the stored figure is a cache).
+  const rating = !config.useMock && reviews.data ? ratingSummary(reviews.data) : { average: user.rating, count: user.ratingCount };
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
@@ -67,7 +71,7 @@ export default function ArtisanDetail() {
                 {user.verified && <Badge label={t('ad.verified')} variant="success" icon="shield" />}
               </View>
               <View style={{ flexDirection: 'row', gap: 28, marginTop: 12 }}>
-                <Stat value={user.rating.toFixed(1)} label={t('profile.rating')} />
+                <Stat value={rating.average.toFixed(1)} label={t('profile.rating')} />
                 <Stat value={String(profile.completedJobs)} label={t('ad.jobs')} />
               </View>
             </View>
@@ -115,7 +119,7 @@ export default function ArtisanDetail() {
           <View>
             <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
               <Text variant="h3">{t('ad.reviews')}</Text>
-              <Rating value={user.rating} count={user.ratingCount} size={14} showValue />
+              <Rating value={rating.average} count={rating.count} size={14} showValue />
             </View>
             <View style={{ gap: 12 }}>
               {(reviews.data ?? []).map((r) => (

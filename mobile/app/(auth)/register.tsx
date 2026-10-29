@@ -112,8 +112,8 @@ export default function Register() {
   };
 
   const baseFields = [
-    { name: 'fullName' as const, label: t('auth.fullName'), placeholder: 'ليلى خالد', icon: 'user' as const, kb: 'default' as const },
-    { name: 'phone' as const, label: t('auth.phone'), placeholder: '+970 5X XXX XXXX', icon: 'phone' as const, kb: 'phone-pad' as const },
+    { name: 'fullName' as const, label: t('auth.fullName'), icon: 'user' as const, kb: 'default' as const },
+    { name: 'phone' as const, label: t('auth.phone'), icon: 'phone' as const, kb: 'phone-pad' as const },
   ];
 
   return (
@@ -136,7 +136,6 @@ export default function Register() {
               render={({ field: { onChange, value, onBlur } }) => (
                 <Input
                   label={f.label}
-                  placeholder={f.placeholder}
                   iconLeft={f.icon}
                   keyboardType={f.kb}
                   autoCapitalize={f.name === 'phone' ? 'none' : 'words'}
@@ -152,14 +151,14 @@ export default function Register() {
             control={control}
             name="password"
             render={({ field: { onChange, value, onBlur } }) => (
-              <Input label={t('auth.password')} placeholder="••••••••" iconLeft="lock" secure value={value} onChangeText={onChange} onBlur={onBlur} error={errors.password?.message as string | undefined} />
+              <Input label={t('auth.password')} iconLeft="lock" secure value={value} onChangeText={onChange} onBlur={onBlur} error={errors.password?.message as string | undefined} />
             )}
           />
           <Controller
             control={control}
             name="confirmPassword"
             render={({ field: { onChange, value, onBlur } }) => (
-              <Input label={t('auth.confirmPassword')} placeholder="••••••••" iconLeft="lock" secure value={value} onChangeText={onChange} onBlur={onBlur} error={errors.confirmPassword?.message as string | undefined} />
+              <Input label={t('auth.confirmPassword')} iconLeft="lock" secure value={value} onChangeText={onChange} onBlur={onBlur} error={errors.confirmPassword?.message as string | undefined} />
             )}
           />
 
@@ -216,7 +215,7 @@ export default function Register() {
                 control={control}
                 name="experience"
                 render={({ field: { onChange, value, onBlur } }) => (
-                  <Input label={t('auth.experience')} placeholder="8" iconLeft="award" keyboardType="number-pad" value={value} onChangeText={onChange} onBlur={onBlur} error={errors.experience?.message as string | undefined} />
+                  <Input label={t('auth.experience')} iconLeft="award" keyboardType="number-pad" value={value} onChangeText={onChange} onBlur={onBlur} error={errors.experience?.message as string | undefined} />
                 )}
               />
 
@@ -224,7 +223,7 @@ export default function Register() {
                 control={control}
                 name="bio"
                 render={({ field: { onChange, value, onBlur } }) => (
-                  <Input label={t('auth.bio')} placeholder={t('auth.bioPlaceholder')} multiline value={value} onChangeText={onChange} onBlur={onBlur} error={errors.bio?.message as string | undefined} />
+                  <Input label={t('auth.bio')} multiline value={value} onChangeText={onChange} onBlur={onBlur} error={errors.bio?.message as string | undefined} />
                 )}
               />
 

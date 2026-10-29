@@ -14,6 +14,7 @@ import { AnimatedNumber } from '@/components/ui/AnimatedNumber';
 import { formatMoney } from '@/lib/format';
 import { incomeSummary } from '@/lib/income';
 import { useJobHistory } from '@/hooks/queries';
+import { useMyRating } from '@/hooks/useMyRating';
 import { useAuth } from '@/store/auth';
 import { useT } from '@/i18n';
 import { useTheme } from '@/theme/ThemeProvider';
@@ -24,6 +25,7 @@ export default function Income() {
   const tabBarSpace = useTabBarSpace();
   const user = useAuth((s) => s.user)!;
   const history = useJobHistory(user.uid);
+  const rating = useMyRating();
   // Tabs stay mounted, so pick up jobs finished since the screen was last shown.
   const { refetch } = history;
   useFocusEffect(
@@ -40,7 +42,8 @@ export default function Income() {
     { icon: 'check-circle' as const, label: t('inc.completedJobs'), value: count(history.data?.completed.length), color: '#10B981', tab: 'completed' },
     { icon: 'x-circle' as const, label: t('inc.rejectedJobs'), value: count(history.data?.rejected.length), color: '#EF4444', tab: 'rejected' },
     { icon: 'wallet' as const, label: t('inc.avgJob'), value: loading ? '…' : formatMoney(income.average), color: '#F59E0B' },
-    { icon: 'star' as const, label: t('inc.avgRating'), value: user.rating.toFixed(1), color: colors.tint },
+    // Average of the customers' ratings, with how many there are.
+    { icon: 'star' as const, label: rating ? `${t('inc.avgRating')} (${rating.count})` : t('inc.avgRating'), value: rating ? rating.average.toFixed(1) : '…', color: colors.tint },
   ];
   return (
     // Bottom padding must clear the floating tab bar (Screen's default doesn't).

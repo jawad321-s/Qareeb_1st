@@ -56,6 +56,7 @@ export default function RequestDetail() {
   const isPending = request.status === 'PENDING';
   const isCancelled = request.status === 'CANCELLED';
   const bestPrice = Math.min(...(offers.data ?? []).map((o) => o.price));
+  const acceptedOffer = request.acceptedOfferId ? offers.data?.find((o) => o.id === request.acceptedOfferId) : undefined;
 
   const onAccept = async (offerId: string) => {
     setAcceptingId(offerId);
@@ -167,6 +168,15 @@ export default function RequestDetail() {
                 <Text variant="bodyMedium">{acceptedArtisan.fullName}</Text>
                 <Rating value={acceptedArtisan.rating} count={acceptedArtisan.ratingCount} size={13} showValue />
               </View>
+              {/* The agreed price (the artisan may update it until the job is done). */}
+              {acceptedOffer && (
+                <View style={{ alignItems: 'flex-end' }}>
+                  <Text variant="caption" tone="muted">
+                    {t('job.price')}
+                  </Text>
+                  <Text variant="h3">{formatMoney(acceptedOffer.price)}</Text>
+                </View>
+              )}
             </View>
             <Button label={t('req.chat')} iconLeft="message" onPress={() => router.push(`/(shared)/chat/${request.id}`)} />
           </Card>

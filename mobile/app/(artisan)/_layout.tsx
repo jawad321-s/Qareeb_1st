@@ -45,12 +45,22 @@ export default function ArtisanLayout() {
 
   // No freezeOnBlur — see the customer layout: frozen tabs kept stale theme colors.
   return (
-    <Tabs screenOptions={{ headerShown: false, animation: 'shift', lazy: true }} tabBar={(props) => <TabBar {...props} meta={META} />}>
+    // backBehavior "history": back from a job's details returns to the tab it
+    // was opened from (home or jobs), not always to the first tab.
+    <Tabs
+      backBehavior="history"
+      screenOptions={{ headerShown: false, animation: 'shift', lazy: true }}
+      tabBar={(props) => <TabBar {...props} meta={META} />}
+    >
       <Tabs.Screen name="dashboard" />
       <Tabs.Screen name="requests" />
       <Tabs.Screen name="offers" />
       <Tabs.Screen name="income" />
       <Tabs.Screen name="profile" />
+      {/* Job details: not a tab (no entry in the tab bar), but it must be
+          declared — expo-router 58 no longer adds undeclared routes, and a
+          push to /job/<id> fell back to the dashboard. */}
+      <Tabs.Screen name="job/[id]" />
     </Tabs>
   );
 }

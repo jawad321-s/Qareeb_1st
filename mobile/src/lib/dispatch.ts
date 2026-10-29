@@ -2,7 +2,8 @@
 // Cloud Functions run they own dispatch; without them (Spark plan) the app
 // applies the same policy itself so artisans only see matching nearby work.
 import { distanceKm } from './geo';
-import type { AppUser, ServiceRequest } from '@/types';
+import { isWithinAvailability } from './availability';
+import type { AppUser, Availability, ServiceRequest } from '@/types';
 
 export const INITIAL_RADIUS_KM = 2;
 export const STEP_KM = 2;
@@ -26,12 +27,20 @@ export function isExpiredWithoutOffers(r: ServiceRequest, now = Date.now()): boo
 }
 
 /**
- * Whether an artisan should see a PENDING request. Dispatched requests (Cloud
- * Functions) go to the artisans recorded on them; otherwise the same rules
- * are applied here: verified artisan, same category, within the radius the
- * search has reached, and not past the response window.
+ * Whether an artisan should see a PENDING request. Nothing reaches them
+ * outside their working days and hours. Dispatched requests (Cloud Functions)
+ * go to the artisans recorded on them; otherwise the same rules are applied
+ * here: verified artisan, same category, within the radius the search has
+ * reached, and not past the response window.
  */
-export function isVisibleToArtisan(r: ServiceRequest, me: AppUser, categoryIds: string[], now = Date.now()): boolean {
+export function isVisibleToArtisan(
+  r: ServiceRequest,
+  me: AppUser,
+  categoryIds: string[],
+  now = Date.now(),
+  availability?: Availability,
+): boolean {
+  if (!isWithinAvailability(availability, new Date(now))) return false;
   if (r.dispatch) return (r.notifiedArtisanIds ?? []).includes(me.uid);
   if ((REQUIRE_VERIFIED && !me.verified) || !categoryIds.includes(r.categoryId)) return false;
   if (isExpiredWithoutOffers(r, now)) return false;

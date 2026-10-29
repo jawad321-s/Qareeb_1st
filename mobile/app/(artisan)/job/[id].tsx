@@ -11,7 +11,15 @@ import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Icon } from '@/components/ui/Icon';
 import { CardSkeleton } from '@/components/feedback/Skeleton';
-import { useRequest, useSubmitOffer, useCancelRequest, useUpdateRequestStatus } from '@/hooks/queries';
+import {
+  useRequest,
+  useSubmitOffer,
+  useCancelRequest,
+  useUpdateRequestStatus,
+  useOffers,
+  useUpdateOfferPrice,
+  useSendMessage,
+} from '@/hooks/queries';
 import { StatusBadge } from '@/components/domain/StatusBadge';
 import { TrackingTimeline } from '@/components/domain/TrackingTimeline';
 import { useToast } from '@/components/feedback/Toast';
@@ -26,6 +34,7 @@ import { useMySubscription } from '@/store/subscription';
 import { useTheme } from '@/theme/ThemeProvider';
 import { useFont, useT } from '@/i18n';
 import { localizedTextAlign } from '@/i18n/rtl';
+import type { Offer } from '@/types';
 
 export default function JobDetail() {
   const { colors } = useTheme();
@@ -38,6 +47,11 @@ export default function JobDetail() {
   const submit = useSubmitOffer(id!);
   const cancel = useCancelRequest(id!);
   const progress = useUpdateRequestStatus(id!, user.uid);
+  // The artisan's own offer on this job (the query is scoped to them).
+  const myOffers = useOffers(id!);
+  const myOffer = myOffers.data?.find((o) => o.artisanId === user.uid && (o.status === 'PENDING' || o.status === 'ACCEPTED'));
+  const updatePrice = useUpdateOfferPrice(id!, user.uid);
+  const sendMessage = useSendMessage(id!);
   // This screen lives inside the artisan tab navigator, so the floating tab bar
   // overlays it — the submit button must clear the bar.
   const tabBarSpace = useTabBarSpace();
@@ -80,6 +94,24 @@ export default function JobDetail() {
   };
 
   const canSend = Number(price) > 0 && Number(eta) > 0 && !sent;
+
+  // The price can change until the job is completed. On an accepted job the
+  // customer is told in the chat as well.
+  const savePrice = async (minor: number): Promise<boolean> => {
+    if (!myOffer) return false;
+    try {
+      await updatePrice.mutateAsync({ offerId: myOffer.id, price: minor });
+    } catch (err) {
+      console.warn('[price]', err);
+      toast('error', t('job.priceFailed'));
+      return false;
+    }
+    if (isActiveJob(request.status)) {
+      sendMessage.mutate({ senderId: user.uid, type: 'text', text: t('job.priceChangedMsg').replace('{price}', formatMoney(minor)) });
+    }
+    toast('success', t('job.priceUpdated'));
+    return true;
+  };
 
   // The assigned artisan can also call the job off before work starts.
   const isAssigned = request.acceptedArtisanId === user.uid;
@@ -162,7 +194,16 @@ export default function JobDetail() {
         </Card>
       </Animated.View>
 
-      {request.status === 'PENDING' ? (
+      {request.status === 'PENDING' && myOffer ? (
+        /* Already quoted: show the offer (no second offer) with its price editable. */
+        <Card style={{ marginTop: 24, gap: 14 }}>
+          <Text variant="h3">{t('job.yourOffer')}</Text>
+          <PriceRow offer={myOffer} editable saving={updatePrice.isPending} onSave={savePrice} />
+          <Text variant="caption" tone="muted">
+            {t('job.waitingCustomer')}
+          </Text>
+        </Card>
+      ) : request.status === 'PENDING' ? (
         <>
         {/* Offer form — locked once the trial or plan has ended */}
         {subscription.isActive ? (
@@ -222,6 +263,9 @@ export default function JobDetail() {
             <StatusBadge status={request.status} />
           </View>
           <TrackingTimeline status={request.status} />
+          {myOffer && (
+            <PriceRow offer={myOffer} editable={isActiveJob(request.status)} saving={updatePrice.isPending} onSave={savePrice} />
+          )}
           {next && (
             <Button
               label={t(`job.next.${next}` as any)}
@@ -264,6 +308,76 @@ export default function JobDetail() {
         </View>
       )}
     </Screen>
+  );
+}
+
+/** The offer's price, with an inline editor while the job is still open. */
+function PriceRow({
+  offer,
+  editable,
+  saving,
+  onSave,
+}: {
+  offer: Offer;
+  editable: boolean;
+  saving: boolean;
+  onSave: (minor: number) => Promise<boolean>;
+}) {
+  const { colors } = useTheme();
+  const { t, isRTL } = useT();
+  const font = useFont();
+  const [editing, setEditing] = useState(false);
+  const [value, setValue] = useState('');
+  const minor = Math.round(Number(value) * 100);
+  const valid = Number(value) > 0 && minor !== offer.price;
+
+  if (editing) {
+    return (
+      <View style={{ gap: 10 }}>
+        <Text variant="caption" tone="muted">
+          {t('job.price')} ({config.currency})
+        </Text>
+        <TextInput value={value} onChangeText={setValue} keyboardType="number-pad" autoFocus style={inputStyle(colors, font, isRTL)} />
+        <View style={{ flexDirection: 'row', gap: 10 }}>
+          <Button label={t('common.cancel')} variant="outline" onPress={() => setEditing(false)} style={{ flex: 1 }} />
+          <Button
+            label={t('job.savePrice')}
+            iconLeft="check"
+            loading={saving}
+            disabled={!valid}
+            onPress={async () => {
+              if (await onSave(minor)) setEditing(false);
+            }}
+            style={{ flex: 1 }}
+          />
+        </View>
+      </View>
+    );
+  }
+
+  return (
+    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+      <Icon name="wallet" size={20} color={colors.tint} />
+      <View style={{ flex: 1 }}>
+        <Text variant="caption" tone="muted">
+          {t('job.price')}
+        </Text>
+        <Text variant="h3">{formatMoney(offer.price)}</Text>
+      </View>
+      {editable && (
+        <Button
+          label={t('job.editPrice')}
+          iconLeft="edit"
+          variant="outline"
+          size="sm"
+          fullWidth={false}
+          onPress={() => {
+            setValue(String(offer.price / 100));
+            setEditing(true);
+          }}
+        />
+      )}
+    </View>
   );
 }
 

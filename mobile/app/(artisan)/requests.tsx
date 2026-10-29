@@ -10,6 +10,7 @@ import { EmptyState } from '@/components/feedback/EmptyState';
 import { useArtisan, useArtisanJobs, useNearbyRequests } from '@/hooks/queries';
 import { config } from '@/lib/config';
 import { REQUIRE_VERIFIED } from '@/lib/dispatch';
+import { isWithinAvailability } from '@/lib/availability';
 import { useTheme } from '@/theme/ThemeProvider';
 import { useAuth } from '@/store/auth';
 import { useT } from '@/i18n';
@@ -34,7 +35,9 @@ export default function ArtisanRequests() {
         ? { icon: 'map-pin' as const, title: t('aJobs.noLocation'), desc: t('aJobs.noLocationDesc') }
         : profile.data && !hasServices
           ? { icon: 'tools' as const, title: t('aJobs.noServices'), desc: t('aJobs.noServicesDesc') }
-          : null;
+          : profile.data && !isWithinAvailability(profile.data.profile.availability)
+            ? { icon: 'clock' as const, title: t('aJobs.offHours'), desc: t('aJobs.offHoursDesc') }
+            : null;
 
   return (
     <Screen padded={false}>

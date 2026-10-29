@@ -15,6 +15,7 @@ import { useTheme } from '@/theme/ThemeProvider';
 import { useThemeStore } from '@/theme/ThemeProvider';
 import { useT } from '@/i18n';
 import { useJobHistory } from '@/hooks/queries';
+import { useMyRating } from '@/hooks/useMyRating';
 import { useMySubscription } from '@/store/subscription';
 import { planById } from '@/lib/plans';
 
@@ -27,6 +28,7 @@ export default function ArtisanProfile() {
   // Real figures: verification from the account, jobs from the work history
   // (same count as the dashboard and income screens).
   const history = useJobHistory(user?.uid ?? '');
+  const rating = useMyRating();
   // The premium badge reflects the plan the artisan actually paid for.
   const plan = useMySubscription(user?.uid);
 
@@ -68,7 +70,7 @@ export default function ArtisanProfile() {
               </View>
               <View style={{ flexDirection: 'row', gap: 28, marginTop: 8 }}>
                 <Stat value={history.data ? String(history.data.completed.length) : '…'} label={t('ad.jobs')} />
-                <Stat value={user.rating.toFixed(1)} label={t('profile.rating')} />
+                <Stat value={rating ? rating.average.toFixed(1) : '…'} label={t('profile.rating')} />
               </View>
             </View>
           </SafeAreaView>

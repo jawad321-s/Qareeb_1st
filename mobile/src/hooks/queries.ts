@@ -170,6 +170,20 @@ export function useSubmitOffer(requestId: string) {
   });
 }
 
+/** The artisan changes their price before the job is completed. */
+export function useUpdateOfferPrice(requestId: string, artisanId: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ offerId, price }: { offerId: string; price: number }) => api.updateOfferPrice(offerId, price),
+    onSuccess: () =>
+      Promise.all([
+        qc.invalidateQueries({ queryKey: qk.offers(requestId) }),
+        qc.invalidateQueries({ queryKey: qk.artisanOffers(artisanId) }),
+        qc.invalidateQueries({ queryKey: qk.jobHistory(artisanId) }),
+      ]),
+  });
+}
+
 export function useSendMessage(requestId: string) {
   const qc = useQueryClient();
   return useMutation({

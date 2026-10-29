@@ -96,7 +96,7 @@ export const useVerification = create<VerificationState>((set, get) => {
     // leaving the status as it was so the artisan can try again.
     submit: async (user) => {
       const { idFront, idBack, selfie, certificates, draft } = get();
-      if (!idFront || !idBack) return;
+      if (!idFront || !idBack || !selfie) return;
       await submitVerification({
         user,
         categoryIds: draft.categoryIds,

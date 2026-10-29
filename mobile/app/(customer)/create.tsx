@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { I18nManager, View, ScrollView, Pressable, TextInput } from 'react-native';
+import { I18nManager, View, ScrollView, Pressable, TextInput, useWindowDimensions } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
 import { Image } from 'expo-image';
@@ -20,6 +20,12 @@ import { useFont, useT } from '@/i18n';
 import { config } from '@/lib/config';
 import { formatMoney } from '@/lib/format';
 import { localizedTextAlign } from '@/i18n/rtl';
+
+// Service picker: a regular grid in catalog order, so a short last row lines
+// up from the start instead of being spread to the edges.
+const GRID_COLUMNS = 3;
+const GRID_GAP = 12;
+const SERVICES = [...CATEGORIES].sort((a, b) => a.order - b.order);
 
 export default function CreateRequest() {
   const { colors } = useTheme();
@@ -49,6 +55,9 @@ export default function CreateRequest() {
   const [when, setWhen] = useState<'asap' | 'today' | 'tomorrow'>('asap');
 
   const category = CATEGORIES.find((c) => c.id === categoryId);
+  // The screen content has 20px side padding.
+  const { width } = useWindowDimensions();
+  const cellWidth = (width - 40 - GRID_GAP * (GRID_COLUMNS - 1)) / GRID_COLUMNS;
 
   const pickImage = async () => {
     const res = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ImagePicker.MediaTypeOptions.Images, quality: 0.7, allowsMultipleSelection: true });
@@ -105,15 +114,17 @@ export default function CreateRequest() {
         {step === 0 && (
           <Animated.View entering={FadeIn} style={{ gap: 16 }}>
             <Text variant="h3">{t('create.whatNeed')}</Text>
-            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 12, justifyContent: 'space-between' }}>
-              {CATEGORIES.map((c) => (
-                <View key={c.id} style={{ opacity: categoryId && categoryId !== c.id ? 0.5 : 1 }}>
-                  <CategoryTile category={c} locale={locale} size={80} onPress={() => setCategoryId(c.id)} />
-                  {categoryId === c.id && (
-                    <View style={{ position: 'absolute', top: -4, right: 8, backgroundColor: colors.tint, borderRadius: 999, padding: 3 }}>
-                      <Icon name="check" size={12} color="#FFF" strokeWidth={3} />
-                    </View>
-                  )}
+            <View style={{ flexDirection: 'row', flexWrap: 'wrap', columnGap: GRID_GAP, rowGap: 16 }}>
+              {SERVICES.map((c) => (
+                <View key={c.id} style={{ width: cellWidth, alignItems: 'center', opacity: categoryId && categoryId !== c.id ? 0.5 : 1 }}>
+                  <View>
+                    <CategoryTile category={c} locale={locale} size={80} onPress={() => setCategoryId(c.id)} />
+                    {categoryId === c.id && (
+                      <View style={{ position: 'absolute', top: -4, right: 8, backgroundColor: colors.tint, borderRadius: 999, padding: 3 }}>
+                        <Icon name="check" size={12} color="#FFF" strokeWidth={3} />
+                      </View>
+                    )}
+                  </View>
                 </View>
               ))}
             </View>

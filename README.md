@@ -6,8 +6,8 @@
 
 **Connecting customers with nearby verified artisans, in real time.**
 
-[![Expo SDK](https://img.shields.io/badge/Expo_SDK-54-000020?logo=expo)](https://expo.dev)
-[![React Native](https://img.shields.io/badge/React_Native-0.81-61DAFB?logo=react)](https://reactnative.dev)
+[![Expo SDK](https://img.shields.io/badge/Expo_SDK-58-000020?logo=expo)](https://expo.dev)
+[![React Native](https://img.shields.io/badge/React_Native-0.88-61DAFB?logo=react)](https://reactnative.dev)
 [![Next.js](https://img.shields.io/badge/Next.js-15-000000?logo=nextdotjs)](https://nextjs.org)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript)](https://www.typescriptlang.org)
 [![Firebase](https://img.shields.io/badge/Firebase-11-FFCA28?logo=firebase)](https://firebase.google.com)
@@ -57,11 +57,14 @@ Moving Services
 | [Design System](./docs/DESIGN_SYSTEM.md) | Colors, typography, spacing, components, motion |
 | [User Flows](./docs/USER_FLOWS.md) | Auth, request lifecycle, offers, chat, ratings |
 | [Integration](./docs/INTEGRATION.md) | Mobile ↔ Admin shared Firestore backend, mock/live switch |
-| [Run Locally (عربي)](./docs/RUN_LOCAL.md) | Step-by-step: run the app on your phone with Expo Go |
+| [Run Locally (عربي)](./docs/RUN_LOCAL.md) | First-time setup: download the project, run the app on your phone and the admin dashboard |
 
 ---
 
 ## 🚀 Quick Start
+
+> **First time on a new computer?** Follow the step-by-step Arabic guide:
+> [docs/RUN_LOCAL.md](./docs/RUN_LOCAL.md).
 
 ### Prerequisites
 - Node.js ≥ 22.13 (Expo SDK 58), npm ≥ 10

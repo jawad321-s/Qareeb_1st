@@ -63,8 +63,10 @@ Moving Services
 
 ## 🚀 Quick Start
 
-> **First time on a new computer?** Follow the step-by-step Arabic guide:
-> [docs/RUN_LOCAL.md](./docs/RUN_LOCAL.md).
+> **Team workflow (Windows):** clone the repo to your Desktop, then double-click
+> `start-app.cmd` (mobile app) or `start-admin.cmd` (admin dashboard). Each run
+> pulls the latest version from GitHub and installs libraries when they change.
+> Step-by-step Arabic guide: [docs/RUN_LOCAL.md](./docs/RUN_LOCAL.md).
 
 ### Prerequisites
 - Node.js ≥ 22.13 (Expo SDK 58), npm ≥ 10

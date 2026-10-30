@@ -1,140 +1,113 @@
-# تنزيل مشروع قريب وتشغيله على جهازك لأول مرة 🚀
+# تشغيل مشروع قريب: طريقة الفريق الموحّدة 🚀
 
-دليل خطوة بخطوة لأي حدا بالفريق: تنزيل المشروع، تشغيل التطبيق على الجوال،
-وتشغيل لوحة الأدمن. الأوامر مكتوبة لـ **Windows (cmd)**، وتحت كل خطوة
-ملاحظة لـ Mac إذا اختلفت.
+نفس الطريقة عند كل الفريق، وبنفس المكان، وبدون أوامر:
 
-> آخر نسخة دايماً هي الفرع الافتراضي على GitHub (`claude/qareeb-home-services-oxn9td`)،
-> و`git clone` بينزّله لحاله.
+> 1. **المكان:** المشروع عند الكل على **سطح المكتب** باسم `Qareeb_1st`.
+> 2. **التعديلات:** ما حدا بيعدّل الكود بإيده. كل التعديلات بتصير عن طريق Claude،
+>    وبتنرفع على GitHub.
+> 3. **التشغيل:** دبل كليك على **`start-app.cmd`** (التطبيق) و**`start-admin.cmd`**
+>    (لوحة الأدمن). كل مرة بيجيبوا آخر نسخة من GitHub لحالهم.
 
 ## المتطلبات (مرة وحدة)
 
 | الأداة | من وين |
 |---|---|
-| **Git** | https://git-scm.com/download/win (على Mac: `xcode-select --install`) |
+| **Git** | https://git-scm.com/download/win ← ركّبه بالإعدادات الافتراضية |
 | **Node.js 22.13 أو أحدث** (Expo SDK 58 بيحتاجه) | https://nodejs.org ← زر LTS |
 | **تطبيق Expo Go** (آخر نسخة) | App Store أو Google Play ← ابحث "Expo Go" |
 | الكمبيوتر والجوال على **نفس الواي فاي** | — |
 
-تأكد إن Node مركّب صح:
+ما في داعي لأي ملف مفاتيح: إعدادات Firebase تبعت مشروعنا مبنية جوّا الكود.
 
-```cmd
-node -v
-```
+## التنزيل لأول مرة (مرة وحدة)
 
-لازم يطبع `v22.13` أو أعلى.
+1. افتح **سطح المكتب** (Desktop) بـ File Explorer.
+2. اضغط على **شريط العنوان** فوق (اللي مكتوب فيه المسار)، امسحه واكتب `cmd`
+   واضغط Enter. بتفتح نافذة سوداء على سطح المكتب.
+3. اكتب واضغط Enter:
+   ```cmd
+   git clone https://github.com/jawad321-s/Qareeb_1st.git
+   ```
+4. سكّر النافذة. صار عندك مجلد **`Qareeb_1st`** على سطح المكتب، وجوّاه
+   `start-app.cmd` و`start-admin.cmd`.
 
-## 1) نزّل المشروع
-
-افتح **cmd عادي** (مش "Run as administrator") واكتب سطر سطر:
-
-```cmd
-cd %USERPROFILE%
-git clone https://github.com/jawad321-s/Qareeb_1st.git
-cd Qareeb_1st
-git log -1 --oneline
-```
-
-(على Mac: `cd ~` بدل السطر الأول.)
-
-> ⚠️ **لا تنزّل المشروع جوّا `C:\Windows\System32`** (هو المكان اللي بتفتح عليه
-> الطرفية لما تكون أدمن). هو مجلد نظام، وبعدين بيطلع خطأ `EPERM` عند التشغيل.
-> المكان الصح: مجلدك الشخصي، مثل `C:\Users\<اسمك>\Qareeb_1st`.
+> ⚠️ لا تنزّله **ZIP** من GitHub، ولا من نافذة cmd مفتوحة كـ "Run as administrator".
 >
-> ولا تنزّله **ZIP** من GitHub: الـ ZIP ما بيتحدّث بـ `git pull`.
+> **إذا عندك نسخة قديمة من المشروع على سطح المكتب** وما فيها `start-app.cmd`:
+> افتح مجلد `Qareeb_1st`، اكتب `cmd` بشريط العنوان (مثل الخطوة 2)، وبعدين:
+> ```cmd
+> git fetch origin
+> git checkout -f -B claude/qareeb-home-services-oxn9td origin/claude/qareeb-home-services-oxn9td
+> ```
+> أو احذف المجلد القديم ونزّله من جديد بالخطوات فوق.
 
-> 🔑 **ما في داعي لأي ملف مفاتيح:** إعدادات Firebase تبعت مشروعنا مبنية جوّا الكود،
-> فالتطبيق ولوحة الأدمن بيشتغلوا على بياناتنا الحقيقية مباشرة بعد التنزيل.
+## كل مرة: تشغيل التطبيق 📱
 
-## 2) شغّل التطبيق على الجوال 📱
+دبل كليك على **`start-app.cmd`** جوّا `Qareeb_1st`. هو بيعمل لحاله:
 
-```cmd
-cd %USERPROFILE%\Qareeb_1st\mobile
-npm install
-npx expo start -c
-```
+1. بيجيب آخر نسخة من GitHub، وبيطبع رقمها (مثل `Version: 87f30f5 …`).
+2. بيركّب المكتبات إذا تغيّرت. أول مرة بياخد كم دقيقة، وبعدها بيتخطّاها.
+3. بيشغّل التطبيق وبيطلّع **رمز QR**.
 
-`npm install` أول مرة بياخد كم دقيقة. بعدها بيطلع **رمز QR** بالطرفية:
+على الجوال:
 
 - **آيفون**: افتح الكاميرا العادية ← وجّهها على الـ QR ← اضغط الرابط ← بيفتح بـ Expo Go
 - **أندرويد**: افتح Expo Go ← "Scan QR code" ← امسح الرمز
 
-امسح الـ QR **الجديد** كل مرة، ولا تفتح المشروع من "Recently opened" بـ Expo Go
-(ممكن يفتح نسخة قديمة).
+امسح الـ QR **الجديد** كل مرة، ولا تفتح المشروع من "Recently opened" بـ Expo Go.
+للإيقاف: `Ctrl + C` بالنافذة.
 
-### إذا طلع: "You're signed in to Expo Go as …, but not signed in to Expo CLI"
+## لوحة الأدمن 🖥️
 
-يعني الجوال مسجّل دخول على حساب Expo والكمبيوتر لأ. اختار وحدة:
+دبل كليك على **`start-admin.cmd`**. بعد كم ثانية بيفتح المتصفح على
+**http://localhost:3000**. سجّل دخول بإيميل الأدمن وكلمة مروره.
 
-1. **الأسهل:** بـ Expo Go ← Profile ← **Sign out**، وامسح الـ QR من جديد.
-2. **سجّل دخول بالطرفية بنفس الحساب** (بدون متصفح، لأن الدخول بالمتصفح بيوقف
-   بخطأ على Windows بهاي النسخة من Expo):
-   ```cmd
-   npx expo login --no-browser
-   npx expo whoami
-   ```
-3. **بتوكن** (إذا الحساب معمول بـ Google وما إله كلمة مرور): من expo.dev ←
-   Account settings ← **Access tokens** ← Create token، وبعدين بنفس نافذة cmd:
-   ```cmd
-   set EXPO_TOKEN=الصق-التوكن-هون
-   npx expo whoami
-   npx expo start -c
-   ```
-   (بدون علامات تنصيص. بـ PowerShell بتنكتب: `$env:EXPO_TOKEN="..."`.)
-   التوكن سرّي: لا تبعته لحدا ولا تحطه بأي ملف بالمشروع.
+إذا بدك الاثنين مع بعض: شغّل `start-app.cmd` أول، واستنى لحد ما يطلع الـ QR،
+وبعدين `start-admin.cmd`.
 
-## 3) شغّل لوحة الأدمن 🖥️ (بنافذة cmd ثانية)
+## لما ينرفع تعديل جديد
 
-```cmd
-cd %USERPROFILE%\Qareeb_1st\admin
-npm install
-npm run dev
-```
+اطلب التعديل من Claude، وهو بيرفعه على GitHub. بعدها عند كل واحد بالفريق:
+سكّر نافذة التطبيق (`Ctrl + C`)، ودبل كليك على `start-app.cmd` من جديد. هيك
+بيجيب التعديل لحاله.
 
-افتح المتصفح على **http://localhost:3000** وسجّل دخول بإيميل الأدمن وكلمة مروره.
-(إنشاء حساب الأدمن مشروح بـ [FIREBASE_SETUP.md](FIREBASE_SETUP.md)، الخطوة 5.)
+> السكربتات بترجّع المشروع **طبق الأصل عن GitHub** كل مرة. أي تعديل يدوي على
+> ملفات المشروع بينمسح، وهاد مقصود: GitHub هو النسخة الوحيدة الصحيحة.
 
-## كل ما ينرفع تحديث جديد
+## إذا طلع: "You're signed in to Expo Go as …, but not signed in to Expo CLI"
 
-```cmd
-cd %USERPROFILE%\Qareeb_1st
+يعني الجوال مسجّل دخول على حساب Expo والكمبيوتر لأ. **الحل:** بـ Expo Go ←
+Profile ← **Sign out**، وامسح الـ QR من جديد.
+
+## حل المشاكل الشائعة
+
+| المشكلة | الحل |
+|---|---|
+| `Something went wrong` | خذ سكرين شوت للنافذة كاملة وابعتها |
+| `Git is not installed` أو `Node.js is not installed` | ركّب الناقص من جدول المتطلبات، وسكّر وافتح السكربت من جديد |
+| `This folder was not downloaded with git clone` | المشروع منزّل ZIP: نزّله من جديد بخطوات "التنزيل لأول مرة" |
+| `Could not reach GitHub` | ما في إنترنت: التطبيق بيشتغل على آخر نسخة نزلت عندك |
+| `EPERM: operation not permitted` | المشروع بمجلد نظام، أو انركّبت مكتباته من نافذة أدمن: نزّله من جديد على سطح المكتب |
+| أزرار "Demo: Customer / Artisan" ظاهرة | عندك ملف `mobile\.env` قديم فيه `EXPO_PUBLIC_USE_MOCK=true`: احذفه وشغّل `start-app.cmd` من جديد |
+| QR ما بيفتح / timeout | تأكد إن الكمبيوتر والجوال على نفس الواي فاي |
+| `permission-denied` بالتطبيق | قواعد Firestore الجديدة مش منشورة: [FIREBASE_SETUP.md](FIREBASE_SETUP.md)، الخطوة 3 |
+| بيطلب نسخة أحدث من Expo Go | حدّث Expo Go من المتجر (المشروع على SDK 58) |
+
+## على Mac
+
+السكربتات لـ Windows. على Mac، من مجلد المشروع بالـ Terminal:
+
+```bash
 git pull
 cd mobile
 npm ci
 npx expo start -c
 ```
 
-`npm ci` بيركّب المكتبات من جديد بالنسخ اللي بالمشروع بالزبط (مثلاً بعد تحديث
-Expo)، فما بيضل عندك مكتبات قديمة.
-
-إذا `git pull` رفض بسبب تعديلات عندك على الجهاز، هدول بيحفظوا تعديلاتك
-بفرع احتياطي وبيرجّعوا نسختك طبق الأصل عن GitHub:
-
-```cmd
-git fetch origin
-git stash
-git branch backup-mine
-git checkout -B claude/qareeb-home-services-oxn9td origin/claude/qareeb-home-services-oxn9td
-```
-
-## حل المشاكل الشائعة
-
-| المشكلة | الحل |
-|---|---|
-| `package.json does not exist` أو `ENOENT … package.json` | إنت بالمجلد الغلط: الأوامر بتنكتب جوّا `mobile` (أو `admin`)، مش بـ `Qareeb_1st` نفسه |
-| `not a git repository` | إنت مش جوّا مجلد المشروع: اعمل `cd %USERPROFILE%\Qareeb_1st` أول |
-| `EPERM: operation not permitted` | المشروع بمجلد نظام أو انركّبت مكتباته كأدمن: نزّله من جديد بمجلدك الشخصي (الخطوة 1) |
-| التطبيق بيفتح على نسخة قديمة | سكّر كل نافذة فيها Expo (`Ctrl + C`)، سكّر Expo Go من الجوال، شغّل `npx expo start -c` وامسح الـ QR الجديد |
-| QR ما بيفتح / timeout | تأكد من نفس الواي فاي، أو شغّل `npx expo start -c --tunnel` |
-| أزرار "Demo: Customer / Artisan" ظاهرة بشاشة الترحيب | التطبيق شغّال على البيانات التجريبية: إما كودك قديم (اعمل `git pull`)، أو عندك ملف `mobile\.env` قديم فيه `EXPO_PUBLIC_USE_MOCK=true` (احذفه). وبعدها `npx expo start -c` |
-| `permission-denied` بالتطبيق | قواعد Firestore الجديدة مش منشورة: [FIREBASE_SETUP.md](FIREBASE_SETUP.md)، الخطوة 3 |
-| خطأ عند `npm install` | تأكد من `node -v` (22.13 أو أحدث)، احذف مجلد `node_modules` وأعد `npm install` |
-| بيطلب نسخة أحدث من Expo Go | حدّث Expo Go من المتجر (المشروع على SDK 58) |
-
 ## معلومات إضافية
 
 - **أول تشغيل بالعربي** بيعيد تشغيل التطبيق مرة وحدة لحاله (ثانية تقريباً)، عشان يضبط
   اتجاه الكتابة من اليمين لليسار. وتبديل اللغة كمان بيعيد التشغيل. هاد طبيعي.
-- **معاينة على المتصفح:** بعد `npx expo start` اضغط `w` بالطرفية.
+- **معاينة على المتصفح:** بنافذة التطبيق اضغط `w`.
 - **إعداد Firebase نفسه** (القواعد، حساب الأدمن، البيانات الأساسية) لصاحب المشروع:
   [FIREBASE_SETUP.md](FIREBASE_SETUP.md).

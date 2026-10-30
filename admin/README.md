@@ -7,11 +7,13 @@ Tailwind CSS · TanStack Table · Recharts · Framer Motion**.
 
 ```bash
 npm install
-cp .env.example .env.local   # add Firebase keys when wiring the backend
 npm run dev                  # http://localhost:3000
 ```
 
-Sign in at `/login` (mock — any credentials) to enter the dashboard.
+Sign in at `/login` with the admin account (see
+[FIREBASE_SETUP.md](../docs/FIREBASE_SETUP.md), step 5). The dashboard uses the
+team's Firebase project by default; with `NEXT_PUBLIC_USE_MOCK=true` in
+`.env.local` it runs on mock data and any credentials work.
 
 ## Pages
 

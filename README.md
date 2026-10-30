@@ -75,7 +75,6 @@ Moving Services
 ```bash
 cd mobile
 npm install
-cp .env.example .env        # fill in your Firebase + Maps keys
 npx expo start
 ```
 
@@ -83,7 +82,6 @@ npx expo start
 ```bash
 cd admin
 npm install
-cp .env.example .env.local  # fill in your Firebase keys
 npm run dev                  # http://localhost:3000
 ```
 

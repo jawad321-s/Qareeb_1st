@@ -15,7 +15,6 @@
 | **Node.js 22.13 أو أحدث** (Expo SDK 58 بيحتاجه) | https://nodejs.org ← زر LTS |
 | **تطبيق Expo Go** (آخر نسخة) | App Store أو Google Play ← ابحث "Expo Go" |
 | الكمبيوتر والجوال على **نفس الواي فاي** | — |
-| ملف **`mobile/.env`** (ومعه `admin/.env.local` للوحة) | صاحب المشروع ببعتهم بشكل خاص — مش موجودين على GitHub |
 
 تأكد إن Node مركّب صح:
 
@@ -44,19 +43,10 @@ git log -1 --oneline
 >
 > ولا تنزّله **ZIP** من GitHub: الـ ZIP ما بيتحدّث بـ `git pull`.
 
-## 2) حط ملفات المفاتيح
+> 🔑 **ما في داعي لأي ملف مفاتيح:** إعدادات Firebase تبعت مشروعنا مبنية جوّا الكود،
+> فالتطبيق ولوحة الأدمن بيشتغلوا على بياناتنا الحقيقية مباشرة بعد التنزيل.
 
-انسخ الملفات اللي وصلتك لهون:
-
-| الملف | مكانه |
-|---|---|
-| `.env` | `Qareeb_1st\mobile\.env` |
-| `.env.local` | `Qareeb_1st\admin\.env.local` |
-
-بدون `mobile\.env` التطبيق بيشتغل على **بيانات تجريبية** داخل الجوال (بتظهر
-أزرار "Demo: Customer" و"Demo: Artisan")، مش على بياناتنا الحقيقية.
-
-## 3) شغّل التطبيق على الجوال 📱
+## 2) شغّل التطبيق على الجوال 📱
 
 ```cmd
 cd %USERPROFILE%\Qareeb_1st\mobile
@@ -93,7 +83,7 @@ npx expo start -c
    (بدون علامات تنصيص. بـ PowerShell بتنكتب: `$env:EXPO_TOKEN="..."`.)
    التوكن سرّي: لا تبعته لحدا ولا تحطه بأي ملف بالمشروع.
 
-## 4) شغّل لوحة الأدمن 🖥️ (بنافذة cmd ثانية)
+## 3) شغّل لوحة الأدمن 🖥️ (بنافذة cmd ثانية)
 
 ```cmd
 cd %USERPROFILE%\Qareeb_1st\admin
@@ -103,7 +93,6 @@ npm run dev
 
 افتح المتصفح على **http://localhost:3000** وسجّل دخول بإيميل الأدمن وكلمة مروره.
 (إنشاء حساب الأدمن مشروح بـ [FIREBASE_SETUP.md](FIREBASE_SETUP.md)، الخطوة 5.)
-على البيانات التجريبية: أي إيميل صحيح + كلمة مرور 6 أحرف أو أكثر.
 
 ## كل ما ينرفع تحديث جديد
 
@@ -111,9 +100,12 @@ npm run dev
 cd %USERPROFILE%\Qareeb_1st
 git pull
 cd mobile
-npm install
+npm ci
 npx expo start -c
 ```
+
+`npm ci` بيركّب المكتبات من جديد بالنسخ اللي بالمشروع بالزبط (مثلاً بعد تحديث
+Expo)، فما بيضل عندك مكتبات قديمة.
 
 إذا `git pull` رفض بسبب تعديلات عندك على الجهاز، هدول بيحفظوا تعديلاتك
 بفرع احتياطي وبيرجّعوا نسختك طبق الأصل عن GitHub:
@@ -134,6 +126,7 @@ git checkout -B claude/qareeb-home-services-oxn9td origin/claude/qareeb-home-ser
 | `EPERM: operation not permitted` | المشروع بمجلد نظام أو انركّبت مكتباته كأدمن: نزّله من جديد بمجلدك الشخصي (الخطوة 1) |
 | التطبيق بيفتح على نسخة قديمة | سكّر كل نافذة فيها Expo (`Ctrl + C`)، سكّر Expo Go من الجوال، شغّل `npx expo start -c` وامسح الـ QR الجديد |
 | QR ما بيفتح / timeout | تأكد من نفس الواي فاي، أو شغّل `npx expo start -c --tunnel` |
+| أزرار "Demo: Customer / Artisan" ظاهرة بشاشة الترحيب | التطبيق شغّال على البيانات التجريبية: إما كودك قديم (اعمل `git pull`)، أو عندك ملف `mobile\.env` قديم فيه `EXPO_PUBLIC_USE_MOCK=true` (احذفه). وبعدها `npx expo start -c` |
 | `permission-denied` بالتطبيق | قواعد Firestore الجديدة مش منشورة: [FIREBASE_SETUP.md](FIREBASE_SETUP.md)، الخطوة 3 |
 | خطأ عند `npm install` | تأكد من `node -v` (22.13 أو أحدث)، احذف مجلد `node_modules` وأعد `npm install` |
 | بيطلب نسخة أحدث من Expo Go | حدّث Expo Go من المتجر (المشروع على SDK 58) |

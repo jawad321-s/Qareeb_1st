@@ -20,7 +20,10 @@ changes required.
 
 1. Create a free Firebase project → add a **Web app**.
 2. Enable **Firestore** and **Storage**.
-3. Copy the SDK config into env files:
+3. Put its SDK config in `TEAM_PROJECT` in `mobile/src/lib/config.ts` and
+   `admin/lib/config.ts` (the team's project, `qareeb-b9a54`, is already there,
+   so a fresh clone runs live with no env file). To point one machine elsewhere
+   instead, env files override it:
    - `mobile/.env` (see `mobile/.env.example`) — `EXPO_PUBLIC_FIREBASE_*`
    - `admin/.env.local` (see `admin/.env.example`) — `NEXT_PUBLIC_FIREBASE_*`
    - **Use the same project for both.**

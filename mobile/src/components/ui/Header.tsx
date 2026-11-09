@@ -12,10 +12,12 @@ interface HeaderProps {
   rightIcon?: IconName;
   onRightPress?: () => void;
   onBack?: () => void;
+  /** Makes the title a link (e.g. to the profile of the person in a chat). */
+  onTitlePress?: () => void;
   transparent?: boolean;
 }
 
-export function Header({ title, subtitle, showBack, rightIcon, onRightPress, onBack, transparent }: HeaderProps) {
+export function Header({ title, subtitle, showBack, rightIcon, onRightPress, onBack, onTitlePress, transparent }: HeaderProps) {
   const { colors } = useTheme();
 
   // Safe back: some screens are reached via router.replace (e.g. the new
@@ -54,14 +56,15 @@ export function Header({ title, subtitle, showBack, rightIcon, onRightPress, onB
           <Icon name="arrow-left" size={20} color={colors.fg} />
         </Pressable>
       )}
-      <View style={{ flex: 1 }}>
-        {title && <Text variant="h2">{title}</Text>}
-        {subtitle && (
+      {/* `!!`: an empty title (still loading) must not render as a bare string. */}
+      <Pressable onPress={onTitlePress} disabled={!onTitlePress} style={{ flex: 1 }}>
+        {!!title && <Text variant="h2">{title}</Text>}
+        {!!subtitle && (
           <Text variant="caption" tone="muted">
             {subtitle}
           </Text>
         )}
-      </View>
+      </Pressable>
       {rightIcon && (
         <Pressable
           onPress={onRightPress}

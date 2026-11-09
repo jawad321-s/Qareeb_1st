@@ -19,7 +19,9 @@ import {
   useOffers,
   useUpdateOfferPrice,
   useSendMessage,
+  useUser,
 } from '@/hooks/queries';
+import { PersonRow } from '@/components/domain/PersonRow';
 import { StatusBadge } from '@/components/domain/StatusBadge';
 import { TrackingTimeline } from '@/components/domain/TrackingTimeline';
 import { useToast } from '@/components/feedback/Toast';
@@ -44,6 +46,7 @@ export default function JobDetail() {
   const { t, locale, isRTL } = useT();
   const font = useFont();
   const { data: request, isLoading } = useRequest(id!);
+  const { data: customer } = useUser(request?.customerId);
   const submit = useSubmitOffer(id!);
   const cancel = useCancelRequest(id!);
   const progress = useUpdateRequestStatus(id!, user.uid);
@@ -193,6 +196,22 @@ export default function JobDetail() {
           </View>
         </Card>
       </Animated.View>
+
+      {/* Who asked: their profile shows how other artisans rated them. */}
+      {customer && (
+        <Card style={{ marginTop: 16, gap: 10 }}>
+          <Text variant="caption" tone="muted">
+            {t('job.customer')}
+          </Text>
+          <PersonRow
+            name={customer.fullName}
+            photoUrl={customer.photoUrl}
+            rating={customer.rating}
+            ratingCount={customer.ratingCount}
+            onPress={() => router.push(`/(shared)/customer/${customer.uid}`)}
+          />
+        </Card>
+      )}
 
       {request.status === 'PENDING' && myOffer ? (
         /* Already quoted: show the offer (no second offer) with its price editable. */

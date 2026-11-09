@@ -447,6 +447,11 @@ export const translations = {
 
     // job detail
     'job.title': 'Job details',
+    'job.customer': 'Customer',
+    'cust.title': 'Customer profile',
+    'cust.since': 'Member since',
+    'cust.reviews': 'What artisans said',
+    'cust.noReviews': 'No ratings yet.',
     'job.sendQuote': 'Send your quotation',
     'job.price': 'Price',
     'job.eta': 'ETA (min)',
@@ -1044,6 +1049,11 @@ export const translations = {
 
     // job detail
     'job.title': 'تفاصيل العمل',
+    'job.customer': 'الزبون',
+    'cust.title': 'ملف الزبون',
+    'cust.since': 'عضو منذ',
+    'cust.reviews': 'تقييمات الحرفيين',
+    'cust.noReviews': 'لا توجد تقييمات بعد.',
     'job.sendQuote': 'أرسل عرض سعرك',
     'job.price': 'السعر',
     'job.eta': 'الوصول (دقيقة)',

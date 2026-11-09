@@ -9,11 +9,10 @@ import { Text } from '@/components/ui/Text';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Icon } from '@/components/ui/Icon';
-import { Avatar } from '@/components/ui/Avatar';
-import { Rating } from '@/components/ui/Rating';
 import { StatusBadge } from '@/components/domain/StatusBadge';
 import { TrackingTimeline } from '@/components/domain/TrackingTimeline';
 import { OfferCard } from '@/components/domain/OfferCard';
+import { PersonRow } from '@/components/domain/PersonRow';
 import { CardSkeleton } from '@/components/feedback/Skeleton';
 import { useRequest, useOffers, useAcceptOffer, useRejectOffer, useCancelRequest, useHasReviewed, useUser } from '@/hooks/queries';
 import { useAuth } from '@/store/auth';
@@ -163,11 +162,15 @@ export default function RequestDetail() {
           </Text>
           <Card style={{ gap: 14 }}>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
-              <Avatar uri={acceptedArtisan.photoUrl} name={acceptedArtisan.fullName} size={52} verified={acceptedArtisan.verified} />
-              <View style={{ flex: 1 }}>
-                <Text variant="bodyMedium">{acceptedArtisan.fullName}</Text>
-                <Rating value={acceptedArtisan.rating} count={acceptedArtisan.ratingCount} size={13} showValue />
-              </View>
+              <PersonRow
+                name={acceptedArtisan.fullName}
+                photoUrl={acceptedArtisan.photoUrl}
+                rating={acceptedArtisan.rating}
+                ratingCount={acceptedArtisan.ratingCount}
+                verified={acceptedArtisan.verified}
+                size={52}
+                onPress={() => router.push(`/(shared)/artisan/${acceptedArtisan.uid}`)}
+              />
               {/* The agreed price (the artisan may update it until the job is done). */}
               {acceptedOffer && (
                 <View style={{ alignItems: 'flex-end' }}>

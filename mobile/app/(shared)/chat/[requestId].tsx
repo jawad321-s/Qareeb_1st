@@ -1,6 +1,6 @@
 import React, { useRef, useState } from 'react';
 import { ActivityIndicator, View, ScrollView, TextInput, Pressable, KeyboardAvoidingView, Platform, type ScrollViewInstance } from 'react-native';
-import { useLocalSearchParams } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import { Image } from 'expo-image';
 import * as ImagePicker from 'expo-image-picker';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -72,7 +72,12 @@ export default function Chat() {
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.bg }} edges={['top', 'bottom']}>
       <StatusBar style={isDark ? 'light' : 'dark'} />
       <View style={{ paddingHorizontal: 20 }}>
-        <Header showBack title={other?.fullName ?? ''} subtitle={request?.title} />
+        <Header
+          showBack
+          title={other?.fullName ?? ''}
+          subtitle={request?.title}
+          onTitlePress={otherId ? () => router.push(me.uid === request?.customerId ? `/(shared)/artisan/${otherId}` : `/(shared)/customer/${otherId}`) : undefined}
+        />
       </View>
 
       <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined} keyboardVerticalOffset={12}>

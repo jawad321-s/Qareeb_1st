@@ -2,11 +2,10 @@ import React from 'react';
 import { View } from 'react-native';
 import { Card } from '../ui/Card';
 import { Text } from '../ui/Text';
-import { Avatar } from '../ui/Avatar';
-import { Rating } from '../ui/Rating';
 import { Button } from '../ui/Button';
 import { Badge } from '../ui/Badge';
 import { Icon } from '../ui/Icon';
+import { PersonRow } from './PersonRow';
 import type { Offer } from '@/types';
 import { formatMoney, timeAgo } from '@/lib/format';
 import { useT } from '@/i18n';
@@ -35,13 +34,7 @@ export function OfferCard({ offer, best, onAccept, onReject, onPressArtisan, loa
         </View>
       )}
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
-        <Avatar uri={a?.photoUrl} name={a?.fullName} size={48} />
-        <View style={{ flex: 1, gap: 2 }}>
-          <Text variant="bodyMedium" numberOfLines={1} onPress={onPressArtisan}>
-            {a?.fullName ?? 'Artisan'}
-          </Text>
-          <Rating value={a?.rating ?? 0} count={a?.ratingCount} size={12} showValue />
-        </View>
+        <PersonRow name={a?.fullName ?? 'Artisan'} photoUrl={a?.photoUrl} rating={a?.rating} ratingCount={a?.ratingCount} onPress={onPressArtisan} />
         <View style={{ alignItems: 'flex-end' }}>
           <Text variant="h3" tone="primary">
             {formatMoney(offer.price)}

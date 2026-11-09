@@ -2,6 +2,7 @@
   "expo": {
     "name": "Qareeb",
     "slug": "qareeb",
+    "owner": "project-2026-2027",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -59,7 +60,9 @@
     },
     "extra": {
       "router": {},
-      "eas": {},
+      "eas": {
+        "projectId": "76ba06a5-0a3a-4c8e-9b72-00ae3a9b6e05"
+      },
       "supportsRTL": true
     }
   }

@@ -8,17 +8,14 @@ import { StatusBar } from 'expo-status-bar';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { Header } from '@/components/ui/Header';
 import { Text } from '@/components/ui/Text';
-import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Icon } from '@/components/ui/Icon';
 import { Avatar } from '@/components/ui/Avatar';
-import { Rating } from '@/components/ui/Rating';
 import { Badge } from '@/components/ui/Badge';
 import { CardSkeleton } from '@/components/feedback/Skeleton';
 import { FloatingBlobs } from '@/components/ui/FloatingBlobs';
 import { useArtisan, useReviews } from '@/hooks/queries';
 import { categoryById } from '@/constants/categories';
-import { timeAgo } from '@/lib/format';
 import { config } from '@/lib/config';
 import { ratingSummary, ratingValue } from '@/lib/rating';
 import { useTheme } from '@/theme/ThemeProvider';
@@ -43,7 +40,8 @@ export default function ArtisanDetail() {
   }
 
   const { user, profile } = data;
-  // The rating from the reviews themselves (the stored figure is a cache).
+  // The rating from the reviews themselves (the stored figure is a cache). Only
+  // the overall figure is shown, not the individual reviews.
   const rating = !config.useMock && reviews.data ? ratingSummary(reviews.data) : { average: user.rating, count: user.ratingCount };
 
   return (
@@ -115,28 +113,6 @@ export default function ArtisanDetail() {
             </View>
           )}
 
-          {/* Reviews */}
-          <View>
-            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
-              <Text variant="h3">{t('ad.reviews')}</Text>
-              <Rating value={rating.average} count={rating.count} size={14} showValue />
-            </View>
-            <View style={{ gap: 12 }}>
-              {(reviews.data ?? []).map((r) => (
-                <Card key={r.id} style={{ gap: 8 }}>
-                  <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-                    <Rating value={r.rating} size={13} />
-                    <Text variant="caption" tone="muted">
-                      {timeAgo(r.createdAt)}
-                    </Text>
-                  </View>
-                  <Text variant="body" tone="muted">
-                    {r.comment}
-                  </Text>
-                </Card>
-              ))}
-            </View>
-          </View>
         </View>
       </ScrollView>
 

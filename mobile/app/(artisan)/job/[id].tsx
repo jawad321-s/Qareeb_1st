@@ -33,6 +33,7 @@ import { AUTO_COMPLETE_HOURS, NEXT_STATUS, canCancelRequest, isActiveJob } from 
 import { confirmAction } from '@/lib/confirm';
 import { useAuth } from '@/store/auth';
 import { useMySubscription } from '@/store/subscription';
+import { shownPhotos } from '@/services/media.service';
 import { useTheme } from '@/theme/ThemeProvider';
 import { useFont, useT } from '@/i18n';
 import { localizedTextAlign } from '@/i18n/rtl';
@@ -172,9 +173,9 @@ export default function JobDetail() {
           <Text variant="body" tone="muted" style={{ lineHeight: 21 }}>
             {request.description}
           </Text>
-          {request.images.length > 0 && (
+          {shownPhotos(request.images).length > 0 && (
             <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8 }}>
-              {request.images.map((uri) => (
+              {shownPhotos(request.images).map((uri) => (
                 <Image key={uri} source={{ uri }} style={{ width: 110, height: 110, borderRadius: 14 }} />
               ))}
             </ScrollView>

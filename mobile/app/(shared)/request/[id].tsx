@@ -21,6 +21,7 @@ import { categoryById } from '@/constants/categories';
 import { formatMoney } from '@/lib/format';
 import { AUTO_COMPLETE_HOURS, canCancelRequest } from '@/lib/requestRules';
 import { confirmAction } from '@/lib/confirm';
+import { shownPhotos } from '@/services/media.service';
 import { useTheme } from '@/theme/ThemeProvider';
 import { useT } from '@/i18n';
 
@@ -108,9 +109,9 @@ export default function RequestDetail() {
           <Text variant="body" tone="muted" style={{ lineHeight: 21 }}>
             {request.description}
           </Text>
-          {request.images.length > 0 && (
+          {shownPhotos(request.images).length > 0 && (
             <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8 }}>
-              {request.images.map((uri) => (
+              {shownPhotos(request.images).map((uri) => (
                 <Image key={uri} source={{ uri }} style={{ width: 120, height: 120, borderRadius: 14 }} />
               ))}
             </ScrollView>

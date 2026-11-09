@@ -1,10 +1,12 @@
-// Photos on Cloud Storage: the artisan's work gallery and images sent in chat.
-// Each photo is shrunk on the device first, then uploaded; Firestore keeps only
-// its download URL (artisanProfiles.gallery, or a chat message's mediaUrl).
+// Photos on Cloud Storage: the artisan's work gallery, photos attached to a
+// request, and images sent in chat. Each photo is shrunk on the device first,
+// then uploaded; Firestore keeps only its download URL (artisanProfiles.gallery,
+// a request's images, or a chat message's mediaUrl).
 import { arrayRemove, arrayUnion, doc, updateDoc } from 'firebase/firestore';
 import { deleteObject, getDownloadURL, ref, uploadBytes } from 'firebase/storage';
 import { ImageManipulator, SaveFormat } from 'expo-image-manipulator';
 import { getBucket, getDb } from '@/lib/firebase';
+import { config } from '@/lib/config';
 
 // Longest side of an uploaded photo: sharp on a phone, a few hundred KB.
 const MAX_SIDE = 1600;
@@ -62,6 +64,18 @@ export async function removeGalleryPhoto(uid: string, url: string): Promise<void
   // A photo stored elsewhere (not in this bucket) only leaves the list.
   if (bucket) await deleteObject(ref(bucket, url)).catch(() => {});
 }
+
+/** Uploads a photo attached to a new request and returns its URL. */
+export function uploadRequestPhoto(requestId: string, uri: string): Promise<string> {
+  return upload(`requests/${requestId}/${fileName()}`, uri);
+}
+
+/**
+ * The photos of a request that can be shown. Requests made before photos were
+ * uploaded hold paths on the customer's phone, which no other device can open;
+ * live, only web links are kept. The demo shows everything.
+ */
+export const shownPhotos = (uris: string[] = []) => (config.useMock ? uris : uris.filter((u) => /^https?:\/\//.test(u)));
 
 /** Uploads a photo for the chat on a request and returns its URL. */
 export function uploadChatPhoto(requestId: string, uri: string): Promise<string> {

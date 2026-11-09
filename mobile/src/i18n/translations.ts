@@ -150,6 +150,7 @@ export const translations = {
     'create.tomorrow': 'Tomorrow',
     'create.reviewTitle': 'Review your request',
     'create.submit': 'Submit request',
+    'create.failed': 'The request could not be sent. Check your connection and try again.',
 
     // orders
     'orders.title': 'My orders',
@@ -450,8 +451,6 @@ export const translations = {
     'job.customer': 'Customer',
     'cust.title': 'Customer profile',
     'cust.since': 'Member since',
-    'cust.reviews': 'What artisans said',
-    'cust.noReviews': 'No ratings yet.',
     'job.sendQuote': 'Send your quotation',
     'job.price': 'Price',
     'job.eta': 'ETA (min)',
@@ -752,6 +751,7 @@ export const translations = {
     'create.tomorrow': 'غداً',
     'create.reviewTitle': 'راجع طلبك',
     'create.submit': 'إرسال الطلب',
+    'create.failed': 'تعذّر إرسال الطلب. تأكد من الإنترنت وحاول مرة ثانية.',
 
     // orders
     'orders.title': 'طلباتي',
@@ -1052,8 +1052,6 @@ export const translations = {
     'job.customer': 'الزبون',
     'cust.title': 'ملف الزبون',
     'cust.since': 'عضو منذ',
-    'cust.reviews': 'تقييمات الحرفيين',
-    'cust.noReviews': 'لا توجد تقييمات بعد.',
     'job.sendQuote': 'أرسل عرض سعرك',
     'job.price': 'السعر',
     'job.eta': 'الوصول (دقيقة)',

@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/Button';
 import { Icon } from '@/components/ui/Icon';
 import { Card } from '@/components/ui/Card';
 import { useTabBarSpace } from '@/components/ui/TabBar';
+import { useToast } from '@/components/feedback/Toast';
 import { CATEGORIES } from '@/constants/categories';
 import { useCreateRequest } from '@/hooks/queries';
 import { useAuth } from '@/store/auth';
@@ -30,6 +31,7 @@ export default function CreateRequest() {
   const font = useFont();
   const tabBarSpace = useTabBarSpace();
   const create = useCreateRequest(user.uid);
+  const toast = useToast();
   const STEPS = [t('create.step.service'), t('create.step.details'), t('create.step.budget'), t('create.step.review')];
 
   const [step, setStep] = useState(0);
@@ -72,18 +74,22 @@ export default function CreateRequest() {
       return;
     }
     const preferredTime = when === 'asap' ? Date.now() + 3600_000 : when === 'today' ? Date.now() + 3600_000 * 5 : Date.now() + 3600_000 * 24;
-    const req = await create.mutateAsync({
-      customerId: user.uid,
-      serviceId: categoryId!,
-      categoryId: categoryId!,
-      title: title.trim(),
-      description: description.trim(),
-      images,
-      location: user.location,
-      preferredTime,
-      budget: { min: Number(budgetMin) * 100, max: Number(budgetMax) * 100 },
-    });
-    router.replace(`/(shared)/request/${req.id}`);
+    try {
+      const req = await create.mutateAsync({
+        customerId: user.uid,
+        serviceId: categoryId!,
+        categoryId: categoryId!,
+        title: title.trim(),
+        description: description.trim(),
+        images,
+        location: user.location,
+        preferredTime,
+        budget: { min: Number(budgetMin) * 100, max: Number(budgetMax) * 100 },
+      });
+      router.replace(`/(shared)/request/${req.id}`);
+    } catch {
+      toast('error', t('create.failed'));
+    }
   };
 
   return (

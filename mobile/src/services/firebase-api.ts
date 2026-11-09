@@ -17,6 +17,7 @@ import { MOCK_CUSTOMER } from '@/mock/data';
 import { SERVICES, toServiceId } from '@/constants/services';
 import { ACTIVE_STATUSES, NEXT_STATUS, canCancelRequest, isOverdue } from '@/lib/requestRules';
 import { completedRecord, rejectedRecord } from '@/lib/jobHistory';
+import { uploadRequestPhoto } from '@/services/media.service';
 
 function db() {
   const d = getDb();
@@ -135,10 +136,14 @@ export const firebaseApi: typeof mockApi = {
 
   async createRequest(input): Promise<ServiceRequest> {
     const now = Date.now();
-    const payload = { ...input, status: 'PENDING' as const, offerCount: 0, createdAt: now, updatedAt: now };
+    // The picked photos exist only on this phone: upload them first, so the
+    // request stores links the artisans (and the admin) can open.
+    const refDoc = doc(collection(db(), 'requests'));
+    const images = await Promise.all((input.images ?? []).map((uri) => uploadRequestPhoto(refDoc.id, uri)));
+    const payload = { ...input, images, status: 'PENDING' as const, offerCount: 0, createdAt: now, updatedAt: now };
     // Denormalise the customer name so the admin table can render it directly.
     const customerName = useAuth.getState().user?.fullName ?? '';
-    const refDoc = await addDoc(collection(db(), 'requests'), { ...payload, customerName });
+    await setDoc(refDoc, { ...payload, customerName });
     return { ...payload, id: refDoc.id };
   },
 

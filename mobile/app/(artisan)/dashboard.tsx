@@ -149,7 +149,7 @@ export default function ArtisanDashboard() {
               [0, 1].map((i) => <CardSkeleton key={i} />)
             ) : (
               (nearby.data ?? []).slice(0, 3).map((r) => (
-                <RequestCard key={r.id} request={r} distanceKm={r.distanceKm} onPress={() => router.push(`/(artisan)/job/${r.id}`)} />
+                <RequestCard showCustomer key={r.id} request={r} distanceKm={r.distanceKm} onPress={() => router.push(`/(artisan)/job/${r.id}`)} />
               ))
             )}
           </View>

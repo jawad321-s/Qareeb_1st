@@ -56,7 +56,7 @@ export default function ArtisanRequests() {
           <View style={{ gap: 12, marginBottom: 8 }}>
             <Text variant="h3">{t('aJobs.active')}</Text>
             {(jobs.data ?? []).map((r) => (
-              <RequestCard key={r.id} request={r} onPress={() => router.push(`/(artisan)/job/${r.id}`)} />
+              <RequestCard showCustomer key={r.id} request={r} onPress={() => router.push(`/(artisan)/job/${r.id}`)} />
             ))}
             <Text variant="h3" style={{ marginTop: 12 }}>
               {t('aJobs.nearby')}
@@ -76,7 +76,7 @@ export default function ArtisanRequests() {
         ) : (
           (data ?? []).map((r) => (
             <Animated.View key={r.id} entering={FadeIn.duration(300)}>
-              <RequestCard request={r} distanceKm={r.distanceKm} onPress={() => router.push(`/(artisan)/job/${r.id}`)} />
+              <RequestCard showCustomer request={r} distanceKm={r.distanceKm} onPress={() => router.push(`/(artisan)/job/${r.id}`)} />
             </Animated.View>
           ))
         )}

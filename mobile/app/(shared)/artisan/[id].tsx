@@ -70,7 +70,7 @@ export default function ArtisanDetail() {
               </View>
               <View style={{ flexDirection: 'row', gap: 28, marginTop: 12 }}>
                 <Stat value={ratingValue(rating)} label={t('profile.rating')} />
-                <Stat value={String(profile.completedJobs)} label={t('ad.jobs')} />
+                <Stat value={String(profile.completedJobs ?? 0)} label={t('ad.jobs')} />
               </View>
             </View>
           </SafeAreaView>

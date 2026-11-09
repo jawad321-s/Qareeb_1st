@@ -232,6 +232,9 @@ export const mockApi = {
     await delay(150);
   },
 
+  /** Store how many jobs the artisan finished (the demo keeps its sample figure). */
+  async setCompletedJobs(_uid: string, _count: number): Promise<void> {},
+
   async getMessages(requestId: string): Promise<ChatMessage[]> {
     await delay(250);
     return clone(messages.filter((m) => m.requestId === requestId).sort((a, b) => a.createdAt - b.createdAt));

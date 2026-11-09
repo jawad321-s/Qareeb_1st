@@ -16,6 +16,7 @@ import { RequestCard } from '@/components/domain/RequestCard';
 import { CardSkeleton } from '@/components/feedback/Skeleton';
 import { useJobHistory, useNearbyRequests } from '@/hooks/queries';
 import { useMyRating } from '@/hooks/useMyRating';
+import { useSyncCompletedJobs } from '@/hooks/useSyncCompletedJobs';
 import { ratingValue } from '@/lib/rating';
 import { useAuth } from '@/store/auth';
 import { useTheme } from '@/theme/ThemeProvider';
@@ -36,6 +37,8 @@ export default function ArtisanDashboard() {
   const nearby = useNearbyRequests(user.uid, user.location);
   const history = useJobHistory(user.uid);
   const rating = useMyRating();
+  // Customers see this count on the public profile.
+  useSyncCompletedJobs(user.uid, history.data?.completed.length);
   const tabBarSpace = useTabBarSpace();
 
   // Artisans are matched to jobs by distance, so ask for the device location

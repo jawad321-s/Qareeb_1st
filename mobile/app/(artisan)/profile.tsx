@@ -16,6 +16,7 @@ import { useThemeStore } from '@/theme/ThemeProvider';
 import { useT } from '@/i18n';
 import { useJobHistory } from '@/hooks/queries';
 import { useMyRating } from '@/hooks/useMyRating';
+import { useSyncCompletedJobs } from '@/hooks/useSyncCompletedJobs';
 import { ratingValue } from '@/lib/rating';
 import { useMySubscription } from '@/store/subscription';
 import { planById } from '@/lib/plans';
@@ -30,6 +31,8 @@ export default function ArtisanProfile() {
   // (same count as the dashboard and income screens).
   const history = useJobHistory(user?.uid ?? '');
   const rating = useMyRating();
+  // Customers see this count on the public profile.
+  useSyncCompletedJobs(user?.uid ?? '', history.data?.completed.length);
   // The premium badge reflects the plan the artisan actually paid for.
   const plan = useMySubscription(user?.uid);
 

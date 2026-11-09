@@ -53,7 +53,7 @@ function ConversationRow({ conversation, myId }: { conversation: Conversation; m
   const open = isChatOpen(request.status);
   const unread = !!lastMessage && !lastMessage.read && lastMessage.senderId !== myId;
   const preview = lastMessage
-    ? `${lastMessage.senderId === myId ? t('conv.you') : ''}${lastMessage.text ?? ''}`
+    ? `${lastMessage.senderId === myId ? t('conv.you') : ''}${lastMessage.type === 'image' ? t('chat.photo') : (lastMessage.text ?? '')}`
     : t('conv.noMessages');
 
   return (

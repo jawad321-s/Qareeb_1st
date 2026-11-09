@@ -1,6 +1,8 @@
 import React, { useRef, useState } from 'react';
-import { View, ScrollView, TextInput, Pressable, KeyboardAvoidingView, Platform, type ScrollViewInstance } from 'react-native';
+import { ActivityIndicator, View, ScrollView, TextInput, Pressable, KeyboardAvoidingView, Platform, type ScrollViewInstance } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
+import { Image } from 'expo-image';
+import * as ImagePicker from 'expo-image-picker';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Animated, { FadeInUp } from 'react-native-reanimated';
 import { StatusBar } from 'expo-status-bar';
@@ -11,6 +13,8 @@ import { Avatar } from '@/components/ui/Avatar';
 import { useMessages, useRequest, useSendMessage, useUser } from '@/hooks/queries';
 import { useToast } from '@/components/feedback/Toast';
 import { isChatOpen } from '@/lib/requestRules';
+import { config } from '@/lib/config';
+import { uploadChatPhoto } from '@/services/media.service';
 import { useAuth } from '@/store/auth';
 import { useTheme } from '@/theme/ThemeProvider';
 import { useFont, useT } from '@/i18n';
@@ -26,6 +30,7 @@ export default function Chat() {
   const { t, isRTL } = useT();
   const font = useFont();
   const [text, setText] = useState('');
+  const [sendingPhoto, setSendingPhoto] = useState(false);
   const scrollRef = useRef<ScrollViewInstance>(null);
   const toast = useToast();
   const { data: request } = useRequest(requestId!);
@@ -40,6 +45,27 @@ export default function Chat() {
     send.mutate({ senderId: me.uid, type: 'text', text: text.trim() }, { onError: () => toast('error', t('chat.sendFailed')) });
     setText('');
     setTimeout(() => scrollRef.current?.scrollToEnd({ animated: true }), 200);
+  };
+
+  const sendPhoto = async () => {
+    if (!open || sendingPhoto) return;
+    const res = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      quality: 0.8,
+    });
+    if (res.canceled || !res.assets[0]) return;
+    setSendingPhoto(true);
+    try {
+      // Live chats upload the photo first; the demo keeps it on the device.
+      const uri = res.assets[0].uri;
+      const mediaUrl = config.useMock ? uri : await uploadChatPhoto(requestId!, uri);
+      await send.mutateAsync({ senderId: me.uid, type: 'image', mediaUrl });
+      setTimeout(() => scrollRef.current?.scrollToEnd({ animated: true }), 200);
+    } catch {
+      toast('error', t('chat.sendFailed'));
+    } finally {
+      setSendingPhoto(false);
+    }
   };
 
   return (
@@ -78,9 +104,13 @@ export default function Chat() {
                     paddingVertical: 10,
                   }}
                 >
-                  <Text variant="body" tone={mine ? 'inverse' : 'default'} style={{ lineHeight: 20 }}>
-                    {m.text}
-                  </Text>
+                  {m.type === 'image' && m.mediaUrl ? (
+                    <Image source={{ uri: m.mediaUrl }} style={{ width: 200, height: 200, borderRadius: 12 }} contentFit="cover" transition={150} />
+                  ) : (
+                    <Text variant="body" tone={mine ? 'inverse' : 'default'} style={{ lineHeight: 20 }}>
+                      {m.text}
+                    </Text>
+                  )}
                   <Text variant="overline" style={{ color: mine ? 'rgba(255,255,255,0.7)' : colors.muted, marginTop: 4, alignSelf: 'flex-end' }}>
                     {timeAgo(m.createdAt)}
                   </Text>
@@ -93,8 +123,12 @@ export default function Chat() {
         {/* Composer — replaced by a notice once the job has ended */}
         {open ? (
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 16, paddingVertical: 10, borderTopWidth: 1, borderTopColor: colors.border }}>
-            <Pressable style={{ width: 40, height: 40, borderRadius: 12, backgroundColor: colors.surface2, alignItems: 'center', justifyContent: 'center' }}>
-              <Icon name="image" size={20} color={colors.muted} />
+            <Pressable
+              onPress={sendPhoto}
+              disabled={sendingPhoto}
+              style={{ width: 40, height: 40, borderRadius: 12, backgroundColor: colors.surface2, alignItems: 'center', justifyContent: 'center' }}
+            >
+              {sendingPhoto ? <ActivityIndicator size="small" color={colors.tint} /> : <Icon name="image" size={20} color={colors.tint} />}
             </Pressable>
             <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center', backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border, borderRadius: 22, paddingHorizontal: 14 }}>
               <TextInput

@@ -10,10 +10,12 @@ service firebase.storage {
     function isImage() { return request.resource.contentType.matches('image/.*'); }
     function underMB(n) { return request.resource.size < n * 1024 * 1024; }
 
-    // Profile & work-gallery photos, keyed by owner.
+    // Profile & work-gallery photos, keyed by owner. A delete has no incoming
+    // file to check, so it has its own rule.
     match /users/{userId}/{allPaths=**} {
       allow read: if isSignedIn();
-      allow write: if isOwner(userId) && isImage() && underMB(8);
+      allow create, update: if isOwner(userId) && isImage() && underMB(8);
+      allow delete: if isOwner(userId);
     }
 
     // Request attachment images.
@@ -28,10 +30,11 @@ service firebase.storage {
       allow write: if isOwner(userId) && underMB(10);
     }
 
-    // Chat media (images / voice notes).
+    // Chat photos. Who may post in a chat is checked on the message itself
+    // (Firestore rules); the file only has to be a reasonably small image.
     match /chat/{requestId}/{fileName} {
       allow read: if isSignedIn();
-      allow write: if isSignedIn() && underMB(15);
+      allow create: if isSignedIn() && isImage() && underMB(8);
     }
   }
 }

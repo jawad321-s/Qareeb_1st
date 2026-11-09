@@ -1,14 +1,19 @@
 import React, { useState } from 'react';
-import { Pressable, View, useWindowDimensions } from 'react-native';
+import { ActivityIndicator, Pressable, View, useWindowDimensions } from 'react-native';
 import { Image } from 'expo-image';
 import * as ImagePicker from 'expo-image-picker';
+import { useQueryClient } from '@tanstack/react-query';
 import { Screen } from '@/components/ui/Screen';
 import { Header } from '@/components/ui/Header';
 import { Text } from '@/components/ui/Text';
 import { Icon } from '@/components/ui/Icon';
+import { useToast } from '@/components/feedback/Toast';
+import { useArtisan } from '@/hooks/queries';
 import { kv } from '@/lib/mmkv';
+import { qk } from '@/lib/queryClient';
 import { MOCK_ARTISAN_PROFILE } from '@/mock/data';
 import { config } from '@/lib/config';
+import { addGalleryPhoto, removeGalleryPhoto } from '@/services/media.service';
 import { useAuth } from '@/store/auth';
 import { useTheme } from '@/theme/ThemeProvider';
 import { useT } from '@/i18n';
@@ -20,29 +25,54 @@ export default function Gallery() {
   const { colors } = useTheme();
   const { t } = useT();
   const { width } = useWindowDimensions();
-  // Live accounts start with an empty gallery (kept per account on this device
-  // until photo upload to Storage is enabled); the demo shows sample work.
+  const toast = useToast();
+  const qc = useQueryClient();
   const uid = useAuth((s) => s.user?.uid ?? '');
-  const key = config.useMock ? KEY : `${KEY}.${uid}`;
-  const [photos, setPhotos] = useState<string[]>(() => kv.get<string[]>(key) ?? (config.useMock ? MOCK_ARTISAN_PROFILE.gallery : []));
+  // Live: the photos are uploaded to Storage and listed on the artisan's
+  // profile, so every customer sees them. The demo keeps them on the device.
+  const live = !config.useMock;
+  const artisan = useArtisan(live ? uid : '');
+  const [local, setLocal] = useState<string[]>(() => (live ? [] : (kv.get<string[]>(KEY) ?? MOCK_ARTISAN_PROFILE.gallery)));
+  const photos = live ? (artisan.data?.profile.gallery ?? []) : local;
+  const [uploading, setUploading] = useState(false);
 
   // 2-column grid inside the 20px screen padding, with a 12px gutter.
   const tile = (width - 40 - 12) / 2;
 
-  const save = (next: string[]) => {
-    setPhotos(next);
-    kv.set(key, next);
+  const saveLocal = (next: string[]) => {
+    setLocal(next);
+    kv.set(KEY, next);
   };
 
   const addPhoto = async () => {
+    if (uploading) return;
     const res = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       quality: 0.8,
     });
-    if (!res.canceled && res.assets[0]) save([res.assets[0].uri, ...photos]);
+    if (res.canceled || !res.assets[0]) return;
+    const uri = res.assets[0].uri;
+    if (!live) return saveLocal([uri, ...photos]);
+    setUploading(true);
+    try {
+      await addGalleryPhoto(uid, uri);
+      await qc.invalidateQueries({ queryKey: qk.artisan(uid) });
+    } catch {
+      toast('error', t('gal.failed'));
+    } finally {
+      setUploading(false);
+    }
   };
 
-  const removePhoto = (uri: string) => save(photos.filter((p) => p !== uri));
+  const removePhoto = async (uri: string) => {
+    if (!live) return saveLocal(photos.filter((p) => p !== uri));
+    try {
+      await removeGalleryPhoto(uid, uri);
+      await qc.invalidateQueries({ queryKey: qk.artisan(uid) });
+    } catch {
+      toast('error', t('gal.removeFailed'));
+    }
+  };
 
   return (
     <Screen scroll>
@@ -55,6 +85,7 @@ export default function Gallery() {
         {/* Add tile first so it's always reachable */}
         <Pressable
           onPress={addPhoto}
+          disabled={uploading}
           style={{
             width: tile,
             height: tile,
@@ -78,10 +109,10 @@ export default function Gallery() {
               justifyContent: 'center',
             }}
           >
-            <Icon name="plus" size={22} color={colors.tint} />
+            {uploading ? <ActivityIndicator color={colors.tint} /> : <Icon name="plus" size={22} color={colors.tint} />}
           </View>
           <Text variant="caption" tone="primary" style={{ fontFamily: 'Inter_600SemiBold' }}>
-            {t('gal.add')}
+            {uploading ? t('gal.uploading') : t('gal.add')}
           </Text>
         </Pressable>
 

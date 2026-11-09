@@ -390,6 +390,9 @@ export const translations = {
     'gal.desc': 'Photos customers see on your public profile.',
     'gal.add': 'Add photo',
     'gal.photos': 'photos',
+    'gal.uploading': 'Uploading…',
+    'gal.failed': 'The photo could not be uploaded',
+    'gal.removeFailed': 'The photo could not be removed',
 
     // services & pricing
     'sp.desc': 'Choose the services you offer. You set the price for each request when you send your offer.',
@@ -471,6 +474,7 @@ export const translations = {
     'conv.you': 'You: ',
     'chat.closed': 'This job has ended — the conversation is read-only.',
     'chat.sendFailed': 'The message could not be sent',
+    'chat.photo': '📷 Photo',
     'home.messages': 'Messages',
     'home.messagesHint': 'Chat with your artisans',
     'home.chats': 'conversations',
@@ -983,6 +987,9 @@ export const translations = {
     'gal.desc': 'الصور التي يشاهدها الزبائن على ملفك العام.',
     'gal.add': 'إضافة صورة',
     'gal.photos': 'صور',
+    'gal.uploading': 'جارٍ الرفع…',
+    'gal.failed': 'تعذّر رفع الصورة',
+    'gal.removeFailed': 'تعذّر حذف الصورة',
 
     // services & pricing
     'sp.desc': 'اختر الخدمات التي تقدمها. السعر تحدده لكل طلب عند إرسال عرضك.',
@@ -1064,6 +1071,7 @@ export const translations = {
     'conv.you': 'أنت: ',
     'chat.closed': 'انتهى الطلب — المحادثة للقراءة فقط.',
     'chat.sendFailed': 'تعذّر إرسال الرسالة',
+    'chat.photo': '📷 صورة',
     'home.messages': 'الرسائل',
     'home.messagesHint': 'تواصل مع الحرفيين',
     'home.chats': 'محادثات',

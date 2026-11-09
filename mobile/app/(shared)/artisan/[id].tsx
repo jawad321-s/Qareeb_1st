@@ -101,14 +101,14 @@ export default function ArtisanDetail() {
             </View>
           </View>
 
-          {/* Gallery */}
-          {profile.gallery.length > 0 && (
+          {/* Gallery — a profile written before galleries existed has none. */}
+          {(profile.gallery ?? []).length > 0 && (
             <View>
               <Text variant="h3" style={{ marginBottom: 10 }}>
                 {t('ad.gallery')}
               </Text>
               <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 10 }}>
-                {profile.gallery.map((uri) => (
+                {(profile.gallery ?? []).map((uri) => (
                   <Image key={uri} source={{ uri }} style={{ width: 160, height: 120, borderRadius: 16 }} contentFit="cover" />
                 ))}
               </ScrollView>

@@ -25,7 +25,12 @@ interface Availability {
 // New accounts start every day, 08:00–20:00 (same as registration).
 const DEFAULT_AVAILABILITY: Availability = { days: [0, 1, 2, 3, 4, 5, 6], from: '08:00', to: '20:00' };
 
-const HOURS = ['06:00', '07:00', '08:00', '09:00', '10:00', '12:00', '14:00', '16:00', '18:00', '20:00', '22:00'];
+// Every hour of the day. "To" is exclusive; a "To" earlier than "From" runs
+// past midnight (20:00 → 02:00), and From = To means the whole day — the same
+// rules as lib/availability and the Cloud Functions.
+const HOURS = Array.from({ length: 24 }, (_, h) => `${String(h).padStart(2, '0')}:00`);
+const ALL_DAY = { from: '00:00', to: '00:00' };
+const isAllDay = (av: Availability) => av.from === av.to;
 
 /** Weekly working days + hours customers can book the artisan in. */
 export default function AvailabilityScreen() {
@@ -59,6 +64,10 @@ export default function AvailabilityScreen() {
     const db = getDb();
     if (!config.useMock && db && uid) updateDoc(doc(db, 'artisanProfiles', uid), { availability: next }).catch(() => {});
   };
+
+  const allDay = isAllDay(av);
+  const toggleAllDay = () => save({ ...av, ...(allDay ? { from: DEFAULT_AVAILABILITY.from, to: DEFAULT_AVAILABILITY.to } : ALL_DAY) });
+  const overnight = !allDay && av.to < av.from;
 
   const toggleDay = (d: number) => {
     const days = av.days.includes(d) ? av.days.filter((x) => x !== d) : [...av.days, d].sort();
@@ -104,14 +113,33 @@ export default function AvailabilityScreen() {
         </View>
       </Card>
 
-      <HourPicker label={t('av.from')} value={av.from} onChange={(h) => save({ ...av, from: h })} />
-      <View style={{ height: 16 }} />
-      <HourPicker label={t('av.to')} value={av.to} onChange={(h) => save({ ...av, to: h })} />
+      <Card style={{ marginBottom: 16 }}>
+        <Pressable onPress={toggleAllDay} accessibilityRole="switch" accessibilityState={{ checked: allDay }} style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+          <View style={{ flex: 1, gap: 2 }}>
+            <Text variant="bodyMedium">{t('av.allDay')}</Text>
+            <Text variant="caption" tone="muted">
+              {allDay ? t('av.allDayOn') : `${av.from} – ${av.to}${overnight ? ` ${t('av.nextDay')}` : ''}`}
+            </Text>
+          </View>
+          <View style={{ width: 50, height: 30, borderRadius: 15, padding: 3, backgroundColor: allDay ? colors.tint : colors.surface2, alignItems: allDay ? 'flex-end' : 'flex-start' }}>
+            <View style={{ width: 24, height: 24, borderRadius: 12, backgroundColor: '#FFFFFF' }} />
+          </View>
+        </Pressable>
+      </Card>
+
+      {!allDay && (
+        <>
+          {/* The other picker's hour is off: From = To would mean the whole day. */}
+          <HourPicker label={t('av.from')} value={av.from} blocked={av.to} onChange={(h) => save({ ...av, from: h })} />
+          <View style={{ height: 16 }} />
+          <HourPicker label={t('av.to')} value={av.to} blocked={av.from} onChange={(h) => save({ ...av, to: h })} />
+        </>
+      )}
     </Screen>
   );
 }
 
-function HourPicker({ label, value, onChange }: { label: string; value: string; onChange: (h: string) => void }) {
+function HourPicker({ label, value, blocked, onChange }: { label: string; value: string; blocked: string; onChange: (h: string) => void }) {
   const { colors } = useTheme();
   return (
     <Card>
@@ -121,15 +149,18 @@ function HourPicker({ label, value, onChange }: { label: string; value: string; 
       <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
         {HOURS.map((h) => {
           const active = h === value;
+          const off = h === blocked;
           return (
             <Pressable
               key={h}
               onPress={() => onChange(h)}
+              disabled={off}
               style={{
                 paddingHorizontal: 14,
                 paddingVertical: 9,
                 borderRadius: 999,
                 backgroundColor: active ? colors.tint : colors.surface2,
+                opacity: off ? 0.35 : 1,
               }}
             >
               <Text

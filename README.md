@@ -66,7 +66,9 @@ Moving Services
 > **Team workflow:** clone the repo to your Desktop, then double-click
 > `start-app.cmd` (mobile app) or `start-admin.cmd` (admin dashboard) on Windows,
 > or `start-app.command` / `start-admin.command` on a Mac. Each run pulls the
-> latest version from GitHub and installs libraries when they change.
+> latest version from GitHub and installs libraries when they change. The admin
+> dashboard is also published at https://qareeb-b9a54.web.app (`deploy-admin.cmd`
+> updates it).
 > Step-by-step Arabic guide: [docs/RUN_LOCAL.md](./docs/RUN_LOCAL.md).
 
 ### Prerequisites

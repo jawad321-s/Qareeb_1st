@@ -78,6 +78,24 @@ node scripts/create-admin.mjs admin@example.com 'كلمة-مرور-قوية'
 ينشئ الحساب ويعطيه صلاحية الأدمن. تشغيله مرة ثانية لنفس الإيميل يغيّر كلمة المرور.
 وفي صفحة دخول اللوحة زر **نسيت كلمة المرور؟** يرسل رابطاً على الإيميل.
 
+### نشر اللوحة على رابط مباشر (Firebase Hosting)
+
+دبل كليك على **`deploy-admin.cmd`** (أو `deploy-admin.command` على الماك). بيجيب آخر
+نسخة، وبيبني اللوحة كموقع، وبينشرها على **https://qareeb-b9a54.web.app**. أو بالأوامر:
+
+```bash
+cd admin
+npm ci
+npm run build
+npx firebase-tools deploy --only hosting --project qareeb-b9a54
+```
+
+- أول مرة على الجهاز: `npx firebase-tools login`.
+- إذا طلع خطأ إنه ما في Hosting site: Firebase Console ← **Hosting** ← **Get started**
+  (كمّل الخطوات بدون ما تنفّذ أوامرها)، وبعدين أعد النشر.
+- اللوحة كلها بتشتغل بالمتصفح وبتحكي مع Firebase مباشرة، وقواعد Firestore هي اللي
+  بتحمي البيانات: الدخول بس لحساب عنده صلاحية الأدمن.
+
 ---
 
 ## 6) ملفات المفاتيح (اختيارية)

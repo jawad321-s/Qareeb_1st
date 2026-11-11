@@ -63,9 +63,10 @@ Moving Services
 
 ## 🚀 Quick Start
 
-> **Team workflow (Windows):** clone the repo to your Desktop, then double-click
-> `start-app.cmd` (mobile app) or `start-admin.cmd` (admin dashboard). Each run
-> pulls the latest version from GitHub and installs libraries when they change.
+> **Team workflow:** clone the repo to your Desktop, then double-click
+> `start-app.cmd` (mobile app) or `start-admin.cmd` (admin dashboard) on Windows,
+> or `start-app.command` / `start-admin.command` on a Mac. Each run pulls the
+> latest version from GitHub and installs libraries when they change.
 > Step-by-step Arabic guide: [docs/RUN_LOCAL.md](./docs/RUN_LOCAL.md).
 
 ### Prerequisites

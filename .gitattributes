@@ -1,2 +1,5 @@
 # Windows scripts need CRLF line endings to run reliably in cmd.
 *.cmd text eol=crlf
+# Mac scripts need LF line endings (bash fails on CRLF).
+*.command text eol=lf
+*.sh text eol=lf

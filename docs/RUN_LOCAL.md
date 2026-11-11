@@ -93,16 +93,47 @@ Profile ← **Sign out**، وامسح الـ QR من جديد.
 | `permission-denied` بالتطبيق | قواعد Firestore الجديدة مش منشورة: [FIREBASE_SETUP.md](FIREBASE_SETUP.md)، الخطوة 3 |
 | بيطلب نسخة أحدث من Expo Go | حدّث Expo Go من المتجر (المشروع على SDK 58) |
 
-## على Mac
+## على Mac 🍎
 
-السكربتات لـ Windows. على Mac، من مجلد المشروع بالـ Terminal:
+نفس الطريقة، بس الملفات اسمها بتنتهي بـ **`.command`** بدل `.cmd`.
+
+### المتطلبات (مرة وحدة)
+
+| الأداة | كيف |
+|---|---|
+| **Git** | افتح **Terminal** (`Cmd + Space` واكتب Terminal)، واكتب `git --version`. إذا طلعت نافذة بتطلب تركيب "developer tools" اضغط **Install** واستنى لحد ما يخلص |
+| **Node.js 22.13 أو أحدث** | https://nodejs.org ← زر LTS ← نزّل ملف `.pkg` وركّبه |
+| **Expo Go** على الجوال، ونفس الواي فاي | — |
+
+### التنزيل لأول مرة
+
+بالـ Terminal اكتب السطرين (كل واحد واضغط Enter):
 
 ```bash
-git pull
-cd mobile
-npm ci
-npx expo start -c
+cd ~/Desktop
+git clone https://github.com/jawad321-s/Qareeb_1st.git
 ```
+
+إذا سألك "Terminal would like to access files in your Desktop folder" اضغط **Allow**.
+صار عندك مجلد **`Qareeb_1st`** على سطح المكتب.
+
+### كل مرة
+
+- التطبيق: دبل كليك على **`start-app.command`**
+- لوحة الأدمن: دبل كليك على **`start-admin.command`**
+- إذا الجوال علق على "Opening project…": **`start-app-tunnel.command`**
+
+بيفتح Terminal وبيعمل نفس اللي بيعمله `start-app.cmd` على Windows: آخر نسخة،
+والمكتبات، وبعدين الـ QR. للإيقاف: `Ctrl + C`.
+
+### مشاكل خاصة بالماك
+
+| المشكلة | الحل |
+|---|---|
+| "cannot be opened because it is from an unidentified developer" | كليك يمين على الملف ← **Open** ← **Open**. بعدها بيفتح عادي بالدبل كليك |
+| نافذة "Do you want the application node to accept incoming network connections?" | اضغط **Allow**، وإلا الجوال ما بيقدر يوصل للكمبيوتر |
+| `Permission denied` لما تفتح الملف | بالـ Terminal: `cd ~/Desktop/Qareeb_1st && chmod +x *.command` وجرّب مرة تانية |
+| الملف بيفتح بمحرر نصوص بدل Terminal | كليك يمين ← Open With ← **Terminal** |
 
 ## معلومات إضافية
 

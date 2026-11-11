@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, ScrollView } from 'react-native';
+import { View, ScrollView, Pressable } from 'react-native';
 import { Image } from 'expo-image';
 import { router, useLocalSearchParams } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -15,8 +15,10 @@ import { Badge } from '@/components/ui/Badge';
 import { CardSkeleton } from '@/components/feedback/Skeleton';
 import { FloatingBlobs } from '@/components/ui/FloatingBlobs';
 import { useArtisan, useReviews } from '@/hooks/queries';
+import { usePastArtisans } from '@/hooks/usePastArtisans';
 import { categoryById } from '@/constants/categories';
 import { config } from '@/lib/config';
+import { timeAgo } from '@/lib/format';
 import { ratingSummary, ratingValue } from '@/lib/rating';
 import { useTheme } from '@/theme/ThemeProvider';
 import { useT } from '@/i18n';
@@ -27,6 +29,8 @@ export default function ArtisanDetail() {
   const { t, locale } = useT();
   const { data, isLoading } = useArtisan(id!);
   const reviews = useReviews(id!);
+  // Set when the signed-in customer has worked with this artisan before.
+  const past = usePastArtisans().byId.get(id!);
 
   if (isLoading || !data) {
     return (
@@ -57,7 +61,7 @@ export default function ArtisanDetail() {
           />
           <SafeAreaView edges={['top']}>
             <View style={{ paddingHorizontal: 20 }}>
-              <Header showBack rightIcon="heart" transparent />
+              <Header showBack transparent />
             </View>
             <View style={{ alignItems: 'center', gap: 8, paddingTop: 8 }}>
               <Avatar uri={user.photoUrl} name={user.fullName} size={96} verified={user.verified} />
@@ -77,6 +81,27 @@ export default function ArtisanDetail() {
         </LinearGradient>
 
         <View style={{ paddingHorizontal: 20, marginTop: 20, gap: 20 }}>
+          {past && (
+            <Animated.View entering={FadeInDown.duration(400)}>
+              <Pressable
+                onPress={() => router.push(`/(shared)/request/${past.lastRequestId}`)}
+                style={{ flexDirection: 'row', alignItems: 'center', gap: 12, padding: 14, borderRadius: 16, backgroundColor: '#10B98114', borderWidth: 1, borderColor: '#10B98140' }}
+              >
+                <Icon name="check-circle" size={22} color="#10B981" />
+                <View style={{ flex: 1, gap: 2 }}>
+                  <Text variant="bodyMedium">{t('past.cardTitle')}</Text>
+                  <Text variant="caption" tone="muted" numberOfLines={1}>
+                    {t('past.last').replace('{title}', past.lastTitle)}
+                  </Text>
+                  <Text variant="caption" tone="muted">
+                    {t('past.jobs').replace('{n}', String(past.jobs))} · {timeAgo(past.lastAt)}
+                  </Text>
+                </View>
+                <Icon name="chevron-right" size={18} color={colors.muted} />
+              </Pressable>
+            </Animated.View>
+          )}
+
           <Animated.View entering={FadeInDown.duration(400)}>
             <Text variant="h3" style={{ marginBottom: 8 }}>
               {t('ad.about')}

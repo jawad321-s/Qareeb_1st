@@ -164,7 +164,7 @@ export const translations = {
     // profile
     'profile.account': 'Account',
     'profile.editProfile': 'Edit profile',
-    'profile.favorites': 'Favorites',
+    'profile.pastArtisans': 'Artisans you worked with',
     'profile.notifications': 'Notifications',
     'profile.preferences': 'Preferences',
     'profile.theme': 'Theme',
@@ -399,11 +399,15 @@ export const translations = {
     'loc.enabled': 'Location enabled',
     'loc.denied': 'Location permission was denied',
 
-    // favorites
-    'fav.title': 'Favorites',
-    'fav.empty': 'No favorites yet',
-    'fav.emptyDesc': 'Tap the heart on an artisan to save them here.',
-    'fav.saved': 'Saved artisan',
+    // artisans the customer has worked with
+    'past.title': 'Artisans you worked with',
+    'past.subtitle': 'From your requests, most recent first',
+    'past.empty': 'No artisans yet',
+    'past.emptyDesc': 'When an artisan takes one of your requests, they show up here so you can find them again.',
+    'past.last': 'Last request: {title}',
+    'past.jobs': 'Requests together: {n}',
+    'past.badge': 'Worked with before',
+    'past.cardTitle': 'You have worked with this artisan before',
 
     // artisan profile
     'ap.verification': 'Identity verification',
@@ -792,7 +796,7 @@ export const translations = {
     // profile
     'profile.account': 'الحساب',
     'profile.editProfile': 'تعديل الملف الشخصي',
-    'profile.favorites': 'المفضّلة',
+    'profile.pastArtisans': 'حرفيون تعاملت معهم',
     'profile.notifications': 'الإشعارات',
     'profile.preferences': 'التفضيلات',
     'profile.theme': 'المظهر',
@@ -1027,11 +1031,15 @@ export const translations = {
     'loc.enabled': 'تم تفعيل الموقع',
     'loc.denied': 'تم رفض إذن الموقع',
 
-    // favorites
-    'fav.title': 'المفضّلة',
-    'fav.empty': 'لا توجد مفضّلة بعد',
-    'fav.emptyDesc': 'اضغط أيقونة القلب على حرفي لحفظه هنا.',
-    'fav.saved': 'حرفي محفوظ',
+    // artisans the customer has worked with
+    'past.title': 'حرفيون تعاملت معهم',
+    'past.subtitle': 'من طلباتك، الأحدث أولاً',
+    'past.empty': 'لم تتعامل مع أي حرفي بعد',
+    'past.emptyDesc': 'عندما يقبل حرفي أحد طلباتك يظهر هنا، لتجده بسهولة لاحقاً.',
+    'past.last': 'آخر طلب: {title}',
+    'past.jobs': 'عدد الطلبات معه: {n}',
+    'past.badge': 'تعاملت معه سابقاً',
+    'past.cardTitle': 'تعاملت مع هذا الحرفي سابقاً',
 
     // artisan profile
     'ap.verification': 'توثيق الهوية',

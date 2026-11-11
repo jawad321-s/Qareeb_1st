@@ -16,6 +16,7 @@ import { PersonRow } from '@/components/domain/PersonRow';
 import { CardSkeleton } from '@/components/feedback/Skeleton';
 import { useRequest, useOffers, useAcceptOffer, useRejectOffer, useCancelRequest, useHasReviewed, useUser } from '@/hooks/queries';
 import { useAuth } from '@/store/auth';
+import { usePastArtisans } from '@/hooks/usePastArtisans';
 import { useToast } from '@/components/feedback/Toast';
 import { categoryById } from '@/constants/categories';
 import { formatMoney } from '@/lib/format';
@@ -34,6 +35,7 @@ export default function RequestDetail() {
   const uid = useAuth((s) => s.user?.uid);
   const { data: rated } = useHasReviewed(id!, uid);
   const offers = useOffers(id!);
+  const past = usePastArtisans();
   const accept = useAcceptOffer(id!);
   const reject = useRejectOffer(id!);
   const cancel = useCancelRequest(id!);
@@ -209,6 +211,7 @@ export default function RequestDetail() {
                   onAccept={() => onAccept(o.id)}
                   onReject={() => onReject(o.id)}
                   onPressArtisan={() => router.push(`/(shared)/artisan/${o.artisanId}`)}
+                  pastJobs={past.byId.get(o.artisanId)?.jobs}
                 />
               ))
             )}

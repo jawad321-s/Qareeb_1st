@@ -45,7 +45,7 @@ export default function Profile() {
       title: t('profile.account'),
       items: [
         { icon: 'user', label: t('profile.editProfile'), route: '/(shared)/edit-profile' },
-        { icon: 'heart', label: t('profile.favorites'), route: '/(shared)/favorites' },
+        { icon: 'briefcase', label: t('profile.pastArtisans'), route: '/(shared)/past-artisans' },
         { icon: 'bell', label: t('profile.notifications'), route: '/(shared)/notifications' },
       ],
     },

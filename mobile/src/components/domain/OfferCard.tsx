@@ -17,10 +17,12 @@ interface Props {
   onAccept?: () => void;
   onReject?: () => void;
   onPressArtisan?: () => void;
+  /** Requests the customer already had with this artisan (shows a badge). */
+  pastJobs?: number;
   loading?: boolean;
 }
 
-export function OfferCard({ offer, best, onAccept, onReject, onPressArtisan, loading }: Props) {
+export function OfferCard({ offer, best, onAccept, onReject, onPressArtisan, pastJobs, loading }: Props) {
   const a = offer.artisan;
   const { t } = useT();
   const { colors } = useTheme();
@@ -28,9 +30,10 @@ export function OfferCard({ offer, best, onAccept, onReject, onPressArtisan, loa
 
   return (
     <Card style={{ gap: 14, borderColor: best ? colors.tint : undefined, borderWidth: best ? 1.5 : 1 }}>
-      {best && (
-        <View style={{ flexDirection: 'row' }}>
-          <Badge label={t('offer.best')} variant="primary" icon="award" />
+      {(best || !!pastJobs) && (
+        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+          {best && <Badge label={t('offer.best')} variant="primary" icon="award" />}
+          {!!pastJobs && <Badge label={t('past.badge')} variant="success" icon="check-circle" />}
         </View>
       )}
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>

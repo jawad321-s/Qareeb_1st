@@ -11,12 +11,14 @@ import type { AppUser } from '@/types';
 interface Props {
   artisan: AppUser;
   subtitle?: string;
+  /** A second, smaller line under the subtitle. */
+  detail?: string;
   distanceKm?: number;
   onPress?: () => void;
   compact?: boolean;
 }
 
-export function ArtisanCard({ artisan, subtitle, distanceKm, onPress, compact }: Props) {
+export function ArtisanCard({ artisan, subtitle, detail, distanceKm, onPress, compact }: Props) {
   if (compact) {
     return (
       <Card onPress={onPress} style={{ width: 160, gap: 10 }}>
@@ -40,9 +42,14 @@ export function ArtisanCard({ artisan, subtitle, distanceKm, onPress, compact }:
           <Text variant="bodyMedium" numberOfLines={1}>
             {artisan.fullName}
           </Text>
-          {subtitle && (
+          {!!subtitle && (
             <Text variant="caption" tone="muted" numberOfLines={1}>
               {subtitle}
+            </Text>
+          )}
+          {!!detail && (
+            <Text variant="caption" tone="muted" numberOfLines={1}>
+              {detail}
             </Text>
           )}
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>

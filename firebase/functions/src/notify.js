@@ -34,6 +34,8 @@ export async function notifyUsers(db, uids, type, params, data = {}) {
       createdAt: Date.now(),
     });
     const tokens = await snap.ref.collection('fcmTokens').get();
+    // In the logs: why a user got the bell notification but no push.
+    if (tokens.empty) logger.info('No push token for user', { uid: snap.id, type });
     tokens.forEach((t) => {
       const token = t.get('token');
       if (typeof token === 'string' && token.startsWith('ExponentPushToken')) {
@@ -42,6 +44,7 @@ export async function notifyUsers(db, uids, type, params, data = {}) {
     });
   }
   await batch.commit();
+  logger.info('Notification sent', { type, users: unique.length, pushes: pushes.length });
   await sendExpoPushes(pushes);
 }
 
@@ -56,11 +59,12 @@ async function sendExpoPushes(pushes) {
         body: JSON.stringify(chunk.map((p) => p.msg)),
       });
       const json = await res.json();
-      // Drop tokens of uninstalled apps so we stop sending to them.
+      if (!res.ok || json.errors) logger.warn('Expo push request refused', { status: res.status, errors: json.errors });
       (json.data ?? []).forEach((ticket, idx) => {
-        if (ticket.status === 'error' && ticket.details?.error === 'DeviceNotRegistered') {
-          chunk[idx].ref.delete().catch(() => {});
-        }
+        if (ticket.status !== 'error') return;
+        logger.warn('Expo push ticket error', { error: ticket.details?.error, message: ticket.message, token: chunk[idx].ref.id });
+        // Drop tokens of uninstalled apps so we stop sending to them.
+        if (ticket.details?.error === 'DeviceNotRegistered') chunk[idx].ref.delete().catch(() => {});
       });
     } catch (err) {
       logger.warn('Expo push failed', err);

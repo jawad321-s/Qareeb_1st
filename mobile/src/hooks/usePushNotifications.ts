@@ -16,7 +16,9 @@ export function usePushNotifications(uid: string | undefined, ready: boolean) {
 
   useEffect(() => {
     if (config.useMock || !uid) return;
-    registerForPush(uid).catch((err) => console.warn('[push] registration failed', err));
+    registerForPush(uid).then((r) => {
+      if (!r.ok && r.reason === 'error') console.warn('[push] registration failed:', r.message);
+    });
   }, [uid]);
 
   useEffect(() => {

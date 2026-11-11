@@ -89,7 +89,7 @@ Profile ← **Sign out**، وامسح الـ QR من جديد.
 | `Could not reach GitHub` | ما في إنترنت: التطبيق بيشتغل على آخر نسخة نزلت عندك |
 | `EPERM: operation not permitted` | المشروع بمجلد نظام، أو انركّبت مكتباته من نافذة أدمن: نزّله من جديد على سطح المكتب |
 | أزرار "Demo: Customer / Artisan" ظاهرة | عندك ملف `mobile\.env` قديم فيه `EXPO_PUBLIC_USE_MOCK=true`: احذفه وشغّل `start-app.cmd` من جديد |
-| QR ما بيفتح / timeout | تأكد إن الكمبيوتر والجوال على نفس الواي فاي |
+| الجوال عالق على "Opening project…" أو QR ما بيفتح | تأكد إن الكمبيوتر والجوال على نفس الواي فاي، وإن **Expo Go** مسموحله بـ **Local Network** بإعدادات الآيفون. إذا ضل، شغّل **`start-app-tunnel`** بدل `start-app` (أول مرة بيسأل يركّب `@expo/ngrok`: جاوب `Y`) |
 | `permission-denied` بالتطبيق | قواعد Firestore الجديدة مش منشورة: [FIREBASE_SETUP.md](FIREBASE_SETUP.md)، الخطوة 3 |
 | بيطلب نسخة أحدث من Expo Go | حدّث Expo Go من المتجر (المشروع على SDK 58) |
 

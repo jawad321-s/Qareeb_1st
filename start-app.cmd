@@ -1,6 +1,7 @@
 @echo off
 rem Double-click to open the Qareeb mobile app: gets the latest version from
 rem GitHub, installs the libraries when they changed, then starts Expo.
+rem Extra arguments go to Expo (start-app-tunnel.cmd passes --tunnel).
 title Qareeb - App
 cd /d "%~dp0"
 
@@ -15,7 +16,7 @@ rem block that cmd parses before running any of them.
   echo.
   echo Scan the QR code with your phone. Press Ctrl+C to stop.
   echo.
-  call npx expo start -c
+  call npx expo start -c %*
   pause
   exit /b 0
 )

@@ -10,7 +10,8 @@ export function useServices() {
 }
 
 export function useArtisan(id: string) {
-  return useQuery({ queryKey: qk.artisan(id), queryFn: () => api.getArtisan(id), enabled: !!id });
+  // React Query refuses `undefined` as data, so "not found" is kept as null.
+  return useQuery({ queryKey: qk.artisan(id), queryFn: async () => (await api.getArtisan(id)) ?? null, enabled: !!id });
 }
 
 export function useRecommendedArtisans() {
@@ -26,7 +27,7 @@ export function useMyRequests(customerId: string) {
 }
 
 export function useRequest(id: string) {
-  return useQuery({ queryKey: qk.request(id), queryFn: () => api.getRequest(id), enabled: !!id });
+  return useQuery({ queryKey: qk.request(id), queryFn: async () => (await api.getRequest(id)) ?? null, enabled: !!id });
 }
 
 export type NearbyRequest = ServiceRequest & { distanceKm?: number };
@@ -79,7 +80,8 @@ export function useReviews(targetId: string) {
 }
 
 export function useUser(uid: string | undefined) {
-  return useQuery({ queryKey: qk.user(uid ?? ''), queryFn: () => api.getUser(uid!), enabled: !!uid });
+  // Unreadable or unknown users (e.g. a customer without a public profile yet) are null.
+  return useQuery({ queryKey: qk.user(uid ?? ''), queryFn: async () => (await api.getUser(uid!)) ?? null, enabled: !!uid });
 }
 
 /**

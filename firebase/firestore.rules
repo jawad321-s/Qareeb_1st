@@ -98,6 +98,13 @@ service cloud.firestore {
       allow delete: if isAdmin();
     }
 
+    // ── settings/{id} ────────────────────────────────────────────────────────
+    // Platform settings the admin edits, e.g. the support contacts in Help.
+    match /settings/{id} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
     // ── categories / services (read-only to clients) ─────────────────────────
     match /categories/{id} {
       allow read: if true;

@@ -12,7 +12,7 @@ import { useTabBarSpace } from '@/components/ui/TabBar';
 import { SectionHeader } from '@/components/ui/SectionHeader';
 import { CategoryTile } from '@/components/domain/CategoryTile';
 import { RequestCard } from '@/components/domain/RequestCard';
-import { CATEGORIES } from '@/constants/categories';
+import { useCategories } from '@/constants/categories';
 import { useConversations, useMyRequests } from '@/hooks/queries';
 import { useAuth } from '@/store/auth';
 import { useTheme } from '@/theme/ThemeProvider';
@@ -23,6 +23,7 @@ export default function Home() {
   const tabBarSpace = useTabBarSpace();
   const user = useAuth((s) => s.user);
   const { t, locale } = useT();
+  const categories = useCategories();
 
   const greeting = () => {
     const h = new Date().getHours();
@@ -126,7 +127,7 @@ export default function Home() {
           <SectionHeader title={t('home.categories')} />
         </View>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingHorizontal: 16, gap: 8 }}>
-          {CATEGORIES.map((cat, i) => (
+          {categories.map((cat, i) => (
             <Animated.View key={cat.id} entering={FadeInDown.delay(i * 40).duration(400)}>
               <CategoryTile
                 category={cat}

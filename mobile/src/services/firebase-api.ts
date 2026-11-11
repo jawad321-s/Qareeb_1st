@@ -7,14 +7,15 @@ import {
   setDoc, updateDoc, where, writeBatch,
 } from 'firebase/firestore';
 import type {
-  AppUser, ArtisanProfile, ChatMessage, Conversation, JobHistory, Offer, Review, Service, ServiceRequest,
+  AppUser, ArtisanProfile, ChatMessage, Conversation, JobHistory, Offer, Review, Service, ServiceRequest, SupportContacts,
 } from '@/types';
 import type { mockApi } from '@/mock/api';
 import { getDb } from '@/lib/firebase';
 import { useAuth } from '@/store/auth';
 import { isExpiredWithoutOffers, isVisibleToArtisan } from '@/lib/dispatch';
 import { MOCK_CUSTOMER } from '@/mock/data';
-import { SERVICES, toServiceId } from '@/constants/services';
+import { servicesOf, toServiceId } from '@/constants/services';
+import { allCategories } from '@/constants/categories';
 import { ACTIVE_STATUSES, NEXT_STATUS, canCancelRequest, isOverdue } from '@/lib/requestRules';
 import { completedRecord, rejectedRecord } from '@/lib/jobHistory';
 import { uploadRequestPhoto } from '@/services/media.service';
@@ -72,12 +73,14 @@ export const firebaseApi: typeof mockApi = {
   // The catalog comes from the app (constants/services), not Firestore: a
   // database seeded before services were merged still holds the old split
   // repair/installation services and the removed "Maintenance" category.
+  // Only the admin's renames and hidden flags (categories/{id}) apply.
   async getServices(categoryId?: string): Promise<Service[]> {
-    return categoryId ? SERVICES.filter((s) => s.categoryId === categoryId) : SERVICES;
+    const shown = servicesOf(allCategories().filter((c) => c.active));
+    return categoryId ? shown.filter((s) => s.categoryId === categoryId) : shown;
   },
 
   async getService(id: string): Promise<Service | undefined> {
-    return SERVICES.find((s) => s.id === toServiceId(id));
+    return servicesOf(allCategories()).find((s) => s.id === toServiceId(id));
   },
 
   async getArtisan(id: string): Promise<{ user: AppUser; profile: ArtisanProfile } | undefined> {
@@ -325,6 +328,12 @@ export const firebaseApi: typeof mockApi = {
 
   async updateArtisanServices(uid, serviceIds, categoryIds): Promise<void> {
     await updateDoc(doc(db(), 'artisanProfiles', uid), { serviceIds, categoryIds, updatedAt: Date.now() });
+  },
+
+  async getSupportContacts(): Promise<SupportContacts> {
+    const snap = await getDoc(doc(db(), 'settings', 'platform'));
+    const v = snap.data() ?? {};
+    return { supportPhone: v.supportPhone || undefined, supportWhatsApp: v.supportWhatsApp || undefined, supportEmail: v.supportEmail || undefined };
   },
 
   async setAvailable(uid, available): Promise<void> {

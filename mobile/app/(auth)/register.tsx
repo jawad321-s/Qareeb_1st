@@ -17,7 +17,7 @@ import { useVerification } from '@/store/verification';
 import { useAuth } from '@/store/auth';
 import { authErrorMessage } from '@/services/auth.service';
 import { config } from '@/lib/config';
-import { CATEGORIES } from '@/constants/categories';
+import { useCategories } from '@/constants/categories';
 import { useTheme } from '@/theme/ThemeProvider';
 import { useT, useLocaleStore } from '@/i18n';
 import type { TranslationKey } from '@/i18n/translations';
@@ -34,6 +34,7 @@ export default function Register() {
   const [catError, setCatError] = useState<string | undefined>();
   const [formError, setFormError] = useState<string | undefined>();
   const { t } = useT();
+  const categories = useCategories();
   const { colors } = useTheme();
   const locale = useLocaleStore((s) => s.locale);
 
@@ -178,7 +179,7 @@ export default function Register() {
                   {t('auth.selectCategories')} · {t('auth.selectCategoriesHint')}
                 </Text>
                 <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
-                  {CATEGORIES.map((c) => {
+                  {categories.map((c) => {
                     const active = categoryIds.includes(c.id);
                     return (
                       <Pressable

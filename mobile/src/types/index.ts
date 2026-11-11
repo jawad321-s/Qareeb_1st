@@ -65,6 +65,13 @@ export interface LocalizedText {
   en: string;
 }
 
+/** settings/platform: how users reach support (set in the admin dashboard). */
+export interface SupportContacts {
+  supportPhone?: string;
+  supportWhatsApp?: string;
+  supportEmail?: string;
+}
+
 export interface Category {
   id: string;
   slug: string;

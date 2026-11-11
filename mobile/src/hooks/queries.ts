@@ -52,6 +52,11 @@ export function useNearbyRequests(artisanId: string, origin?: GeoLocation | null
   });
 }
 
+/** How to reach support (set in the admin dashboard → Settings). */
+export function useSupportContacts() {
+  return useQuery({ queryKey: ['supportContacts'], queryFn: () => api.getSupportContacts() });
+}
+
 /** The artisan's "available" switch; off stops new requests. */
 export function useSetAvailable(artisanId: string) {
   const qc = useQueryClient();

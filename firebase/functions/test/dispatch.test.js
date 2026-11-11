@@ -1,5 +1,5 @@
 // Runs against the Firestore emulator:
-//   firebase emulators:exec --only firestore "cd functions && npm test"
+//   firebase emulators:exec --only auth,firestore "cd functions && npm test"
 import { test, before } from 'node:test';
 import assert from 'node:assert/strict';
 import { initializeApp } from 'firebase-admin/app';

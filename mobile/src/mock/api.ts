@@ -1,4 +1,4 @@
-import type { AppUser, Offer, Review, Service, ServiceRequest, ChatMessage, ArtisanProfile, GeoLocation, Conversation, RequestStatus, JobHistory } from '@/types';
+import type { AppUser, Offer, Review, Service, ServiceRequest, ChatMessage, ArtisanProfile, GeoLocation, Conversation, RequestStatus, JobHistory, SupportContacts } from '@/types';
 import {
   MOCK_ARTISANS,
   MOCK_ARTISAN_PROFILE,
@@ -233,6 +233,11 @@ export const mockApi = {
   /** Save which services the artisan offers (the mock keeps them on the device). */
   async updateArtisanServices(_uid: string, _serviceIds: string[], _categoryIds: string[]): Promise<void> {
     await delay(150);
+  },
+
+  /** Support contacts are set in the admin dashboard; the demo has none. */
+  async getSupportContacts(): Promise<SupportContacts> {
+    return {};
   },
 
   /** The dashboard switch: an unavailable artisan gets no new requests. */

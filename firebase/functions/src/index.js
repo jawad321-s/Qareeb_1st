@@ -4,14 +4,18 @@
 //  • onRequestUpdated   → status changes (accepted, on the way, …, cancelled)
 //  • onOfferCreated     → tell the customer about a new offer
 //  • onMessageCreated   → tell the other party about a chat message
+//  • resetPasswordWithPhone → set a new password after an SMS code (callable)
 import { initializeApp } from 'firebase-admin/app';
+import { getAuth } from 'firebase-admin/auth';
 import { getFirestore } from 'firebase-admin/firestore';
 import { setGlobalOptions } from 'firebase-functions/v2';
 import { onDocumentCreated, onDocumentUpdated } from 'firebase-functions/v2/firestore';
+import { onCall } from 'firebase-functions/v2/https';
 import { onSchedule } from 'firebase-functions/v2/scheduler';
 import { REGION } from './config.js';
 import { runDispatchTick, startDispatch } from './dispatch.js';
 import { notifyUsers } from './notify.js';
+import { resetPasswordWithPhone as resetPassword } from './passwordReset.js';
 
 initializeApp();
 const db = getFirestore();
@@ -77,3 +81,15 @@ export const onMessageCreated = onDocumentCreated('requests/{requestId}/messages
   const recipient = msg.senderId === req.customerId ? req.acceptedArtisanId : req.customerId;
   await notifyUsers(db, [recipient], 'newMessage', { senderName: await nameOf(msg.senderId), text: msg.text }, { route: `/(shared)/chat/${id}`, requestId: id });
 });
+
+export const resetPasswordWithPhone = onCall((request) =>
+  resetPassword(
+    getAuth(),
+    request.auth && {
+      uid: request.auth.uid,
+      phone: request.auth.token.phone_number,
+      provider: request.auth.token.firebase?.sign_in_provider,
+    },
+    request.data,
+  ),
+);

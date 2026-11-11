@@ -30,6 +30,7 @@ import { useAuth } from '@/store/auth';
 import { useVerification } from '@/store/verification';
 import { usePushNotifications } from '@/hooks/usePushNotifications';
 import { usePublicProfile } from '@/hooks/usePublicProfile';
+import { useCatalog } from '@/store/catalog';
 
 SplashScreen.preventAutoHideAsync().catch(() => {});
 
@@ -61,6 +62,10 @@ function RootNavigator() {
   usePushNotifications(uid, hydrated && fontsLoaded && splashDone);
   // What other users see of this account; the full user doc stays private.
   usePublicProfile(user);
+  // The admin's renamed and hidden services.
+  useEffect(() => {
+    useCatalog.getState().load().catch(() => {});
+  }, []);
 
   // Keep the module-level "where am I" up to date, so the language switch can
   // save it before the RTL restart and return the user to the same screen.

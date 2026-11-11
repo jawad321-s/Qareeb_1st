@@ -97,6 +97,16 @@ name, photo or rating changes.
 ## `categories/{categoryId}`
 `{ id, slug, name: {ar,en}, icon, colorHex, order, active }`
 
+The apps ship the catalog (icons, colours, order); only `name` and `active`
+here are applied on top of it. The admin dashboard → Categories renames a
+category or hides it (`active: false`): hidden ones are no longer offered for
+new requests or services.
+
+## `settings/platform`
+`{ supportPhone?, supportWhatsApp?, supportEmail?, updatedAt }`: set in the
+admin dashboard → Settings, shown on the app's Help screen. Readable by anyone,
+written only by admins.
+
 ## `services/{serviceId}`
 `{ id, categoryId, name: {ar,en}, description: {ar,en}, icon, basePriceFrom, active, popular }`
 

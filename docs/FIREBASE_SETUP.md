@@ -19,6 +19,9 @@
 1. افتح https://console.firebase.google.com واختر المشروع.
 2. **Build → Authentication → Get started** (إذا ما كان مفعّلاً).
 3. تبويب **Sign-in method** → اختر **Email/Password** → فعّل الخيار الأول **Enable** → **Save**.
+4. بنفس التبويب: **Add new provider** → **Phone** → **Enable** → **Save**. هاد لرمز التحقق
+   برسالة SMS لما الزبون أو الحرفي ينسى كلمة المرور. وإذا في إعداد **SMS region policy**،
+   خلّيه يسمح بفلسطين. كل رسالة إلها سعر حسب البلد، بينخصم من رصيد Blaze.
 
 > ليش Email/Password؟ الزبون والحرفي يدخلون **برقم الجوال وكلمة المرور فقط**،
 > بس Firebase يحتاج معرّفاً داخلياً بشكل إيميل. التطبيق يبنيه تلقائياً من الرقم
@@ -160,8 +163,10 @@ EXPO_PUBLIC_FIREBASE_EMULATOR_HOST=192.168.1.20
   الإشعارات بتوصل على **آيفون** من Expo Go. على **أندرويد** Expo Go ما بيدعمها، فبتحتاج
   نسخة APK من التطبيق. التطبيق مربوط بمشروع Expo `project-2026-2027/qareeb`
   (`mobile/app.json`).
-- **رمز التحقق (OTP)** بعد إنشاء الحساب: أي رمز يُقبل، ولا تُرسل رسالة SMS (يحتاج Blaze).
-- **نسيت كلمة المرور** في التطبيق (للزبون والحرفي) غير مفعّل بعد؛ الأدمن فقط عنده رابط بالإيميل.
+- **رمز التحقق (OTP)** بعد إنشاء حساب جديد: أي رمز يُقبل، ولا تُرسل رسالة SMS.
+- **نسيت كلمة المرور** في التطبيق: رمز SMS حقيقي (Firebase Phone Auth). قبل الإرسال بيطلع
+  مربع "أنا لست روبوت" (reCAPTCHA)، وبعد الرمز الـ Cloud Function `resetPasswordWithPhone`
+  بتغيّر كلمة المرور. بيحتاج تفعيل **Phone** (الخطوة 1) ونشر الـ functions.
 - **صور المعرض والمحادثة** بتنرفع على **Storage** (مضغوطة، JPEG لحد 1600 بكسل)، وFirestore
   بيحفظ رابطها بس. لازم يكون Storage مفعّل (Firebase Console ← **Storage** ← **Get started**)
   وقواعده منشورة: `cd firebase` ثم `npx firebase-tools deploy --only storage --project qareeb-b9a54`.

@@ -12,7 +12,7 @@ import { Icon } from '@/components/ui/Icon';
 import { Card } from '@/components/ui/Card';
 import { useTabBarSpace } from '@/components/ui/TabBar';
 import { useToast } from '@/components/feedback/Toast';
-import { CATEGORIES } from '@/constants/categories';
+import { categoryById, useCategories } from '@/constants/categories';
 import { useCreateRequest } from '@/hooks/queries';
 import { useAuth } from '@/store/auth';
 import { useTheme } from '@/theme/ThemeProvider';
@@ -22,7 +22,6 @@ import { formatMoney } from '@/lib/format';
 import { localizedTextAlign } from '@/i18n/rtl';
 
 // Service picker: one row per service, in catalog order.
-const SERVICES = [...CATEGORIES].sort((a, b) => a.order - b.order);
 
 export default function CreateRequest() {
   const { colors, isDark } = useTheme();
@@ -52,7 +51,9 @@ export default function CreateRequest() {
   const [budgetMax, setBudgetMax] = useState('');
   const [when, setWhen] = useState<'asap' | 'today' | 'tomorrow'>('asap');
 
-  const category = CATEGORIES.find((c) => c.id === categoryId);
+  const category = categoryId ? categoryById(categoryId) : undefined;
+  // The services to pick from: the shown ones, in catalog order.
+  const services = useCategories();
 
   const pickImage = async () => {
     const res = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ImagePicker.MediaTypeOptions.Images, quality: 0.7, allowsMultipleSelection: true });
@@ -114,7 +115,7 @@ export default function CreateRequest() {
           <Animated.View entering={FadeIn} style={{ gap: 16 }}>
             <Text variant="h3">{t('create.whatNeed')}</Text>
             <View style={{ gap: 10 }}>
-              {SERVICES.map((c) => {
+              {services.map((c) => {
                 const active = categoryId === c.id;
                 return (
                   <Pressable

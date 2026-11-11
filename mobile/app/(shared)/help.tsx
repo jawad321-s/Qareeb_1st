@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Pressable } from 'react-native';
+import { Linking, View, Pressable } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Screen } from '@/components/ui/Screen';
@@ -8,6 +8,8 @@ import { Text } from '@/components/ui/Text';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Icon } from '@/components/ui/Icon';
+import { useToast } from '@/components/feedback/Toast';
+import { useSupportContacts } from '@/hooks/queries';
 import { useTheme } from '@/theme/ThemeProvider';
 import { useT } from '@/i18n';
 
@@ -33,6 +35,16 @@ export default function HelpCenter() {
   const { t, locale } = useT();
   const [open, setOpen] = useState<number | null>(0);
   const faqs = FAQS[locale];
+  const toast = useToast();
+  // Set by the admin (dashboard → Settings); a channel left empty is hidden.
+  const contacts = useSupportContacts().data;
+  const digits = (n?: string) => (n ?? '').replace(/\D/g, '');
+  const channels = [
+    contacts?.supportWhatsApp && { label: t('help.whatsapp'), icon: 'message' as const, url: `https://wa.me/${digits(contacts.supportWhatsApp)}` },
+    contacts?.supportPhone && { label: t('help.call'), icon: 'phone' as const, url: `tel:${contacts.supportPhone.replace(/\s/g, '')}` },
+    contacts?.supportEmail && { label: t('help.email'), icon: 'send' as const, url: `mailto:${contacts.supportEmail}` },
+  ].filter(Boolean) as { label: string; icon: 'message' | 'phone' | 'send'; url: string }[];
+  const openChannel = (url: string) => Linking.openURL(url).catch(() => toast('error', t('help.openFailed')));
 
   return (
     <Screen scroll>
@@ -46,8 +58,14 @@ export default function HelpCenter() {
         <Text variant="caption" style={{ color: 'rgba(255,255,255,0.85)' }}>
           {t('help.browse')}
         </Text>
-        <View style={{ marginTop: 4 }}>
-          <Button label={t('help.contact')} variant="secondary" size="sm" iconLeft="message" onPress={() => {}} fullWidth={false} />
+        <View style={{ marginTop: 4, flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+          {channels.length > 0 ? (
+            channels.map((c) => (
+              <Button key={c.url} label={c.label} variant="secondary" size="sm" iconLeft={c.icon} onPress={() => openChannel(c.url)} fullWidth={false} />
+            ))
+          ) : (
+            <Button label={t('help.contact')} variant="secondary" size="sm" iconLeft="message" onPress={() => toast('info', t('help.noContacts'))} fullWidth={false} />
+          )}
         </View>
       </LinearGradient>
 

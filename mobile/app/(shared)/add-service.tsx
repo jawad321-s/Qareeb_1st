@@ -9,7 +9,7 @@ import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { CardSkeleton } from '@/components/feedback/Skeleton';
 import { useToast } from '@/components/feedback/Toast';
-import { CATEGORIES } from '@/constants/categories';
+import { categoryById } from '@/constants/categories';
 import { useServices } from '@/hooks/queries';
 import { useAuth } from '@/store/auth';
 import { useArtisanServices } from '@/store/artisanServices';
@@ -51,7 +51,7 @@ export default function AddService() {
         {catalog.isLoading
           ? [0, 1, 2].map((i) => <CardSkeleton key={i} />)
           : (catalog.data ?? []).map((s) => {
-              const cat = CATEGORIES.find((c) => c.id === s.categoryId);
+              const cat = categoryById(s.categoryId);
               const color = cat?.colorHex ?? colors.tint;
               const already = s.id in offered;
               const on = picked.includes(s.id);

@@ -13,6 +13,7 @@ users/{uid}
   ├── notifications/{notifId}
   └── fcmTokens/{tokenId}
 
+publicProfiles/{uid}           # what others see of any account (no contact details)
 artisanProfiles/{uid}          # 1:1 with a user whose role = "artisan"
 
 categories/{categoryId}
@@ -53,6 +54,17 @@ cms/{docId}
 | `ratingCount` | number | |
 | `createdAt` / `updatedAt` | Timestamp | |
 
+A customer's `users` doc (phone, home location) is readable only by them and
+the admins; artisans' docs are public. Everyone else sees a customer through
+`publicProfiles/{uid}`.
+
+## `publicProfiles/{uid}`
+
+`{ uid, role, fullName, photoUrl?, rating, ratingCount, createdAt, updatedAt }`:
+the fields other users may see. Written only by the account's own app (the
+rules allow no other fields), refreshed whenever the user opens the app or their
+name, photo or rating changes.
+
 ### Subcollection `users/{uid}/notifications/{id}`
 `{ id, type, title, body, data, read: boolean, createdAt }`
 
@@ -71,12 +83,13 @@ cms/{docId}
 | `categoryIds` | string[] | references `categories` |
 | `basePrices` | `Record<serviceId, number>` | minor units |
 | `availability` | `{ days: number[], from: string, to: string }` | weekly schedule |
+| `available` | boolean? | the dashboard switch; `false` stops new requests (app and Cloud Functions). Missing = available |
 | `gallery` | string[] | Storage URLs of past work |
 | `certificates` | `{ name, url, verified }[]` | |
 | `idDocuments` | `{ frontUrl, backUrl, verified }` | KYC |
 | `verificationStatus` | `'unsubmitted' \| 'pending' \| 'approved' \| 'rejected'` | |
 | `premium` | boolean | subscription badge |
-| `completedJobs` | number | denormalized |
+| `completedJobs` | number | denormalized; the artisan's app refreshes it from their job history |
 | `rating` / `ratingCount` | number | |
 
 ---

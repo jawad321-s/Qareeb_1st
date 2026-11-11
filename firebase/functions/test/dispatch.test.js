@@ -26,6 +26,8 @@ before(async () => {
     artisan('a_self', 1, { phone: '0599123456' }), // the customer's own artisan account
     // Works Mondays 08:00–09:00 only (Palestine time).
     { ...artisan('a_offhours', 1), profile: { uid: 'a_offhours', categoryIds: ['plumbing'], availability: { days: [1], from: '08:00', to: '09:00' } } },
+    // Switched "unavailable" on the dashboard.
+    { ...artisan('a_away', 1), profile: { uid: 'a_away', categoryIds: ['plumbing'], available: false } },
   ];
   for (const p of people) {
     await db.doc(`users/${p.user.uid}`).set(p.user);
@@ -97,6 +99,13 @@ test('a request with an offer stops expanding and is not cancelled', async () =>
 test('with verification off, unverified artisans are included', async () => {
   const found = await findArtisans(db, { categoryId: 'plumbing', origin: at(0), radiusKm: 2, requireVerified: false });
   assert.deepEqual(found.map((f) => f.uid).sort(), ['a_1km', 'a_self', 'a_unverified']);
+});
+
+test('an artisan switched to unavailable gets no requests', async () => {
+  const strict = await findArtisans(db, { categoryId: 'plumbing', origin: at(0), radiusKm: 15 });
+  const loose = await findArtisans(db, { categoryId: 'plumbing', origin: at(0), radiusKm: 15, requireVerified: false });
+  assert.ok(!strict.some((f) => f.uid === 'a_away'));
+  assert.ok(!loose.some((f) => f.uid === 'a_away'));
 });
 
 test('working hours: requests reach artisans only inside their days and hours (Palestine time)', async () => {

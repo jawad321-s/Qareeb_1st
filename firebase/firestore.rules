@@ -44,15 +44,13 @@ service cloud.firestore {
     match /users/{userId} {
       // A user reads their own doc; admins read all. Artisans are public
       // service providers, so any signed-in user can read an artisan's doc
-      // (listings, profiles, chat headers). Artisans can read customer docs to
-      // show who they are chatting with / reviewing.
-      // TODO: split public fields into a separate collection so phone/email
-      // aren't exposed beyond the parties of an accepted job.
+      // (listings, profiles, chat headers). A customer's doc holds their phone
+      // number and home location, so only they and the admins read it; what
+      // others see of a customer comes from publicProfiles/{uid}.
       allow read: if isSignedIn() && (
                     uid() == userId
                     || isAdmin()
-                    || resource.data.role == 'artisan'
-                    || isArtisan());
+                    || resource.data.role == 'artisan');
       allow create: if isSignedIn() && uid() == userId
                     && incoming().role in ['customer', 'artisan'];
       allow update: if isSignedIn() && (
@@ -82,6 +80,20 @@ service cloud.firestore {
                                 // verificationStatus & premium are admin-controlled.
                                 && incoming().verificationStatus == (resource == null ? 'unsubmitted' : existing().verificationStatus)
                                 && incoming().premium == (resource == null ? false : existing().premium))
+                              || isAdmin());
+      allow delete: if isAdmin();
+    }
+
+    // ── publicProfiles/{uid} ─────────────────────────────────────────────────
+    // What other users may see of an account: name, photo, rating and join
+    // date, never contact details. Each user's own app keeps theirs current.
+    match /publicProfiles/{userId} {
+      allow read: if isSignedIn();
+      allow create, update: if isSignedIn() && (
+                              (uid() == userId
+                                && incoming().keys().hasOnly(['uid', 'role', 'fullName', 'photoUrl', 'rating', 'ratingCount', 'createdAt', 'updatedAt'])
+                                && incoming().uid == userId
+                                && incoming().role == get(userDoc()).data.role)
                               || isAdmin());
       allow delete: if isAdmin();
     }

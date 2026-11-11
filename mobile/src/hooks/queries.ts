@@ -52,6 +52,19 @@ export function useNearbyRequests(artisanId: string, origin?: GeoLocation | null
   });
 }
 
+/** The artisan's "available" switch; off stops new requests. */
+export function useSetAvailable(artisanId: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (available: boolean) => api.setAvailable(artisanId, available),
+    onSettled: () =>
+      Promise.all([
+        qc.invalidateQueries({ queryKey: qk.artisan(artisanId) }),
+        qc.invalidateQueries({ queryKey: qk.nearbyRequests(artisanId) }),
+      ]),
+  });
+}
+
 export function useOffers(requestId: string) {
   return useQuery({ queryKey: qk.offers(requestId), queryFn: () => api.getOffers(requestId), enabled: !!requestId });
 }

@@ -49,6 +49,8 @@ export interface ArtisanProfile {
   serviceIds: string[];
   categoryIds: string[];
   availability: Availability;
+  /** The dashboard switch: false stops new requests. Missing means available. */
+  available?: boolean;
   gallery: string[];
   certificates: { name: string; url: string; verified: boolean }[];
   verificationStatus: VerificationStatus;
@@ -106,6 +108,8 @@ export interface ServiceRequest {
   status: RequestStatus;
   acceptedOfferId?: string;
   acceptedArtisanId?: string;
+  /** Copied from the customer when the request is made (lists, and before their public profile exists). */
+  customerName?: string;
   /** Set by Cloud Functions: current search radius and response deadline. */
   dispatch?: { radiusKm: number; startedAt: number; expiresAt: number };
   notifiedArtisanIds?: string[];

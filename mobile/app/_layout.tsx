@@ -29,6 +29,7 @@ import { LANG_RELOAD_KEY } from '@/i18n';
 import { useAuth } from '@/store/auth';
 import { useVerification } from '@/store/verification';
 import { usePushNotifications } from '@/hooks/usePushNotifications';
+import { usePublicProfile } from '@/hooks/usePublicProfile';
 
 SplashScreen.preventAutoHideAsync().catch(() => {});
 
@@ -37,7 +38,8 @@ function RootNavigator() {
   const hydrate = useAuth((s) => s.hydrate);
   const hydrated = useAuth((s) => s.hydrated);
   const hydrateVerification = useVerification((s) => s.hydrate);
-  const uid = useAuth((s) => s.user?.uid);
+  const user = useAuth((s) => s.user);
+  const uid = user?.uid;
   const [fontsLoaded] = useFonts({
     Inter_400Regular,
     Inter_500Medium,
@@ -57,6 +59,8 @@ function RootNavigator() {
   });
   const pathname = usePathname();
   usePushNotifications(uid, hydrated && fontsLoaded && splashDone);
+  // What other users see of this account; the full user doc stays private.
+  usePublicProfile(user);
 
   // Keep the module-level "where am I" up to date, so the language switch can
   // save it before the RTL restart and return the user to the same screen.

@@ -30,6 +30,8 @@ export function RequestCard({
   const { t } = useT();
   const { isDark, colors } = useTheme();
   const { data: customer } = useUser(showCustomer ? request.customerId : undefined);
+  // The name copied onto the request covers customers without a public profile yet.
+  const customerName = showCustomer ? customer?.fullName || request.customerName : undefined;
   return (
     <Card onPress={onPress} style={{ gap: 12 }}>
       <View style={{ flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between', gap: 10 }}>
@@ -83,13 +85,13 @@ export function RequestCard({
         )}
       </View>
 
-      {customer && (
+      {!!customerName && (
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, paddingTop: 10, borderTopWidth: 1, borderTopColor: colors.border }}>
-          <Avatar uri={customer.photoUrl} name={customer.fullName} size={26} />
+          <Avatar uri={customer?.photoUrl} name={customerName} size={26} />
           <Text variant="caption" numberOfLines={1} style={{ flexShrink: 1, fontFamily: 'Inter_500Medium' }}>
-            {customer.fullName}
+            {customerName}
           </Text>
-          <Rating value={customer.rating} size={11} showValue />
+          {customer && <Rating value={customer.rating} size={11} showValue />}
         </View>
       )}
     </Card>

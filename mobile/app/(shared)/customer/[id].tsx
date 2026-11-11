@@ -24,7 +24,13 @@ export default function CustomerProfile() {
     return (
       <Screen>
         <Header showBack title={t('cust.title')} />
-        <CardSkeleton />
+        {isLoading ? (
+          <CardSkeleton />
+        ) : (
+          <Text variant="body" tone="muted">
+            {t('cust.notYet')}
+          </Text>
+        )}
       </Screen>
     );
   }

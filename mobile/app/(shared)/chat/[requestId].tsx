@@ -74,7 +74,7 @@ export default function Chat() {
       <View style={{ paddingHorizontal: 20 }}>
         <Header
           showBack
-          title={other?.fullName ?? ''}
+          title={other?.fullName || (me.uid !== request?.customerId ? request?.customerName : '') || ''}
           subtitle={request?.title}
           onTitlePress={otherId ? () => router.push(me.uid === request?.customerId ? `/(shared)/artisan/${otherId}` : `/(shared)/customer/${otherId}`) : undefined}
         />

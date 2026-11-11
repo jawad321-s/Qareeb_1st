@@ -155,8 +155,8 @@ EXPO_PUBLIC_FIREBASE_EMULATOR_HOST=192.168.1.20
 ## ما زال ناقصاً أو تجريبياً على Firebase
 
 - **الإشعارات والتوزيع من السيرفر:** المشروع على **Blaze**، والـ Cloud Functions منشورة
-  (`europe-west1`، بجانب قاعدة البيانات `eur3`). لإعادة نشرها بعد أي تعديل عليها:
-  `cd firebase` ثم `npx firebase-tools deploy --only functions --project qareeb-b9a54`.
+  (`europe-west1`، بجانب قاعدة البيانات `eur3`). لإعادة نشرها مع القواعد بعد أي تعديل عليها:
+  `cd firebase` ثم `npx firebase-tools deploy --only functions,firestore:rules --project qareeb-b9a54`.
   الإشعارات بتوصل على **آيفون** من Expo Go. على **أندرويد** Expo Go ما بيدعمها، فبتحتاج
   نسخة APK من التطبيق. التطبيق مربوط بمشروع Expo `project-2026-2027/qareeb`
   (`mobile/app.json`).

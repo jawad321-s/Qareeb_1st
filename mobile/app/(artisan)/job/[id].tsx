@@ -199,17 +199,17 @@ export default function JobDetail() {
       </Animated.View>
 
       {/* Who asked: their profile shows how other artisans rated them. */}
-      {customer && (
+      {(customer || !!request.customerName) && (
         <Card style={{ marginTop: 16, gap: 10 }}>
           <Text variant="caption" tone="muted">
             {t('job.customer')}
           </Text>
           <PersonRow
-            name={customer.fullName}
-            photoUrl={customer.photoUrl}
-            rating={customer.rating}
-            ratingCount={customer.ratingCount}
-            onPress={() => router.push(`/(shared)/customer/${customer.uid}`)}
+            name={customer?.fullName || request.customerName}
+            photoUrl={customer?.photoUrl}
+            rating={customer?.rating}
+            ratingCount={customer?.ratingCount}
+            onPress={() => router.push(`/(shared)/customer/${request.customerId}`)}
           />
         </Card>
       )}

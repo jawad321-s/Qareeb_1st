@@ -128,6 +128,8 @@ export async function registerWithPhone(p: RegisterParams): Promise<AppUser> {
       updatedAt: now,
     };
     await setDoc(doc(db(), 'users', user.uid), profile);
+    // Visible to others right away (name, photo, rating — no contact details).
+    await publishPublicProfile(profile).catch(() => {});
 
     if (p.role === 'artisan' && p.artisan) {
       await setDoc(doc(db(), 'artisanProfiles', user.uid), {
@@ -153,6 +155,24 @@ export async function registerWithPhone(p: RegisterParams): Promise<AppUser> {
   } catch (err) {
     throw toAuthError(err);
   }
+}
+
+/**
+ * What other users may see of an account: publicProfiles/{uid}. The users doc
+ * also holds the phone number and home location; for customers it is private
+ * (see firestore.rules), so artisans read this instead.
+ */
+export async function publishPublicProfile(u: AppUser): Promise<void> {
+  await setDoc(doc(db(), 'publicProfiles', u.uid), {
+    uid: u.uid,
+    role: u.role,
+    fullName: u.fullName,
+    ...(u.photoUrl ? { photoUrl: u.photoUrl } : {}),
+    rating: u.rating ?? 0,
+    ratingCount: u.ratingCount ?? 0,
+    createdAt: u.createdAt ?? Date.now(),
+    updatedAt: Date.now(),
+  });
 }
 
 /** Persists self-editable profile fields (role/status/verified are server-owned). */

@@ -123,6 +123,8 @@ export const firebaseApi: typeof mockApi = {
       getDoc(doc(db(), 'artisanProfiles', me.uid)),
       getDoc(doc(db(), 'users', me.uid)),
     ]);
+    // Switched to unavailable on the dashboard: no new requests.
+    if (profile.exists() && profile.data().available === false) return [];
     const categoryIds: string[] = profile.exists() ? (profile.data().categoryIds ?? []) : [];
     const availability = profile.exists() ? profile.data().availability : undefined;
     // Pick up an admin approval made since sign-in.
@@ -238,13 +240,31 @@ export const firebaseApi: typeof mockApi = {
   },
 
   async getUser(uid: string): Promise<AppUser | undefined> {
-    // Users may only read their own doc (see firestore.rules), so reading the
-    // other party can be denied — callers fall back to a generic label.
+    // Your own doc and artisans' docs are readable. A customer's doc (phone,
+    // home location) is private to them, so others get their public profile:
+    // name, photo, rating and join date.
     const snap = await getDoc(doc(db(), 'users', uid)).catch(() => null);
-    if (!snap) return undefined;
-    if (!snap.exists()) return undefined;
-    const v = snap.data();
-    return { ...(v as AppUser), uid: snap.id, createdAt: ms(v.createdAt), updatedAt: ms(v.updatedAt) };
+    if (snap?.exists()) {
+      const v = snap.data();
+      return { ...(v as AppUser), uid: snap.id, createdAt: ms(v.createdAt), updatedAt: ms(v.updatedAt) };
+    }
+    const pub = await getDoc(doc(db(), 'publicProfiles', uid)).catch(() => null);
+    if (!pub?.exists()) return undefined;
+    const v = pub.data();
+    return {
+      uid,
+      role: v.role,
+      fullName: v.fullName ?? '',
+      photoUrl: v.photoUrl,
+      phone: '',
+      locale: 'ar',
+      status: 'active',
+      verified: false,
+      rating: v.rating ?? 0,
+      ratingCount: v.ratingCount ?? 0,
+      createdAt: ms(v.createdAt),
+      updatedAt: ms(v.updatedAt),
+    } as AppUser;
   },
 
   async getPendingReview(uid: string, role: 'customer' | 'artisan'): Promise<ServiceRequest | null> {
@@ -305,6 +325,10 @@ export const firebaseApi: typeof mockApi = {
 
   async updateArtisanServices(uid, serviceIds, categoryIds): Promise<void> {
     await updateDoc(doc(db(), 'artisanProfiles', uid), { serviceIds, categoryIds, updatedAt: Date.now() });
+  },
+
+  async setAvailable(uid, available): Promise<void> {
+    await updateDoc(doc(db(), 'artisanProfiles', uid), { available, updatedAt: Date.now() });
   },
 
   async setCompletedJobs(uid, count): Promise<void> {

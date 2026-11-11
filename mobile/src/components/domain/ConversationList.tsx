@@ -62,7 +62,7 @@ function ConversationRow({ conversation, myId }: { conversation: Conversation; m
       <View style={{ flex: 1, gap: 2 }}>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
           <Text variant="bodyMedium" numberOfLines={1} style={{ flex: 1 }}>
-            {other?.fullName ?? '…'}
+            {other?.fullName || (otherUserId === request.customerId ? request.customerName : '') || '…'}
           </Text>
           <Text variant="caption" tone="muted">
             {timeAgo(lastMessage?.createdAt ?? request.updatedAt)}

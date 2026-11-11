@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { View, ScrollView, Pressable } from 'react-native';
 import { router } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -14,7 +14,8 @@ import { SectionHeader } from '@/components/ui/SectionHeader';
 import { useTabBarSpace } from '@/components/ui/TabBar';
 import { RequestCard } from '@/components/domain/RequestCard';
 import { CardSkeleton } from '@/components/feedback/Skeleton';
-import { useJobHistory, useNearbyRequests } from '@/hooks/queries';
+import { useArtisan, useJobHistory, useNearbyRequests, useSetAvailable } from '@/hooks/queries';
+import { useToast } from '@/components/feedback/Toast';
 import { useMyRating } from '@/hooks/useMyRating';
 import { useSyncCompletedJobs } from '@/hooks/useSyncCompletedJobs';
 import { ratingValue } from '@/lib/rating';
@@ -31,7 +32,13 @@ export default function ArtisanDashboard() {
   const { colors, isDark, hero } = useTheme();
   const user = useAuth((s) => s.user)!;
   const { t, locale } = useT();
-  const [online, setOnline] = useState(true);
+  const toast = useToast();
+  // The "available" switch is saved on the profile; off stops new requests,
+  // here and in the server's dispatch. Ongoing jobs carry on as usual.
+  const profile = useArtisan(user.uid);
+  const setAvailable = useSetAvailable(user.uid);
+  const online = setAvailable.isPending ? setAvailable.variables === true : profile.data?.profile.available !== false;
+  const toggleOnline = () => setAvailable.mutate(!online, { onError: () => toast('error', t('artisan.availFailed')) });
   const subscription = useMySubscription(user.uid);
   const currentPlan = subscription.isActive && subscription.record ? planById(subscription.record.planId) : undefined;
   const nearby = useNearbyRequests(user.uid, user.location);
@@ -108,7 +115,7 @@ export default function ArtisanDashboard() {
             </Pressable>
 
             {/* Availability toggle */}
-            <Pressable onPress={() => setOnline((o) => !o)}>
+            <Pressable onPress={toggleOnline} disabled={setAvailable.isPending}>
               <Card style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
                 <View style={{ width: 44, height: 44, borderRadius: 12, backgroundColor: (online ? '#10B981' : '#94A3B8') + '20', alignItems: 'center', justifyContent: 'center' }}>
                   <Icon name={online ? 'zap' : 'moon'} size={22} color={online ? '#10B981' : '#94A3B8'} />
@@ -148,7 +155,14 @@ export default function ArtisanDashboard() {
         <View style={{ paddingHorizontal: 20, marginTop: 24 }}>
           <SectionHeader title={t('artisan.nearby')} actionLabel={t('common.viewAll')} onAction={() => router.push('/(artisan)/requests')} />
           <View style={{ gap: 12 }}>
-            {nearby.isLoading ? (
+            {!online ? (
+              <Card style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+                <Icon name="moon" size={18} color={colors.muted} />
+                <Text variant="caption" tone="muted" style={{ flex: 1 }}>
+                  {t('artisan.offlineHint')}
+                </Text>
+              </Card>
+            ) : nearby.isLoading ? (
               [0, 1].map((i) => <CardSkeleton key={i} />)
             ) : (
               (nearby.data ?? []).slice(0, 3).map((r) => (

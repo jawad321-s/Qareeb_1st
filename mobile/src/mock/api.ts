@@ -19,6 +19,8 @@ import { hasAccount } from '@/store/auth';
 let requests = [...MOCK_REQUESTS];
 let offers = [...MOCK_OFFERS];
 let messages = [...MOCK_MESSAGES];
+// The demo artisan's "available" switch (for this session).
+let demoAvailable = true;
 // Reviews the user submitted are kept on the device. Everything else here resets
 // on reload, but ratings can't: the mandatory-review gate would otherwise ask
 // for the same rating again after every app launch or language switch.
@@ -60,7 +62,7 @@ export const mockApi = {
   async getArtisan(id: string): Promise<{ user: AppUser; profile: ArtisanProfile } | undefined> {
     await delay(300);
     const user = MOCK_ARTISANS.find((a) => a.uid === id) ?? MOCK_ARTISANS[0];
-    return clone({ user, profile: { ...MOCK_ARTISAN_PROFILE, uid: user.uid, rating: user.rating, ratingCount: user.ratingCount } });
+    return clone({ user, profile: { ...MOCK_ARTISAN_PROFILE, uid: user.uid, rating: user.rating, ratingCount: user.ratingCount, available: demoAvailable } });
   },
 
   async getRecommendedArtisans(): Promise<AppUser[]> {
@@ -83,6 +85,7 @@ export const mockApi = {
   async getNearbyRequests(): Promise<ServiceRequest[]> {
     await delay();
     autoCompleteOverdue();
+    if (!demoAvailable) return [];
     return clone(requests.filter((r) => r.status === 'PENDING'));
   },
 
@@ -230,6 +233,12 @@ export const mockApi = {
   /** Save which services the artisan offers (the mock keeps them on the device). */
   async updateArtisanServices(_uid: string, _serviceIds: string[], _categoryIds: string[]): Promise<void> {
     await delay(150);
+  },
+
+  /** The dashboard switch: an unavailable artisan gets no new requests. */
+  async setAvailable(_uid: string, available: boolean): Promise<void> {
+    await delay(150);
+    demoAvailable = available;
   },
 
   /** Store how many jobs the artisan finished (the demo keeps its sample figure). */

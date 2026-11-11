@@ -10,14 +10,15 @@ import { notifyUsers } from './notify.js';
 
 /**
  * Verified, active artisans of `categoryId` within `radiusKm` of `origin` who
- * are inside their working days and hours at `now`, excluding `excludeIds`
- * and the customer's own artisan account (same phone).
+ * are available (the dashboard switch is on) and inside their working days and
+ * hours at `now`, excluding `excludeIds` and the customer's own artisan account
+ * (same phone).
  * Returns [{ uid, distanceKm }] nearest first.
  */
 export async function findArtisans(db, { categoryId, origin, radiusKm, excludeIds = [], customerPhone, requireVerified = REQUIRE_VERIFIED, now = Date.now() }) {
   const profiles = await db.collection('artisanProfiles').where('categoryIds', 'array-contains', categoryId).get();
   const ids = profiles.docs
-    .filter((d) => isWithinAvailability(d.get('availability'), now))
+    .filter((d) => d.get('available') !== false && isWithinAvailability(d.get('availability'), now))
     .map((d) => d.id)
     .filter((id) => !excludeIds.includes(id));
   if (ids.length === 0) return [];

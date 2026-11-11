@@ -23,6 +23,11 @@ import { localizedTextAlign } from '@/i18n/rtl';
 
 // Service picker: one row per service, in catalog order.
 
+// Shortest title and description a request may have; the fields say so while
+// they are shorter, so a disabled Continue button is never a mystery.
+const TITLE_MIN = 4;
+const DESC_MIN = 10;
+
 export default function CreateRequest() {
   const { colors, isDark } = useTheme();
   const user = useAuth((s) => s.user)!;
@@ -62,7 +67,7 @@ export default function CreateRequest() {
 
   const canNext = () => {
     if (step === 0) return !!categoryId;
-    if (step === 1) return title.trim().length >= 4 && description.trim().length >= 10;
+    if (step === 1) return title.trim().length >= TITLE_MIN && description.trim().length >= DESC_MIN;
     if (step === 2) return Number(budgetMin) > 0 && Number(budgetMax) >= Number(budgetMin);
     return true;
   };
@@ -157,6 +162,7 @@ export default function CreateRequest() {
                 onChangeText={setTitle}
                 style={{ height: 54, borderRadius: 16, borderWidth: 1.5, borderColor: colors.border, backgroundColor: colors.surface, paddingHorizontal: 14, color: colors.fg, fontSize: 15, fontFamily: font('Inter_400Regular'), textAlign: localizedTextAlign(isRTL) }}
               />
+              <MinLengthHint value={title} min={TITLE_MIN} />
             </View>
             <View style={{ gap: 6 }}>
               <Text variant="caption" tone="muted">
@@ -165,9 +171,12 @@ export default function CreateRequest() {
               <TextInput
                 value={description}
                 onChangeText={setDescription}
+                placeholder={t('create.describePlaceholder')}
+                placeholderTextColor={colors.muted}
                 multiline
                 style={{ minHeight: 120, borderRadius: 16, borderWidth: 1.5, borderColor: colors.border, backgroundColor: colors.surface, padding: 14, color: colors.fg, fontSize: 15, fontFamily: font('Inter_400Regular'), textAlign: localizedTextAlign(isRTL), textAlignVertical: 'top' }}
               />
+              <MinLengthHint value={description} min={DESC_MIN} />
             </View>
             <View style={{ gap: 8 }}>
               <Text variant="caption" tone="muted">
@@ -297,5 +306,17 @@ function Row({ label, value }: { label: string; value: string }) {
         {value}
       </Text>
     </View>
+  );
+}
+
+/** "At least N characters (n/N)" under a field while it is too short. */
+function MinLengthHint({ value, min }: { value: string; min: number }) {
+  const { t } = useT();
+  const n = value.trim().length;
+  if (n >= min) return null;
+  return (
+    <Text variant="caption" style={{ color: '#D97706' }}>
+      {t('create.minChars').split('{min}').join(String(min)).replace('{n}', String(n))}
+    </Text>
   );
 }

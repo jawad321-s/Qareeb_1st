@@ -99,6 +99,7 @@ Profile ← **Sign out**، وامسح الـ QR من جديد.
 | الجوال عالق على "Opening project…" أو QR ما بيفتح | تأكد إن الكمبيوتر والجوال على نفس الواي فاي، وإن **Expo Go** مسموحله بـ **Local Network** بإعدادات الآيفون. إذا ضل، شغّل **`start-app-tunnel`** بدل `start-app` (أول مرة بيسأل يركّب `@expo/ngrok`: جاوب `Y`) |
 | `permission-denied` بالتطبيق | قواعد Firestore الجديدة مش منشورة: [FIREBASE_SETUP.md](FIREBASE_SETUP.md)، الخطوة 3 |
 | بيطلب نسخة أحدث من Expo Go | حدّث Expo Go من المتجر (المشروع على SDK 58) |
+| `Cannot find native module 'ExpoAsset'` أو أي `Cannot find native module` | مكتبة زيادة على الكمبيوتر (من `npm install` بالإيد). `start-app` بيلاحظها وبيعيد تركيب المكتبات لحاله. إذا ضل: احذف مجلد `mobile\node_modules` وشغّل `start-app` من جديد |
 | `git pull` بيطلّع `Your local changes … would be overwritten` وما بيسحب | ملف بالمشروع تغيّر على جهازك (غالباً من `npm install`). دبل كليك على `start-app.cmd` بيرجّع كل إشي لآخر نسخة. أو بالأوامر: `git checkout -- .` وبعدين `git pull`. وركّب المكتبات بـ `npm ci` مش `npm install` |
 
 ## على Mac 🍎

@@ -30,7 +30,7 @@ export default function ArtisanOffers() {
   const uid = useAuth((s) => s.user?.uid ?? '');
   // The signed-in artisan's own offers, newest first.
   const { data: offers, isLoading, refetch } = useArtisanOffers(uid);
-  const [tab, setTab] = useState<OfferTab>('active');
+  const [tab, setTab] = useState<OfferTab>('all');
   // Tabs stay mounted: pick up jobs that moved on (or were cancelled) meanwhile.
   useFocusEffect(
     useCallback(() => {

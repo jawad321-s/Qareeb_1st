@@ -13,21 +13,21 @@ import { useAuth } from '@/store/auth';
 import { useT } from '@/i18n';
 import type { RequestStatus } from '@/types';
 
-type Tab = 'active' | 'completed' | 'all';
+type Tab = 'active' | 'completed' | 'cancelled' | 'all';
 const ACTIVE: RequestStatus[] = ['PENDING', 'ACCEPTED', 'ON_THE_WAY', 'WORKING'];
 
 export default function Requests() {
   const { t } = useT();
   const user = useAuth((s) => s.user)!;
   const { data, isLoading, refetch } = useMyRequests(user.uid);
-  const [tab, setTab] = useState<Tab>('active');
+  const [tab, setTab] = useState<Tab>('all');
   const [refreshing, setRefreshing] = useState(false);
 
   const filtered = useMemo(() => {
     const list = data ?? [];
     if (tab === 'active') return list.filter((r) => ACTIVE.includes(r.status));
-    // Cancelled requests are only listed under "all".
     if (tab === 'completed') return list.filter((r) => r.status === 'COMPLETED');
+    if (tab === 'cancelled') return list.filter((r) => r.status === 'CANCELLED');
     return list;
   }, [data, tab]);
 
@@ -47,6 +47,7 @@ export default function Requests() {
           options={[
             { key: 'active', label: t('orders.active') },
             { key: 'completed', label: t('orders.completed') },
+            { key: 'cancelled', label: t('orders.cancelled') },
             { key: 'all', label: t('orders.all') },
           ]}
           value={tab}
@@ -61,6 +62,10 @@ export default function Requests() {
       >
         {isLoading ? (
           [0, 1, 2].map((i) => <CardSkeleton key={i} />)
+        ) : filtered.length === 0 && (data ?? []).length > 0 ? (
+          <View style={{ marginTop: 60 }}>
+            <EmptyState icon="briefcase" title={t('orders.emptyTab')} />
+          </View>
         ) : filtered.length === 0 ? (
           <View style={{ marginTop: 60 }}>
             <EmptyState

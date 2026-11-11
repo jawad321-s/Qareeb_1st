@@ -157,7 +157,8 @@ export const translations = {
     'orders.completed': 'completed',
     'orders.all': 'all',
     'orders.cancelled': 'cancelled',
-    'orders.empty': 'No active orders',
+    'orders.empty': 'No requests yet',
+    'orders.emptyTab': 'No requests here',
     'orders.emptyDesc': 'When you create a request it will show up here so you can track it.',
     'orders.createCta': 'Create a request',
 
@@ -789,7 +790,8 @@ export const translations = {
     'orders.completed': 'المكتملة',
     'orders.all': 'الكل',
     'orders.cancelled': 'الملغية',
-    'orders.empty': 'لا توجد طلبات حالية',
+    'orders.empty': 'لا توجد طلبات بعد',
+    'orders.emptyTab': 'لا توجد طلبات هنا',
     'orders.emptyDesc': 'عند إنشاء طلب سيظهر هنا لتتمكن من متابعته.',
     'orders.createCta': 'إنشاء طلب',
 

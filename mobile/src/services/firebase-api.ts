@@ -245,13 +245,19 @@ export const firebaseApi: typeof mockApi = {
   async getUser(uid: string): Promise<AppUser | undefined> {
     // Your own doc and artisans' docs are readable. A customer's doc (phone,
     // home location) is private to them, so others get their public profile:
-    // name, photo, rating and join date.
-    const snap = await getDoc(doc(db(), 'users', uid)).catch(() => null);
+    // name, photo, rating and join date. A refused read means "try the next";
+    // any other failure (e.g. offline) is thrown so the query retries.
+    const read = (path: string) =>
+      getDoc(doc(db(), path)).catch((err) => {
+        if ((err as { code?: string })?.code === 'permission-denied') return null;
+        throw err;
+      });
+    const snap = await read(`users/${uid}`);
     if (snap?.exists()) {
       const v = snap.data();
       return { ...(v as AppUser), uid: snap.id, createdAt: ms(v.createdAt), updatedAt: ms(v.updatedAt) };
     }
-    const pub = await getDoc(doc(db(), 'publicProfiles', uid)).catch(() => null);
+    const pub = await read(`publicProfiles/${uid}`);
     if (!pub?.exists()) return undefined;
     const v = pub.data();
     return {

@@ -195,6 +195,19 @@ export const translations = {
     'notif.title': 'Notifications',
     'notif.empty': 'No notifications',
     'notif.emptyDesc': "You're all caught up! New updates will appear here.",
+    'notif.all': 'All',
+    'notif.unread': 'Unread',
+    'notif.noUnread': "You've read everything",
+    'notif.today': 'Today',
+    'notif.yesterday': 'Yesterday',
+    'notif.week': 'This week',
+    'notif.older': 'Older',
+    'notif.delete': 'Delete notification',
+    'notif.clearAll': 'Clear all',
+    'notif.clearTitle': 'Clear all notifications?',
+    'notif.clearBody': 'All your notifications will be deleted. This cannot be undone.',
+    'notif.clearYes': 'Clear all',
+    'notif.clearFailed': "Couldn't clear the notifications. Try again.",
 
     // wallet
 
@@ -828,6 +841,19 @@ export const translations = {
     'notif.title': 'الإشعارات',
     'notif.empty': 'لا توجد إشعارات',
     'notif.emptyDesc': 'لا جديد حالياً! ستظهر التحديثات هنا.',
+    'notif.all': 'الكل',
+    'notif.unread': 'غير المقروءة',
+    'notif.noUnread': 'قرأت كل الإشعارات',
+    'notif.today': 'اليوم',
+    'notif.yesterday': 'أمس',
+    'notif.week': 'هذا الأسبوع',
+    'notif.older': 'أقدم',
+    'notif.delete': 'حذف الإشعار',
+    'notif.clearAll': 'مسح الكل',
+    'notif.clearTitle': 'مسح كل الإشعارات؟',
+    'notif.clearBody': 'سيتم حذف كل إشعاراتك، ولا يمكن التراجع عن ذلك.',
+    'notif.clearYes': 'مسح الكل',
+    'notif.clearFailed': 'تعذّر مسح الإشعارات، حاول مرة أخرى.',
 
     // wallet
 

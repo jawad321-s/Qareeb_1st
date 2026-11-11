@@ -1,6 +1,6 @@
 // In-app notifications written by Cloud Functions to users/{uid}/notifications.
 import { useEffect, useState } from 'react';
-import { collection, doc, limit, onSnapshot, orderBy, query, updateDoc, writeBatch } from 'firebase/firestore';
+import { collection, deleteDoc, doc, getDocs, limit, onSnapshot, orderBy, query, updateDoc, writeBatch } from 'firebase/firestore';
 import { getDb } from '@/lib/firebase';
 import type { AppNotification } from '@/types';
 
@@ -31,4 +31,22 @@ export async function markAllNotificationsRead(uid: string, ids: string[]): Prom
   const batch = writeBatch(db);
   ids.forEach((id) => batch.update(doc(db, 'users', uid, 'notifications', id), { read: true }));
   await batch.commit();
+}
+
+export async function deleteNotification(uid: string, id: string): Promise<void> {
+  const db = getDb();
+  if (db) await deleteDoc(doc(db, 'users', uid, 'notifications', id));
+}
+
+/** Deletes every notification the user has, not only the ones on screen. */
+export async function deleteAllNotifications(uid: string): Promise<void> {
+  const db = getDb();
+  if (!db) return;
+  const snap = await getDocs(collection(db, 'users', uid, 'notifications'));
+  // A batch takes at most 500 writes.
+  for (let i = 0; i < snap.docs.length; i += 450) {
+    const batch = writeBatch(db);
+    snap.docs.slice(i, i + 450).forEach((d) => batch.delete(d.ref));
+    await batch.commit();
+  }
 }

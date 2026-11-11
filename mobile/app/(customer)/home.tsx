@@ -17,6 +17,7 @@ import { useConversations, useMyRequests } from '@/hooks/queries';
 import { useAuth } from '@/store/auth';
 import { useTheme } from '@/theme/ThemeProvider';
 import { useT } from '@/i18n';
+import { NotificationBell } from '@/components/domain/NotificationBell';
 
 export default function Home() {
   const { colors, isDark } = useTheme();
@@ -57,13 +58,7 @@ export default function Home() {
                   {user?.fullName ?? ''}
                 </Text>
               </View>
-              <Pressable
-                onPress={() => router.push('/(shared)/notifications')}
-                style={{ width: 42, height: 42, borderRadius: 21, backgroundColor: colors.surface, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: colors.border }}
-              >
-                <Icon name="bell" size={19} color={colors.fg} />
-                <View style={{ position: 'absolute', top: 9, right: 11, width: 8, height: 8, borderRadius: 4, backgroundColor: '#EF4444', borderWidth: 1.5, borderColor: colors.surface }} />
-              </Pressable>
+              <NotificationBell style={{ width: 42, height: 42, borderRadius: 21 }} />
             </View>
             <Pressable
               onPress={() => router.push('/(shared)/location-permission')}

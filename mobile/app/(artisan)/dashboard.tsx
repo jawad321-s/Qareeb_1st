@@ -22,6 +22,7 @@ import { ratingValue } from '@/lib/rating';
 import { useAuth } from '@/store/auth';
 import { useTheme } from '@/theme/ThemeProvider';
 import { useT } from '@/i18n';
+import { NotificationBell } from '@/components/domain/NotificationBell';
 import { formatMoney } from '@/lib/format';
 import { incomeSummary } from '@/lib/income';
 import { daysLabel, planById } from '@/lib/plans';
@@ -86,9 +87,7 @@ export default function ArtisanDashboard() {
                   {user.fullName.split(' ')[0]}
                 </Text>
               </View>
-              <Pressable onPress={() => router.push('/(shared)/notifications')} style={{ width: 44, height: 44, borderRadius: 14, backgroundColor: colors.surface, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: colors.border }}>
-                <Icon name="bell" size={20} color={colors.fg} />
-              </Pressable>
+              <NotificationBell style={{ width: 44, height: 44, borderRadius: 14 }} iconSize={20} />
             </View>
 
             {/* Where the artisan works from — distances to jobs are measured from here. */}

@@ -1,128 +1,136 @@
-import React from 'react';
-import { View } from 'react-native';
+import React, { useState } from 'react';
+import { Pressable, View } from 'react-native';
 import { router } from 'expo-router';
-import Animated, { FadeInDown } from 'react-native-reanimated';
+import Animated, { FadeInDown, FadeOut, LinearTransition } from 'react-native-reanimated';
 import { Screen } from '@/components/ui/Screen';
 import { Header } from '@/components/ui/Header';
 import { Text } from '@/components/ui/Text';
 import { Card } from '@/components/ui/Card';
-import { Icon, type IconName } from '@/components/ui/Icon';
+import { Icon } from '@/components/ui/Icon';
+import { Segmented } from '@/components/ui/Segmented';
 import { EmptyState } from '@/components/feedback/EmptyState';
+import { CardSkeleton } from '@/components/feedback/Skeleton';
+import { useToast } from '@/components/feedback/Toast';
+import { useNotificationFeed, type FeedItem } from '@/hooks/useNotificationFeed';
+import { groupByDay } from '@/lib/notificationGroups';
+import { confirmAction } from '@/lib/confirm';
 import { timeAgo } from '@/lib/format';
 import { useTheme } from '@/theme/ThemeProvider';
 import { useT } from '@/i18n';
-import { config } from '@/lib/config';
-import { useAuth } from '@/store/auth';
-import { markAllNotificationsRead, markNotificationRead, useLiveNotifications } from '@/services/notifications.service';
-import type { AppNotification } from '@/types';
 
-type Notif = { id: string; icon: IconName; color: string; title: string; body: string; ts: number; read: boolean; route?: string };
-
-// Role-specific feeds: customers get updates about THEIR requests (offers in,
-// booking confirmed, review prompt); artisans get updates about THEIR work
-// (nearby jobs, offer accepted, new rating, weekly income).
-const customerNotifs = (tint: string): Record<'en' | 'ar', Notif[]> => ({
-  en: [
-    { id: 'c1', icon: 'wallet', color: tint, title: 'New offer received', body: 'Omar Khalid offered 120 ₪ for your plumbing request.', ts: Date.now() - 12 * 60_000, read: false, route: '/(shared)/request/req_1' },
-    { id: 'c2', icon: 'check-circle', color: '#10B981', title: 'Offer accepted', body: 'Your AC repair is confirmed with Tariq Mansour.', ts: Date.now() - 2 * 3600_000, read: false, route: '/(shared)/request/req_2' },
-    { id: 'c3', icon: 'message', color: tint, title: 'New message', body: 'Tariq: Please keep the AC off until I arrive.', ts: Date.now() - 3 * 3600_000, read: true, route: '/(shared)/chat/req_2' },
-    { id: 'c4', icon: 'star', color: '#F59E0B', title: 'Rate your artisan', body: 'How was your deep-clean service? Leave a review.', ts: Date.now() - 4 * 24 * 3600_000, read: true, route: '/(shared)/request/req_3' },
-  ],
-  ar: [
-    { id: 'c1', icon: 'wallet', color: tint, title: 'عرض جديد', body: 'قدّم عمر خالد عرضاً بـ 120 ₪ لطلب السباكة.', ts: Date.now() - 12 * 60_000, read: false, route: '/(shared)/request/req_1' },
-    { id: 'c2', icon: 'check-circle', color: '#10B981', title: 'تم قبول العرض', body: 'تم تأكيد إصلاح التكييف مع طارق منصور.', ts: Date.now() - 2 * 3600_000, read: false, route: '/(shared)/request/req_2' },
-    { id: 'c3', icon: 'message', color: tint, title: 'رسالة جديدة', body: 'طارق: من فضلك أبقِ التكييف مطفأً حتى أصل.', ts: Date.now() - 3 * 3600_000, read: true, route: '/(shared)/chat/req_2' },
-    { id: 'c4', icon: 'star', color: '#F59E0B', title: 'قيّم الحرفي', body: 'كيف كانت خدمة التنظيف؟ اترك تقييماً.', ts: Date.now() - 4 * 24 * 3600_000, read: true, route: '/(shared)/request/req_3' },
-  ],
-});
-
-const artisanNotifs = (tint: string): Record<'en' | 'ar', Notif[]> => ({
-  en: [
-    { id: 'a1', icon: 'briefcase', color: tint, title: 'New job near you', body: 'Kitchen sink leak in Al-Masyoun, 2.4 km away — budget 80–200 ₪.', ts: Date.now() - 8 * 60_000, read: false, route: '/(artisan)/job/req_1' },
-    { id: 'a2', icon: 'check-circle', color: '#10B981', title: 'Your offer was accepted', body: 'Layla Khaled accepted your 150 ₪ offer for the AC repair.', ts: Date.now() - 90 * 60_000, read: false, route: '/(artisan)/job/req_2' },
-    { id: 'a3', icon: 'message', color: tint, title: 'New message from customer', body: 'Layla: The building entrance code is 4512.', ts: Date.now() - 3 * 3600_000, read: true, route: '/(shared)/chat/req_2' },
-    { id: 'a4', icon: 'star', color: '#F59E0B', title: 'New 5-star review', body: '"Fast and clean work, highly recommended" — Ahmad S.', ts: Date.now() - 26 * 3600_000, read: true },
-    { id: 'a5', icon: 'trending-up', color: '#10B981', title: 'Weekly income summary', body: 'You earned 940 ₪ from 6 completed jobs this week.', ts: Date.now() - 3 * 24 * 3600_000, read: true, route: '/(artisan)/income' },
-  ],
-  ar: [
-    { id: 'a1', icon: 'briefcase', color: tint, title: 'عمل جديد قريب منك', body: 'تسريب في مغسلة المطبخ بالماصيون، يبعد 2.4 كم — الميزانية 80–200 ₪.', ts: Date.now() - 8 * 60_000, read: false, route: '/(artisan)/job/req_1' },
-    { id: 'a2', icon: 'check-circle', color: '#10B981', title: 'تم قبول عرضك', body: 'قبلت ليلى خالد عرضك 150 ₪ لإصلاح التكييف.', ts: Date.now() - 90 * 60_000, read: false, route: '/(artisan)/job/req_2' },
-    { id: 'a3', icon: 'message', color: tint, title: 'رسالة جديدة من الزبون', body: 'ليلى: رمز مدخل البناية 4512.', ts: Date.now() - 3 * 3600_000, read: true, route: '/(shared)/chat/req_2' },
-    { id: 'a4', icon: 'star', color: '#F59E0B', title: 'تقييم جديد 5 نجوم', body: '"شغل سريع ونظيف، أنصح فيه" — أحمد س.', ts: Date.now() - 26 * 3600_000, read: true },
-    { id: 'a5', icon: 'trending-up', color: '#10B981', title: 'ملخص دخل الأسبوع', body: 'حقّقت 940 ₪ من 6 أعمال مكتملة هذا الأسبوع.', ts: Date.now() - 3 * 24 * 3600_000, read: true, route: '/(artisan)/income' },
-  ],
-});
-
-// Icon + colour per notification type sent by Cloud Functions.
-const TYPE_STYLE: Record<string, { icon: IconName; color?: string }> = {
-  newJob: { icon: 'briefcase' },
-  newOffer: { icon: 'wallet' },
-  offerAccepted: { icon: 'check-circle', color: '#10B981' },
-  onTheWay: { icon: 'navigation' },
-  working: { icon: 'tools' },
-  completed: { icon: 'star', color: '#F59E0B' },
-  cancelledByOther: { icon: 'x-circle', color: '#EF4444' },
-  noOffers: { icon: 'alert-circle', color: '#EF4444' },
-  newMessage: { icon: 'message' },
-};
-
-const toNotif = (n: AppNotification, tint: string): Notif => {
-  const style = TYPE_STYLE[n.type] ?? { icon: 'bell' as IconName };
-  return { id: n.id, icon: style.icon, color: style.color ?? tint, title: n.title, body: n.body, ts: n.createdAt, read: n.read, route: n.data?.route };
-};
+type Tab = 'all' | 'unread';
 
 export default function Notifications() {
-  const { colors, role } = useTheme();
-  const { t, locale } = useT();
-  const uid = useAuth((s) => s.user?.uid);
-  const live = useLiveNotifications(config.useMock ? undefined : uid);
-  const notifs = config.useMock
-    ? (role === 'artisan' ? artisanNotifs : customerNotifs)(colors.tint)[locale]
-    : (live ?? []).map((n) => toNotif(n, colors.tint));
+  const { t } = useT();
+  const toast = useToast();
+  const feed = useNotificationFeed();
+  const [tab, setTab] = useState<Tab>('all');
+  const all = feed.items ?? [];
+  const shown = tab === 'unread' ? all.filter((n) => !n.read) : all;
 
-  const open = (n: Notif) => {
-    if (!config.useMock && uid && !n.read) markNotificationRead(uid, n.id).catch(() => {});
+  const open = (n: FeedItem) => {
+    if (!n.read) feed.markRead(n.id);
     if (n.route) router.push(n.route as any);
   };
-  const markAll = () => {
-    if (config.useMock || !uid) return;
-    markAllNotificationsRead(uid, notifs.filter((n) => !n.read).map((n) => n.id)).catch(() => {});
+
+  const clearAll = async () => {
+    const ok = await confirmAction({
+      title: t('notif.clearTitle'),
+      message: t('notif.clearBody'),
+      confirmLabel: t('notif.clearYes'),
+      cancelLabel: t('common.cancel'),
+      destructive: true,
+    });
+    if (!ok) return;
+    try {
+      await feed.clear();
+    } catch {
+      toast('error', t('notif.clearFailed'));
+    }
   };
 
   return (
     <Screen scroll>
-      <Header showBack title={t('notif.title')} rightIcon="check-circle" onRightPress={markAll} />
-      {notifs.length === 0 ? (
+      <Header showBack title={t('notif.title')} rightIcon={feed.unread ? 'check-circle' : undefined} onRightPress={feed.markAllRead} />
+
+      {feed.items === null ? (
+        <View style={{ gap: 12 }}>
+          {[0, 1, 2].map((i) => (
+            <CardSkeleton key={i} />
+          ))}
+        </View>
+      ) : all.length === 0 ? (
         <View style={{ marginTop: 60 }}>
           <EmptyState icon="bell" title={t('notif.empty')} description={t('notif.emptyDesc')} />
         </View>
       ) : (
-        <View style={{ gap: 12 }}>
-          {notifs.map((n, i) => (
-            <Animated.View key={n.id} entering={FadeInDown.delay(i * 60).duration(400)}>
-              <Card onPress={n.route || !n.read ? () => open(n) : undefined} style={{ flexDirection: 'row', gap: 12, alignItems: 'flex-start', backgroundColor: n.read ? undefined : colors.tint + '0C' }}>
-                <View style={{ width: 42, height: 42, borderRadius: 12, backgroundColor: n.color + '20', alignItems: 'center', justifyContent: 'center' }}>
-                  <Icon name={n.icon} size={20} color={n.color} />
-                </View>
-                <View style={{ flex: 1, gap: 2 }}>
-                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-                    <Text variant="bodyMedium" style={{ flex: 1 }} numberOfLines={1}>
-                      {n.title}
-                    </Text>
-                    {!n.read && <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: colors.tint }} />}
-                  </View>
-                  <Text variant="caption" tone="muted" style={{ lineHeight: 18 }}>
-                    {n.body}
-                  </Text>
-                  <Text variant="overline" tone="muted" style={{ marginTop: 2 }}>
-                    {timeAgo(n.ts)}
-                  </Text>
-                </View>
-              </Card>
-            </Animated.View>
-          ))}
-        </View>
+        <>
+          <Segmented<Tab>
+            options={[
+              { key: 'all', label: t('notif.all') },
+              { key: 'unread', label: feed.unread ? `${t('notif.unread')} (${feed.unread})` : t('notif.unread') },
+            ]}
+            value={tab}
+            onChange={setTab}
+          />
+          <Pressable onPress={clearAll} hitSlop={8} style={{ flexDirection: 'row', alignItems: 'center', gap: 6, alignSelf: 'flex-end', marginTop: 14 }}>
+            <Icon name="trash" size={14} color="#EF4444" />
+            <Text variant="caption" style={{ color: '#EF4444' }}>
+              {t('notif.clearAll')}
+            </Text>
+          </Pressable>
+
+          {shown.length === 0 ? (
+            <View style={{ marginTop: 50 }}>
+              <EmptyState icon="check-circle" title={t('notif.noUnread')} />
+            </View>
+          ) : (
+            groupByDay(shown).map(({ group, items }) => (
+              <View key={group} style={{ marginTop: 18, gap: 10 }}>
+                <Text variant="overline" tone="muted" style={{ marginHorizontal: 4 }}>
+                  {t(`notif.${group}`)}
+                </Text>
+                {items.map((n, i) => (
+                  <Animated.View key={n.id} entering={FadeInDown.delay(i * 50).duration(350)} exiting={FadeOut.duration(200)} layout={LinearTransition}>
+                    <Row n={n} onOpen={() => open(n)} onDelete={() => feed.remove(n.id)} />
+                  </Animated.View>
+                ))}
+              </View>
+            ))
+          )}
+        </>
       )}
     </Screen>
+  );
+}
+
+function Row({ n, onOpen, onDelete }: { n: FeedItem; onOpen: () => void; onDelete: () => void }) {
+  const { colors } = useTheme();
+  const { t } = useT();
+  return (
+    <Card onPress={n.route || !n.read ? onOpen : undefined} style={{ backgroundColor: n.read ? undefined : colors.tint + '0C' }}>
+      <View style={{ flexDirection: 'row', gap: 12, alignItems: 'flex-start' }}>
+        <View style={{ width: 42, height: 42, borderRadius: 12, backgroundColor: n.color + '20', alignItems: 'center', justifyContent: 'center' }}>
+          <Icon name={n.icon} size={20} color={n.color} />
+        </View>
+        <View style={{ flex: 1, gap: 2 }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+            {!n.read && <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: colors.tint }} />}
+            <Text variant="bodyMedium" style={{ flex: 1 }} numberOfLines={1}>
+              {n.title}
+            </Text>
+          </View>
+          <Text variant="caption" tone="muted" style={{ lineHeight: 18 }}>
+            {n.body}
+          </Text>
+          <Text variant="overline" tone="muted" style={{ marginTop: 2 }}>
+            {timeAgo(n.ts)}
+          </Text>
+        </View>
+        <Pressable onPress={onDelete} hitSlop={10} accessibilityRole="button" accessibilityLabel={t('notif.delete')} style={{ padding: 4 }}>
+          <Icon name="x" size={16} color={colors.muted} />
+        </Pressable>
+      </View>
+    </Card>
   );
 }

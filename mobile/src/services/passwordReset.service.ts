@@ -83,6 +83,17 @@ export async function confirmPhoneCode(verificationId: string, code: string): Pr
   await user.delete().catch(() => signOut(a).catch(() => {}));
 }
 
+/**
+ * The message for a failed step. An unexpected failure also shows Firebase's
+ * own error code in brackets, so it can be told apart from the others.
+ */
+export function resetErrorMessage(err: unknown, t: (key: ReturnType<typeof resetErrorKey>) => string): string {
+  const key = resetErrorKey(err);
+  if (key !== 'reset.err.generic') return t(key);
+  const code = (err as { code?: string })?.code ?? (err as Error)?.message ?? '';
+  return code ? `${t(key)} (${code})` : t(key);
+}
+
 /** The message key for a failed step (Firebase Auth or Functions error code). */
 export function resetErrorKey(err: unknown):
   | 'reset.err.phone'

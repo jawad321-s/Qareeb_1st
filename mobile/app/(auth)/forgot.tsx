@@ -10,7 +10,7 @@ import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
 import { EmptyState } from '@/components/feedback/EmptyState';
 import { usePhoneVerifier } from '@/components/auth/PhoneVerifier';
-import { confirmReset, resetErrorKey, sendResetCode } from '@/services/passwordReset.service';
+import { confirmReset, resetErrorMessage, sendResetCode } from '@/services/passwordReset.service';
 import { useT } from '@/i18n';
 import { config } from '@/lib/config';
 import { useTheme } from '@/theme/ThemeProvider';
@@ -66,7 +66,7 @@ export default function Forgot() {
       setSeconds(RESEND_AFTER_S);
     } catch (err) {
       // Closing the robot check is not an error worth showing.
-      if ((err as Error)?.message !== 'recaptcha-cancelled') setError(t(resetErrorKey(err)));
+      if ((err as Error)?.message !== 'recaptcha-cancelled') setError(resetErrorMessage(err, t));
     } finally {
       setLoading(false);
     }
@@ -85,7 +85,7 @@ export default function Forgot() {
       if (!config.useMock) await confirmReset(verificationId, code.trim(), role, password);
       setStep('done');
     } catch (err) {
-      setError(t(resetErrorKey(err)));
+      setError(resetErrorMessage(err, t));
     } finally {
       setLoading(false);
     }

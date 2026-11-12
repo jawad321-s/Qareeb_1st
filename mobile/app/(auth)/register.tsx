@@ -17,7 +17,7 @@ import { useVerification } from '@/store/verification';
 import { useAuth } from '@/store/auth';
 import { authErrorMessage } from '@/services/auth.service';
 import { usePhoneVerifier } from '@/components/auth/PhoneVerifier';
-import { confirmPhoneCode, resetErrorKey, sendResetCode } from '@/services/passwordReset.service';
+import { confirmPhoneCode, resetErrorMessage, sendResetCode } from '@/services/passwordReset.service';
 import { displayPhone, withCountryCode } from '@/lib/phone';
 import { config } from '@/lib/config';
 import { useCategories } from '@/constants/categories';
@@ -129,7 +129,7 @@ export default function Register() {
     } catch (err) {
       // Closing the robot check is not an error worth showing.
       if ((err as Error)?.message !== 'recaptcha-cancelled') {
-        const msg = t(resetErrorKey(err));
+        const msg = resetErrorMessage(err, t);
         if (step === 'code') setCodeError(msg);
         else setFormError(msg);
       }
@@ -148,7 +148,7 @@ export default function Register() {
     try {
       await confirmPhoneCode(verificationId, code.trim());
     } catch (err) {
-      setCodeError(t(resetErrorKey(err)));
+      setCodeError(resetErrorMessage(err, t));
       setLoading(false);
       return;
     }

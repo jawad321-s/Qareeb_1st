@@ -9,7 +9,7 @@ import { StatusBadge } from './StatusBadge';
 import { useUser } from '@/hooks/queries';
 import type { ServiceRequest } from '@/types';
 import { categoryById } from '@/constants/categories';
-import { formatDistance, formatMoney, timeAgo } from '@/lib/format';
+import { formatDistance, timeAgo } from '@/lib/format';
 import { useT } from '@/i18n';
 import { useTheme } from '@/theme/ThemeProvider';
 
@@ -61,12 +61,6 @@ export function RequestCard({
       </View>
 
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 16 }}>
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
-          <Icon name="wallet" size={14} color="#94A3B8" />
-          <Text variant="caption" tone="muted">
-            {formatMoney(request.budget.min)}–{formatMoney(request.budget.max)}
-          </Text>
-        </View>
         {distanceKm !== undefined && (
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
             <Icon name="map-pin" size={14} color="#94A3B8" />

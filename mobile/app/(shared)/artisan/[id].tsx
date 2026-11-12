@@ -8,7 +8,6 @@ import { StatusBar } from 'expo-status-bar';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { Header } from '@/components/ui/Header';
 import { Text } from '@/components/ui/Text';
-import { Button } from '@/components/ui/Button';
 import { Icon } from '@/components/ui/Icon';
 import { Avatar } from '@/components/ui/Avatar';
 import { Badge } from '@/components/ui/Badge';
@@ -51,7 +50,7 @@ export default function ArtisanDetail() {
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
       <StatusBar style="light" />
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 120 }}>
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 40 }}>
         <LinearGradient colors={isDark ? [gradient[0], '#0A0F1E'] : [gradient[0], gradient[2]]} style={{ paddingBottom: 24, overflow: 'hidden' }}>
           <FloatingBlobs
             blobs={[
@@ -141,9 +140,6 @@ export default function ArtisanDetail() {
         </View>
       </ScrollView>
 
-      <View style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: 20, paddingBottom: 32, backgroundColor: colors.bg, borderTopWidth: 1, borderTopColor: colors.border }}>
-        <Button label={t('ad.request')} iconRight="arrow-right" onPress={() => router.push('/(customer)/create')} />
-      </View>
     </View>
   );
 }

@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { View, KeyboardAvoidingView, Platform, Pressable } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useForm, Controller } from 'react-hook-form';
@@ -16,6 +16,9 @@ import { api } from '@/services/api';
 import { useVerification } from '@/store/verification';
 import { useAuth } from '@/store/auth';
 import { authErrorMessage } from '@/services/auth.service';
+import { usePhoneVerifier } from '@/components/auth/PhoneVerifier';
+import { confirmPhoneCode, resetErrorKey, sendResetCode } from '@/services/passwordReset.service';
+import { displayPhone } from '@/lib/phone';
 import { config } from '@/lib/config';
 import { useCategories } from '@/constants/categories';
 import { useTheme } from '@/theme/ThemeProvider';
@@ -38,8 +41,24 @@ export default function Register() {
   const { colors } = useTheme();
   const locale = useLocaleStore((s) => s.locale);
 
+  // Live sign-up has two steps: the form, then the SMS code that proves the
+  // number. The account is created only once the code checks out.
+  const [step, setStep] = useState<'form' | 'code'>('form');
+  const [verificationId, setVerificationId] = useState('');
+  const [code, setCode] = useState('');
+  const [codeError, setCodeError] = useState<string | undefined>();
+  const [seconds, setSeconds] = useState(0);
+  const { verifier, modal } = usePhoneVerifier();
+  useEffect(() => {
+    if (seconds <= 0) return;
+    const id = setTimeout(() => setSeconds((s) => s - 1), 1000);
+    return () => clearTimeout(id);
+  }, [seconds]);
+
   const schema = useMemo(() => (isArtisan ? artisanRegisterSchema : registerSchema), [isArtisan]);
+  // Errors show once a field is left, and update as you type after that.
   const { control, handleSubmit, getValues, setError, formState: { errors } } = useForm<any>({
+    mode: 'onTouched',
     resolver: zodResolver(schema),
     defaultValues: {
       fullName: '',
@@ -85,7 +104,60 @@ export default function Register() {
     if (artisan) setArtisanDraft(artisan);
 
     if (!config.useMock) {
-      // Live: create the Firebase account + profile, then enter the app.
+      // Live: text a code to the number first; the account comes after it.
+      await sendCode();
+      return;
+    }
+
+    // Demo: the account is created once the phone number is verified (OTP step).
+    setLoading(false);
+    router.push({ pathname: '/(auth)/otp', params: { phone: getValues('phone'), role, fullName: getValues('fullName') } });
+  };
+
+  const sendCode = async () => {
+    setLoading(true);
+    setFormError(undefined);
+    setCodeError(undefined);
+    try {
+      setVerificationId(await sendResetCode(getValues('phone'), verifier));
+      setCode('');
+      setStep('code');
+      setSeconds(60);
+    } catch (err) {
+      // Closing the robot check is not an error worth showing.
+      if ((err as Error)?.message !== 'recaptcha-cancelled') {
+        const msg = t(resetErrorKey(err));
+        if (step === 'code') setCodeError(msg);
+        else setFormError(msg);
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const confirmCode = async () => {
+    if (!/^\d{6}$/.test(code.trim())) {
+      setCodeError(t('reset.err.codeFormat'));
+      return;
+    }
+    setLoading(true);
+    setCodeError(undefined);
+    try {
+      await confirmPhoneCode(verificationId, code.trim());
+    } catch (err) {
+      setCodeError(t(resetErrorKey(err)));
+      setLoading(false);
+      return;
+    }
+    const artisan = isArtisan
+      ? {
+          categoryIds,
+          experienceYears: Number(getValues('experience')) || undefined,
+          bio: (getValues('bio') as string) || undefined,
+        }
+      : undefined;
+    {
+      // The number is proved: create the Firebase account + profile, then enter the app.
       try {
         await register({
           role: isArtisan ? 'artisan' : 'customer',
@@ -96,7 +168,7 @@ export default function Register() {
           artisan,
         });
       } catch (err) {
-        setFormError(authErrorMessage(err, t));
+        setCodeError(authErrorMessage(err, t));
         setLoading(false);
         return;
       }
@@ -104,12 +176,13 @@ export default function Register() {
       router.replace('/');
       // New artisans continue to document verification as the next step.
       if (isArtisan) setTimeout(() => router.push('/(shared)/verification'), 350);
-      return;
     }
+  };
 
-    // Demo: the account is created once the phone number is verified (OTP step).
-    setLoading(false);
-    router.push({ pathname: '/(auth)/otp', params: { phone: getValues('phone'), role, fullName: getValues('fullName') } });
+  // Validation messages are translation keys.
+  const errorOf = (name: string) => {
+    const m = errors[name]?.message;
+    return m ? t(m as TranslationKey) : undefined;
   };
 
   const baseFields = [
@@ -119,7 +192,43 @@ export default function Register() {
 
   return (
     <Screen scroll>
-      <Header showBack />
+      <Header showBack onBack={step === 'code' ? () => setStep('form') : undefined} />
+      {modal}
+      {step === 'code' ? (
+        <View style={{ gap: 16 }}>
+          <Animated.View entering={FadeInDown.duration(400)} style={{ gap: 6, marginBottom: 8 }}>
+            <Text variant="h1">{t('otp.title')}</Text>
+            <Text variant="body" tone="muted">
+              {t('reset.codeDesc')} {displayPhone(getValues('phone'))}
+            </Text>
+          </Animated.View>
+          <Input
+            label={t('reset.code')}
+            placeholder="000000"
+            iconLeft="lock"
+            keyboardType="number-pad"
+            maxLength={6}
+            value={code}
+            onChangeText={(v) => setCode(v.replace(/[^0-9]/g, ''))}
+            error={codeError}
+          />
+          <Button label={t('otp.confirmCreate')} onPress={confirmCode} loading={loading} />
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+            <Text variant="caption" tone="primary" onPress={() => setStep('form')}>
+              {t('reset.changeNumber')}
+            </Text>
+            {seconds > 0 ? (
+              <Text variant="caption" tone="muted">
+                {t('otp.resendIn')} {seconds}s
+              </Text>
+            ) : (
+              <Text variant="caption" tone="primary" onPress={loading ? undefined : sendCode}>
+                {t('otp.resend')}
+              </Text>
+            )}
+          </View>
+        </View>
+      ) : (
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         <Animated.View entering={FadeInDown.duration(400)} style={{ gap: 6, marginBottom: 24 }}>
           <Text variant="h1">{isArtisan ? t('auth.registerArtisanTitle') : t('auth.registerCustomerTitle')}</Text>
@@ -143,7 +252,7 @@ export default function Register() {
                   value={value}
                   onChangeText={onChange}
                   onBlur={onBlur}
-                  error={errors[f.name]?.message ? t(errors[f.name]?.message as TranslationKey) : undefined}
+                  error={errorOf(f.name)}
                 />
               )}
             />
@@ -152,14 +261,14 @@ export default function Register() {
             control={control}
             name="password"
             render={({ field: { onChange, value, onBlur } }) => (
-              <Input label={t('auth.password')} iconLeft="lock" secure value={value} onChangeText={onChange} onBlur={onBlur} error={errors.password?.message as string | undefined} />
+              <Input label={t('auth.password')} iconLeft="lock" secure value={value} onChangeText={onChange} onBlur={onBlur} error={errorOf('password')} />
             )}
           />
           <Controller
             control={control}
             name="confirmPassword"
             render={({ field: { onChange, value, onBlur } }) => (
-              <Input label={t('auth.confirmPassword')} iconLeft="lock" secure value={value} onChangeText={onChange} onBlur={onBlur} error={errors.confirmPassword?.message as string | undefined} />
+              <Input label={t('auth.confirmPassword')} iconLeft="lock" secure value={value} onChangeText={onChange} onBlur={onBlur} error={errorOf('confirmPassword')} />
             )}
           />
 
@@ -216,7 +325,7 @@ export default function Register() {
                 control={control}
                 name="experience"
                 render={({ field: { onChange, value, onBlur } }) => (
-                  <Input label={t('auth.experience')} iconLeft="award" keyboardType="number-pad" value={value} onChangeText={onChange} onBlur={onBlur} error={errors.experience?.message as string | undefined} />
+                  <Input label={t('auth.experience')} iconLeft="award" keyboardType="number-pad" value={value} onChangeText={onChange} onBlur={onBlur} error={errorOf('experience')} />
                 )}
               />
 
@@ -224,7 +333,7 @@ export default function Register() {
                 control={control}
                 name="bio"
                 render={({ field: { onChange, value, onBlur } }) => (
-                  <Input label={t('auth.bio')} multiline value={value} onChangeText={onChange} onBlur={onBlur} error={errors.bio?.message as string | undefined} />
+                  <Input label={t('auth.bio')} multiline value={value} onChangeText={onChange} onBlur={onBlur} error={errorOf('bio')} />
                 )}
               />
 
@@ -259,6 +368,7 @@ export default function Register() {
           </View>
         </View>
       </KeyboardAvoidingView>
+      )}
     </Screen>
   );
 }

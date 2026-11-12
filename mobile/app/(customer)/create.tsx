@@ -17,8 +17,6 @@ import { useCreateRequest } from '@/hooks/queries';
 import { useAuth } from '@/store/auth';
 import { useTheme } from '@/theme/ThemeProvider';
 import { useFont, useT } from '@/i18n';
-import { config } from '@/lib/config';
-import { formatMoney } from '@/lib/format';
 import { localizedTextAlign } from '@/i18n/rtl';
 
 // Service picker: one row per service, in catalog order.
@@ -36,7 +34,7 @@ export default function CreateRequest() {
   const tabBarSpace = useTabBarSpace();
   const create = useCreateRequest(user.uid);
   const toast = useToast();
-  const STEPS = [t('create.step.service'), t('create.step.details'), t('create.step.budget'), t('create.step.review')];
+  const STEPS = [t('create.step.service'), t('create.step.details'), t('create.step.review')];
 
   const [step, setStep] = useState(0);
   // A category tapped on the home screen arrives as ?category=… and is preselected.
@@ -51,10 +49,6 @@ export default function CreateRequest() {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [images, setImages] = useState<string[]>([]);
-  // The customer types their own range (no pre-filled example figures).
-  const [budgetMin, setBudgetMin] = useState('');
-  const [budgetMax, setBudgetMax] = useState('');
-  const [when, setWhen] = useState<'asap' | 'today' | 'tomorrow'>('asap');
 
   const category = categoryId ? categoryById(categoryId) : undefined;
   // The services to pick from: the shown ones, in catalog order.
@@ -68,7 +62,6 @@ export default function CreateRequest() {
   const canNext = () => {
     if (step === 0) return !!categoryId;
     if (step === 1) return title.trim().length >= TITLE_MIN && description.trim().length >= DESC_MIN;
-    if (step === 2) return Number(budgetMin) > 0 && Number(budgetMax) >= Number(budgetMin);
     return true;
   };
 
@@ -79,7 +72,6 @@ export default function CreateRequest() {
       router.push('/(shared)/location-permission');
       return;
     }
-    const preferredTime = when === 'asap' ? Date.now() + 3600_000 : when === 'today' ? Date.now() + 3600_000 * 5 : Date.now() + 3600_000 * 24;
     try {
       const req = await create.mutateAsync({
         customerId: user.uid,
@@ -89,8 +81,8 @@ export default function CreateRequest() {
         description: description.trim(),
         images,
         location: user.location,
-        preferredTime,
-        budget: { min: Number(budgetMin) * 100, max: Number(budgetMax) * 100 },
+        // No budget and no time: artisans send their price, and the job is as soon as possible.
+        preferredTime: Date.now(),
       });
       router.replace(`/(shared)/request/${req.id}`);
     } catch {
@@ -202,69 +194,18 @@ export default function CreateRequest() {
         )}
 
         {step === 2 && (
-          <Animated.View entering={FadeInDown} style={{ gap: 20 }}>
-            <Text variant="h3">{t('create.budgetRange')}</Text>
-            <View style={{ flexDirection: 'row', gap: 12 }}>
-              {[
-                { label: t('create.min'), v: budgetMin, set: setBudgetMin },
-                { label: t('create.max'), v: budgetMax, set: setBudgetMax },
-              ].map((b) => (
-                <View key={b.label} style={{ flex: 1, gap: 6 }}>
-                  <Text variant="caption" tone="muted">
-                    {b.label} ({config.currency})
-                  </Text>
-                  <TextInput
-                    value={b.v}
-                    onChangeText={b.set}
-                    keyboardType="number-pad"
-                    style={{ height: 54, borderRadius: 16, borderWidth: 1.5, borderColor: colors.border, backgroundColor: colors.surface, paddingHorizontal: 14, color: colors.fg, fontSize: 18, fontFamily: font('Inter_600SemiBold'), textAlign: localizedTextAlign(isRTL) }}
-                  />
-                </View>
-              ))}
-            </View>
-            <Text variant="h3" style={{ marginTop: 8 }}>
-              {t('create.when')}
-            </Text>
-            <View style={{ gap: 10 }}>
-              {[
-                { key: 'asap' as const, label: t('create.asap'), icon: 'zap' as const },
-                { key: 'today' as const, label: t('create.today'), icon: 'clock' as const },
-                { key: 'tomorrow' as const, label: t('create.tomorrow'), icon: 'calendar' as const },
-              ].map((o) => {
-                const active = when === o.key;
-                return (
-                  <Pressable
-                    key={o.key}
-                    onPress={() => setWhen(o.key)}
-                    style={{ flexDirection: 'row', alignItems: 'center', gap: 12, padding: 16, borderRadius: 16, borderWidth: 1.5, borderColor: active ? colors.tint : colors.border, backgroundColor: active ? colors.tint + '15' : colors.surface }}
-                  >
-                    <Icon name={o.icon} size={20} color={active ? colors.tint : colors.muted} />
-                    <Text variant="bodyMedium" style={{ flex: 1 }}>
-                      {o.label}
-                    </Text>
-                    {active && <Icon name="check-circle" size={20} color={colors.tint} />}
-                  </Pressable>
-                );
-              })}
-            </View>
-          </Animated.View>
-        )}
-
-        {step === 3 && (
           <Animated.View entering={FadeInDown} style={{ gap: 14 }}>
             <Text variant="h3">{t('create.reviewTitle')}</Text>
             <Card style={{ gap: 14 }}>
               <Row label={t('create.step.service')} value={category?.name[locale] ?? '—'} />
               <Row label={t('create.titleLabel')} value={title} />
-              <Row label={t('create.step.budget')} value={`${formatMoney(Number(budgetMin) * 100)} – ${formatMoney(Number(budgetMax) * 100)}`} />
-              <Row label={t('create.when')} value={when === 'asap' ? t('create.asap') : when === 'today' ? t('create.today') : t('create.tomorrow')} />
               <Row label={t('home.setLocation')} value={user.location?.address ?? '—'} />
               <Row label={t('create.photos')} value={String(images.length)} />
             </Card>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, padding: 12, borderRadius: 12, backgroundColor: colors.tint + '12' }}>
               <Icon name="info" size={18} color={colors.tint} />
               <Text variant="caption" tone="primary" style={{ flex: 1 }}>
-                Nearby verified artisans will be notified instantly.
+                {t('create.notifyNote')}
               </Text>
             </View>
           </Animated.View>

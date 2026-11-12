@@ -119,7 +119,6 @@ export default function RequestDetail() {
             </ScrollView>
           )}
           <View style={{ flexDirection: 'row', gap: 20, flexWrap: 'wrap' }}>
-            <Info icon="wallet" label={`${formatMoney(request.budget.min)}–${formatMoney(request.budget.max)}`} />
             <Info icon="map-pin" label={request.location?.address ?? '—'} />
           </View>
         </Card>

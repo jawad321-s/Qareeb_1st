@@ -42,7 +42,6 @@ export interface AdminRequest {
   customer: string;
   category: string;
   status: 'PENDING' | 'ACCEPTED' | 'ON_THE_WAY' | 'WORKING' | 'COMPLETED' | 'CANCELLED';
-  budgetMax: number;
   offers: number;
   createdAt: number;
 }
@@ -97,7 +96,6 @@ export const REQUESTS: AdminRequest[] = Array.from({ length: 40 }).map((_, i) =>
   customer: name(),
   category: CATS[rnd(0, CATS.length)],
   status: (['PENDING', 'ACCEPTED', 'ON_THE_WAY', 'WORKING', 'COMPLETED', 'CANCELLED'] as AdminRequest['status'][])[rnd(0, 6)],
-  budgetMax: rnd(100, 800) * 100,
   offers: rnd(0, 8),
   createdAt: Date.now() - rnd(0, 30) * day,
 }));

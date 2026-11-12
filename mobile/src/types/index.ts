@@ -111,7 +111,6 @@ export interface ServiceRequest {
   images: string[];
   location: GeoLocation;
   preferredTime: number;
-  budget: { min: number; max: number };
   status: RequestStatus;
   acceptedOfferId?: string;
   acceptedArtisanId?: string;

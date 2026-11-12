@@ -182,12 +182,6 @@ export default function JobDetail() {
           )}
           <View style={{ flexDirection: 'row', gap: 20, flexWrap: 'wrap' }}>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-              <Icon name="wallet" size={16} color="#94A3B8" />
-              <Text variant="caption" tone="muted">
-                {t('job.budget')} {formatMoney(request.budget.min)}–{formatMoney(request.budget.max)}
-              </Text>
-            </View>
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
               <Icon name="map-pin" size={16} color="#94A3B8" />
               <Text variant="caption" tone="muted">
                 {request.location?.address ?? '—'}

@@ -31,7 +31,6 @@ export function subscribeRequests(cb: (items: AdminRequest[]) => void): () => vo
         customer: v.customerName ?? v.customerId ?? '—',
         category: v.category ?? v.categoryId ?? '',
         status: v.status ?? 'PENDING',
-        budgetMax: v.budget?.max ?? v.budgetMax ?? 0,
         offers: v.offerCount ?? v.offers ?? 0,
         createdAt,
       };

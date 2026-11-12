@@ -1,7 +1,8 @@
-// Password reset by SMS code. The phone number is proved with Firebase Phone
-// Auth on a separate Firebase app instance, so the app's own sign-in state is
-// never touched; a Cloud Function (resetPasswordWithPhone) then sets the new
-// password on the account whose login belongs to that number and role.
+// SMS codes: proving a phone number at sign-up, and resetting a forgotten
+// password. The number is proved with Firebase Phone Auth on a separate
+// Firebase app instance, so the app's own sign-in state is never touched. For
+// a reset, a Cloud Function (resetPasswordWithPhone) then sets the new password
+// on the account whose login belongs to that number and role.
 import { getApps, initializeApp, type FirebaseApp } from 'firebase/app';
 import {
   connectAuthEmulator,
@@ -65,6 +66,17 @@ export async function confirmReset(verificationId: string, code: string, role: U
   } finally {
     await signOut(a).catch(() => {});
   }
+}
+
+/**
+ * Checks the code sent at sign-up. Only proof of the number is needed (the
+ * account itself signs in with phone + password), so the temporary phone
+ * sign-in is deleted right after.
+ */
+export async function confirmPhoneCode(verificationId: string, code: string): Promise<void> {
+  const a = resetAuth();
+  const { user } = await signInWithCredential(a, PhoneAuthProvider.credential(verificationId, code));
+  await user.delete().catch(() => signOut(a).catch(() => {}));
 }
 
 /** The message key for a failed step (Firebase Auth or Functions error code). */

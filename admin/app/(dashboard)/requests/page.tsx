@@ -6,7 +6,7 @@ import { DataTable } from '@/components/ui/data-table';
 import { StatusPill } from '@/components/ui/primitives';
 import { type AdminRequest } from '@/lib/mock-data';
 import { subscribeRequests } from '@/lib/requests.service';
-import { formatMoney, timeAgo } from '@/lib/utils';
+import { timeAgo } from '@/lib/utils';
 import { useT } from '@/lib/i18n';
 
 export default function RequestsPage() {
@@ -23,7 +23,6 @@ export default function RequestsPage() {
       { accessorKey: 'customer', header: t('rcol.customer') },
       { accessorKey: 'category', header: t('rcol.category') },
       { accessorKey: 'offers', header: t('rcol.offers') },
-      { accessorKey: 'budgetMax', header: t('rcol.budget'), cell: ({ getValue }) => formatMoney(getValue() as number) },
       { accessorKey: 'status', header: t('col.status'), cell: ({ getValue }) => <StatusPill status={getValue() as string} /> },
       { accessorKey: 'createdAt', header: t('rcol.created'), cell: ({ getValue }) => <span className="text-muted">{timeAgo(getValue() as number, locale)}</span> },
     ],

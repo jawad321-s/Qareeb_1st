@@ -15,14 +15,14 @@ import { useT } from '@/i18n';
 
 const FAQS = {
   en: [
-    { q: 'How do I create a service request?', a: 'Tap the Request tab, pick a category, describe your problem, set your budget and preferred time, then submit. Nearby artisans are notified instantly.' },
+    { q: 'How do I create a service request?', a: 'Tap the Request tab, pick a category, describe your problem, then submit. Nearby artisans are notified instantly and send you their price.' },
     { q: 'How are artisans verified?', a: 'Every artisan submits ID and certificates which our team reviews before approval. Verified pros show a blue badge.' },
     { q: 'When am I charged?', a: 'You only pay after you accept an offer and the job is completed. Payments are handled securely in-app.' },
     { q: 'Can I cancel a request?', a: 'Yes — open the request and choose cancel. If an artisan is already on the way, a small fee may apply.' },
     { q: 'How do reviews work?', a: 'After a job completes, both you and the artisan rate each other. Ratings help keep quality high for everyone.' },
   ],
   ar: [
-    { q: 'كيف أنشئ طلب خدمة؟', a: 'اضغط تبويب "طلب"، اختر فئة، صف مشكلتك، حدّد ميزانيتك والوقت المناسب، ثم أرسل. يُبلَّغ الحرفيون القريبون فوراً.' },
+    { q: 'كيف أنشئ طلب خدمة؟', a: 'اضغط تبويب "طلب"، اختر فئة، صف مشكلتك، ثم أرسل. يُبلَّغ الحرفيون القريبون فوراً ويرسلون لك أسعارهم.' },
     { q: 'كيف يتم توثيق الحرفيين؟', a: 'يقدّم كل حرفي الهوية والشهادات ويراجعها فريقنا قبل الاعتماد. الحرفيون الموثّقون لهم شارة زرقاء.' },
     { q: 'متى يُخصم المبلغ؟', a: 'تدفع فقط بعد قبولك للعرض وإتمام العمل. تُعالَج المدفوعات بأمان داخل التطبيق.' },
     { q: 'هل يمكنني إلغاء الطلب؟', a: 'نعم — افتح الطلب واختر إلغاء. إذا كان الحرفي في الطريق، قد تُطبَّق رسوم بسيطة.' },

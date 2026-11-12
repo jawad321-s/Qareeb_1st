@@ -111,7 +111,7 @@ export default function Login() {
                 value={value}
                 onChangeText={onChange}
                 onBlur={onBlur}
-                error={errors.password?.message}
+                error={errors.password?.message && t(errors.password.message as TranslationKey)}
               />
             )}
           />

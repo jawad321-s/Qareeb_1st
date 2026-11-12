@@ -1,5 +1,5 @@
 import React from 'react';
-import { ScrollView, View, type ViewStyle, RefreshControl } from 'react-native';
+import { Platform, ScrollView, View, type ViewStyle, RefreshControl } from 'react-native';
 import { SafeAreaView, type Edge } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import { useTheme } from '@/theme/ThemeProvider';
@@ -14,6 +14,18 @@ interface ScreenProps {
   contentStyle?: ViewStyle;
   background?: string;
 }
+
+/**
+ * How a scrolling screen behaves with the keyboard: the scroll area shrinks by
+ * the keyboard's height (iOS) and the field being typed in is scrolled into
+ * view; dragging the content down closes the keyboard, and a tap on a button
+ * works while it is open. Android resizes the window itself.
+ */
+export const keyboardScrollProps = {
+  automaticallyAdjustKeyboardInsets: true,
+  keyboardShouldPersistTaps: 'handled' as const,
+  keyboardDismissMode: Platform.OS === 'ios' ? ('interactive' as const) : ('on-drag' as const),
+};
 
 export function Screen({
   children,
@@ -33,6 +45,7 @@ export function Screen({
       <StatusBar style={isDark ? 'light' : 'dark'} />
       {scroll ? (
         <ScrollView
+          {...keyboardScrollProps}
           showsVerticalScrollIndicator={false}
           contentContainerStyle={[{ paddingBottom: 32 }, pad, contentStyle]}
           refreshControl={

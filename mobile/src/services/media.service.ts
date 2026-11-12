@@ -77,6 +77,11 @@ export function uploadRequestPhoto(requestId: string, uri: string): Promise<stri
  */
 export const shownPhotos = (uris: string[] = []) => (config.useMock ? uris : uris.filter((u) => /^https?:\/\//.test(u)));
 
+/** Uploads a new profile photo and returns its URL (users/{uid}/avatar/…). */
+export function uploadAvatar(uid: string, uri: string): Promise<string> {
+  return upload(`users/${uid}/avatar/${fileName()}`, uri);
+}
+
 /** Uploads a photo for the chat on a request and returns its URL. */
 export function uploadChatPhoto(requestId: string, uri: string): Promise<string> {
   return upload(`chat/${requestId}/${fileName()}`, uri);

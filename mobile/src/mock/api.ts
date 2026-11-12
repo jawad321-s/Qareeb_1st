@@ -246,6 +246,12 @@ export const mockApi = {
     demoAvailable = available;
   },
 
+  /** The "About" text on the artisan's public profile. */
+  async setBio(_uid: string, bio: string): Promise<void> {
+    await delay(150);
+    MOCK_ARTISAN_PROFILE.bio = bio;
+  },
+
   /** Store how many jobs the artisan finished (the demo keeps its sample figure). */
   async setCompletedJobs(_uid: string, _count: number): Promise<void> {},
 

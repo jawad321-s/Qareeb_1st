@@ -32,7 +32,8 @@ interface AuthState {
    */
   register: (params: RegisterParams) => Promise<void>;
   signOut: () => void;
-  updateUser: (patch: Partial<AppUser>) => void;
+  /** Updates the account here at once; the promise is the save to Firestore. */
+  updateUser: (patch: Partial<AppUser>) => Promise<void>;
   hydrate: () => void;
 }
 
@@ -130,10 +131,14 @@ export const useAuth = create<AuthState>((set, get) => ({
 
   updateUser: (patch) => {
     const current = get().user;
-    if (!current) return;
+    if (!current) return Promise.resolve();
     const next = { ...current, ...patch, updatedAt: Date.now() };
     kv.set(SESSION_KEY, next);
     set({ user: next });
-    if (!config.useMock) saveProfile(current.uid, patch).catch(() => {});
+    if (config.useMock) return Promise.resolve();
+    const saving = saveProfile(current.uid, patch);
+    // Callers that don't wait for it must not see an unhandled rejection.
+    saving.catch(() => {});
+    return saving;
   },
 }));

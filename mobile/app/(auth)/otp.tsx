@@ -53,7 +53,7 @@ export default function Otp() {
   };
 
   return (
-    <Screen>
+    <Screen scroll>
       <Header showBack />
       <Animated.View entering={FadeInDown.duration(400)} style={{ gap: 8, marginBottom: 32 }}>
         <Text variant="h1">{t('otp.title')}</Text>

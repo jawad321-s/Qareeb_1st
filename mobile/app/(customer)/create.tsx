@@ -4,7 +4,7 @@ import { router, useLocalSearchParams } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
 import { Image } from 'expo-image';
 import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
-import { Screen } from '@/components/ui/Screen';
+import { Screen, keyboardScrollProps } from '@/components/ui/Screen';
 import { Header } from '@/components/ui/Header';
 import { Text } from '@/components/ui/Text';
 import { Button } from '@/components/ui/Button';
@@ -107,7 +107,7 @@ export default function CreateRequest() {
         </View>
       </View>
 
-      <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 24 }} showsVerticalScrollIndicator={false}>
+      <ScrollView {...keyboardScrollProps} style={{ flex: 1 }} contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 24 }} showsVerticalScrollIndicator={false}>
         {step === 0 && (
           <Animated.View entering={FadeIn} style={{ gap: 16 }}>
             <Text variant="h3">{t('create.whatNeed')}</Text>

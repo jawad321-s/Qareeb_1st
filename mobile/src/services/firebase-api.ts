@@ -346,6 +346,10 @@ export const firebaseApi: typeof mockApi = {
     await updateDoc(doc(db(), 'artisanProfiles', uid), { available, updatedAt: Date.now() });
   },
 
+  async setBio(uid, bio): Promise<void> {
+    await updateDoc(doc(db(), 'artisanProfiles', uid), { bio, updatedAt: Date.now() });
+  },
+
   async setCompletedJobs(uid, count): Promise<void> {
     await updateDoc(doc(db(), 'artisanProfiles', uid), { completedJobs: count });
   },

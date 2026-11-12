@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, KeyboardAvoidingView, Platform } from 'react-native';
+import { View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -52,7 +52,7 @@ export default function Login() {
   return (
     <Screen scroll>
       <Header showBack />
-      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+      <View>
         <Animated.View entering={FadeInDown.duration(400)} style={{ gap: 10, marginBottom: 24 }}>
           {/* Which account type this sign-in belongs to */}
           <View
@@ -149,7 +149,7 @@ export default function Login() {
             </Text>
           </View>
         </View>
-      </KeyboardAvoidingView>
+      </View>
     </Screen>
   );
 }

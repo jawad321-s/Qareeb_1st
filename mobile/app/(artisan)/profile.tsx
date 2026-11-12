@@ -40,6 +40,7 @@ export default function ArtisanProfile() {
   if (!user) return null;
 
   const items: { icon: IconName; label: string; danger?: boolean; onPress?: () => void; route?: string }[] = [
+    { icon: 'user', label: t('profile.editProfile'), route: '/(shared)/edit-profile' },
     { icon: 'shield', label: t('ap.verification'), route: '/(shared)/verification' },
     { icon: 'image', label: t('ap.gallery'), route: '/(shared)/gallery' },
     { icon: 'message', label: t('ap.conversations'), route: '/(shared)/conversations' },

@@ -389,6 +389,8 @@ export const translations = {
 
     // edit profile
     'edit.title': 'Edit profile',
+    'edit.saved': 'Profile saved',
+    'edit.saveFailed': "Couldn't save. Check your connection and try again.",
     'edit.changePhoto': 'Change photo',
     'edit.phoneLocked': 'Your phone number is your account, so it can\'t be changed here.',
     'edit.changePassword': 'Change password',
@@ -1069,6 +1071,8 @@ export const translations = {
 
     // edit profile
     'edit.title': 'تعديل الملف الشخصي',
+    'edit.saved': 'تم حفظ الملف الشخصي',
+    'edit.saveFailed': 'تعذّر الحفظ. تحقق من الاتصال وحاول مجدداً.',
     'edit.changePhoto': 'تغيير الصورة',
     'edit.phoneLocked': 'رقم الجوال هو هوية حسابك، لذلك لا يمكن تغييره من هنا.',
     'edit.changePassword': 'تغيير كلمة المرور',

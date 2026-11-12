@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { View, KeyboardAvoidingView, Platform, Pressable } from 'react-native';
+import { View, Pressable } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -229,7 +229,7 @@ export default function Register() {
           </View>
         </View>
       ) : (
-      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+      <View>
         <Animated.View entering={FadeInDown.duration(400)} style={{ gap: 6, marginBottom: 24 }}>
           <Text variant="h1">{isArtisan ? t('auth.registerArtisanTitle') : t('auth.registerCustomerTitle')}</Text>
           <Text variant="body" tone="muted">
@@ -367,7 +367,7 @@ export default function Register() {
             </Text>
           </View>
         </View>
-      </KeyboardAvoidingView>
+      </View>
       )}
     </Screen>
   );

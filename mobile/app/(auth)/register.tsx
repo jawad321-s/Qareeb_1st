@@ -106,8 +106,10 @@ export default function Register() {
     if (artisan) setArtisanDraft(artisan);
 
     if (!config.useMock) {
-      // Live: text a code to the number first; the account comes after it.
-      await sendCode('970');
+      // Live: with SMS sign-up on, a code proves the number first and the
+      // account comes after it; without, the account is created right away.
+      if (config.smsSignUp) await sendCode('970');
+      else await createAccount(setFormError);
       return;
     }
 
@@ -152,6 +154,13 @@ export default function Register() {
       setLoading(false);
       return;
     }
+    // The number is proved.
+    await createAccount(setCodeError);
+  };
+
+  /** Creates the Firebase account + profile, then enters the app; errors go to `showError`. */
+  const createAccount = async (showError: (message: string) => void) => {
+    setLoading(true);
     const artisan = isArtisan
       ? {
           categoryIds,
@@ -159,27 +168,24 @@ export default function Register() {
           bio: (getValues('bio') as string) || undefined,
         }
       : undefined;
-    {
-      // The number is proved: create the Firebase account + profile, then enter the app.
-      try {
-        await register({
-          role: isArtisan ? 'artisan' : 'customer',
-          fullName: getValues('fullName'),
-          phone: getValues('phone'),
-          password: getValues('password'),
-          locale,
-          artisan,
-        });
-      } catch (err) {
-        setCodeError(authErrorMessage(err, t));
-        setLoading(false);
-        return;
-      }
+    try {
+      await register({
+        role: isArtisan ? 'artisan' : 'customer',
+        fullName: getValues('fullName'),
+        phone: getValues('phone'),
+        password: getValues('password'),
+        locale,
+        artisan,
+      });
+    } catch (err) {
+      showError(authErrorMessage(err, t));
       setLoading(false);
-      router.replace('/');
-      // New artisans continue to document verification as the next step.
-      if (isArtisan) setTimeout(() => router.push('/(shared)/verification'), 350);
+      return;
     }
+    setLoading(false);
+    router.replace('/');
+    // New artisans continue to document verification as the next step.
+    if (isArtisan) setTimeout(() => router.push('/(shared)/verification'), 350);
   };
 
   // Validation messages are translation keys.

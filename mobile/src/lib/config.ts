@@ -33,6 +33,10 @@ export const config = {
   // When set, Auth / Firestore / Storage talk to the local emulators instead
   // of the real project — for testing without touching live data.
   firebaseEmulatorHost: process.env.EXPO_PUBLIC_FIREBASE_EMULATOR_HOST ?? '',
+  // Sign-up proves the number with an SMS code. Off for now: Firebase refuses
+  // to send the codes from Expo Go on the team's phones. Turn back on with
+  // EXPO_PUBLIC_SMS_SIGNUP=true (or set the default to true) once SMS works.
+  smsSignUp: process.env.EXPO_PUBLIC_SMS_SIGNUP === 'true',
   googleMapsApiKey: process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY ?? '',
   currency: '₪', // Israeli new shekel (ILS)
   currencyCode: 'ILS',

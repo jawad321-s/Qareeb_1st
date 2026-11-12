@@ -21,6 +21,12 @@ export const isValidPhone = (input: string) => /^\+97[02]5[69]\d{7}$/.test(norma
  */
 export const nationalNumber = (input: string) => normalizePhone(input).replace(/^\+97[02]/, '');
 
+/**
+ * The number with the given country code. A Palestinian mobile is reachable as
+ * +970 and as +972; some SMS routes only deliver one of them.
+ */
+export const withCountryCode = (input: string, code: '970' | '972') => normalizePhone(input).replace(/^\+97[02]/, `+${code}`);
+
 /** "+970 59 000 0001", isolated left-to-right so it reads correctly inside Arabic text. */
 export function displayPhone(phone: string): string {
   const m = normalizePhone(phone).match(/^\+(\d{3})(\d{2})(\d{3})(\d{4})$/);

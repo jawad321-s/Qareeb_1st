@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import Animated, { FadeInDown } from 'react-native-reanimated';
-import { displayPhone, isValidPhone } from '@/lib/phone';
+import { displayPhone, isValidPhone, withCountryCode } from '@/lib/phone';
 import { Screen } from '@/components/ui/Screen';
 import { Header } from '@/components/ui/Header';
 import { Text } from '@/components/ui/Text';
@@ -42,6 +42,8 @@ export default function Forgot() {
   const [error, setError] = useState<string | null>(null);
   const [fieldError, setFieldError] = useState<{ phone?: string; code?: string; password?: string; confirm?: string }>({});
   const [seconds, setSeconds] = useState(0);
+  // The country code the last code went to (see sendResetCode).
+  const [via, setVia] = useState<'970' | '972'>('970');
 
   useEffect(() => {
     if (seconds <= 0) return;
@@ -49,7 +51,7 @@ export default function Forgot() {
     return () => clearTimeout(id);
   }, [seconds]);
 
-  const send = async () => {
+  const send = async (code: '970' | '972' = '970') => {
     if (!isValidPhone(phone)) {
       setFieldError({ phone: t('reset.err.phone') });
       return;
@@ -58,7 +60,8 @@ export default function Forgot() {
     setError(null);
     setLoading(true);
     try {
-      setVerificationId(config.useMock ? 'demo' : await sendResetCode(phone, verifier));
+      setVerificationId(config.useMock ? 'demo' : await sendResetCode(phone, verifier, code));
+      setVia(code);
       setStep('code');
       setSeconds(RESEND_AFTER_S);
     } catch (err) {
@@ -103,7 +106,7 @@ export default function Forgot() {
           <Animated.View entering={FadeInDown.duration(400)} style={{ gap: 8, marginBottom: 28 }}>
             <Text variant="h1">{t('forgot.title')}</Text>
             <Text variant="body" tone="muted">
-              {step === 'phone' ? t('reset.phoneDesc') : `${t('reset.codeDesc')} ${displayPhone(phone)}`}
+              {step === 'phone' ? t('reset.phoneDesc') : `${t('reset.codeDesc')} ${displayPhone(withCountryCode(phone, via))}`}
             </Text>
           </Animated.View>
 
@@ -119,7 +122,7 @@ export default function Forgot() {
                 onChangeText={setPhone}
                 error={fieldError.phone}
               />
-              <Button label={t('reset.send')} onPress={send} loading={loading} accent={{ gradient: accent.gradient, tint }} />
+              <Button label={t('reset.send')} onPress={() => send()} loading={loading} accent={{ gradient: accent.gradient, tint }} />
             </View>
           ) : (
             <View style={{ gap: 16 }}>
@@ -145,11 +148,16 @@ export default function Forgot() {
                     {t('otp.resendIn')} {seconds}s
                   </Text>
                 ) : (
-                  <Text variant="caption" tone="primary" onPress={loading ? undefined : send}>
+                  <Text variant="caption" tone="primary" onPress={loading ? undefined : () => send(via)}>
                     {t('otp.resend')}
                   </Text>
                 )}
               </View>
+              {seconds <= 0 && via === '970' && (
+                <Text variant="caption" tone="primary" center onPress={loading ? undefined : () => send('972')}>
+                  {t('otp.via972')}
+                </Text>
+              )}
             </View>
           )}
 

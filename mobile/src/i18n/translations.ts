@@ -276,6 +276,7 @@ export const translations = {
     'otp.yourPhone': 'your phone',
     'otp.verify': 'Verify',
     'otp.confirmCreate': 'Confirm and create account',
+    'otp.via972': "Didn't get the code? Send it via +972",
     'otp.resendIn': 'Resend code in',
     'otp.resend': 'Resend code',
 
@@ -958,6 +959,7 @@ export const translations = {
     'otp.yourPhone': 'جوالك',
     'otp.verify': 'تأكيد',
     'otp.confirmCreate': 'تأكيد وإنشاء الحساب',
+    'otp.via972': 'ما وصلك الرمز؟ أرسله عبر ‎+972',
     'otp.resendIn': 'إعادة الإرسال خلال',
     'otp.resend': 'إعادة إرسال الرمز',
 

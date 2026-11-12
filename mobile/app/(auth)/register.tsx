@@ -18,7 +18,7 @@ import { useAuth } from '@/store/auth';
 import { authErrorMessage } from '@/services/auth.service';
 import { usePhoneVerifier } from '@/components/auth/PhoneVerifier';
 import { confirmPhoneCode, resetErrorKey, sendResetCode } from '@/services/passwordReset.service';
-import { displayPhone } from '@/lib/phone';
+import { displayPhone, withCountryCode } from '@/lib/phone';
 import { config } from '@/lib/config';
 import { useCategories } from '@/constants/categories';
 import { useTheme } from '@/theme/ThemeProvider';
@@ -48,6 +48,8 @@ export default function Register() {
   const [code, setCode] = useState('');
   const [codeError, setCodeError] = useState<string | undefined>();
   const [seconds, setSeconds] = useState(0);
+  // The country code the last code went to (see sendResetCode).
+  const [via, setVia] = useState<'970' | '972'>('970');
   const { verifier, modal } = usePhoneVerifier();
   useEffect(() => {
     if (seconds <= 0) return;
@@ -105,7 +107,7 @@ export default function Register() {
 
     if (!config.useMock) {
       // Live: text a code to the number first; the account comes after it.
-      await sendCode();
+      await sendCode('970');
       return;
     }
 
@@ -114,12 +116,13 @@ export default function Register() {
     router.push({ pathname: '/(auth)/otp', params: { phone: getValues('phone'), role, fullName: getValues('fullName') } });
   };
 
-  const sendCode = async () => {
+  const sendCode = async (code: '970' | '972' = '970') => {
     setLoading(true);
     setFormError(undefined);
     setCodeError(undefined);
     try {
-      setVerificationId(await sendResetCode(getValues('phone'), verifier));
+      setVerificationId(await sendResetCode(getValues('phone'), verifier, code));
+      setVia(code);
       setCode('');
       setStep('code');
       setSeconds(60);
@@ -199,7 +202,7 @@ export default function Register() {
           <Animated.View entering={FadeInDown.duration(400)} style={{ gap: 6, marginBottom: 8 }}>
             <Text variant="h1">{t('otp.title')}</Text>
             <Text variant="body" tone="muted">
-              {t('reset.codeDesc')} {displayPhone(getValues('phone'))}
+              {t('reset.codeDesc')} {displayPhone(withCountryCode(getValues('phone'), via))}
             </Text>
           </Animated.View>
           <Input
@@ -222,11 +225,16 @@ export default function Register() {
                 {t('otp.resendIn')} {seconds}s
               </Text>
             ) : (
-              <Text variant="caption" tone="primary" onPress={loading ? undefined : sendCode}>
+              <Text variant="caption" tone="primary" onPress={loading ? undefined : () => sendCode(via)}>
                 {t('otp.resend')}
               </Text>
             )}
           </View>
+          {seconds <= 0 && via === '970' && (
+            <Text variant="caption" tone="primary" center onPress={loading ? undefined : () => sendCode('972')}>
+              {t('otp.via972')}
+            </Text>
+          )}
         </View>
       ) : (
       <View>

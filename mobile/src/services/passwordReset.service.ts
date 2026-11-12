@@ -16,7 +16,7 @@ import {
 } from 'firebase/auth';
 import { connectFunctionsEmulator, getFunctions, httpsCallable, type Functions } from 'firebase/functions';
 import { config } from '@/lib/config';
-import { normalizePhone } from '@/lib/phone';
+import { withCountryCode } from '@/lib/phone';
 import type { UserRole } from '@/types';
 
 const APP_NAME = 'password-reset';
@@ -52,9 +52,13 @@ function resetFunctions(): Functions {
   return functions;
 }
 
-/** Texts a verification code to the number; returns the id that pairs with it. */
-export function sendResetCode(phone: string, verifier: ApplicationVerifier): Promise<string> {
-  return new PhoneAuthProvider(resetAuth()).verifyPhoneNumber(normalizePhone(phone), verifier);
+/**
+ * Texts a verification code to the number; returns the id that pairs with it.
+ * `via` picks the country code the SMS is sent to (+970 or +972: the same line,
+ * and the account is found by the number without its code either way).
+ */
+export function sendResetCode(phone: string, verifier: ApplicationVerifier, via: '970' | '972' = '970'): Promise<string> {
+  return new PhoneAuthProvider(resetAuth()).verifyPhoneNumber(withCountryCode(phone, via), verifier);
 }
 
 /** Checks the code, then sets the new password on the account for this number and role. */

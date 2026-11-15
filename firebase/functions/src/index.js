@@ -3,6 +3,8 @@
 //  • dispatchTick       → every minute: widen the radius / cancel on timeout
 //  • onRequestUpdated   → status changes (accepted, on the way, …, cancelled)
 //  • onOfferCreated     → tell the customer about a new offer
+//  • onOfferUpdated     → tell the artisan their offer was declined / not chosen
+//  • onArtisanProfileUpdated → a service added: offer its open requests
 //  • onMessageCreated   → tell the other party about a chat message
 //  • resetPasswordWithPhone → set a new password after an SMS code (callable)
 import { initializeApp } from 'firebase-admin/app';
@@ -13,8 +15,9 @@ import { onDocumentCreated, onDocumentUpdated } from 'firebase-functions/v2/fire
 import { onCall } from 'firebase-functions/v2/https';
 import { onSchedule } from 'firebase-functions/v2/scheduler';
 import { REGION } from './config.js';
-import { runDispatchTick, startDispatch } from './dispatch.js';
+import { offerOpenRequests, runDispatchTick, startDispatch } from './dispatch.js';
 import { notifyUsers } from './notify.js';
+import { notifyOfferClosed, notifyRequestCancelled } from './handlers.js';
 import { resetPasswordWithPhone as resetPassword } from './passwordReset.js';
 
 initializeApp();
@@ -51,23 +54,8 @@ export const onRequestUpdated = onDocumentUpdated('requests/{requestId}', async 
       // Both sides are asked to rate each other.
       await notifyUsers(db, [after.customerId], 'completed', { title: after.title }, customerRoute);
       return notifyUsers(db, [after.acceptedArtisanId], 'completed', { title: after.title }, artisanRoute);
-    case 'CANCELLED': {
-      if (after.cancelReason === 'NO_OFFERS') {
-        return notifyUsers(db, [after.customerId], 'noOffers', { title: after.title }, customerRoute);
-      }
-      if (after.cancelReason === 'EXPIRED') {
-        // Offers came in but none was accepted within the window.
-        await notifyUsers(db, [after.customerId], 'requestExpired', { title: after.title }, customerRoute);
-        const offers = await db.collection('offers').where('requestId', '==', id).get();
-        return notifyUsers(db, offers.docs.map((d) => d.get('artisanId')), 'offerExpired', { title: after.title }, artisanRoute);
-      }
-      // Tell the party who did not cancel (if an artisan was assigned).
-      if (!after.acceptedArtisanId) return;
-      const byCustomer = after.cancelledBy !== after.acceptedArtisanId;
-      const other = byCustomer ? after.acceptedArtisanId : after.customerId;
-      const byName = await nameOf(byCustomer ? after.customerId : after.acceptedArtisanId);
-      return notifyUsers(db, [other], 'cancelledByOther', { byName, title: after.title }, byCustomer ? artisanRoute : customerRoute);
-    }
+    case 'CANCELLED':
+      return notifyRequestCancelled(db, id, after);
   }
 });
 
@@ -76,6 +64,23 @@ export const onOfferCreated = onDocumentCreated('offers/{offerId}', async (event
   if (!offer) return;
   const artisanName = offer.artisan?.fullName || (await nameOf(offer.artisanId));
   await notifyUsers(db, [offer.customerId], 'newOffer', { artisanName, price: offer.price }, { route: `/(shared)/request/${offer.requestId}`, requestId: offer.requestId });
+});
+
+/**
+ * An offer turned down: the artisan hears whether the customer declined it
+ * (with the reason given) or accepted another offer. Offers closed because the
+ * whole request was cancelled or expired are told by onRequestUpdated.
+ */
+export const onOfferUpdated = onDocumentUpdated('offers/{offerId}', (event) =>
+  notifyOfferClosed(db, event.params.offerId, event.data.before.data(), event.data.after.data()),
+);
+
+/** An artisan added a service: offer them the requests still open in it. */
+export const onArtisanProfileUpdated = onDocumentUpdated('artisanProfiles/{uid}', async (event) => {
+  const before = event.data.before.data() ?? {};
+  const after = event.data.after.data() ?? {};
+  const added = (after.categoryIds ?? []).filter((c) => !(before.categoryIds ?? []).includes(c));
+  if (added.length) await offerOpenRequests(db, event.params.uid, added);
 });
 
 export const onMessageCreated = onDocumentCreated('requests/{requestId}/messages/{messageId}', async (event) => {

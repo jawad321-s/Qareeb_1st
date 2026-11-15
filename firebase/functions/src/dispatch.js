@@ -124,6 +124,38 @@ export async function runDispatchTick(db, now = Date.now()) {
   return result;
 }
 
+/**
+ * Offers an artisan the requests still open in `categoryIds` that they can
+ * take now: within the radius each request's search has reached, inside its
+ * 30-minute window, and passing every check of findArtisans (verified,
+ * available, working hours, not the customer's own account). Used when an
+ * artisan adds a service. Returns the request ids offered.
+ */
+export async function offerOpenRequests(db, artisanUid, categoryIds, now = Date.now()) {
+  const offered = [];
+  for (const categoryId of categoryIds) {
+    const open = await db.collection('requests').where('status', '==', 'PENDING').where('categoryId', '==', categoryId).get();
+    for (const doc of open.docs) {
+      const r = doc.data();
+      if (!r.dispatch || !r.location || now - r.dispatch.startedAt >= TIMEOUT_MS) continue;
+      if ((r.notifiedArtisanIds ?? []).includes(artisanUid)) continue;
+      const reachable = await findArtisans(db, {
+        categoryId,
+        origin: r.location,
+        radiusKm: r.dispatch.radiusKm,
+        customerPhone: await customerPhoneOf(db, r.customerId),
+        now,
+      });
+      const me = reachable.find((a) => a.uid === artisanUid);
+      if (!me) continue;
+      await doc.ref.update({ notifiedArtisanIds: FieldValue.arrayUnion(artisanUid) });
+      await notifyNewJob(db, doc.id, r, [me]);
+      offered.push(doc.id);
+    }
+  }
+  return offered;
+}
+
 /** Offers still waiting on a request that expired are closed with it. */
 async function closeOpenOffers(db, requestId) {
   const open = await db.collection('offers').where('requestId', '==', requestId).where('status', '==', 'PENDING').get();

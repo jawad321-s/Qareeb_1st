@@ -57,12 +57,15 @@ export default function ReviewScreen() {
   const [tags, setTags] = useState<TranslationKey[]>([]);
 
   const home = isArtisan ? '/(artisan)/dashboard' : '/(customer)/home';
+  // After a cancelled job rating is optional: the user may leave without it.
+  const optional = request?.status === 'CANCELLED';
 
   // Android hardware back would otherwise skip the mandatory review.
   useEffect(() => {
+    if (optional) return;
     const sub = BackHandler.addEventListener('hardwareBackPress', () => true);
     return () => sub.remove();
-  }, []);
+  }, [optional]);
 
   // Already rated (e.g. reopened from an old notification) — nothing to do here.
   useEffect(() => {
@@ -102,20 +105,21 @@ export default function ReviewScreen() {
     }
     toast('success', t('review.thanks'));
     // Back to the app; the layout re-checks and opens the next unrated job, if any.
-    router.replace(home);
+    if (optional && router.canGoBack()) router.back();
+    else router.replace(home);
   };
 
   return (
     <Screen scroll>
-      <Header title={t('review.title')} />
+      <Header title={t('review.title')} showBack={optional} />
 
-      {/* Why the user can't leave: the job is done and rating is required. */}
+      {/* Why the user can't leave (a finished job must be rated), or that this one is optional. */}
       <Card style={{ flexDirection: 'row', gap: 12, alignItems: 'center', backgroundColor: colors.tint + '12', borderColor: colors.tint + '33' }}>
-        <Icon name="check-circle" size={22} color={colors.tint} />
+        <Icon name={optional ? 'info' : 'check-circle'} size={22} color={colors.tint} />
         <View style={{ flex: 1, gap: 2 }}>
-          <Text variant="bodyMedium">{t('review.requiredTitle')}</Text>
+          <Text variant="bodyMedium">{t(optional ? 'review.optionalTitle' : 'review.requiredTitle')}</Text>
           <Text variant="caption" tone="muted">
-            {request.title} · {t('review.requiredBody')}
+            {request.title} · {t(optional ? 'review.optionalBody' : 'review.requiredBody')}
           </Text>
         </View>
       </Card>

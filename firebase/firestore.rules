@@ -199,7 +199,8 @@ service cloud.firestore {
     // ── reviews/{id} ─────────────────────────────────────────────────────────
     match /reviews/{id} {
       allow read: if true;
-      // Rating is mandatory for both sides once a job is COMPLETED. Only a
+      // Rating is mandatory for both sides once a job is COMPLETED, and
+      // optional after a job that had an artisan was CANCELLED. Only a
       // party to that request may write, only about the other party, and the
       // id is `${requestId}_${authorId}` so each person rates a job once —
       // there is no `update`, so a second write for the same pair is denied.
@@ -213,7 +214,7 @@ service cloud.firestore {
     }
     function reviewableBy(requestId, targetId) {
       let req = get(/databases/$(database)/documents/requests/$(requestId)).data;
-      return req.status == 'COMPLETED'
+      return req.status in ['COMPLETED', 'CANCELLED']
         && ((req.customerId == uid() && req.acceptedArtisanId == targetId)
          || (req.acceptedArtisanId == uid() && req.customerId == targetId));
     }

@@ -13,7 +13,11 @@ import {
 import { NEXT_STATUS, canCancelRequest, isChatOpen, isOverdue } from '@/lib/requestRules';
 import { completedRecord, rejectedRecord } from '@/lib/jobHistory';
 import { kv } from '@/lib/mmkv';
-import { hasAccount } from '@/store/auth';
+import { hasAccount, useAuth } from '@/store/auth';
+import type { Reason } from '@/lib/reasons';
+
+/** Who is signed in to the demo (read when called: the store is created after this module). */
+const currentUid = () => useAuth.getState().user?.uid ?? null;
 
 // In-memory mutable stores so the app behaves like a real backend during a session.
 let requests = [...MOCK_REQUESTS];
@@ -114,7 +118,9 @@ export const mockApi = {
     if (!offer) return;
     offers = offers.map((o) =>
       o.requestId === offer.requestId
-        ? { ...o, status: o.id === offerId ? 'ACCEPTED' : 'REJECTED' }
+        ? o.id === offerId
+          ? { ...o, status: 'ACCEPTED' }
+          : { ...o, status: 'REJECTED', closedReason: 'OTHER_ACCEPTED' }
         : o,
     );
     requests = requests.map((r) =>
@@ -126,27 +132,31 @@ export const mockApi = {
 
   // Either party can call off a request while it hasn't started yet. Any offers
   // still open on it are closed out at the same time.
-  async cancelRequest(requestId: string): Promise<void> {
+  async cancelRequest(requestId: string, reason?: Reason): Promise<void> {
     await delay(400);
     const target = requests.find((r) => r.id === requestId);
     if (!target || !canCancelRequest(target.status)) return;
     requests = requests.map((r) =>
-      r.id === requestId ? { ...r, status: 'CANCELLED', updatedAt: Date.now() } : r,
+      r.id === requestId
+        ? { ...r, status: 'CANCELLED', cancelledBy: currentUid(), cancelChoice: reason?.choice, cancelNote: reason?.note, updatedAt: Date.now() }
+        : r,
     );
     offers = offers.map((o) =>
       o.requestId !== requestId
         ? o
         : o.status === 'PENDING'
-          ? { ...o, status: 'REJECTED', requestStatus: 'CANCELLED' }
+          ? { ...o, status: 'REJECTED', requestStatus: 'CANCELLED', closedReason: 'REQUEST_CANCELLED' }
           : o.status === 'ACCEPTED'
             ? { ...o, requestStatus: 'CANCELLED' }
             : o,
     );
   },
 
-  async rejectOffer(offerId: string): Promise<void> {
+  async rejectOffer(offerId: string, reason?: Reason): Promise<void> {
     await delay(300);
-    offers = offers.map((o) => (o.id === offerId ? { ...o, status: 'REJECTED' } : o));
+    offers = offers.map((o) =>
+      o.id === offerId ? { ...o, status: 'REJECTED', closedReason: 'REJECTED_BY_CUSTOMER', rejectChoice: reason?.choice, rejectNote: reason?.note } : o,
+    );
   },
 
   async submitOffer(input: Omit<Offer, 'id' | 'status' | 'createdAt'>): Promise<Offer> {

@@ -13,6 +13,7 @@ import type { mockApi } from '@/mock/api';
 import { getDb } from '@/lib/firebase';
 import { useAuth } from '@/store/auth';
 import { isExpired, isVisibleToArtisan } from '@/lib/dispatch';
+import type { Reason } from '@/lib/reasons';
 import { MOCK_CUSTOMER } from '@/mock/data';
 import { servicesOf, toServiceId } from '@/constants/services';
 import { allCategories } from '@/constants/categories';
@@ -176,7 +177,8 @@ export const firebaseApi: typeof mockApi = {
     const siblings = await getDocs(
       query(collection(db(), 'offers'), where('requestId', '==', offer.requestId), where('customerId', '==', offer.customerId)),
     );
-    siblings.forEach((s) => batch.update(s.ref, { status: s.id === offerId ? 'ACCEPTED' : 'REJECTED' }));
+    // closedReason tells the other artisans another offer was chosen.
+    siblings.forEach((s) => batch.update(s.ref, s.id === offerId ? { status: 'ACCEPTED' } : { status: 'REJECTED', closedReason: 'OTHER_ACCEPTED' }));
     batch.update(doc(db(), 'requests', offer.requestId), {
       status: 'ACCEPTED',
       acceptedOfferId: offerId,
@@ -188,7 +190,7 @@ export const firebaseApi: typeof mockApi = {
 
   // Either party can call off a request while it hasn't started yet. Any offers
   // still open on it are closed out in the same batch.
-  async cancelRequest(requestId: string): Promise<void> {
+  async cancelRequest(requestId: string, reason?: Reason): Promise<void> {
     const reqSnap = await getDoc(doc(db(), 'requests', requestId));
     if (!reqSnap.exists()) return;
     const current = reqSnap.data() as ServiceRequest;
@@ -196,7 +198,13 @@ export const firebaseApi: typeof mockApi = {
 
     const batch = writeBatch(db());
     // cancelledBy lets Cloud Functions notify the other party.
-    batch.update(reqSnap.ref, { status: 'CANCELLED', cancelledBy: useAuth.getState().user?.uid ?? null, updatedAt: Date.now() });
+    batch.update(reqSnap.ref, {
+      status: 'CANCELLED',
+      cancelledBy: useAuth.getState().user?.uid ?? null,
+      cancelChoice: reason?.choice ?? null,
+      cancelNote: reason?.note ?? null,
+      updatedAt: Date.now(),
+    });
     // Only the customer can read/close the other offers; once an artisan is
     // assigned (the only time they can cancel) none are still pending anyway.
     if (useAuth.getState().user?.uid === current.customerId) {
@@ -210,13 +218,18 @@ export const firebaseApi: typeof mockApi = {
           where('status', '==', 'PENDING'),
         ),
       );
-      open.forEach((o) => batch.update(o.ref, { status: 'REJECTED', requestStatus: 'CANCELLED' }));
+      open.forEach((o) => batch.update(o.ref, { status: 'REJECTED', requestStatus: 'CANCELLED', closedReason: 'REQUEST_CANCELLED' }));
     }
     await batch.commit();
   },
 
-  async rejectOffer(offerId: string): Promise<void> {
-    await updateDoc(doc(db(), 'offers', offerId), { status: 'REJECTED' });
+  async rejectOffer(offerId: string, reason?: Reason): Promise<void> {
+    await updateDoc(doc(db(), 'offers', offerId), {
+      status: 'REJECTED',
+      closedReason: 'REJECTED_BY_CUSTOMER',
+      rejectChoice: reason?.choice ?? null,
+      rejectNote: reason?.note ?? null,
+    });
   },
 
   async submitOffer(input): Promise<Offer> {

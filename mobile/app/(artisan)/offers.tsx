@@ -16,6 +16,7 @@ import { inOfferTab, offerState, type OfferTab } from '@/lib/offerStatus';
 import { useArtisanOffers } from '@/hooks/queries';
 import { useAuth } from '@/store/auth';
 import { useT } from '@/i18n';
+import { reasonText } from '@/lib/reasons';
 import type { OfferStatus } from '@/types';
 
 const STATUS_VARIANT: Record<OfferStatus, React.ComponentProps<typeof Badge>['variant']> = {
@@ -110,6 +111,16 @@ export default function ArtisanOffers() {
                   {timeAgo(o.createdAt)}
                 </Text>
               </View>
+              {/* Why a turned-down offer was closed. */}
+              {o.status === 'REJECTED' && !!o.closedReason && o.closedReason !== 'REQUEST_CANCELLED' && (
+                <Text variant="caption" tone="muted" numberOfLines={2}>
+                  {o.closedReason === 'OTHER_ACCEPTED'
+                    ? t('aOffers.notChosen')
+                    : o.closedReason === 'EXPIRED'
+                      ? t('aOffers.expired')
+                      : [t('aOffers.declined'), reasonText(t, o.rejectChoice, o.rejectNote)].filter(Boolean).join(' · ')}
+                </Text>
+              )}
             </Card>
           );
         })}

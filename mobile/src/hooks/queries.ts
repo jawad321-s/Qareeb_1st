@@ -3,6 +3,7 @@ import { api } from '@/services/api';
 import { qk } from '@/lib/queryClient';
 import type { AppUser, GeoLocation, Offer, RequestStatus, Review, ServiceRequest, ChatMessage } from '@/types';
 import { distanceKm } from '@/lib/geo';
+import type { Reason } from '@/lib/reasons';
 
 /** The service catalog (every category's services). */
 export function useServices() {
@@ -156,7 +157,7 @@ export function useAcceptOffer(requestId: string) {
 export function useRejectOffer(requestId: string) {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (offerId: string) => api.rejectOffer(offerId),
+    mutationFn: ({ offerId, reason }: { offerId: string; reason?: Reason }) => api.rejectOffer(offerId, reason),
     onSuccess: () => qc.invalidateQueries({ queryKey: qk.offers(requestId) }),
   });
 }
@@ -168,7 +169,7 @@ export function useRejectOffer(requestId: string) {
 export function useCancelRequest(requestId: string) {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: () => api.cancelRequest(requestId),
+    mutationFn: (reason?: Reason) => api.cancelRequest(requestId, reason),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: qk.request(requestId) });
       qc.invalidateQueries({ queryKey: qk.offers(requestId) });

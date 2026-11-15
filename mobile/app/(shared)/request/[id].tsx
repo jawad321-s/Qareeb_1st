@@ -21,7 +21,8 @@ import { useToast } from '@/components/feedback/Toast';
 import { categoryById } from '@/constants/categories';
 import { formatMoney } from '@/lib/format';
 import { AUTO_COMPLETE_HOURS, canCancelRequest } from '@/lib/requestRules';
-import { confirmAction } from '@/lib/confirm';
+import { ReasonSheet } from '@/components/feedback/ReasonSheet';
+import { reasonText, type Reason } from '@/lib/reasons';
 import { shownPhotos } from '@/services/media.service';
 import { useTheme } from '@/theme/ThemeProvider';
 import { useT } from '@/i18n';
@@ -40,6 +41,8 @@ export default function RequestDetail() {
   const reject = useRejectOffer(id!);
   const cancel = useCancelRequest(id!);
   const [acceptingId, setAcceptingId] = useState<string | null>(null);
+  // Which reason sheet is open: cancelling the request, or declining an offer.
+  const [asking, setAsking] = useState<{ kind: 'cancel' } | { kind: 'reject'; offerId: string } | null>(null);
   const { data: acceptedArtisan } = useUser(request?.acceptedArtisanId);
 
   if (isLoading || !request) {
@@ -64,31 +67,42 @@ export default function RequestDetail() {
     setAcceptingId(offerId);
     await accept.mutateAsync(offerId);
     setAcceptingId(null);
-    toast('success', 'Offer accepted — your artisan is on the way!');
+    toast('success', t('offer.acceptedToast'));
   };
 
-  const onReject = (offerId: string) => {
-    reject.mutate(offerId);
-    toast('info', 'Offer declined');
-  };
-
+  // Declining an offer and cancelling the request both ask why; the artisan(s) are told.
+  const onReject = (offerId: string) => setAsking({ kind: 'reject', offerId });
   // Cancelling is only offered while the job hasn't started (see requestRules).
-  const onCancel = async () => {
-    const ok = await confirmAction({
-      title: t('req.cancelConfirmTitle'),
-      message: t('req.cancelConfirmBody'),
-      confirmLabel: t('req.cancelConfirmYes'),
-      cancelLabel: t('req.cancelKeep'),
-      destructive: true,
-    });
-    if (!ok) return;
-    await cancel.mutateAsync();
-    toast('info', t('req.cancelled'));
+  const onCancel = () => setAsking({ kind: 'cancel' });
+
+  const onReason = async (reason: Reason) => {
+    if (!asking) return;
+    try {
+      if (asking.kind === 'cancel') {
+        await cancel.mutateAsync(reason);
+        toast('info', t('req.cancelled'));
+      } else {
+        await reject.mutateAsync({ offerId: asking.offerId, reason });
+        toast('info', t('offer.declinedToast'));
+      }
+      setAsking(null);
+    } catch {
+      toast('error', t('req.actionFailed'));
+    }
   };
 
   return (
     <Screen scroll>
       <Header showBack title={t('req.title')} rightIcon="more-horizontal" />
+      <ReasonSheet
+        visible={!!asking}
+        context={asking?.kind === 'reject' ? 'rejectOffer' : 'customerCancel'}
+        title={asking?.kind === 'reject' ? t('offer.rejectTitle') : t('req.cancelConfirmTitle')}
+        confirmLabel={asking?.kind === 'reject' ? t('offer.rejectYes') : t('req.cancelConfirmYes')}
+        loading={cancel.isPending || reject.isPending}
+        onClose={() => setAsking(null)}
+        onSubmit={onReason}
+      />
 
       <Animated.View entering={FadeInDown.duration(400)}>
         <Card style={{ gap: 14 }}>
@@ -143,6 +157,33 @@ export default function RequestDetail() {
             {t(request.cancelReason === 'EXPIRED' ? 'req.expiredCancelled' : 'req.noOffersCancelled')}
           </Text>
         </Card>
+      )}
+
+      {/* Cancelled by a person: who, and why. */}
+      {isCancelled && !request.cancelReason && request.cancelledBy && (
+        <Card style={{ marginTop: 16, gap: 4, backgroundColor: '#EF444412' }}>
+          <View style={{ flexDirection: 'row', gap: 10, alignItems: 'center' }}>
+            <Icon name="x-circle" size={18} color="#EF4444" />
+            <Text variant="bodyMedium" style={{ flex: 1 }}>
+              {t(request.cancelledBy === request.customerId ? 'req.cancelledByYou' : 'req.cancelledByArtisan')}
+            </Text>
+          </View>
+          {!!reasonText(t, request.cancelChoice, request.cancelNote) && (
+            <Text variant="caption" tone="muted">
+              {t('req.reason')} {reasonText(t, request.cancelChoice, request.cancelNote)}
+            </Text>
+          )}
+        </Card>
+      )}
+      {/* After a cancelled job both sides may still rate each other (optional). */}
+      {isCancelled && !!request.acceptedArtisanId && (
+        <View style={{ marginTop: 12 }}>
+          {rated ? (
+            <Button label={t('review.done')} iconLeft="check-circle" variant="secondary" disabled />
+          ) : (
+            <Button label={t('req.rateArtisan')} iconLeft="star" variant="outline" onPress={() => router.push(`/(shared)/review/${request.id}`)} />
+          )}
+        </View>
       )}
 
       {/* Tracking (accepted through completed — nothing to track once cancelled) */}

@@ -20,7 +20,10 @@ import {
   useUpdateOfferPrice,
   useSendMessage,
   useUser,
+  useHasReviewed,
 } from '@/hooks/queries';
+import { ReasonSheet } from '@/components/feedback/ReasonSheet';
+import { reasonText, type Reason } from '@/lib/reasons';
 import { PersonRow } from '@/components/domain/PersonRow';
 import { StatusBadge } from '@/components/domain/StatusBadge';
 import { TrackingTimeline } from '@/components/domain/TrackingTimeline';
@@ -47,6 +50,8 @@ export default function JobDetail() {
   const { t, locale, isRTL } = useT();
   const font = useFont();
   const { data: request, isLoading } = useRequest(id!);
+  const { data: rated } = useHasReviewed(id!, user.uid);
+  const [askingReason, setAskingReason] = useState(false);
   const { data: customer } = useUser(request?.customerId);
   const submit = useSubmitOffer(id!);
   const cancel = useCancelRequest(id!);
@@ -139,19 +144,30 @@ export default function JobDetail() {
     if (next === 'COMPLETED') toast('success', t('job.finished'));
   };
 
-  const onCancel = async () => {
-    const ok = await confirmAction({
-      title: t('req.cancelConfirmTitle'),
-      message: t('req.cancelConfirmBody'),
-      confirmLabel: t('req.cancelConfirmYes'),
-      cancelLabel: t('req.cancelKeep'),
-      destructive: true,
-    });
-    if (!ok) return;
-    await cancel.mutateAsync();
-    toast('info', t('req.cancelled'));
-    router.back();
+  // Cancelling asks why; the customer is told. The page stays open so the
+  // artisan can still rate the customer.
+  const onCancel = () => setAskingReason(true);
+  const onCancelReason = async (reason: Reason) => {
+    try {
+      await cancel.mutateAsync(reason);
+      setAskingReason(false);
+      toast('info', t('req.cancelled'));
+    } catch {
+      toast('error', t('req.actionFailed'));
+    }
   };
+
+  // Why the artisan's own offer was closed, when it was.
+  const closedOffer = myOffers.data?.find((o) => o.artisanId === user.uid && o.status === 'REJECTED');
+  const offerOutcome = !closedOffer
+    ? ''
+    : closedOffer.closedReason === 'OTHER_ACCEPTED' || (!closedOffer.closedReason && request.acceptedArtisanId && request.acceptedArtisanId !== user.uid)
+      ? t('aOffers.notChosen')
+      : closedOffer.closedReason === 'EXPIRED'
+        ? t('aOffers.expired')
+        : closedOffer.closedReason === 'REQUEST_CANCELLED' || closedOffer.requestStatus === 'CANCELLED'
+          ? [t('req.cancelledByCustomer'), reasonText(t, request.cancelChoice, request.cancelNote)].filter(Boolean).join(' · ')
+          : [t('aOffers.declined'), reasonText(t, closedOffer.rejectChoice, closedOffer.rejectNote)].filter(Boolean).join(' · ');
 
   return (
     <Screen scroll contentStyle={{ paddingBottom: tabBarSpace + 12 }}>
@@ -308,6 +324,46 @@ export default function JobDetail() {
           </Text>
         </Card>
       )}
+
+      {/* Why the job was cancelled, and the (optional) rating of the customer. */}
+      {request.status === 'CANCELLED' && isAssigned && (
+        <Card style={{ marginTop: 20, gap: 10 }}>
+          <View style={{ flexDirection: 'row', gap: 10, alignItems: 'center' }}>
+            <Icon name="x-circle" size={18} color="#EF4444" />
+            <Text variant="bodyMedium" style={{ flex: 1 }}>
+              {t(request.cancelledBy === user.uid ? 'req.cancelledByYou' : 'req.cancelledByCustomer')}
+            </Text>
+          </View>
+          {!!reasonText(t, request.cancelChoice, request.cancelNote) && (
+            <Text variant="caption" tone="muted">
+              {t('req.reason')} {reasonText(t, request.cancelChoice, request.cancelNote)}
+            </Text>
+          )}
+          {rated ? (
+            <Button label={t('review.done')} iconLeft="check-circle" variant="secondary" disabled />
+          ) : (
+            <Button label={t('job.rateCustomer')} iconLeft="star" variant="outline" onPress={() => router.push(`/(shared)/review/${request.id}`)} />
+          )}
+        </Card>
+      )}
+      {!isAssigned && !!offerOutcome && (
+        <Card style={{ marginTop: 20, flexDirection: 'row', gap: 10, alignItems: 'center', backgroundColor: '#EF444412' }}>
+          <Icon name="info" size={18} color="#EF4444" />
+          <Text variant="caption" style={{ flex: 1 }}>
+            {offerOutcome}
+          </Text>
+        </Card>
+      )}
+
+      <ReasonSheet
+        visible={askingReason}
+        context="artisanCancel"
+        title={t('req.cancelConfirmTitle')}
+        confirmLabel={t('req.cancelConfirmYes')}
+        loading={cancel.isPending}
+        onClose={() => setAskingReason(false)}
+        onSubmit={onCancelReason}
+      />
 
       {/* Assigned artisan may call the job off until work starts */}
       {showCancel && (

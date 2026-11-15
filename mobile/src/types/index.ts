@@ -121,6 +121,9 @@ export interface ServiceRequest {
   notifiedArtisanIds?: string[];
   /** Set when the 30-minute window ran out: NO_OFFERS (none came) or EXPIRED (none accepted). */
   cancelReason?: 'NO_OFFERS' | 'EXPIRED';
+  /** Why the customer or the artisan cancelled (lib/reasons), and their own words. */
+  cancelChoice?: string;
+  cancelNote?: string;
   cancelledBy?: string | null;
   offerCount: number;
   completedAt?: number;
@@ -146,6 +149,11 @@ export interface Offer {
   // Denormalized request summary, so the artisan's history can name the job
   // even after the request stops being readable to them (taken or cancelled).
   requestTitle?: string;
+  /** Why a turned-down offer was closed (OTHER_ACCEPTED, REJECTED_BY_CUSTOMER, REQUEST_CANCELLED, EXPIRED). */
+  closedReason?: 'OTHER_ACCEPTED' | 'REJECTED_BY_CUSTOMER' | 'REQUEST_CANCELLED' | 'EXPIRED';
+  /** The customer's reason for declining it (lib/reasons) and their words. */
+  rejectChoice?: string;
+  rejectNote?: string;
   categoryId?: string;
   /**
    * The job's status as the artisan last knew it: read from the request when

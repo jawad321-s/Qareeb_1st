@@ -2,6 +2,32 @@
 const money = (minor) => `${Math.round((Number(minor) || 0) / 100)} ₪`;
 const clip = (s = '', n = 120) => (s.length > n ? `${s.slice(0, n - 1)}…` : s);
 
+// Why a request was cancelled or an offer turned down. Keep the codes in sync
+// with the app (mobile/src/lib/reasons.ts).
+const REASONS = {
+  // Customer cancelling a request
+  changed_mind: { ar: 'لم يعد بحاجة للخدمة', en: 'no longer needs the service' },
+  found_other: { ar: 'وجد حلاً آخر', en: 'found another solution' },
+  too_long: { ar: 'الانتظار طويل', en: 'waiting too long' },
+  price: { ar: 'السعر غير مناسب', en: 'the price did not suit' },
+  // Artisan cancelling a job
+  not_available: { ar: 'لم يعد متاحاً', en: 'no longer available' },
+  too_far: { ar: 'المكان بعيد', en: 'too far away' },
+  customer_unreachable: { ar: 'تعذّر التواصل مع الزبون', en: 'could not reach the customer' },
+  job_mismatch: { ar: 'العمل يختلف عن الوصف', en: 'the job differs from the description' },
+  // Customer turning down an offer
+  price_high: { ar: 'السعر مرتفع', en: 'the price is high' },
+  eta_long: { ar: 'وقت الوصول طويل', en: 'arrival time is long' },
+  other: { ar: 'سبب آخر', en: 'another reason' },
+};
+/** "the reason: …" in the recipient's language, or '' when none was given. */
+const why = (p, locale) => {
+  const label = REASONS[p.choice]?.[locale];
+  const parts = [label, clip(p.note ?? '', 120)].filter(Boolean);
+  if (!parts.length) return '';
+  return locale === 'ar' ? ` السبب: ${parts.join(' — ')}` : ` Reason: ${parts.join(' — ')}`;
+};
+
 export const MESSAGES = {
   newJob: {
     ar: (p) => ({ title: 'طلب جديد قريب منك', body: `${clip(p.title, 60)} — على بعد ${p.distanceKm.toFixed(1)} كم` }),
@@ -28,8 +54,21 @@ export const MESSAGES = {
     en: (p) => ({ title: 'Job completed', body: `"${clip(p.title, 60)}" is complete. Leave a rating now` }),
   },
   cancelledByOther: {
-    ar: (p) => ({ title: 'تم إلغاء الطلب', body: `ألغى ${p.byName} طلب "${clip(p.title, 60)}"` }),
-    en: (p) => ({ title: 'Request cancelled', body: `${p.byName} cancelled "${clip(p.title, 60)}"` }),
+    ar: (p) => ({ title: 'تم إلغاء الطلب', body: `ألغى ${p.byName} طلب "${clip(p.title, 60)}".${why(p, 'ar')}` }),
+    en: (p) => ({ title: 'Request cancelled', body: `${p.byName} cancelled "${clip(p.title, 60)}".${why(p, 'en')}` }),
+  },
+  // To artisans who sent an offer, when the customer cancels before accepting one.
+  requestCancelledPending: {
+    ar: (p) => ({ title: 'تم إلغاء الطلب', body: `ألغى الزبون طلب "${clip(p.title, 60)}" الذي قدّمت عليه عرضاً.${why(p, 'ar')}` }),
+    en: (p) => ({ title: 'Request cancelled', body: `The customer cancelled "${clip(p.title, 60)}", which you made an offer on.${why(p, 'en')}` }),
+  },
+  offerRejected: {
+    ar: (p) => ({ title: 'تم رفض عرضك', body: `رفض الزبون عرضك على "${clip(p.title, 60)}".${why(p, 'ar')}` }),
+    en: (p) => ({ title: 'Your offer was declined', body: `The customer declined your offer on "${clip(p.title, 60)}".${why(p, 'en')}` }),
+  },
+  offerNotChosen: {
+    ar: (p) => ({ title: 'اختار الزبون عرضاً آخر', body: `قبل الزبون عرضاً آخر على "${clip(p.title, 60)}"` }),
+    en: (p) => ({ title: 'Another offer was chosen', body: `The customer accepted another offer on "${clip(p.title, 60)}"` }),
   },
   requestExpired: {
     ar: (p) => ({ title: 'انتهت مهلة الطلب', body: `مرّت 30 دقيقة على طلب "${clip(p.title, 60)}" بدون قبول أي عرض، فتم إلغاؤه. تقدر تنشره من جديد` }),

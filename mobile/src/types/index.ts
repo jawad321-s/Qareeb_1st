@@ -119,8 +119,8 @@ export interface ServiceRequest {
   /** Set by Cloud Functions: current search radius and response deadline. */
   dispatch?: { radiusKm: number; startedAt: number; expiresAt: number };
   notifiedArtisanIds?: string[];
-  /** NO_OFFERS when the response window ran out (Cloud Functions). */
-  cancelReason?: 'NO_OFFERS';
+  /** Set when the 30-minute window ran out: NO_OFFERS (none came) or EXPIRED (none accepted). */
+  cancelReason?: 'NO_OFFERS' | 'EXPIRED';
   cancelledBy?: string | null;
   offerCount: number;
   completedAt?: number;

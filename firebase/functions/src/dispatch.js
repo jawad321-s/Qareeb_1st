@@ -71,29 +71,38 @@ export async function startDispatch(db, requestId, request, now = Date.now()) {
 }
 
 /**
- * Periodic pass over PENDING requests: widen the radius of requests nobody has
- * answered yet and cancel the ones whose window ran out with no offers.
- * Once a request has an offer, it is left alone for the customer to decide.
+ * Runs every minute: widen the search for dispatched requests nobody has
+ * answered yet, and close every request still PENDING 30 minutes after it
+ * went out — with no offers (NO_OFFERS), or with offers the customer did not
+ * accept in time (EXPIRED, its open offers closed). The customer (and the
+ * artisans who offered) are told by the status-change trigger.
  */
 export async function runDispatchTick(db, now = Date.now()) {
   const pending = await db.collection('requests').where('status', '==', 'PENDING').get();
   const result = { expanded: 0, cancelled: 0 };
   for (const doc of pending.docs) {
     const r = doc.data();
-    if (!r.dispatch || (r.offerCount ?? 0) > 0) continue;
-    const elapsed = now - r.dispatch.startedAt;
+    // Requests made before dispatch existed count from their creation.
+    const startedAt = r.dispatch?.startedAt ?? toMillis(r.createdAt);
+    const elapsed = now - startedAt;
 
-    if (elapsed >= TIMEOUT_MS) {
-      const cancelled = await db.runTransaction(async (tx) => {
+    if (startedAt && elapsed >= TIMEOUT_MS) {
+      const reason = await db.runTransaction(async (tx) => {
         const fresh = await tx.get(doc.ref);
-        if (fresh.get('status') !== 'PENDING' || (fresh.get('offerCount') ?? 0) > 0) return false;
-        tx.update(doc.ref, { status: 'CANCELLED', cancelReason: 'NO_OFFERS', cancelledAt: now, updatedAt: now });
-        return true;
+        if (fresh.get('status') !== 'PENDING') return null;
+        const why = (fresh.get('offerCount') ?? 0) > 0 ? 'EXPIRED' : 'NO_OFFERS';
+        tx.update(doc.ref, { status: 'CANCELLED', cancelReason: why, cancelledAt: now, updatedAt: now });
+        return why;
       });
-      if (cancelled) result.cancelled++;
-      continue; // the customer is notified by the status-change trigger
+      if (reason) {
+        result.cancelled++;
+        if (reason === 'EXPIRED') await closeOpenOffers(db, doc.id);
+      }
+      continue;
     }
 
+    // Widen only dispatched requests that have no offer yet.
+    if (!r.dispatch || (r.offerCount ?? 0) > 0) continue;
     const radiusKm = targetRadiusKm(elapsed);
     if (radiusKm <= r.dispatch.radiusKm || !r.location) continue;
     const already = r.notifiedArtisanIds ?? [];
@@ -113,4 +122,19 @@ export async function runDispatchTick(db, now = Date.now()) {
     result.expanded++;
   }
   return result;
+}
+
+/** Offers still waiting on a request that expired are closed with it. */
+async function closeOpenOffers(db, requestId) {
+  const open = await db.collection('offers').where('requestId', '==', requestId).where('status', '==', 'PENDING').get();
+  if (open.empty) return;
+  const batch = db.batch();
+  open.docs.forEach((d) => batch.update(d.ref, { status: 'REJECTED', closedReason: 'EXPIRED' }));
+  await batch.commit();
+}
+
+/** A Firestore timestamp or a number of milliseconds, as milliseconds (0 if neither). */
+function toMillis(v) {
+  if (typeof v === 'number') return v;
+  return typeof v?.toMillis === 'function' ? v.toMillis() : 0;
 }

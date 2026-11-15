@@ -55,6 +55,12 @@ export const onRequestUpdated = onDocumentUpdated('requests/{requestId}', async 
       if (after.cancelReason === 'NO_OFFERS') {
         return notifyUsers(db, [after.customerId], 'noOffers', { title: after.title }, customerRoute);
       }
+      if (after.cancelReason === 'EXPIRED') {
+        // Offers came in but none was accepted within the window.
+        await notifyUsers(db, [after.customerId], 'requestExpired', { title: after.title }, customerRoute);
+        const offers = await db.collection('offers').where('requestId', '==', id).get();
+        return notifyUsers(db, offers.docs.map((d) => d.get('artisanId')), 'offerExpired', { title: after.title }, artisanRoute);
+      }
       // Tell the party who did not cancel (if an artisan was assigned).
       if (!after.acceptedArtisanId) return;
       const byCustomer = after.cancelledBy !== after.acceptedArtisanId;

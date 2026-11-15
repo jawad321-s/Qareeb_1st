@@ -5,6 +5,7 @@ import { Redirect } from 'expo-router';
 import { Tabs } from 'expo-router/js-tabs';
 import { TabBar } from '@/components/ui/TabBar';
 import { useAuth } from '@/store/auth';
+import { useRefreshLocation } from '@/hooks/useRefreshLocation';
 import { useTheme } from '@/theme/ThemeProvider';
 import { usePendingReview } from '@/hooks/queries';
 
@@ -24,6 +25,8 @@ export default function CustomerLayout() {
   const { colors } = useTheme();
   // Called before the early returns below (rules of hooks); idle until signed in.
   const pendingReview = usePendingReview(user);
+  // Requests go out from the customer's saved location: keep it where they are.
+  useRefreshLocation(user?.role === 'customer');
   if (!user) return <Redirect href="/(auth)/welcome" />;
   // Role gate: tab paths like /profile exist in BOTH groups, and an ambiguous
   // link (deep link, post-restart restore) can land an artisan here — showing

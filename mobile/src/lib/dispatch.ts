@@ -21,9 +21,13 @@ export function targetRadiusKm(elapsedMs: number): number {
   return Math.min(INITIAL_RADIUS_KM + steps * STEP_KM, MAX_RADIUS_KM);
 }
 
-/** A request with no offers whose response window has run out. */
-export function isExpiredWithoutOffers(r: ServiceRequest, now = Date.now()): boolean {
-  return r.status === 'PENDING' && (r.offerCount ?? 0) === 0 && now - r.createdAt >= TIMEOUT_MS;
+/**
+ * A request still PENDING whose 30-minute window has run out — with no offers,
+ * or with offers the customer didn't accept. The Cloud Functions cancel it;
+ * until they do, nobody should act on it.
+ */
+export function isExpired(r: ServiceRequest, now = Date.now()): boolean {
+  return r.status === 'PENDING' && now - (r.dispatch?.startedAt ?? r.createdAt) >= TIMEOUT_MS;
 }
 
 /**
@@ -41,9 +45,9 @@ export function isVisibleToArtisan(
   availability?: Availability,
 ): boolean {
   if (!isWithinAvailability(availability, new Date(now))) return false;
+  if (isExpired(r, now)) return false;
   if (r.dispatch) return (r.notifiedArtisanIds ?? []).includes(me.uid);
   if ((REQUIRE_VERIFIED && !me.verified) || !categoryIds.includes(r.categoryId)) return false;
-  if (isExpiredWithoutOffers(r, now)) return false;
   if (!me.location || !r.location) return false;
   return distanceKm(me.location, r.location) <= targetRadiusKm(now - r.createdAt);
 }

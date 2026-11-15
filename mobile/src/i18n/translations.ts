@@ -319,7 +319,9 @@ export const translations = {
     // request detail
     'req.title': 'Request details',
     'req.tracking': 'Order tracking',
-    'req.searching': 'Looking for artisans within {km} km · the request closes in {min} min if no offers arrive',
+    'req.searching': 'Looking for artisans within {km} km · {n} notified so far · the request closes in {min} min if no offers arrive',
+    'req.acceptBefore': 'Accept an offer within {min} min, or the request is cancelled automatically',
+    'req.expiredCancelled': 'No offer was accepted within 30 minutes, so this request was cancelled. You can post it again.',
     'req.noOffersCancelled': 'No artisan sent an offer in time, so this request was cancelled. You can post it again.',
     'req.yourArtisan': 'Your artisan',
     'req.chat': 'Chat',
@@ -1010,7 +1012,9 @@ export const translations = {
     // request detail
     'req.title': 'تفاصيل الطلب',
     'req.tracking': 'تتبّع الطلب',
-    'req.searching': 'نبحث عن حرفيين ضمن {km} كم · يُلغى الطلب بعد {min} دقيقة إذا لم تصل عروض',
+    'req.searching': 'نبحث عن حرفيين ضمن {km} كم · أبلغنا {n} حتى الآن · يُلغى الطلب بعد {min} دقيقة إذا لم تصل عروض',
+    'req.acceptBefore': 'اقبل عرضاً خلال {min} دقيقة، وإلا يُلغى الطلب تلقائياً',
+    'req.expiredCancelled': 'لم يُقبل أي عرض خلال 30 دقيقة، فتم إلغاء الطلب. يمكنك نشره مرة أخرى.',
     'req.noOffersCancelled': 'لم يقدّم أي حرفي عرضاً خلال المهلة، فتم إلغاء الطلب. يمكنك نشره مرة أخرى.',
     'req.yourArtisan': 'الحرفي الخاص بك',
     'req.chat': 'محادثة',

@@ -31,6 +31,14 @@ export const MESSAGES = {
     ar: (p) => ({ title: 'تم إلغاء الطلب', body: `ألغى ${p.byName} طلب "${clip(p.title, 60)}"` }),
     en: (p) => ({ title: 'Request cancelled', body: `${p.byName} cancelled "${clip(p.title, 60)}"` }),
   },
+  requestExpired: {
+    ar: (p) => ({ title: 'انتهت مهلة الطلب', body: `مرّت 30 دقيقة على طلب "${clip(p.title, 60)}" بدون قبول أي عرض، فتم إلغاؤه. تقدر تنشره من جديد` }),
+    en: (p) => ({ title: 'Request expired', body: `No offer on "${clip(p.title, 60)}" was accepted within 30 minutes, so it was cancelled. You can post it again` }),
+  },
+  offerExpired: {
+    ar: (p) => ({ title: 'انتهت مهلة الطلب', body: `الزبون ما قبل أي عرض على "${clip(p.title, 60)}" خلال 30 دقيقة، فتم إلغاء الطلب` }),
+    en: (p) => ({ title: 'Request expired', body: `The customer accepted no offer on "${clip(p.title, 60)}" within 30 minutes, so it was cancelled` }),
+  },
   noOffers: {
     ar: (p) => ({ title: 'لم نجد حرفياً متاحاً', body: `انتهت مهلة طلب "${clip(p.title, 60)}" بدون عروض وتم إلغاؤه. جرّب مرة أخرى لاحقاً` }),
     en: (p) => ({ title: 'No artisan available', body: `"${clip(p.title, 60)}" got no offers in time and was cancelled. Please try again later` }),

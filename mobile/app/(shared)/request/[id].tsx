@@ -124,22 +124,23 @@ export default function RequestDetail() {
         </Card>
       </Animated.View>
 
-      {/* Dispatch status (Cloud Functions): search radius and response deadline. */}
-      {isPending && request.dispatch && (request.offerCount ?? 0) === 0 && (
+      {/* Dispatch status (Cloud Functions): search radius, who was told, and the deadline. */}
+      {isPending && request.dispatch && (
         <Card style={{ marginTop: 16, flexDirection: 'row', gap: 10, alignItems: 'center', backgroundColor: colors.tint + '0C' }}>
           <Icon name="navigation" size={18} color={colors.tint} />
           <Text variant="caption" style={{ flex: 1 }}>
-            {t('req.searching')
+            {t((request.offerCount ?? 0) > 0 ? 'req.acceptBefore' : 'req.searching')
               .replace('{km}', String(request.dispatch.radiusKm))
+              .replace('{n}', String(request.notifiedArtisanIds?.length ?? 0))
               .replace('{min}', String(Math.max(0, Math.ceil((request.dispatch.expiresAt - Date.now()) / 60_000))))}
           </Text>
         </Card>
       )}
-      {isCancelled && request.cancelReason === 'NO_OFFERS' && (
+      {isCancelled && (request.cancelReason === 'NO_OFFERS' || request.cancelReason === 'EXPIRED') && (
         <Card style={{ marginTop: 16, flexDirection: 'row', gap: 10, alignItems: 'center', backgroundColor: '#EF444412' }}>
           <Icon name="alert-circle" size={18} color="#EF4444" />
           <Text variant="caption" style={{ flex: 1 }}>
-            {t('req.noOffersCancelled')}
+            {t(request.cancelReason === 'EXPIRED' ? 'req.expiredCancelled' : 'req.noOffersCancelled')}
           </Text>
         </Card>
       )}

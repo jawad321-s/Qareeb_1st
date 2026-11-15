@@ -18,6 +18,10 @@ import { useAuth } from '@/store/auth';
 import { useTheme } from '@/theme/ThemeProvider';
 import { useFont, useT } from '@/i18n';
 import { localizedTextAlign } from '@/i18n/rtl';
+import { config } from '@/lib/config';
+import { currentLocation } from '@/lib/currentLocation';
+import { distanceKm } from '@/lib/geo';
+import { MIN_MOVE_KM } from '@/hooks/useRefreshLocation';
 
 // Service picker: one row per service, in catalog order.
 
@@ -33,6 +37,8 @@ export default function CreateRequest() {
   const font = useFont();
   const tabBarSpace = useTabBarSpace();
   const create = useCreateRequest(user.uid);
+  const updateUser = useAuth((s) => s.updateUser);
+  const [locating, setLocating] = useState(false);
   const toast = useToast();
   const STEPS = [t('create.step.service'), t('create.step.details'), t('create.step.review')];
 
@@ -68,7 +74,19 @@ export default function CreateRequest() {
   const submit = async () => {
     // Artisans are matched by distance, so a request needs the customer's
     // location. New accounts have none until they grant it.
-    if (!user.location) {
+    // The request goes out from where the customer is now, when the phone can
+    // tell (a saved location may be from another day and another place).
+    let location = user.location;
+    if (!config.useMock) {
+      setLocating(true);
+      const here = await currentLocation(user.location?.address ?? '').catch(() => null);
+      setLocating(false);
+      if (here) {
+        location = here;
+        if (!user.location || distanceKm(user.location, here) >= MIN_MOVE_KM) updateUser({ location: here });
+      }
+    }
+    if (!location) {
       router.push('/(shared)/location-permission');
       return;
     }
@@ -80,7 +98,7 @@ export default function CreateRequest() {
         title: title.trim(),
         description: description.trim(),
         images,
-        location: user.location,
+        location,
         // No budget and no time: artisans send their price, and the job is as soon as possible.
         preferredTime: Date.now(),
       });
@@ -227,7 +245,7 @@ export default function CreateRequest() {
             <Button
               label={user.location ? t('create.submit') : t('home.setLocation')}
               iconRight={user.location ? 'send' : 'map-pin'}
-              loading={create.isPending}
+              loading={create.isPending || locating}
               onPress={submit}
             />
           </View>

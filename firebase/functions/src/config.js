@@ -1,7 +1,8 @@
 // Dispatch policy for new requests. A request is offered to verified artisans
 // of its category within INITIAL_RADIUS_KM; while nobody has sent an offer the
-// radius grows by STEP_KM every STEP_MS, and after TIMEOUT_MS with no offers
-// the request is cancelled and the customer is told.
+// radius grows by STEP_KM every STEP_MS. TIMEOUT_MS after it went out, a
+// request still PENDING (no offers, or none accepted) is cancelled and the
+// customer is told.
 export const INITIAL_RADIUS_KM = 2;
 export const STEP_KM = 2;
 export const STEP_MS = 5 * 60_000;

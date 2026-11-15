@@ -86,14 +86,32 @@ test('no offers after 30 minutes → cancelled with NO_OFFERS', async () => {
   assert.equal(r.cancelReason, 'NO_OFFERS');
 });
 
-test('a request with an offer stops expanding and is not cancelled', async () => {
+test('a request with an offer stops expanding, and expires after 30 minutes if none is accepted', async () => {
   const t0 = 4_000_000;
   await startDispatch(db, 'r4', await newRequest('r4'), t0);
   await db.doc('requests/r4').update({ offerCount: 1 });
-  await runDispatchTick(db, t0 + 31 * MIN);
-  const r = await get('r4');
+  await db.doc('offers/o4').set({ requestId: 'r4', artisanId: 'a_1km', customerId: 'c_1', status: 'PENDING', price: 10000 });
+  // Before the window ends: no widening, still open.
+  await runDispatchTick(db, t0 + 12 * MIN);
+  let r = await get('r4');
   assert.equal(r.status, 'PENDING');
   assert.equal(r.dispatch.radiusKm, 2);
+  // After 30 minutes: cancelled as EXPIRED, and the open offer is closed.
+  await runDispatchTick(db, t0 + 31 * MIN);
+  r = await get('r4');
+  assert.equal(r.status, 'CANCELLED');
+  assert.equal(r.cancelReason, 'EXPIRED');
+  const offer = (await db.doc('offers/o4').get()).data();
+  assert.equal(offer.status, 'REJECTED');
+  assert.equal(offer.closedReason, 'EXPIRED');
+});
+
+test('an old request made before dispatch expires from its creation time', async () => {
+  await db.doc('requests/r_old').set({ customerId: 'c_1', categoryId: 'plumbing', title: 'old', status: 'PENDING', offerCount: 1, createdAt: 1_000 });
+  await runDispatchTick(db, 1_000 + 31 * MIN);
+  const r = await get('r_old');
+  assert.equal(r.status, 'CANCELLED');
+  assert.equal(r.cancelReason, 'EXPIRED');
 });
 
 test('with verification off, unverified artisans are included', async () => {

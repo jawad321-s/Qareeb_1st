@@ -8,7 +8,7 @@ import { useAuth } from '@/store/auth';
 import { useTheme } from '@/theme/ThemeProvider';
 import { usePendingReview } from '@/hooks/queries';
 import { useEnsureTrial } from '@/store/subscription';
-import { useRefreshArtisanLocation } from '@/hooks/useRefreshArtisanLocation';
+import { useRefreshLocation } from '@/hooks/useRefreshLocation';
 import { useEnsureVerificationRequest } from '@/hooks/useEnsureVerificationRequest';
 
 const META = {
@@ -28,7 +28,7 @@ export default function ArtisanLayout() {
   const pendingReview = usePendingReview(user);
   // Every artisan starts on the one-time 7-day free trial.
   useEnsureTrial(user?.uid, user?.role === 'artisan');
-  useRefreshArtisanLocation(user?.role === 'artisan');
+  useRefreshLocation(user?.role === 'artisan');
   useEnsureVerificationRequest(user);
   if (!user) return <Redirect href="/(auth)/welcome" />;
   // Role gate — see the customer layout: ambiguous tab paths must not land a

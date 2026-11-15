@@ -12,7 +12,7 @@ import type {
 import type { mockApi } from '@/mock/api';
 import { getDb } from '@/lib/firebase';
 import { useAuth } from '@/store/auth';
-import { isExpiredWithoutOffers, isVisibleToArtisan } from '@/lib/dispatch';
+import { isExpired, isVisibleToArtisan } from '@/lib/dispatch';
 import { MOCK_CUSTOMER } from '@/mock/data';
 import { servicesOf, toServiceId } from '@/constants/services';
 import { allCategories } from '@/constants/categories';
@@ -48,8 +48,9 @@ async function settleOverdue(list: ServiceRequest[]): Promise<ServiceRequest[]> 
     list.map(async (r) => {
       // No Cloud Functions: close requests nobody answered in time (the
       // customer's read performs the write; the rules reject anyone else).
-      if (!r.dispatch && isExpiredWithoutOffers(r, now)) {
-        const cancel = { status: 'CANCELLED' as const, cancelReason: 'NO_OFFERS' as const, updatedAt: now };
+      if (!r.dispatch && isExpired(r, now)) {
+        const cancelReason = (r.offerCount ?? 0) > 0 ? ('EXPIRED' as const) : ('NO_OFFERS' as const);
+        const cancel = { status: 'CANCELLED' as const, cancelReason, updatedAt: now };
         await updateDoc(doc(db(), 'requests', r.id), cancel).catch(() => {});
         return { ...r, ...cancel };
       }

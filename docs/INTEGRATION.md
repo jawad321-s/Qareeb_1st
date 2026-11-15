@@ -155,7 +155,7 @@ server-side logic. It needs the **Blaze** plan.
 | Function | Trigger | What it does |
 |---|---|---|
 | `onRequestCreated` | `requests/{id}` created | Offers the request to **verified** artisans of its category within **2 km** of the customer; stores `dispatch` + `notifiedArtisanIds` |
-| `dispatchTick` | every minute | While a request has **no offers**: widens the radius by **2 km every 5 min** (max **12 km**), notifying only newly reached artisans. After **30 min** with no offers: `status: CANCELLED`, `cancelReason: NO_OFFERS` |
+| `dispatchTick` | every minute | While a request has **no offers**: widens the radius by **2 km every 2 min** (max **12 km**, reached after 10 min), notifying only newly reached artisans. **30 min** after it went out, a request still `PENDING` is cancelled: `cancelReason: NO_OFFERS` (no offers) or `EXPIRED` (offers, none accepted; its open offers are closed) |
 | `onOfferCreated` | `offers/{id}` created | Notifies the customer |
 | `onRequestUpdated` | status change | Accepted → artisan; on the way / working / completed → customer (completed → both); cancelled → the other party, or the customer on timeout |
 | `onMessageCreated` | chat message | Notifies the other party |

@@ -56,20 +56,22 @@ test('first wave: verified same-category artisans within 2 km only', async () =>
   assert.equal((await inbox('a_self')).length, 0);
 });
 
-test('radius grows 2 km every 5 minutes and only new artisans are notified', async () => {
+test('radius grows 2 km every 2 minutes and only new artisans are notified', async () => {
   const t0 = 2_000_000;
   await startDispatch(db, 'r2', await newRequest('r2'), t0);
-  await runDispatchTick(db, t0 + 4 * MIN);
+  await runDispatchTick(db, t0 + 1 * MIN);
   assert.equal((await get('r2')).dispatch.radiusKm, 2);
-  await runDispatchTick(db, t0 + 5 * MIN); // 4 km → a_3km
+  await runDispatchTick(db, t0 + 2 * MIN); // 4 km → a_3km
   let r = await get('r2');
   assert.equal(r.dispatch.radiusKm, 4);
   assert.deepEqual(r.notifiedArtisanIds.sort(), ['a_1km', 'a_3km']);
-  await runDispatchTick(db, t0 + 15 * MIN); // 8 km → a_7km
+  await runDispatchTick(db, t0 + 6 * MIN); // 8 km → a_7km
   r = await get('r2');
   assert.equal(r.dispatch.radiusKm, 8);
   assert.deepEqual(r.notifiedArtisanIds.sort(), ['a_1km', 'a_3km', 'a_7km']);
-  await runDispatchTick(db, t0 + 29 * MIN); // max 12 km — a_15km never reached
+  await runDispatchTick(db, t0 + 10 * MIN); // 12 km, the most
+  assert.equal((await get('r2')).dispatch.radiusKm, 12);
+  await runDispatchTick(db, t0 + 29 * MIN); // stays at 12 km — a_15km never reached
   r = await get('r2');
   assert.equal(r.dispatch.radiusKm, 12);
   assert.ok(!r.notifiedArtisanIds.includes('a_15km'));

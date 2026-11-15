@@ -5,7 +5,7 @@
 // customer is told.
 export const INITIAL_RADIUS_KM = 2;
 export const STEP_KM = 2;
-export const STEP_MS = 5 * 60_000;
+export const STEP_MS = 2 * 60_000;
 export const TIMEOUT_MS = 30 * 60_000;
 export const MAX_RADIUS_KM = 12;
 // Only admin-verified artisans receive requests (approved from the admin

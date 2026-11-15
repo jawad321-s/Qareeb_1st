@@ -42,7 +42,18 @@ import { useFont, useT } from '@/i18n';
 import { localizedTextAlign } from '@/i18n/rtl';
 import type { Offer } from '@/types';
 
-export default function JobDetail() {
+/**
+ * This screen sits in the artisan's tab navigator, which keeps it mounted and
+ * only swaps `id` when another job is opened. Keyed by the id, the details
+ * start fresh for every job: nothing typed for one job (price, message) or
+ * its "offer sent" state carries over to the next.
+ */
+export default function JobDetailRoute() {
+  const { id } = useLocalSearchParams<{ id: string }>();
+  return <JobDetail key={id} />;
+}
+
+function JobDetail() {
   const { colors } = useTheme();
   const { id } = useLocalSearchParams<{ id: string }>();
   const user = useAuth((s) => s.user)!;

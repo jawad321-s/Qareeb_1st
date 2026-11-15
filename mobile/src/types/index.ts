@@ -154,6 +154,12 @@ export interface Offer {
   /** The customer's reason for declining it (lib/reasons) and their words. */
   rejectChoice?: string;
   rejectNote?: string;
+  /**
+   * Copied from the request when the customer cancels it, so an artisan who
+   * offered (and can no longer read the cancelled request) still sees why.
+   */
+  requestCancelChoice?: string;
+  requestCancelNote?: string;
   categoryId?: string;
   /**
    * The job's status as the artisan last knew it: read from the request when
@@ -202,8 +208,11 @@ export interface JobRecord {
   price?: number;
   etaMinutes?: number;
   message?: string;
-  /** Rejected only: why the offer didn't go through. */
-  reason?: 'otherChosen' | 'cancelled' | 'declined';
+  /** Rejected only: why the offer or the job didn't go through. */
+  reason?: 'otherChosen' | 'cancelled' | 'cancelledByMe' | 'declined' | 'expired';
+  /** The reason given for that (lib/reasons) and the person's own words. */
+  reasonChoice?: string;
+  reasonNote?: string;
   /** Completed only: the customer's rating of the job, once given. */
   rating?: number;
   comment?: string;

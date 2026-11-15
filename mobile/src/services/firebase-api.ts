@@ -209,7 +209,8 @@ export const firebaseApi: typeof mockApi = {
     // assigned (the only time they can cancel) none are still pending anyway.
     if (useAuth.getState().user?.uid === current.customerId) {
       // The hired artisan's offer stays "accepted"; record that the job was cancelled.
-      if (current.acceptedOfferId) batch.update(doc(db(), 'offers', current.acceptedOfferId), { requestStatus: 'CANCELLED' });
+      if (current.acceptedOfferId)
+        batch.update(doc(db(), 'offers', current.acceptedOfferId), { requestStatus: 'CANCELLED', requestCancelChoice: reason?.choice ?? null, requestCancelNote: reason?.note ?? null });
       const open = await getDocs(
         query(
           collection(db(), 'offers'),
@@ -218,7 +219,15 @@ export const firebaseApi: typeof mockApi = {
           where('status', '==', 'PENDING'),
         ),
       );
-      open.forEach((o) => batch.update(o.ref, { status: 'REJECTED', requestStatus: 'CANCELLED', closedReason: 'REQUEST_CANCELLED' }));
+      open.forEach((o) =>
+        batch.update(o.ref, {
+          status: 'REJECTED',
+          requestStatus: 'CANCELLED',
+          closedReason: 'REQUEST_CANCELLED',
+          requestCancelChoice: reason?.choice ?? null,
+          requestCancelNote: reason?.note ?? null,
+        }),
+      );
     }
     await batch.commit();
   },
@@ -460,14 +469,20 @@ export const firebaseApi: typeof mockApi = {
     );
     // A turned-down offer's request is often no longer readable to this artisan
     // (assigned elsewhere or cancelled); the record then uses the offer's copy.
-    const rejected = await Promise.all(
-      myOffers
-        .filter((o) => o.status === 'REJECTED')
-        .map(async (o) => {
-          const snap = await getDoc(doc(db(), 'requests', o.requestId)).catch(() => null);
-          return rejectedRecord(o, snap?.exists() ? mapRequest(snap.id, snap.data()) : undefined);
-        }),
-    );
+    // Accepted offers are read too: a job taken and then cancelled (by either
+    // side) belongs with the ones that didn't go through.
+    const rejected = (
+      await Promise.all(
+        myOffers
+          .filter((o) => o.status === 'REJECTED' || o.status === 'ACCEPTED')
+          .map(async (o) => {
+            const snap = await getDoc(doc(db(), 'requests', o.requestId)).catch(() => null);
+            const r = snap?.exists() ? mapRequest(snap.id, snap.data()) : undefined;
+            if (o.status === 'ACCEPTED' && r?.status !== 'CANCELLED' && o.requestStatus !== 'CANCELLED') return null;
+            return rejectedRecord(o, r);
+          }),
+      )
+    ).filter((x): x is NonNullable<typeof x> => !!x);
     return {
       completed: completed.sort((a, b) => b.date - a.date),
       rejected: rejected.sort((a, b) => b.date - a.date),

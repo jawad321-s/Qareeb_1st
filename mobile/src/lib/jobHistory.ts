@@ -21,13 +21,27 @@ export function completedRecord(r: ServiceRequest, offer?: Offer, review?: Revie
 }
 
 /**
- * An offer the customer turned down. The request may be unreadable by now
- * (assigned to someone else, or cancelled), so the offer's own copy of the
- * title and category is the fallback.
+ * A job that didn't go through for this artisan: their offer was turned down
+ * or closed, or the job they took was cancelled (by either side). The request
+ * may be unreadable by now (assigned to someone else, or cancelled), so the
+ * offer's own copies (title, category, the cancel reason) are the fallback.
  */
 export function rejectedRecord(o: Offer, r?: ServiceRequest): JobRecord {
-  const reason: JobRecord['reason'] =
-    r?.status === 'CANCELLED' || o.requestStatus === 'CANCELLED' ? 'cancelled' : r?.acceptedArtisanId && r.acceptedArtisanId !== o.artisanId ? 'otherChosen' : 'declined';
+  const cancelled = r?.status === 'CANCELLED' || o.requestStatus === 'CANCELLED' || o.closedReason === 'REQUEST_CANCELLED';
+  let reason: JobRecord['reason'];
+  let reasonChoice: string | undefined;
+  let reasonNote: string | undefined;
+  if (o.closedReason === 'EXPIRED' || r?.cancelReason === 'EXPIRED') reason = 'expired';
+  else if (cancelled) {
+    reason = r?.cancelledBy && r.cancelledBy === o.artisanId ? 'cancelledByMe' : 'cancelled';
+    reasonChoice = r?.cancelChoice ?? o.requestCancelChoice;
+    reasonNote = r?.cancelNote ?? o.requestCancelNote;
+  } else if (o.closedReason === 'OTHER_ACCEPTED' || (r?.acceptedArtisanId && r.acceptedArtisanId !== o.artisanId)) reason = 'otherChosen';
+  else {
+    reason = 'declined';
+    reasonChoice = o.rejectChoice;
+    reasonNote = o.rejectNote;
+  }
   return {
     kind: 'rejected',
     requestId: o.requestId,
@@ -41,5 +55,7 @@ export function rejectedRecord(o: Offer, r?: ServiceRequest): JobRecord {
     etaMinutes: o.etaMinutes,
     message: o.message,
     reason,
+    reasonChoice: reasonChoice || undefined,
+    reasonNote: reasonNote || undefined,
   };
 }

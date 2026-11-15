@@ -21,6 +21,7 @@ import { AUTO_COMPLETE_HOURS } from '@/lib/requestRules';
 import { useAuth } from '@/store/auth';
 import { useTheme } from '@/theme/ThemeProvider';
 import { useT } from '@/i18n';
+import { reasonText } from '@/lib/reasons';
 
 /** Full record of one history entry: the job, the customer, the artisan's offer and how it ended. */
 export default function JobRecordScreen() {
@@ -44,6 +45,9 @@ export default function JobRecordScreen() {
   const cat = record.categoryId ? categoryById(record.categoryId) : undefined;
   const color = cat?.colorHex ?? colors.tint;
   const done = record.kind === 'completed';
+  // Cancelled (by either side) or expired, rather than an offer turned down.
+  const cancelled = record.reason === 'cancelled' || record.reason === 'cancelledByMe' || record.reason === 'expired';
+  const why = reasonText(t, record.reasonChoice, record.reasonNote);
 
   return (
     <Screen scroll>
@@ -65,7 +69,7 @@ export default function JobRecordScreen() {
               )}
             </View>
           </View>
-          {done ? <StatusBadge status="COMPLETED" /> : <Badge label={t('ostatus.REJECTED')} variant="danger" icon="x-circle" />}
+          {done ? <StatusBadge status="COMPLETED" /> : cancelled ? <StatusBadge status="CANCELLED" /> : <Badge label={t('ostatus.REJECTED')} variant="danger" icon="x-circle" />}
           {!!record.description && (
             <Text variant="body" tone="muted" style={{ lineHeight: 21 }}>
               {record.description}
@@ -118,7 +122,15 @@ export default function JobRecordScreen() {
               <Badge label={t('hist.awaitingRating')} variant="warning" icon="clock" />
             )
           ) : (
-            <Detail icon="x-circle" color="#DC2626" label={t(`hist.reason.${record.reason ?? 'declined'}` as any)} />
+            <>
+              <Detail icon="x-circle" color="#DC2626" label={t(`hist.reason.${record.reason ?? 'declined'}` as any)} />
+              {/* The reason chosen (and the person's own words), when one was given. */}
+              {!!why && (
+                <Text variant="body" tone="muted">
+                  {t('req.reason')} {why}
+                </Text>
+              )}
+            </>
           )}
           {record.autoCompleted && (
             <Text variant="caption" tone="muted">

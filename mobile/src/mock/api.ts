@@ -145,7 +145,7 @@ export const mockApi = {
       o.requestId !== requestId
         ? o
         : o.status === 'PENDING'
-          ? { ...o, status: 'REJECTED', requestStatus: 'CANCELLED', closedReason: 'REQUEST_CANCELLED' }
+          ? { ...o, status: 'REJECTED', requestStatus: 'CANCELLED', closedReason: 'REQUEST_CANCELLED', requestCancelChoice: reason?.choice, requestCancelNote: reason?.note }
           : o.status === 'ACCEPTED'
             ? { ...o, requestStatus: 'CANCELLED' }
             : o,
@@ -349,7 +349,12 @@ export const mockApi = {
         ),
       );
     const rejected = offers
-      .filter((o) => o.artisanId === artisanId && o.status === 'REJECTED')
+      .filter((o) => {
+        if (o.artisanId !== artisanId) return false;
+        if (o.status === 'REJECTED') return true;
+        // A job taken and then cancelled.
+        return o.status === 'ACCEPTED' && requests.find((r) => r.id === o.requestId)?.status === 'CANCELLED';
+      })
       .map((o) => rejectedRecord(o, requests.find((r) => r.id === o.requestId)));
     return clone({
       completed: completed.sort((a, b) => b.date - a.date),

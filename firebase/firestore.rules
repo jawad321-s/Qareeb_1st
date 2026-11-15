@@ -179,15 +179,14 @@ service cloud.firestore {
                     && incoming().status == 'PENDING'
                     && incoming().price is number && incoming().price > 0
                     && dispatchedTo(incoming().requestId);
-      // Artisan may withdraw, or change the price (only the price) until the
-      // job is completed; customer may accept/reject.
+      // Artisan may withdraw, or change the price (only the price) of the
+      // accepted offer while the work is in progress; customer may accept/reject.
       function priceEditByArtisan() {
         return existing().artisanId == uid()
-          && existing().status in ['PENDING', 'ACCEPTED']
+          && existing().status == 'ACCEPTED'
           && incoming().diff(existing()).affectedKeys().hasOnly(['price', 'priceUpdatedAt'])
           && incoming().price is number && incoming().price > 0
-          && get(/databases/$(database)/documents/requests/$(existing().requestId)).data.status
-               in ['PENDING', 'ACCEPTED', 'ON_THE_WAY', 'WORKING'];
+          && get(/databases/$(database)/documents/requests/$(existing().requestId)).data.status == 'WORKING';
       }
       allow update: if isSignedIn() && (
                       (existing().artisanId == uid() && incoming().status == 'WITHDRAWN')

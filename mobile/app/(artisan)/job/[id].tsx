@@ -99,8 +99,8 @@ export default function JobDetail() {
 
   const canSend = Number(price) > 0 && Number(eta) > 0 && !sent;
 
-  // The price can change until the job is completed. On an accepted job the
-  // customer is told in the chat as well.
+  // The price can change only while the work is in progress (WORKING), once
+  // the artisan has seen the job; the customer is told in the chat as well.
   const savePrice = async (minor: number): Promise<boolean> => {
     if (!myOffer) return false;
     try {
@@ -209,10 +209,10 @@ export default function JobDetail() {
       )}
 
       {request.status === 'PENDING' && myOffer ? (
-        /* Already quoted: show the offer (no second offer) with its price editable. */
+        /* Already quoted: show the offer (no second offer). Its price is fixed until the work starts. */
         <Card style={{ marginTop: 24, gap: 14 }}>
           <Text variant="h3">{t('job.yourOffer')}</Text>
-          <PriceRow offer={myOffer} editable saving={updatePrice.isPending} onSave={savePrice} />
+          <PriceRow offer={myOffer} editable={false} saving={updatePrice.isPending} onSave={savePrice} />
           <Text variant="caption" tone="muted">
             {t('job.waitingCustomer')}
           </Text>
@@ -278,7 +278,7 @@ export default function JobDetail() {
           </View>
           <TrackingTimeline status={request.status} />
           {myOffer && (
-            <PriceRow offer={myOffer} editable={isActiveJob(request.status)} saving={updatePrice.isPending} onSave={savePrice} />
+            <PriceRow offer={myOffer} editable={request.status === 'WORKING'} saving={updatePrice.isPending} onSave={savePrice} />
           )}
           {next && (
             <Button
@@ -325,7 +325,7 @@ export default function JobDetail() {
   );
 }
 
-/** The offer's price, with an inline editor while the job is still open. */
+/** The offer's price, with an inline editor while the work is in progress. */
 function PriceRow({
   offer,
   editable,

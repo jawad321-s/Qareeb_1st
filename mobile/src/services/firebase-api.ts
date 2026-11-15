@@ -231,8 +231,8 @@ export const firebaseApi: typeof mockApi = {
   },
 
   async updateOfferPrice(offerId, price): Promise<void> {
-    // Rules: only the offer's artisan, only the price, and only while the job
-    // is still open (pending, accepted, on the way or in progress).
+    // Rules: only the offer's artisan, only the price, and only while the work
+    // is in progress (request WORKING, offer accepted).
     await updateDoc(doc(db(), 'offers', offerId), { price, priceUpdatedAt: Date.now() });
   },
 

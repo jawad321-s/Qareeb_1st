@@ -81,8 +81,10 @@ export default function BroadcastsPage() {
       setResult({ ok: true, text: t('bc.sent') });
       setTitle('');
       setBody('');
-    } catch {
-      setResult({ ok: false, text: t('bc.failed') });
+    } catch (e) {
+      // Refused by Firestore: the rules that allow broadcasts aren't deployed yet.
+      const denied = (e as { code?: string }).code === 'permission-denied';
+      setResult({ ok: false, text: t(denied ? 'bc.rulesMissing' : 'bc.failed') });
     } finally {
       setBusy(false);
       setConfirming(false);

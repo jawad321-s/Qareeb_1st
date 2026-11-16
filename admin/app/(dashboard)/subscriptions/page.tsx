@@ -91,8 +91,9 @@ export default function SubscriptionsPage() {
       setResult({ ok: true, text: t(notify ? 'price.savedNotified' : 'price.saved') });
       setEditing(false);
       setConfirming(false);
-    } catch {
-      setResult({ ok: false, text: t('price.saveFailed') });
+    } catch (e) {
+      const denied = (e as { code?: string }).code === 'permission-denied';
+      setResult({ ok: false, text: t(denied ? 'bc.rulesMissing' : 'price.saveFailed') });
       setConfirming(false);
     } finally {
       setBusy(false);

@@ -1,14 +1,24 @@
+import { useEffect } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/services/api';
 import { qk } from '@/lib/queryClient';
 import type { AppUser, GeoLocation, Offer, RequestStatus, Review, ServiceRequest, ChatMessage } from '@/types';
 import { distanceKm } from '@/lib/geo';
 import { isChatOpen } from '@/lib/requestRules';
+import { useCatalog } from '@/store/catalog';
 import type { Reason } from '@/lib/reasons';
 
 /** The service catalog (every category's services). */
 export function useServices() {
-  return useQuery({ queryKey: qk.services(), queryFn: () => api.getServices() });
+  // Rebuilt whenever the admin renames, hides or adds a service.
+  const overrides = useCatalog((s) => s.overrides);
+  const custom = useCatalog((s) => s.custom);
+  const query = useQuery({ queryKey: qk.services(), queryFn: () => api.getServices() });
+  const { refetch } = query;
+  useEffect(() => {
+    refetch();
+  }, [overrides, custom, refetch]);
+  return query;
 }
 
 export function useArtisan(id: string) {

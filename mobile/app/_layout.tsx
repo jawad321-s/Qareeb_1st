@@ -65,9 +65,9 @@ function RootNavigator() {
   usePublicProfile(user);
   // Suspended or deleted from the admin dashboard: out at once.
   useAccountGuard(uid);
-  // The admin's renamed and hidden services.
+  // The admin's renamed, hidden and added services, followed live.
   useEffect(() => {
-    useCatalog.getState().load().catch(() => {});
+    useCatalog.getState().start();
   }, []);
 
   // Keep the module-level "where am I" up to date, so the language switch can

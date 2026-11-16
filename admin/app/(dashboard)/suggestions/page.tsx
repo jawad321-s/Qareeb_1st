@@ -117,7 +117,7 @@ export default function SuggestionsPage() {
                   <Button size="sm" variant="ghost" onClick={() => decide(s, 'new')}>{t('sug.reopen')}</Button>
                 )}
                 {s.status !== 'added' && s.status !== 'declined' && (
-                  <Link href="/categories" className="inline-flex items-center gap-1.5 rounded-xl px-2 py-1.5 text-sm text-brand-500 hover:underline">
+                  <Link href={`/categories?new=${encodeURIComponent(s.name)}`} className="inline-flex items-center gap-1.5 rounded-xl px-2 py-1.5 text-sm text-brand-500 hover:underline">
                     <Layers className="h-4 w-4" /> {t('sug.addCategory')}
                   </Link>
                 )}

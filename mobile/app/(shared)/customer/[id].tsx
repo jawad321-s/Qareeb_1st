@@ -8,6 +8,8 @@ import { Avatar } from '@/components/ui/Avatar';
 import { Rating } from '@/components/ui/Rating';
 import { CardSkeleton } from '@/components/feedback/Skeleton';
 import { useReviews, useUser } from '@/hooks/queries';
+import { useAuth } from '@/store/auth';
+import { ReportLink } from '@/components/domain/ReportLink';
 import { config } from '@/lib/config';
 import { formatDate } from '@/lib/format';
 import { ratingSummary, ratingValue } from '@/lib/rating';
@@ -19,6 +21,7 @@ export default function CustomerProfile() {
   const { t } = useT();
   const { data: user, isLoading } = useUser(id);
   const reviews = useReviews(id!);
+  const viewer = useAuth((s) => s.user);
 
   if (isLoading || !user) {
     return (
@@ -57,6 +60,8 @@ export default function CustomerProfile() {
           </Text>
         </View>
       </View>
+      {/* Artisans reach this page from a job: they can complain about the customer. */}
+      {viewer?.role === 'artisan' && viewer.uid !== id && <ReportLink targetId={id!} targetRole="customer" />}
     </Screen>
   );
 }

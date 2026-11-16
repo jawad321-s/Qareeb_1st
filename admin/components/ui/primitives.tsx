@@ -72,8 +72,46 @@ export function StatusPill({ status }: { status: string }) {
     PENDING: 'warning', ACCEPTED: 'info', ON_THE_WAY: 'info', WORKING: 'brand',
     COMPLETED: 'success', CANCELLED: 'danger',
     active: 'success', suspended: 'danger', pending: 'warning',
-    open: 'warning', reviewing: 'info', resolved: 'success',
+    open: 'warning', reviewing: 'info', resolved: 'success', dismissed: 'neutral',
+    new: 'warning', reviewed: 'info', added: 'success', declined: 'neutral',
     approved: 'success', rejected: 'danger',
   };
   return <Badge tone={map[status] ?? 'neutral'}>{t(`status.${status}` as TKey)}</Badge>;
+}
+
+/** A row of filter tabs with counts (complaints, suggestions). */
+export function FilterTabs<K extends string>({
+  tabs,
+  value,
+  onChange,
+}: {
+  tabs: { key: K; label: string; count?: number }[];
+  value: K;
+  onChange: (key: K) => void;
+}) {
+  return (
+    <div role="tablist" className="flex flex-wrap gap-2">
+      {tabs.map((tab) => {
+        const active = tab.key === value;
+        return (
+          <button
+            key={tab.key}
+            type="button"
+            role="tab"
+            aria-selected={active}
+            onClick={() => onChange(tab.key)}
+            className={cn(
+              'inline-flex items-center gap-2 rounded-full border px-3.5 py-1.5 text-sm font-medium transition-colors',
+              active ? 'border-brand-600 bg-brand-600 text-white' : 'border-base text-muted hover:bg-slate-500/10',
+            )}
+          >
+            {tab.label}
+            {tab.count !== undefined && (
+              <span className={cn('rounded-full px-1.5 text-xs', active ? 'bg-white/20' : 'bg-slate-500/10')}>{tab.count}</span>
+            )}
+          </button>
+        );
+      })}
+    </div>
+  );
 }

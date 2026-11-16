@@ -6,13 +6,17 @@
 import { useEffect, useState } from 'react';
 import { collection, onSnapshot } from 'firebase/firestore';
 import { getDb, isLive } from './firebase';
-import type { AdminUser, Complaint } from './mock-data';
+import type { AdminUser, Complaint, PartyRole, Suggestion } from './mock-data';
+import { complaintReason } from './feedback';
 
 export type LiveDoc = Record<string, any> & { id: string };
 
 /** Firestore Timestamp | epoch millis | undefined → epoch millis (0 if absent). */
 export const toMillis = (v: any): number =>
   v && typeof v.toMillis === 'function' ? v.toMillis() : typeof v === 'number' ? v : 0;
+
+/** 'artisan' | 'customer' from a stored role, else undefined. */
+const partyRole = (v: unknown): PartyRole | undefined => (v === 'artisan' || v === 'customer' ? v : undefined);
 
 /** Live snapshot of a whole collection (null while loading, [] on error). */
 export function useCollection(name: string): LiveDoc[] | null {
@@ -168,7 +172,10 @@ export function recentActivity(
     ...data.complaints.map((c) => ({
       id: `c_${c.id}`,
       type: 'complaint' as const,
-      text: { en: `New report: ${c.reason ?? ''}`, ar: `بلاغ جديد: ${c.reason ?? ''}` },
+      text: {
+        en: `New complaint: ${complaintReason({ reason: c.reason ?? '', targetRole: partyRole(c.targetRole) }, 'en')}`,
+        ar: `شكوى جديدة: ${complaintReason({ reason: c.reason ?? '', targetRole: partyRole(c.targetRole) }, 'ar')}`,
+      },
       time: toMillis(c.createdAt),
     })),
     ...data.subscriptions.map((s) => ({
@@ -205,17 +212,46 @@ export function toAdminUsers(users: LiveDoc[], requests: LiveDoc[]): AdminUser[]
     .sort((a, b) => b.joinedAt - a.joinedAt);
 }
 
-/** complaints docs → rows for the complaints list. */
-export function toComplaints(complaints: LiveDoc[]): (Complaint & { details?: string })[] {
+/**
+ * complaints docs → rows for the complaints list. The phone of the person a
+ * complaint is about comes from their account (`users`), so the team can call
+ * both sides.
+ */
+export function toComplaints(complaints: LiveDoc[], users: LiveDoc[] = []): Complaint[] {
+  const phones = new Map(users.map((u) => [u.id, u.phone as string | undefined]));
   return complaints
     .map((c) => ({
       id: c.id,
       reporter: c.reporterName ?? '—',
+      reporterId: c.reporterId ?? undefined,
+      reporterRole: partyRole(c.reporterRole),
+      reporterPhone: c.reporterPhone ?? phones.get(c.reporterId) ?? undefined,
       target: c.targetName ?? '',
+      targetId: c.targetId ?? undefined,
+      targetRole: partyRole(c.targetRole),
+      targetPhone: (c.targetId && phones.get(c.targetId)) || undefined,
+      requestTitle: c.requestTitle || undefined,
       reason: c.reason ?? '—',
       details: c.details ?? '',
+      adminNote: c.adminNote ?? '',
       status: (c.status ?? 'open') as Complaint['status'],
       createdAt: toMillis(c.createdAt),
+    }))
+    .sort((a, b) => b.createdAt - a.createdAt);
+}
+
+/** suggestions docs → rows for the suggestions list, newest first. */
+export function toSuggestions(suggestions: LiveDoc[]): Suggestion[] {
+  return suggestions
+    .map((s) => ({
+      id: s.id,
+      name: String(s.name ?? '—'),
+      details: s.details ?? '',
+      author: s.authorName ?? '—',
+      authorRole: partyRole(s.authorRole),
+      authorPhone: s.authorPhone ?? undefined,
+      status: (s.status ?? 'new') as Suggestion['status'],
+      createdAt: toMillis(s.createdAt),
     }))
     .sort((a, b) => b.createdAt - a.createdAt);
 }

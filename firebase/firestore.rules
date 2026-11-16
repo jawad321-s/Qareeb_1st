@@ -233,9 +233,32 @@ service cloud.firestore {
     }
 
     // ── complaints ───────────────────────────────────────────────────────────
+    // A complaint about a person (an artisan or a customer, usually about a
+    // job they had together) or a general problem report. Only the reporter
+    // and admins can read it: the person it is about is never told who sent
+    // it. Handling it (status, note) is the admin's call.
     match /complaints/{id} {
       allow read: if isSignedIn() && (existing().reporterId == uid() || isAdmin());
-      allow create: if isSignedIn() && incoming().reporterId == uid();
+      allow create: if isSignedIn()
+                    && incoming().reporterId == uid()
+                    && incoming().status == 'open'
+                    && incoming().reason is string && incoming().reason.size() <= 40
+                    && incoming().details is string && incoming().details.size() <= 1000
+                    && incoming().get('targetId', null) != uid();
+      allow update, delete: if isAdmin();
+    }
+
+    // ── suggestions ──────────────────────────────────────────────────────────
+    // A service a customer or artisan would like the app to offer. Shown in
+    // the admin dashboard → Suggestions; only admins review them.
+    match /suggestions/{id} {
+      allow read: if isSignedIn() && (existing().authorId == uid() || isAdmin());
+      allow create: if isSignedIn()
+                    && incoming().authorId == uid()
+                    && incoming().status == 'new'
+                    && incoming().name is string
+                    && incoming().name.size() >= 2 && incoming().name.size() <= 60
+                    && incoming().details is string && incoming().details.size() <= 500;
       allow update, delete: if isAdmin();
     }
 

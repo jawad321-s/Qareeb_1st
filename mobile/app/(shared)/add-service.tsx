@@ -8,6 +8,7 @@ import { Icon } from '@/components/ui/Icon';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { CardSkeleton } from '@/components/feedback/Skeleton';
+import { SuggestServiceLink } from '@/components/domain/SuggestServiceLink';
 import { useToast } from '@/components/feedback/Toast';
 import { categoryById } from '@/constants/categories';
 import { useServices } from '@/hooks/queries';
@@ -102,6 +103,7 @@ export default function AddService() {
                 </Pressable>
               );
             })}
+        {!catalog.isLoading && <SuggestServiceLink label={t('suggest.notFoundArtisan')} />}
       </ScrollView>
 
       <View style={{ paddingHorizontal: 20, paddingVertical: 12, borderTopWidth: 1, borderTopColor: colors.border }}>

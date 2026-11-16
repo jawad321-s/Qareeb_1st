@@ -15,6 +15,8 @@ import { CardSkeleton } from '@/components/feedback/Skeleton';
 import { FloatingBlobs } from '@/components/ui/FloatingBlobs';
 import { useArtisan, useReviews } from '@/hooks/queries';
 import { usePastArtisans } from '@/hooks/usePastArtisans';
+import { useAuth } from '@/store/auth';
+import { ReportLink } from '@/components/domain/ReportLink';
 import { categoryById } from '@/constants/categories';
 import { config } from '@/lib/config';
 import { timeAgo } from '@/lib/format';
@@ -30,6 +32,7 @@ export default function ArtisanDetail() {
   const reviews = useReviews(id!);
   // Set when the signed-in customer has worked with this artisan before.
   const past = usePastArtisans().byId.get(id!);
+  const viewer = useAuth((s) => s.user);
 
   if (isLoading || !data) {
     return (
@@ -137,6 +140,8 @@ export default function ArtisanDetail() {
             </View>
           )}
 
+          {/* Customers can complain about an artisan from their profile. */}
+          {viewer?.role === 'customer' && <ReportLink targetId={id!} targetRole="artisan" />}
         </View>
       </ScrollView>
 

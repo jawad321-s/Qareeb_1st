@@ -46,12 +46,38 @@ export interface AdminRequest {
   createdAt: number;
 }
 
+export type PartyRole = 'customer' | 'artisan';
+
+/** A complaint about a person (target set) or a general problem report. */
 export interface Complaint {
   id: string;
   reporter: string;
+  reporterId?: string;
+  reporterRole?: PartyRole;
+  reporterPhone?: string;
+  /** Empty for a general problem report. */
   target: string;
+  targetId?: string;
+  targetRole?: PartyRole;
+  targetPhone?: string;
+  requestTitle?: string;
+  /** A reason code (lib/feedback.ts), or free text on reports sent by older app versions. */
   reason: string;
-  status: 'open' | 'reviewing' | 'resolved';
+  details?: string;
+  adminNote?: string;
+  status: 'open' | 'reviewing' | 'resolved' | 'dismissed';
+  createdAt: number;
+}
+
+/** A service a customer or artisan asked the app to offer. */
+export interface Suggestion {
+  id: string;
+  name: string;
+  details?: string;
+  author: string;
+  authorRole?: PartyRole;
+  authorPhone?: string;
+  status: 'new' | 'reviewed' | 'added' | 'declined';
   createdAt: number;
 }
 
@@ -100,13 +126,46 @@ export const REQUESTS: AdminRequest[] = Array.from({ length: 40 }).map((_, i) =>
   createdAt: Date.now() - rnd(0, 30) * day,
 }));
 
-export const COMPLAINTS: Complaint[] = Array.from({ length: 6 }).map((_, i) => ({
-  id: `c_${i + 1}`,
-  reporter: name(),
-  target: name(),
-  reason: ['عدم حضور', 'مبالغة بالسعر', 'جودة منخفضة', 'سلوك غير مهني', 'مخاوف تتعلق بالسلامة'][rnd(0, 5)],
-  status: (['open', 'reviewing', 'resolved'] as Complaint['status'][])[rnd(0, 3)],
-  createdAt: Date.now() - rnd(1, 15) * day,
+const phone = () => `+97059${rnd(1000000, 9999999)}`;
+
+export const COMPLAINTS: Complaint[] = Array.from({ length: 7 }).map((_, i) => {
+  const aboutArtisan = i % 3 !== 1;
+  const general = i === 5;
+  const target = name();
+  return {
+    id: `c_${i + 1}`,
+    reporter: name(),
+    reporterRole: aboutArtisan ? 'customer' : 'artisan',
+    reporterPhone: phone(),
+    target: general ? '' : target,
+    targetId: general ? undefined : `u_${(i % 2) + 1}`,
+    targetRole: general ? undefined : aboutArtisan ? 'artisan' : 'customer',
+    targetPhone: general ? undefined : phone(),
+    requestTitle: general ? undefined : ['تصليح تسريب بالمطبخ', 'تمديد كهرباء للصالون', 'دهان غرفة نوم'][i % 3],
+    reason: general ? 'app_issue' : aboutArtisan ? ['no_show', 'overcharged', 'poor_quality'][i % 3] : 'refused_pay',
+    details: 'تفاصيل الشكوى كما كتبها المستخدم في التطبيق.',
+    status: (['open', 'open', 'resolved', 'open', 'dismissed', 'open', 'resolved'] as Complaint['status'][])[i],
+    createdAt: Date.now() - rnd(1, 15) * day,
+  };
+});
+
+export const SUGGESTIONS: Suggestion[] = [
+  ['تنظيف خزانات المياه', 'customer', 'new'],
+  ['تنظيف الخزانات', 'customer', 'new'],
+  ['تركيب كاميرات مراقبة', 'artisan', 'new'],
+  ['صيانة طاقة شمسية', 'customer', 'reviewed'],
+  ['تنظيف خزانات مياه', 'artisan', 'new'],
+  ['صيانة أبواب ألمنيوم', 'customer', 'added'],
+  ['تصليح غسالات', 'customer', 'declined'],
+].map(([n, role, status], i) => ({
+  id: `s_${i + 1}`,
+  name: n,
+  details: i % 2 ? '' : 'بحتاج حدا يعمل هالشغلة وما لقيتها بالتطبيق.',
+  author: name(),
+  authorRole: role as Suggestion['authorRole'],
+  authorPhone: phone(),
+  status: status as Suggestion['status'],
+  createdAt: Date.now() - rnd(1, 20) * day,
 }));
 
 // ── Aggregates for charts ────────────────────────────────────────────────────

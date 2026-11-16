@@ -11,6 +11,7 @@ import { Badge } from '@/components/ui/Badge';
 import { Avatar } from '@/components/ui/Avatar';
 import { Rating } from '@/components/ui/Rating';
 import { Button } from '@/components/ui/Button';
+import { ReportLink } from '@/components/domain/ReportLink';
 import { CardSkeleton } from '@/components/feedback/Skeleton';
 import { EmptyState } from '@/components/feedback/EmptyState';
 import { StatusBadge } from '@/components/domain/StatusBadge';
@@ -141,6 +142,10 @@ export default function JobRecordScreen() {
 
         {done && (
           <Button label={t('hist.openChat')} iconLeft="message" variant="outline" onPress={() => router.push(`/(shared)/chat/${record.requestId}`)} />
+        )}
+        {/* A job the artisan did, or one called off, can still lead to a complaint. */}
+        {(done || record.reason === 'cancelled' || record.reason === 'cancelledByMe') && (
+          <ReportLink targetId={record.customerId} targetRole="customer" requestId={record.requestId} />
         )}
       </Animated.View>
     </Screen>

@@ -49,6 +49,8 @@ export default function ArtisanProfile() {
     { icon: 'award', label: t('ap.subscription'), route: '/(shared)/subscription' },
     { icon: 'globe', label: `${t('profile.language')}: ${locale === 'ar' ? 'العربية' : 'English'}`, onPress: toggle },
     { icon: isDark ? 'moon' : 'sun', label: `${t('profile.theme')}: ${t(`settings.${mode}` as any)}`, onPress: () => setMode(mode === 'dark' ? 'light' : mode === 'light' ? 'system' : 'dark') },
+    { icon: 'lightbulb', label: t('profile.suggest'), route: '/(shared)/suggest' },
+    { icon: 'flag', label: t('profile.report'), route: '/(shared)/report' },
     { icon: 'log-out', label: t('profile.signOut'), danger: true, onPress: signOut },
   ];
 

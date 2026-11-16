@@ -13,6 +13,7 @@ import { StatusBadge } from '@/components/domain/StatusBadge';
 import { TrackingTimeline } from '@/components/domain/TrackingTimeline';
 import { OfferCard } from '@/components/domain/OfferCard';
 import { PersonRow } from '@/components/domain/PersonRow';
+import { ReportLink } from '@/components/domain/ReportLink';
 import { CardSkeleton } from '@/components/feedback/Skeleton';
 import { useRequest, useOffers, useAcceptOffer, useRejectOffer, useCancelRequest, useHasReviewed, useUser } from '@/hooks/queries';
 import { useAuth } from '@/store/auth';
@@ -288,6 +289,9 @@ export default function RequestDetail() {
           )}
         </View>
       )}
+
+      {/* Once an artisan was hired the customer can complain about them. */}
+      {!!request.acceptedArtisanId && <ReportLink targetId={request.acceptedArtisanId} targetRole="artisan" requestId={request.id} />}
     </Screen>
   );
 }

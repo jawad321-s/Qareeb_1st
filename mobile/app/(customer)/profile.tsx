@@ -61,6 +61,7 @@ export default function Profile() {
       title: t('profile.support'),
       items: [
         { icon: 'help-circle', label: t('profile.help'), route: '/(shared)/help' },
+        { icon: 'lightbulb', label: t('profile.suggest'), route: '/(shared)/suggest' },
         { icon: 'flag', label: t('profile.report'), route: '/(shared)/report' },
         { icon: 'log-out', label: t('profile.signOut'), danger: true, onPress: signOut },
       ],

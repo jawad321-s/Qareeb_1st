@@ -6,10 +6,13 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
   LayoutDashboard, Users, ShieldCheck, ClipboardList, BarChart3,
-  Layers, MessageSquareWarning, CreditCard, Settings, Menu, X,
+  Layers, MessageSquareWarning, Lightbulb, CreditCard, Settings, Menu, X,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useT, type TKey } from '@/lib/i18n';
+import { isLive } from '@/lib/firebase';
+import { useCollection } from '@/lib/live-data';
+import { COMPLAINTS, SUGGESTIONS } from '@/lib/mock-data';
 
 const NAV: { href: string; label: TKey; icon: any }[] = [
   { href: '/', label: 'nav.overview', icon: LayoutDashboard },
@@ -19,6 +22,7 @@ const NAV: { href: string; label: TKey; icon: any }[] = [
   { href: '/analytics', label: 'nav.analytics', icon: BarChart3 },
   { href: '/categories', label: 'nav.categories', icon: Layers },
   { href: '/complaints', label: 'nav.complaints', icon: MessageSquareWarning },
+  { href: '/suggestions', label: 'nav.suggestions', icon: Lightbulb },
   { href: '/subscriptions', label: 'nav.subscriptions', icon: CreditCard },
   { href: '/settings', label: 'nav.settings', icon: Settings },
 ];
@@ -38,9 +42,23 @@ function Brand() {
   );
 }
 
+/** What waits for the team: open complaints and new suggestions, shown on their links. */
+function useWaitingCounts(): Record<string, number> {
+  const live = isLive();
+  const complaints = useCollection('complaints');
+  const suggestions = useCollection('suggestions');
+  const c = (live ? complaints ?? [] : COMPLAINTS).map((x) => x.status ?? 'open');
+  const s = (live ? suggestions ?? [] : SUGGESTIONS).map((x) => x.status ?? 'new');
+  return {
+    '/complaints': c.filter((st) => st === 'open' || st === 'reviewing').length,
+    '/suggestions': s.filter((st) => st === 'new').length,
+  };
+}
+
 function NavLinks({ onNavigate }: { onNavigate?: () => void }) {
   const pathname = usePathname();
   const { t } = useT();
+  const waiting = useWaitingCounts();
   return (
     <nav className="flex-1 space-y-1 p-3">
       {NAV.map((item) => {
@@ -58,6 +76,16 @@ function NavLinks({ onNavigate }: { onNavigate?: () => void }) {
           >
             <Icon className="h-[18px] w-[18px]" />
             {t(item.label)}
+            {!!waiting[item.href] && (
+              <span
+                className={cn(
+                  'ms-auto min-w-5 rounded-full px-1.5 text-center text-xs font-semibold',
+                  active ? 'bg-white/25 text-white' : 'bg-red-500 text-white',
+                )}
+              >
+                {waiting[item.href]}
+              </span>
+            )}
           </Link>
         );
       })}

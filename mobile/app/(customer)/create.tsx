@@ -13,6 +13,7 @@ import { Card } from '@/components/ui/Card';
 import { useTabBarSpace } from '@/components/ui/TabBar';
 import { useToast } from '@/components/feedback/Toast';
 import { categoryById, useCategories } from '@/constants/categories';
+import { SuggestServiceLink } from '@/components/domain/SuggestServiceLink';
 import { useCreateRequest } from '@/hooks/queries';
 import { useAuth } from '@/store/auth';
 import { useTheme } from '@/theme/ThemeProvider';
@@ -158,6 +159,7 @@ export default function CreateRequest() {
                 );
               })}
             </View>
+            <SuggestServiceLink label={t('suggest.notFoundCustomer')} />
           </Animated.View>
         )}
 

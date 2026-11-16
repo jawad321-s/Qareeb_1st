@@ -25,6 +25,7 @@ import {
 import { ReasonSheet } from '@/components/feedback/ReasonSheet';
 import { reasonText, type Reason } from '@/lib/reasons';
 import { PersonRow } from '@/components/domain/PersonRow';
+import { ReportLink } from '@/components/domain/ReportLink';
 import { StatusBadge } from '@/components/domain/StatusBadge';
 import { TrackingTimeline } from '@/components/domain/TrackingTimeline';
 import { useToast } from '@/components/feedback/Toast';
@@ -388,6 +389,9 @@ function JobDetail() {
           />
         </View>
       )}
+
+      {/* The artisan hired for the job can complain about its customer. */}
+      {isAssigned && <ReportLink targetId={request.customerId} targetRole="customer" requestId={request.id} />}
     </Screen>
   );
 }

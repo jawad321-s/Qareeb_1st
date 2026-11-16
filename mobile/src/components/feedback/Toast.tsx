@@ -39,10 +39,12 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
       <SafeAreaView edges={['top']} pointerEvents="box-none" style={{ position: 'absolute', top: 0, left: 0, right: 0, alignItems: 'center' }}>
         <View style={{ gap: 8, paddingTop: 8, width: '100%', alignItems: 'center' }} pointerEvents="box-none">
           {toasts.map((t) => (
-            <Animated.View key={t.id} entering={FadeInUp.springify().damping(18)} exiting={FadeOutUp} style={{ borderRadius: 16, overflow: 'hidden', maxWidth: '92%' }}>
+            // A fixed width: a toast sized by its text was measured at one width and
+            // drawn at another, so a second line of Arabic overlapped the first.
+            <Animated.View key={t.id} entering={FadeInUp.springify().damping(18)} exiting={FadeOutUp} style={{ borderRadius: 16, overflow: 'hidden', width: '92%' }}>
               <BlurView intensity={isDark ? 50 : 80} tint={isDark ? 'dark' : 'light'} style={{ flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 16, paddingVertical: 12, borderWidth: 1, borderColor: colors.border }}>
                 <Icon name={ICON[t.type]} size={20} color={COLOR[t.type]} />
-                <Text variant="bodyMedium" numberOfLines={2} style={{ flexShrink: 1 }}>
+                <Text variant="bodyMedium" numberOfLines={3} style={{ flex: 1 }}>
                   {t.message}
                 </Text>
               </BlurView>

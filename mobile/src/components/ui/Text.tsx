@@ -71,7 +71,8 @@ export function Text({
           color: toneColor[tone],
           writingDirection: isRTL ? 'rtl' : 'ltr',
           ...(align ? { textAlign: align } : {}),
-          ...(isRTL ? { lineHeight: arabicLineHeight } : {}),
+          // Arabic letters join: any letter spacing pulls them apart on iOS.
+          ...(isRTL ? { lineHeight: arabicLineHeight, letterSpacing: 0 } : {}),
         },
         center && { textAlign: 'center' },
         style,

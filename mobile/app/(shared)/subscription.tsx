@@ -15,7 +15,7 @@ import { useTheme } from '@/theme/ThemeProvider';
 import { useT } from '@/i18n';
 import { formatMoney } from '@/lib/format';
 import { confirmAction } from '@/lib/confirm';
-import { PLANS, PLAN_FEATURES, daysLabel, perMonth, planById } from '@/lib/plans';
+import { PLAN_FEATURES, daysLabel, perMonth, planById, usePlans } from '@/lib/plans';
 import { useAuth } from '@/store/auth';
 import { useMySubscription, useSubscriptionStore } from '@/store/subscription';
 
@@ -32,11 +32,13 @@ export default function Subscription() {
   const sub = useMySubscription(user?.uid);
   const cancel = useSubscriptionStore((s) => s.cancel);
   const [selected, setSelected] = useState<string>('half');
+  // The admin's current prices.
+  const plans = usePlans();
 
   if (!user) return null;
 
-  const paid = PLANS.filter((p) => p.price > 0);
-  const chosen = planById(selected)!;
+  const paid = plans.filter((p) => p.price > 0);
+  const chosen = plans.find((p) => p.id === selected)!;
   const current = sub.record ? planById(sub.record.planId) : undefined;
   const date = (ts: number) =>
     new Date(ts).toLocaleDateString(locale === 'ar' ? 'ar' : 'en', { year: 'numeric', month: 'long', day: 'numeric' });

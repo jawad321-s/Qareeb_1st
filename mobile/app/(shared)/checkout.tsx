@@ -12,7 +12,7 @@ import { Icon } from '@/components/ui/Icon';
 import { Input } from '@/components/ui/Input';
 import { useAuth } from '@/store/auth';
 import { useSubscriptionStore, type SubscriptionRecord } from '@/store/subscription';
-import { planById } from '@/lib/plans';
+import { usePlans } from '@/lib/plans';
 import { formatMoney } from '@/lib/format';
 import {
   TEST_CARDS, cardBrand, digitsOnly, formatCardNumber, formatExpiry, processPayment, validateCard,
@@ -34,7 +34,8 @@ export default function Checkout() {
   const { colors, gradient } = useTheme();
   const { t, locale } = useT();
   const { plan: planId } = useLocalSearchParams<{ plan: string }>();
-  const plan = planById(planId ?? '');
+  // The current price, as set in the admin dashboard.
+  const plan = usePlans().find((p) => p.id === planId);
   const user = useAuth((s) => s.user);
   const activate = useSubscriptionStore((s) => s.activate);
 

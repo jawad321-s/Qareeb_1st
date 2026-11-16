@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
   LayoutDashboard, Users, ShieldCheck, ClipboardList, BarChart3,
-  Layers, MessageSquareWarning, Lightbulb, CreditCard, Settings, Menu, X,
+  Layers, MessageSquareWarning, Lightbulb, Megaphone, CreditCard, Settings, Menu, X,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useT, type TKey } from '@/lib/i18n';
@@ -24,6 +24,7 @@ const NAV: { href: string; label: TKey; icon: any }[] = [
   { href: '/complaints', label: 'nav.complaints', icon: MessageSquareWarning },
   { href: '/suggestions', label: 'nav.suggestions', icon: Lightbulb },
   { href: '/subscriptions', label: 'nav.subscriptions', icon: CreditCard },
+  { href: '/broadcasts', label: 'nav.broadcasts', icon: Megaphone },
   { href: '/settings', label: 'nav.settings', icon: Settings },
 ];
 

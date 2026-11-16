@@ -1,4 +1,6 @@
+import { useMemo } from 'react';
 import type { Locale } from '@/types';
+import { usePlanPrices } from '@/store/planPrices';
 
 export type PlanId = 'trial' | 'quarter' | 'half' | 'year';
 
@@ -24,8 +26,9 @@ export const PLAN_FEATURES: Record<Locale, string[]> = {
 };
 
 /** Artisan subscription plans — shared by the plans screen, checkout and the
- *  admin figures. The free trial can be used once per artisan. */
-export const PLANS: Plan[] = [
+ *  admin figures. The free trial can be used once per artisan. The prices
+ *  here are the defaults: the admin can change them in the dashboard. */
+const BASE_PLANS: Plan[] = [
   { id: 'trial', name: { en: 'Free trial', ar: 'تجربة مجانية' }, durationDays: 7, price: 0, months: 0, highlight: false },
   { id: 'quarter', name: { en: '3 months', ar: '3 أشهر' }, durationDays: 90, price: 12900, months: 3, highlight: false },
   {
@@ -48,7 +51,20 @@ export const PLANS: Plan[] = [
   },
 ];
 
-export const planById = (id: string) => PLANS.find((p) => p.id === id);
+/** The plans with the admin's current prices (the free trial stays free). */
+export const getPlans = (): Plan[] => {
+  const prices = usePlanPrices.getState().prices;
+  return BASE_PLANS.map((p) => (p.price > 0 && prices[p.id] ? { ...p, price: prices[p.id] } : p));
+};
+
+/** Same, re-rendering when the admin changes a price. */
+export function usePlans(): Plan[] {
+  const prices = usePlanPrices((s) => s.prices);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  return useMemo(getPlans, [prices]);
+}
+
+export const planById = (id: string) => getPlans().find((p) => p.id === id);
 
 export const planDurationMs = (plan: Plan) => plan.durationDays * DAY_MS;
 

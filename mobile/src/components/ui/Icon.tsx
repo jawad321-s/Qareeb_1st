@@ -22,7 +22,7 @@ export type IconName =
   | 'droplet' | 'zap' | 'hammer' | 'wind' | 'paintbrush' | 'sparkles'
   | 'wrench' | 'tools' | 'plug' | 'leaf' | 'satellite' | 'truck' | 'briefcase'
   | 'more-horizontal' | 'info' | 'alert-circle' | 'help-circle' | 'flag' | 'credit-card' | 'lightbulb'
-  | 'key' | 'monitor' | 'scissors' | 'car' | 'package';
+  | 'key' | 'monitor' | 'scissors' | 'car' | 'package' | 'megaphone';
 
 interface IconProps {
   name: IconName;
@@ -122,6 +122,7 @@ function renderPaths(name: IconName, c: string, p: object) {
     case 'scissors': return <><Circle cx="6" cy="6" r="3" {...p} /><Circle cx="6" cy="18" r="3" {...p} /><Line x1="20" y1="4" x2="8.12" y2="15.88" {...p} /><Line x1="14.47" y1="14.48" x2="20" y2="20" {...p} /><Line x1="8.12" y1="8.12" x2="12" y2="12" {...p} /></>;
     case 'car': return <><Path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2" {...p} /><Circle cx="7" cy="17" r="2" {...p} /><Path d="M9 17h6" {...p} /><Circle cx="17" cy="17" r="2" {...p} /></>;
     case 'package': return <><Line x1="16.5" y1="9.4" x2="7.5" y2="4.21" {...p} /><Path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" {...p} /><Polyline points="3.27 6.96 12 12.01 20.73 6.96" {...p} /><Line x1="12" y1="22.08" x2="12" y2="12" {...p} /></>;
+    case 'megaphone': return <><Path d="M3 11l18-5v12L3 14v-3z" {...p} /><Path d="M11.6 16.8a3 3 0 1 1-5.8-1.6" {...p} /></>;
     default: return null;
   }
 }

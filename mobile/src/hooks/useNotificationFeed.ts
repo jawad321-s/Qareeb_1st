@@ -41,6 +41,9 @@ const TYPE_STYLE: Record<string, { icon: IconName; color?: string }> = {
   cancelledByOther: { icon: 'x-circle', color: '#EF4444' },
   noOffers: { icon: 'alert-circle', color: '#EF4444' },
   newMessage: { icon: 'message' },
+  // From the Qareeb team (admin dashboard), and the featured-artisan badge.
+  system: { icon: 'megaphone', color: '#7C3AED' },
+  becameFeatured: { icon: 'star-filled', color: '#D97706' },
 };
 
 const toItem = (n: AppNotification, tint: string): FeedItem => {

@@ -251,6 +251,18 @@ service cloud.firestore {
       allow update, delete: if isAdmin();
     }
 
+    // ── broadcasts ───────────────────────────────────────────────────────────
+    // System notifications written in the admin dashboard; Cloud Functions
+    // deliver each one to its audience and record how many it reached.
+    match /broadcasts/{id} {
+      allow read, delete: if isAdmin();
+      allow create: if isAdmin()
+                    && incoming().status == 'pending'
+                    && incoming().audience in ['all', 'customers', 'artisans']
+                    && incoming().title is string && incoming().title.size() >= 2 && incoming().title.size() <= 80
+                    && incoming().body is string && incoming().body.size() >= 2 && incoming().body.size() <= 500;
+    }
+
     // ── adminLog ─────────────────────────────────────────────────────────────
     // What the admins did to accounts (written by Cloud Functions only).
     match /adminLog/{id} {

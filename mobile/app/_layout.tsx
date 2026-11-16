@@ -32,6 +32,7 @@ import { usePushNotifications } from '@/hooks/usePushNotifications';
 import { usePublicProfile } from '@/hooks/usePublicProfile';
 import { useAccountGuard } from '@/hooks/useAccountGuard';
 import { useCatalog } from '@/store/catalog';
+import { usePlanPrices } from '@/store/planPrices';
 
 SplashScreen.preventAutoHideAsync().catch(() => {});
 
@@ -68,6 +69,7 @@ function RootNavigator() {
   // The admin's renamed, hidden and added services, followed live.
   useEffect(() => {
     useCatalog.getState().start();
+    usePlanPrices.getState().start();
   }, []);
 
   // Keep the module-level "where am I" up to date, so the language switch can

@@ -9,6 +9,8 @@
 //  • resetPasswordWithPhone → set a new password after an SMS code (callable)
 //  • a completed job recounts the artisan's jobs (featured badge at 10)
 //  • adminManageUser    → the dashboard's user management (callable, admins only)
+//  • onBroadcastCreated → a system notification from the dashboard to everyone,
+//                         customers or artisans
 import { initializeApp } from 'firebase-admin/app';
 import { getAuth } from 'firebase-admin/auth';
 import { getFirestore } from 'firebase-admin/firestore';
@@ -22,6 +24,7 @@ import { notifyUsers } from './notify.js';
 import { notifyOfferClosed, notifyRequestCancelled } from './handlers.js';
 import { backfillFeatured, onJobCompleted } from './featured.js';
 import { manageUser } from './adminUsers.js';
+import { deliverBroadcast } from './broadcast.js';
 import { resetPasswordWithPhone as resetPassword } from './passwordReset.js';
 
 initializeApp();
@@ -122,4 +125,9 @@ export const adminManageUser = onCall((request) =>
     request.auth && { uid: request.auth.uid, role: request.auth.token.role, email: request.auth.token.email },
     request.data,
   ),
+);
+
+/** A system notification written in the dashboard goes out to its audience. */
+export const onBroadcastCreated = onDocumentCreated({ document: 'broadcasts/{id}', timeoutSeconds: 540, memory: '512MiB' }, (event) =>
+  deliverBroadcast(db, event.params.id),
 );

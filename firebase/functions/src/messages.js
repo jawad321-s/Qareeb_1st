@@ -86,6 +86,11 @@ export const MESSAGES = {
     ar: (p) => ({ title: p.senderName, body: p.text ? clip(p.text) : '📷 صورة' }),
     en: (p) => ({ title: p.senderName, body: p.text ? clip(p.text) : '📷 Photo' }),
   },
+  // A message the admin wrote in the dashboard (same text in both languages).
+  system: {
+    ar: (p) => ({ title: p.title, body: p.body }),
+    en: (p) => ({ title: p.title, body: p.body }),
+  },
   becameFeatured: {
     ar: (p) => ({ title: 'مبروك! صرت حرفياً مميزاً ⭐', body: `أكملت ${p.jobs} طلبات، فصار عندك شارة "حرفي مميز" وتصلك الطلبات الجديدة قبل غيرك.` }),
     en: (p) => ({ title: "Congratulations, you're a featured artisan ⭐", body: `You completed ${p.jobs} jobs: you now carry the "Featured" badge and get new requests before others.` }),

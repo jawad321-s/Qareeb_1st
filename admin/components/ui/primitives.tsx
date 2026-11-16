@@ -74,6 +74,7 @@ export function StatusPill({ status }: { status: string }) {
     active: 'success', suspended: 'danger', pending: 'warning',
     open: 'warning', reviewing: 'info', resolved: 'success', dismissed: 'neutral',
     new: 'warning', reviewed: 'info', added: 'success', declined: 'neutral',
+    sending: 'info', sent: 'success', failed: 'danger',
     approved: 'success', rejected: 'danger',
   };
   return <Badge tone={map[status] ?? 'neutral'}>{t(`status.${status}` as TKey)}</Badge>;

@@ -45,8 +45,8 @@ export function useRequest(id: string) {
 export type NearbyRequest = ServiceRequest & { distanceKm?: number };
 
 /**
- * Open requests for an artisan, nearest first. Distances are measured from the
- * artisan's saved location; without one the list keeps its server order.
+ * Open requests for an artisan, newest first, each with its distance from the
+ * artisan's saved location (when there is one).
  */
 export function useNearbyRequests(artisanId: string, origin?: GeoLocation | null) {
   return useQuery({
@@ -56,12 +56,9 @@ export function useNearbyRequests(artisanId: string, origin?: GeoLocation | null
     refetchInterval: 30_000,
     staleTime: 0,
     select: (list): NearbyRequest[] =>
-      origin
-        ? list
-            .map((r) => ({ ...r, distanceKm: r.location ? distanceKm(origin, r.location) : undefined }))
-            // Requests without a location sort last.
-            .sort((a, b) => (a.distanceKm ?? Infinity) - (b.distanceKm ?? Infinity))
-        : list,
+      list
+        .map((r) => ({ ...r, distanceKm: origin && r.location ? distanceKm(origin, r.location) : undefined }))
+        .sort((a, b) => b.createdAt - a.createdAt),
   });
 }
 

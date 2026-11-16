@@ -60,7 +60,7 @@ export function isVisibleToArtisan(
   return distanceKm(me.location, r.location) <= targetRadiusKm(now - r.createdAt) + (featured ? FEATURED_BONUS_KM : 0);
 }
 
-/** Offers as the customer sees them: featured artisans first, then the cheapest. */
-export function sortOffers<T extends { price: number; artisanFeatured?: boolean }>(offers: T[]): T[] {
-  return [...offers].sort((a, b) => Number(!!b.artisanFeatured) - Number(!!a.artisanFeatured) || a.price - b.price);
+/** Offers as the customer sees them: featured artisans first, then the newest. */
+export function sortOffers<T extends { createdAt: number; artisanFeatured?: boolean }>(offers: T[]): T[] {
+  return [...offers].sort((a, b) => Number(!!b.artisanFeatured) - Number(!!a.artisanFeatured) || b.createdAt - a.createdAt);
 }

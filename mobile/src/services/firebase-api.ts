@@ -426,7 +426,8 @@ export const firebaseApi: typeof mockApi = {
       query(collection(db(), 'requests'), where('acceptedArtisanId', '==', artisanId), where('status', 'in', ACTIVE_STATUSES)),
     );
     const settled = await settleOverdue(snap.docs.map((d) => mapRequest(d.id, d.data())));
-    return settled.filter((r) => ACTIVE_STATUSES.includes(r.status)).sort((a, b) => b.updatedAt - a.updatedAt);
+    // Newest first, like every list of requests and offers.
+    return settled.filter((r) => ACTIVE_STATUSES.includes(r.status)).sort((a, b) => b.createdAt - a.createdAt);
   },
 
   async updateRequestStatus(requestId, status): Promise<void> {

@@ -307,7 +307,7 @@ export const mockApi = {
     return clone(
       requests
         .filter((r) => r.acceptedArtisanId === artisanId && ['ACCEPTED', 'ON_THE_WAY', 'WORKING'].includes(r.status))
-        .sort((a, b) => b.updatedAt - a.updatedAt),
+        .sort((a, b) => b.createdAt - a.createdAt),
     );
   },
 

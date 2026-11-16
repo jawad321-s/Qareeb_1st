@@ -4,7 +4,6 @@ import { Card } from '../ui/Card';
 import { Text } from '../ui/Text';
 import { Icon } from '../ui/Icon';
 import { Badge } from '../ui/Badge';
-import { Rating } from '../ui/Rating';
 import { categoryById } from '@/constants/categories';
 import { useUser } from '@/hooks/queries';
 import { formatDate, formatMoney } from '@/lib/format';
@@ -47,12 +46,9 @@ export function JobRecordCard({ record, onPress }: { record: JobRecord; onPress?
             {formatDate(record.date)}
           </Text>
         </View>
+        {/* The artisan doesn't see how each customer rated them, only their overall rating. */}
         {record.kind === 'completed' ? (
-          record.rating !== undefined ? (
-            <Rating value={record.rating} size={13} />
-          ) : (
-            <Badge label={t('hist.awaitingRating')} variant="warning" icon="clock" />
-          )
+          <Badge label={t('hist.done')} variant="success" icon="check-circle" />
         ) : (
           <Badge label={t(`hist.reason.${record.reason ?? 'declined'}` as any)} variant="danger" icon="x-circle" />
         )}

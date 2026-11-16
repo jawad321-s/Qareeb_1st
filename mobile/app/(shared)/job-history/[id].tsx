@@ -9,7 +9,6 @@ import { Card } from '@/components/ui/Card';
 import { Icon, type IconName } from '@/components/ui/Icon';
 import { Badge } from '@/components/ui/Badge';
 import { Avatar } from '@/components/ui/Avatar';
-import { Rating } from '@/components/ui/Rating';
 import { Button } from '@/components/ui/Button';
 import { ReportLink } from '@/components/domain/ReportLink';
 import { CardSkeleton } from '@/components/feedback/Skeleton';
@@ -108,20 +107,10 @@ export default function JobRecordScreen() {
 
         {/* How it ended */}
         <Card style={{ gap: 12 }}>
-          <Text variant="h3">{done ? t('hist.customerRating') : t('hist.result')}</Text>
+          <Text variant="h3">{t('hist.result')}</Text>
+          {/* Not how the customer rated the job: the artisan only sees their overall rating. */}
           {done ? (
-            record.rating !== undefined ? (
-              <>
-                <Rating value={record.rating} size={20} showValue />
-                {!!record.comment && (
-                  <Text variant="body" tone="muted">
-                    “{record.comment}”
-                  </Text>
-                )}
-              </>
-            ) : (
-              <Badge label={t('hist.awaitingRating')} variant="warning" icon="clock" />
-            )
+            <Detail icon="check-circle" color="#059669" label={t('hist.done')} />
           ) : (
             <>
               <Detail icon="x-circle" color="#DC2626" label={t(`hist.reason.${record.reason ?? 'declined'}` as any)} />

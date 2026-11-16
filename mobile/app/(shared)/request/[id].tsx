@@ -94,7 +94,7 @@ export default function RequestDetail() {
 
   return (
     <Screen scroll>
-      <Header showBack title={t('req.title')} rightIcon="more-horizontal" />
+      <Header showBack title={t('req.title')} />
       <ReasonSheet
         visible={!!asking}
         context={asking?.kind === 'reject' ? 'rejectOffer' : 'customerCancel'}

@@ -1,13 +1,12 @@
 // User management from the admin dashboard (callable `adminManageUser`), so
 // the team never has to open the Firebase console: suspend / reactivate an
-// account, verify an artisan or take it back, set a new password, delete an
-// account. Only callers whose token carries role=admin may use it, and every
-// action is recorded in `adminLog`.
+// account, verify an artisan or take it back, set a new password. Accounts are
+// suspended, never deleted. Only callers whose token carries role=admin may
+// use it, and every action is recorded in `adminLog`.
 import { HttpsError } from 'firebase-functions/v2/https';
 
-const ACTIVE_JOB = ['ACCEPTED', 'ON_THE_WAY', 'WORKING'];
 export const PASSWORD_MIN = 6;
-export const ACTIONS = ['suspend', 'reactivate', 'verify', 'unverify', 'setPassword', 'delete'];
+export const ACTIONS = ['suspend', 'reactivate', 'verify', 'unverify', 'setPassword'];
 
 /** Auth errors for an account that only exists in Firestore are not failures here. */
 const ignoreMissing = (e) => {
@@ -29,7 +28,7 @@ export async function manageUser(db, auth, caller, data) {
 
   const userRef = db.collection('users').doc(uid);
   const user = await userRef.get();
-  if (!user.exists && action !== 'delete') throw new HttpsError('not-found', 'No such user.');
+  if (!user.exists) throw new HttpsError('not-found', 'No such user.');
   const role = user.get('role');
   const now = Date.now();
   let result = {};
@@ -71,9 +70,6 @@ export async function manageUser(db, auth, caller, data) {
       }
       break;
     }
-    case 'delete':
-      result = await deleteAccount(db, auth, uid);
-      break;
   }
 
   await db.collection('adminLog').add({
@@ -99,37 +95,3 @@ async function withdrawPendingOffers(db, artisanId) {
   return open.size;
 }
 
-/**
- * Deletes an account: refused while it has a job in progress (accepted, on
- * the way, working) so nobody is left half-way. Its open requests are
- * cancelled (the artisans who offered are told) and its open offers
- * withdrawn; the login, the profile and its notifications go. Finished
- * requests, reviews and complaints stay for the records.
- */
-async function deleteAccount(db, auth, uid) {
-  const [asCustomer, asArtisan] = await Promise.all([
-    db.collection('requests').where('customerId', '==', uid).where('status', 'in', ACTIVE_JOB).limit(1).get(),
-    db.collection('requests').where('acceptedArtisanId', '==', uid).where('status', 'in', ACTIVE_JOB).limit(1).get(),
-  ]);
-  if (!asCustomer.empty || !asArtisan.empty) throw new HttpsError('failed-precondition', 'active-jobs');
-
-  const now = Date.now();
-  const pending = await db.collection('requests').where('customerId', '==', uid).where('status', '==', 'PENDING').get();
-  for (const r of pending.docs) {
-    const offers = await db.collection('offers').where('requestId', '==', r.id).where('status', '==', 'PENDING').get();
-    const batch = db.batch();
-    offers.docs.forEach((o) => batch.update(o.ref, { status: 'REJECTED', requestStatus: 'CANCELLED', closedReason: 'REQUEST_CANCELLED' }));
-    batch.update(r.ref, { status: 'CANCELLED', cancelledBy: uid, cancelChoice: null, cancelNote: null, cancelledAt: now, updatedAt: now });
-    await batch.commit();
-  }
-  const withdrawnOffers = await withdrawPendingOffers(db, uid);
-
-  await auth.deleteUser(uid).catch(ignoreMissing);
-  await db.recursiveDelete(db.collection('users').doc(uid));
-  await db.recursiveDelete(db.collection('verificationRequests').doc(uid));
-  await Promise.all([
-    db.collection('artisanProfiles').doc(uid).delete(),
-    db.collection('publicProfiles').doc(uid).delete(),
-  ]);
-  return { cancelledRequests: pending.size, withdrawnOffers };
-}

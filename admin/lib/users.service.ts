@@ -1,16 +1,17 @@
 // The dashboard's user management, done by the `adminManageUser` Cloud
 // Function (firebase/functions/src/adminUsers.js): only it can disable a
-// login, set a password or delete an account. Demo mode only pretends.
+// login or set a password. Accounts are suspended, never deleted. Demo mode
+// only pretends.
 'use client';
 
 import { httpsCallable } from 'firebase/functions';
 import { getFunctionsClient, isLive } from './firebase';
 
-export type UserAction = 'suspend' | 'reactivate' | 'verify' | 'unverify' | 'setPassword' | 'delete';
+export type UserAction = 'suspend' | 'reactivate' | 'verify' | 'unverify' | 'setPassword';
 export const PASSWORD_MIN = 6;
 
 /** Why an action failed, as a key of the users.err.* messages. */
-export type UserActionError = 'activeJobs' | 'weakPassword' | 'noLogin' | 'denied' | 'unreachable' | 'generic';
+export type UserActionError = 'weakPassword' | 'noLogin' | 'denied' | 'unreachable' | 'generic';
 
 export class UserActionFailed extends Error {
   constructor(public reason: UserActionError) {
@@ -29,7 +30,6 @@ export async function manageUser(action: UserAction, uid: string, extra: { reaso
   } catch (e) {
     const code = (e as { code?: string }).code ?? '';
     const message = (e as { message?: string }).message ?? '';
-    if (message === 'active-jobs') throw new UserActionFailed('activeJobs');
     if (message === 'weak-password') throw new UserActionFailed('weakPassword');
     if (message === 'no-login') throw new UserActionFailed('noLogin');
     if (code === 'functions/permission-denied' || code === 'functions/unauthenticated') throw new UserActionFailed('denied');

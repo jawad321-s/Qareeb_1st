@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
 import type { ColumnDef } from '@tanstack/react-table';
-import { CheckCircle2, KeyRound, Phone, ShieldCheck, ShieldOff, Star, Trash2, UserCheck, UserX, X } from 'lucide-react';
+import { CheckCircle2, KeyRound, Phone, ShieldCheck, ShieldOff, Star, UserCheck, UserX, X } from 'lucide-react';
 import { DataTable } from '@/components/ui/data-table';
 import { Badge, Button, FilterTabs, StatusPill } from '@/components/ui/primitives';
 import { USERS, type AdminUser } from '@/lib/mock-data';
@@ -30,9 +30,9 @@ export default function UsersPage() {
     [live, users, requests, profiles],
   );
   // Demo mode has no backend: decisions are kept on the page.
-  const [demo, setDemo] = useState<Record<string, Partial<AdminUser> | null>>({});
+  const [demo, setDemo] = useState<Record<string, Partial<AdminUser>>>({});
   const rows = useMemo(
-    () => loaded.filter((u) => demo[u.uid] !== null).map((u) => ({ ...u, ...demo[u.uid] })),
+    () => loaded.map((u) => ({ ...u, ...demo[u.uid] })),
     [loaded, demo],
   );
   const [filter, setFilter] = useState<Filter>('all');
@@ -147,7 +147,7 @@ export default function UsersPage() {
           serviceName={serviceName}
           complaints={against.get(current.uid) ?? 0}
           onClose={() => setSelected(null)}
-          onDemoChange={(patch) => setDemo((d) => ({ ...d, [current.uid]: patch === null ? null : { ...d[current.uid], ...patch } }))}
+          onDemoChange={(patch) => setDemo((d) => ({ ...d, [current.uid]: { ...d[current.uid], ...patch } }))}
         />
       )}
     </div>
@@ -164,8 +164,9 @@ function Initials({ name, size = 'h-9 w-9 text-xs' }: { name: string; size?: str
 
 /**
  * Everything the team can do to one account, in a side panel: suspend or
- * reactivate it, verify an artisan (or take it back), set a new password,
- * delete it. Each action runs on the server (Cloud Function adminManageUser).
+ * reactivate it (accounts are never deleted), verify an artisan (or take it
+ * back), set a new password. Each action runs on the server (Cloud Function
+ * adminManageUser).
  */
 function UserPanel({
   user,
@@ -178,14 +179,13 @@ function UserPanel({
   serviceName: (id: string) => string;
   complaints: number;
   onClose: () => void;
-  onDemoChange: (patch: Partial<AdminUser> | null) => void;
+  onDemoChange: (patch: Partial<AdminUser>) => void;
 }) {
   const { t, locale } = useT();
   const [busy, setBusy] = useState<UserAction | null>(null);
   const [message, setMessage] = useState<{ ok: boolean; text: string } | null>(null);
   const [reason, setReason] = useState('');
   const [password, setPassword] = useState('');
-  const [confirmDelete, setConfirmDelete] = useState(false);
   const suspended = user.status === 'suspended';
   const artisan = user.role === 'artisan';
 
@@ -201,17 +201,15 @@ function UserPanel({
     try {
       await manageUser(action, user.uid, extra);
       if (!isLive()) {
-        const patch: Record<UserAction, Partial<AdminUser> | null> = {
+        const patch: Record<UserAction, Partial<AdminUser>> = {
           suspend: { status: 'suspended', suspendReason: extra.reason },
           reactivate: { status: 'active', suspendReason: undefined },
           verify: { verified: true },
           unverify: { verified: false },
           setPassword: {},
-          delete: null,
         };
         onDemoChange(patch[action]);
       }
-      if (action === 'delete') return onClose();
       if (action === 'setPassword') setPassword('');
       if (action === 'suspend') setReason('');
       setMessage({ ok: true, text: t(`users.done.${action}` as TKey) });
@@ -220,7 +218,6 @@ function UserPanel({
       setMessage({ ok: false, text: t(`users.err.${why}` as TKey) });
     } finally {
       setBusy(null);
-      setConfirmDelete(false);
     }
   };
 
@@ -337,23 +334,6 @@ function UserPanel({
             </div>
           </Section>
 
-          <Section title={t('users.sec.delete')} hint={t('users.deleteHint')} danger>
-            {confirmDelete ? (
-              <div className="flex flex-wrap items-center gap-2">
-                <span className="text-sm font-medium text-red-600">{t('users.deleteSure')}</span>
-                <Button variant="danger" disabled={!!busy} onClick={() => run('delete')}>
-                  {t('users.deleteYes')}
-                </Button>
-                <Button variant="ghost" onClick={() => setConfirmDelete(false)}>
-                  {t('users.cancel')}
-                </Button>
-              </div>
-            ) : (
-              <Button variant="danger" disabled={!!busy} onClick={() => setConfirmDelete(true)}>
-                <Trash2 className="h-4 w-4" /> {t('users.delete')}
-              </Button>
-            )}
-          </Section>
         </div>
       </aside>
     </div>,

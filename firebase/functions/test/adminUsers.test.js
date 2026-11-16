@@ -88,26 +88,7 @@ test('set a new password (6 characters or more)', async () => {
   assert.equal(r.status, 200);
 });
 
-test('delete is refused while a job is in progress', async () => {
-  await rejects(call({ action: 'delete', uid: 'aubusy' }), 'failed-precondition', 'active-jobs');
-  assert.ok((await user('aubusy')).uid, 'still there');
-});
-
-test('delete removes the login and profile, cancels open requests, keeps finished ones', async () => {
-  await db.doc('offers/o_augone').set({ requestId: 'au_open', artisanId: 'aubusy', customerId: 'augone', status: 'PENDING', price: 90 });
-  const res = await call({ action: 'delete', uid: 'augone' });
-  assert.equal(res.cancelledRequests, 1);
-  await assert.rejects(auth.getUser('augone'), (e) => e.code === 'auth/user-not-found');
-  assert.equal((await db.doc('users/augone').get()).exists, false);
-  assert.equal((await db.doc('users/augone/notifications/n1').get()).exists, false);
-  assert.equal((await db.doc('publicProfiles/augone').get()).exists, false);
-  const r = (await db.doc('requests/au_open').get()).data();
-  assert.equal(r.status, 'CANCELLED');
-  assert.equal(r.cancelledBy, 'augone');
-  assert.equal((await db.doc('offers/o_augone').get()).get('closedReason'), 'REQUEST_CANCELLED');
-  assert.equal((await db.doc('requests/au_done').get()).get('status'), 'COMPLETED', 'history kept');
-  // Deleting an artisan also clears their verification files.
-  await call({ action: 'delete', uid: 'auart' });
-  assert.equal((await db.doc('verificationRequests/auart/files/id').get()).exists, false);
-  assert.equal((await db.doc('artisanProfiles/auart').get()).exists, false);
+test('accounts cannot be deleted from the dashboard', async () => {
+  await rejects(call({ action: 'delete', uid: 'augone' }), 'invalid-argument');
+  assert.ok((await user('augone')).uid, 'still there');
 });

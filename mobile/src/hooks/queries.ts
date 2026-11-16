@@ -3,6 +3,7 @@ import { api } from '@/services/api';
 import { qk } from '@/lib/queryClient';
 import type { AppUser, GeoLocation, Offer, RequestStatus, Review, ServiceRequest, ChatMessage } from '@/types';
 import { distanceKm } from '@/lib/geo';
+import { isChatOpen } from '@/lib/requestRules';
 import type { Reason } from '@/lib/reasons';
 
 /** The service catalog (every category's services). */
@@ -224,6 +225,22 @@ export function useConversations(user: Pick<AppUser, 'uid' | 'role'> | null) {
     queryFn: () => api.getConversations(user!.uid, role),
     enabled: !!user,
     refetchInterval: 8000,
+  });
+}
+
+/**
+ * How many open chats end with a message the user hasn't read (the same data
+ * as the conversation list, refreshed less often where only the count shows).
+ */
+export function useUnreadChats(user: Pick<AppUser, 'uid' | 'role'> | null) {
+  const role = user?.role === 'artisan' ? 'artisan' : 'customer';
+  return useQuery({
+    queryKey: qk.conversations(user?.uid ?? ''),
+    queryFn: () => api.getConversations(user!.uid, role),
+    enabled: !!user,
+    refetchInterval: 30_000,
+    select: (list) =>
+      list.filter((c) => isChatOpen(c.request.status) && c.lastMessage && !c.lastMessage.read && c.lastMessage.senderId !== user?.uid).length,
   });
 }
 

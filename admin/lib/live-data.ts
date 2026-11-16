@@ -189,7 +189,8 @@ export function recentActivity(
 }
 
 /** users/{uid} docs → rows for the users table. */
-export function toAdminUsers(users: LiveDoc[], requests: LiveDoc[]): AdminUser[] {
+export function toAdminUsers(users: LiveDoc[], requests: LiveDoc[], profiles: LiveDoc[] = []): AdminUser[] {
+  const featured = new Set(profiles.filter((p) => p.featured === true).map((p) => p.id));
   const jobs = new Map<string, number>();
   for (const r of requests) {
     if (r.status !== 'COMPLETED') continue;
@@ -208,6 +209,8 @@ export function toAdminUsers(users: LiveDoc[], requests: LiveDoc[]): AdminUser[]
       jobs: jobs.get(u.id) ?? 0,
       city: u.location?.address ?? '—',
       joinedAt: toMillis(u.createdAt),
+      featured: featured.has(u.id),
+      suspendReason: u.suspendReason ?? undefined,
     }))
     .sort((a, b) => b.joinedAt - a.joinedAt);
 }

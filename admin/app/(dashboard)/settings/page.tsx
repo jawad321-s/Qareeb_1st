@@ -99,6 +99,8 @@ export default function SettingsPage() {
         </div>
       </Card>
 
+      <FeaturedSettings />
+
       <Card className="p-6">
         <h2 className="mb-2 font-semibold">{t('set.admins')}</h2>
         {!!adminEmail && (
@@ -112,5 +114,82 @@ export default function SettingsPage() {
         </code>
       </Card>
     </div>
+  );
+}
+
+/** Default number of completed jobs for the "featured artisan" badge (Cloud Functions use the same). */
+const FEATURED_MIN_JOBS = 10;
+
+/**
+ * settings/platform.featuredMinJobs: completed jobs that make an artisan
+ * featured. Cloud Functions recount every artisan against a new number within
+ * a minute of saving it.
+ */
+function FeaturedSettings() {
+  const { t } = useT();
+  const live = isLive();
+  const [value, setValue] = useState(String(FEATURED_MIN_JOBS));
+  const [loaded, setLoaded] = useState(!live);
+  const [state, setState] = useState<'idle' | 'saving' | 'saved' | 'failed'>('idle');
+
+  useEffect(() => {
+    const db = getDb();
+    if (!live || !db) return;
+    return onSnapshot(
+      doc(db, 'settings', 'platform'),
+      (snap) => {
+        const n = snap.get('featuredMinJobs');
+        setValue(String(Number.isInteger(n) && n > 0 ? n : FEATURED_MIN_JOBS));
+        setLoaded(true);
+      },
+      () => setLoaded(true),
+    );
+  }, [live]);
+
+  const n = Number(value);
+  const valid = Number.isInteger(n) && n >= 1 && n <= 1000;
+
+  const save = async () => {
+    if (!valid) return;
+    const db = getDb();
+    setState('saving');
+    try {
+      if (live && db) await setDoc(doc(db, 'settings', 'platform'), { featuredMinJobs: n, updatedAt: Date.now() }, { merge: true });
+      setState('saved');
+    } catch {
+      setState('failed');
+    }
+  };
+
+  return (
+    <Card className="p-6">
+      <h2 className="font-semibold">{t('set.featured')}</h2>
+      <p className="mb-4 mt-1 text-xs text-muted">{t('set.featuredHint')}</p>
+      <div className="grid grid-cols-3 items-center gap-4">
+        <label className="text-sm text-muted">{t('set.featuredMinJobs')}</label>
+        <Input
+          aria-label={t('set.featuredMinJobs')}
+          type="number"
+          min={1}
+          max={1000}
+          inputMode="numeric"
+          value={value}
+          disabled={!loaded}
+          onChange={(e) => {
+            setValue(e.target.value);
+            setState('idle');
+          }}
+          className="col-span-2"
+        />
+      </div>
+      <div className="mt-6 flex items-center justify-end gap-3">
+        {!valid && <span className="text-sm text-red-500">{t('set.featuredInvalid')}</span>}
+        {state === 'saved' && <span className="text-sm text-emerald-600">{t('set.saved')}</span>}
+        {state === 'failed' && <span className="text-sm text-red-500">{t('set.saveFailed')}</span>}
+        <Button disabled={!loaded || !valid || state === 'saving'} onClick={save}>
+          {t('set.save')}
+        </Button>
+      </div>
+    </Card>
   );
 }

@@ -3,7 +3,7 @@
 // the response window runs out. Pure Firestore logic so it can be tested
 // against the emulator without the Functions runtime.
 import { FieldValue } from 'firebase-admin/firestore';
-import { INITIAL_RADIUS_KM, REQUIRE_VERIFIED, TIMEOUT_MS, targetRadiusKm } from './config.js';
+import { FEATURED_BONUS_KM, INITIAL_RADIUS_KM, REQUIRE_VERIFIED, TIMEOUT_MS, targetRadiusKm } from './config.js';
 import { distanceKm, normalizePhone } from './geo.js';
 import { isWithinAvailability } from './availability.js';
 import { notifyUsers } from './notify.js';
@@ -12,15 +12,17 @@ import { notifyUsers } from './notify.js';
  * Verified, active artisans of `categoryId` within `radiusKm` of `origin` who
  * are available (the dashboard switch is on) and inside their working days and
  * hours at `now`, excluding `excludeIds` and the customer's own artisan account
- * (same phone).
- * Returns [{ uid, distanceKm }] nearest first.
+ * (same phone). Featured artisans are reached FEATURED_BONUS_KM further, so
+ * each widening of the search gets to them one step before the others.
+ * Returns [{ uid, distanceKm, featured }], featured first, then nearest first.
  */
 export async function findArtisans(db, { categoryId, origin, radiusKm, excludeIds = [], customerPhone, requireVerified = REQUIRE_VERIFIED, now = Date.now() }) {
   const profiles = await db.collection('artisanProfiles').where('categoryIds', 'array-contains', categoryId).get();
-  const ids = profiles.docs
-    .filter((d) => d.get('available') !== false && isWithinAvailability(d.get('availability'), now))
-    .map((d) => d.id)
-    .filter((id) => !excludeIds.includes(id));
+  const open = profiles.docs.filter(
+    (d) => d.get('available') !== false && isWithinAvailability(d.get('availability'), now) && !excludeIds.includes(d.id),
+  );
+  const featured = new Set(open.filter((d) => d.get('featured') === true).map((d) => d.id));
+  const ids = open.map((d) => d.id);
   if (ids.length === 0) return [];
   const users = await db.getAll(...ids.map((id) => db.collection('users').doc(id)));
   const ownPhone = normalizePhone(customerPhone);
@@ -29,9 +31,9 @@ export async function findArtisans(db, { categoryId, origin, radiusKm, excludeId
     .map((u) => ({ uid: u.id, ...u.data() }))
     .filter((u) => u.role === 'artisan' && (!requireVerified || u.verified === true) && u.status !== 'suspended' && u.location)
     .filter((u) => !ownPhone || normalizePhone(u.phone) !== ownPhone)
-    .map((u) => ({ uid: u.uid, distanceKm: distanceKm(origin, u.location) }))
-    .filter((u) => u.distanceKm <= radiusKm)
-    .sort((a, b) => a.distanceKm - b.distanceKm);
+    .map((u) => ({ uid: u.uid, distanceKm: distanceKm(origin, u.location), featured: featured.has(u.uid) }))
+    .filter((u) => u.distanceKm <= radiusKm + (u.featured ? FEATURED_BONUS_KM : 0))
+    .sort((a, b) => Number(b.featured) - Number(a.featured) || a.distanceKm - b.distanceKm);
 }
 
 async function customerPhoneOf(db, customerId) {

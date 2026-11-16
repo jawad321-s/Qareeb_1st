@@ -30,8 +30,9 @@ export function OfferCard({ offer, best, onAccept, onReject, onPressArtisan, pas
 
   return (
     <Card style={{ gap: 14, borderColor: best ? colors.tint : undefined, borderWidth: best ? 1.5 : 1 }}>
-      {(best || !!pastJobs) && (
+      {(best || !!pastJobs || offer.artisanFeatured) && (
         <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+          {offer.artisanFeatured && <Badge label={t('featured.badge')} variant="warning" icon="star-filled" />}
           {best && <Badge label={t('offer.best')} variant="primary" icon="award" />}
           {!!pastJobs && <Badge label={t('past.badge')} variant="success" icon="check-circle" />}
         </View>

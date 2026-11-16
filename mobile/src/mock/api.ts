@@ -11,6 +11,7 @@ import {
   MOCK_SERVICES,
 } from './data';
 import { NEXT_STATUS, canCancelRequest, isChatOpen, isOverdue } from '@/lib/requestRules';
+import { sortOffers } from '@/lib/dispatch';
 import { completedRecord, rejectedRecord } from '@/lib/jobHistory';
 import { kv } from '@/lib/mmkv';
 import { hasAccount, useAuth } from '@/store/auth';
@@ -109,7 +110,8 @@ export const mockApi = {
 
   async getOffers(requestId: string): Promise<Offer[]> {
     await delay();
-    return clone(offers.filter((o) => o.requestId === requestId).sort((a, b) => a.price - b.price));
+    // Demo: the sample artisan (art_1, 214 jobs) is the featured one.
+    return clone(sortOffers(offers.filter((o) => o.requestId === requestId).map((o) => ({ ...o, artisanFeatured: o.artisanId === 'art_1' }))));
   },
 
   async acceptOffer(offerId: string): Promise<void> {
@@ -263,7 +265,6 @@ export const mockApi = {
   },
 
   /** Store how many jobs the artisan finished (the demo keeps its sample figure). */
-  async setCompletedJobs(_uid: string, _count: number): Promise<void> {},
 
   async getMessages(requestId: string): Promise<ChatMessage[]> {
     await delay(250);

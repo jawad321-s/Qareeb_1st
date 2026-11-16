@@ -16,6 +16,9 @@ export interface AdminUser {
   jobs: number;
   city: string;
   joinedAt: number;
+  /** Artisans: the featured badge (completed jobs counted by Cloud Functions). */
+  featured?: boolean;
+  suspendReason?: string;
 }
 
 export interface VerificationItem {

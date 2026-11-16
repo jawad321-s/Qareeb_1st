@@ -7,10 +7,12 @@
 //  • onArtisanProfileUpdated → a service added: offer its open requests
 //  • onMessageCreated   → tell the other party about a chat message
 //  • resetPasswordWithPhone → set a new password after an SMS code (callable)
+//  • a completed job recounts the artisan's jobs (featured badge at 10)
+//  • adminManageUser    → the dashboard's user management (callable, admins only)
 import { initializeApp } from 'firebase-admin/app';
 import { getAuth } from 'firebase-admin/auth';
 import { getFirestore } from 'firebase-admin/firestore';
-import { setGlobalOptions } from 'firebase-functions/v2';
+import { logger, setGlobalOptions } from 'firebase-functions/v2';
 import { onDocumentCreated, onDocumentUpdated } from 'firebase-functions/v2/firestore';
 import { onCall } from 'firebase-functions/v2/https';
 import { onSchedule } from 'firebase-functions/v2/scheduler';
@@ -18,6 +20,8 @@ import { REGION } from './config.js';
 import { offerOpenRequests, runDispatchTick, startDispatch } from './dispatch.js';
 import { notifyUsers } from './notify.js';
 import { notifyOfferClosed, notifyRequestCancelled } from './handlers.js';
+import { backfillFeatured, onJobCompleted } from './featured.js';
+import { manageUser } from './adminUsers.js';
 import { resetPasswordWithPhone as resetPassword } from './passwordReset.js';
 
 initializeApp();
@@ -32,6 +36,9 @@ export const onRequestCreated = onDocumentCreated('requests/{requestId}', async 
 });
 
 export const dispatchTick = onSchedule({ schedule: 'every 1 minutes', timeZone: 'Asia/Jerusalem' }, async () => {
+  // Once after a deploy (and when the admin changes the number): give the
+  // badge to artisans who already have the jobs. Never holds up dispatch.
+  await backfillFeatured(db).catch((e) => logger.error('Featured backfill failed', e));
   await runDispatchTick(db);
 });
 
@@ -53,7 +60,9 @@ export const onRequestUpdated = onDocumentUpdated('requests/{requestId}', async 
     case 'COMPLETED':
       // Both sides are asked to rate each other.
       await notifyUsers(db, [after.customerId], 'completed', { title: after.title }, customerRoute);
-      return notifyUsers(db, [after.acceptedArtisanId], 'completed', { title: after.title }, artisanRoute);
+      await notifyUsers(db, [after.acceptedArtisanId], 'completed', { title: after.title }, artisanRoute);
+      // Counts towards the featured badge.
+      return onJobCompleted(db, after.acceptedArtisanId);
     case 'CANCELLED':
       return notifyRequestCancelled(db, id, after);
   }
@@ -101,6 +110,16 @@ export const resetPasswordWithPhone = onCall((request) =>
       phone: request.auth.token.phone_number,
       provider: request.auth.token.firebase?.sign_in_provider,
     },
+    request.data,
+  ),
+);
+
+/** Suspend / reactivate / verify / set a password / delete — from the admin dashboard. */
+export const adminManageUser = onCall((request) =>
+  manageUser(
+    db,
+    getAuth(),
+    request.auth && { uid: request.auth.uid, role: request.auth.token.role, email: request.auth.token.email },
     request.data,
   ),
 );

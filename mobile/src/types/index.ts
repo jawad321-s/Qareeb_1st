@@ -55,7 +55,10 @@ export interface ArtisanProfile {
   certificates: { name: string; url: string; verified: boolean }[];
   verificationStatus: VerificationStatus;
   premium: boolean;
+  /** Jobs completed, counted by Cloud Functions from the requests. */
   completedJobs: number;
+  /** "Featured artisan": set by Cloud Functions once completedJobs reaches the threshold. */
+  featured?: boolean;
   rating: number;
   ratingCount: number;
 }
@@ -70,6 +73,8 @@ export interface SupportContacts {
   supportPhone?: string;
   supportWhatsApp?: string;
   supportEmail?: string;
+  /** Completed jobs that make an artisan featured (default FEATURED_MIN_JOBS). */
+  featuredMinJobs?: number;
 }
 
 export interface Category {
@@ -169,6 +174,8 @@ export interface Offer {
   requestStatus?: RequestStatus;
   // Denormalized artisan snapshot for fast rendering in the offers list.
   artisan?: Pick<AppUser, 'uid' | 'fullName' | 'photoUrl' | 'rating' | 'ratingCount'>;
+  /** Read live for the customer: the artisan is featured now (not when they offered). */
+  artisanFeatured?: boolean;
 }
 
 export type MessageType = 'text' | 'image' | 'voice';

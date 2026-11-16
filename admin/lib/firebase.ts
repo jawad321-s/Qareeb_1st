@@ -5,11 +5,13 @@
 import { getApps, initializeApp, type FirebaseApp } from 'firebase/app';
 import { connectAuthEmulator, getAuth, type Auth } from 'firebase/auth';
 import { connectFirestoreEmulator, getFirestore, type Firestore } from 'firebase/firestore';
+import { connectFunctionsEmulator, getFunctions, type Functions } from 'firebase/functions';
 import { config } from './config';
 
 let app: FirebaseApp | null = null;
 let db: Firestore | null = null;
 let auth: Auth | null = null;
+let functions: Functions | null = null;
 
 function ensureApp(): FirebaseApp {
   if (!app) app = getApps().length ? getApps()[0] : initializeApp(config.firebase);
@@ -30,6 +32,15 @@ export function getAuthClient(): Auth | null {
   auth = getAuth(ensureApp());
   if (config.emulatorHost) connectAuthEmulator(auth, `http://${config.emulatorHost}:9099`, { disableWarnings: true });
   return auth;
+}
+
+/** Cloud Functions in the project's region (see firebase/functions/src/config.js). */
+export function getFunctionsClient(): Functions | null {
+  if (config.useMock) return null;
+  if (functions) return functions;
+  functions = getFunctions(ensureApp(), 'europe-west1');
+  if (config.emulatorHost) connectFunctionsEmulator(functions, config.emulatorHost, 5001);
+  return functions;
 }
 
 export const isLive = () => !config.useMock;

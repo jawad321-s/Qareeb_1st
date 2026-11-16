@@ -12,7 +12,7 @@ import type {
 import type { mockApi } from '@/mock/api';
 import { getDb } from '@/lib/firebase';
 import { useAuth } from '@/store/auth';
-import { isExpired, isVisibleToArtisan } from '@/lib/dispatch';
+import { isExpired, isVisibleToArtisan, sortOffers } from '@/lib/dispatch';
 import type { Reason } from '@/lib/reasons';
 import { MOCK_CUSTOMER } from '@/mock/data';
 import { servicesOf, toServiceId } from '@/constants/services';
@@ -132,13 +132,14 @@ export const firebaseApi: typeof mockApi = {
     if (profile.exists() && profile.data().available === false) return [];
     const categoryIds: string[] = profile.exists() ? (profile.data().categoryIds ?? []) : [];
     const availability = profile.exists() ? profile.data().availability : undefined;
+    const featured = profile.exists() && profile.data().featured === true;
     // Pick up an admin approval made since sign-in.
     const verified = self.exists() ? self.data().verified === true : me.verified;
     if (verified !== me.verified) useAuth.getState().updateUser({ verified });
     const now = Date.now();
     return snap.docs
       .map((d) => mapRequest(d.id, d.data()))
-      .filter((r) => isVisibleToArtisan(r, { ...me, verified }, categoryIds, now, availability));
+      .filter((r) => isVisibleToArtisan(r, { ...me, verified }, categoryIds, now, availability, featured));
   },
 
   async createRequest(input): Promise<ServiceRequest> {
@@ -163,9 +164,18 @@ export const firebaseApi: typeof mockApi = {
     const party = me.role === 'artisan' ? 'artisanId' : 'customerId';
     const q = query(collection(db(), 'offers'), where('requestId', '==', requestId), where(party, '==', me.uid));
     const snap = await getDocs(q);
-    return snap.docs
+    const offers = snap.docs
       .map((d) => withId<Offer>(d.id, { ...d.data(), createdAt: ms(d.data().createdAt) }))
-      .sort((a, b) => a.price - b.price);
+      // An offer taken back (by the artisan, or when an admin suspends them) is gone for the customer.
+      .filter((o) => me.role === 'artisan' || o.status !== 'WITHDRAWN');
+    // The customer sees which artisans are featured now; their offers come first.
+    if (me.role !== 'artisan' && offers.length) {
+      const ids = [...new Set(offers.map((o) => o.artisanId))];
+      const profiles = await Promise.all(ids.map((id) => getDoc(doc(db(), 'artisanProfiles', id)).catch(() => null)));
+      const featured = new Set(profiles.filter((p) => p?.exists() && p.data().featured === true).map((p) => p!.id));
+      offers.forEach((o) => (o.artisanFeatured = featured.has(o.artisanId)));
+    }
+    return sortOffers(offers);
   },
 
   async acceptOffer(offerId: string): Promise<void> {
@@ -362,7 +372,12 @@ export const firebaseApi: typeof mockApi = {
   async getSupportContacts(): Promise<SupportContacts> {
     const snap = await getDoc(doc(db(), 'settings', 'platform'));
     const v = snap.data() ?? {};
-    return { supportPhone: v.supportPhone || undefined, supportWhatsApp: v.supportWhatsApp || undefined, supportEmail: v.supportEmail || undefined };
+    return {
+      supportPhone: v.supportPhone || undefined,
+      supportWhatsApp: v.supportWhatsApp || undefined,
+      supportEmail: v.supportEmail || undefined,
+      featuredMinJobs: Number.isInteger(v.featuredMinJobs) && v.featuredMinJobs > 0 ? v.featuredMinJobs : undefined,
+    };
   },
 
   async setAvailable(uid, available): Promise<void> {
@@ -371,10 +386,6 @@ export const firebaseApi: typeof mockApi = {
 
   async setBio(uid, bio): Promise<void> {
     await updateDoc(doc(db(), 'artisanProfiles', uid), { bio, updatedAt: Date.now() });
-  },
-
-  async setCompletedJobs(uid, count): Promise<void> {
-    await updateDoc(doc(db(), 'artisanProfiles', uid), { completedJobs: count });
   },
 
   async getMessages(requestId: string): Promise<ChatMessage[]> {

@@ -237,7 +237,7 @@ export default function RequestDetail() {
           <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
             <Text variant="h3">{t('req.offers')} ({offers.data?.length ?? 0})</Text>
             <Text variant="caption" tone="muted">
-              {t('req.sortedByPrice')}
+              {t((offers.data ?? []).some((o) => o.artisanFeatured) ? 'req.sortedFeatured' : 'req.sortedByPrice')}
             </Text>
           </View>
           <View style={{ gap: 18 }}>

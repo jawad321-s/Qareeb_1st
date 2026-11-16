@@ -79,7 +79,10 @@ service cloud.firestore {
                               (uid() == artisanId
                                 // verificationStatus & premium are admin-controlled.
                                 && incoming().verificationStatus == (resource == null ? 'unsubmitted' : existing().verificationStatus)
-                                && incoming().premium == (resource == null ? false : existing().premium))
+                                && incoming().premium == (resource == null ? false : existing().premium)
+                                // The job count and the featured badge are counted by Cloud Functions.
+                                && incoming().get('completedJobs', 0) == (resource == null ? 0 : existing().get('completedJobs', 0))
+                                && incoming().get('featured', false) == (resource == null ? false : existing().get('featured', false)))
                               || isAdmin());
       allow delete: if isAdmin();
     }
@@ -246,6 +249,12 @@ service cloud.firestore {
                     && incoming().details is string && incoming().details.size() <= 1000
                     && incoming().get('targetId', null) != uid();
       allow update, delete: if isAdmin();
+    }
+
+    // ── adminLog ─────────────────────────────────────────────────────────────
+    // What the admins did to accounts (written by Cloud Functions only).
+    match /adminLog/{id} {
+      allow read: if isAdmin();
     }
 
     // ── suggestions ──────────────────────────────────────────────────────────

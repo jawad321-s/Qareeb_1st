@@ -30,6 +30,7 @@ import { useAuth } from '@/store/auth';
 import { useVerification } from '@/store/verification';
 import { usePushNotifications } from '@/hooks/usePushNotifications';
 import { usePublicProfile } from '@/hooks/usePublicProfile';
+import { useAccountGuard } from '@/hooks/useAccountGuard';
 import { useCatalog } from '@/store/catalog';
 
 SplashScreen.preventAutoHideAsync().catch(() => {});
@@ -62,6 +63,8 @@ function RootNavigator() {
   usePushNotifications(uid, hydrated && fontsLoaded && splashDone);
   // What other users see of this account; the full user doc stays private.
   usePublicProfile(user);
+  // Suspended or deleted from the admin dashboard: out at once.
+  useAccountGuard(uid);
   // The admin's renamed and hidden services.
   useEffect(() => {
     useCatalog.getState().load().catch(() => {});

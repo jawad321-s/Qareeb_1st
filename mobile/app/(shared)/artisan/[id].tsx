@@ -71,7 +71,8 @@ export default function ArtisanDetail() {
                 {user.fullName}
               </Text>
               <View style={{ flexDirection: 'row', gap: 8 }}>
-                {profile.premium && <Badge label={t('ad.premium')} variant="warning" icon="award" />}
+                {profile.featured && <Badge label={t('featured.badge')} variant="warning" icon="star-filled" />}
+                {profile.premium && <Badge label={t('ad.premium')} variant="info" icon="award" />}
                 {user.verified && <Badge label={t('ad.verified')} variant="success" icon="shield" />}
               </View>
               <View style={{ flexDirection: 'row', gap: 28, marginTop: 12 }}>

@@ -64,6 +64,7 @@ export const MOCK_ARTISAN_PROFILE: ArtisanProfile = {
   verificationStatus: 'approved',
   premium: true,
   completedJobs: 214,
+  featured: true,
   rating: 4.8,
   ratingCount: 214,
 };

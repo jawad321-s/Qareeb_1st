@@ -14,15 +14,17 @@ import { SectionHeader } from '@/components/ui/SectionHeader';
 import { useTabBarSpace } from '@/components/ui/TabBar';
 import { RequestCard } from '@/components/domain/RequestCard';
 import { CardSkeleton } from '@/components/feedback/Skeleton';
-import { useArtisan, useJobHistory, useNearbyRequests, useSetAvailable } from '@/hooks/queries';
+import { useArtisan, useJobHistory, useNearbyRequests, useSetAvailable, useSupportContacts } from '@/hooks/queries';
 import { useToast } from '@/components/feedback/Toast';
 import { useMyRating } from '@/hooks/useMyRating';
-import { useSyncCompletedJobs } from '@/hooks/useSyncCompletedJobs';
 import { ratingValue } from '@/lib/rating';
 import { useAuth } from '@/store/auth';
 import { useTheme } from '@/theme/ThemeProvider';
 import { useT } from '@/i18n';
 import { NotificationBell } from '@/components/domain/NotificationBell';
+import { MessagesButton } from '@/components/domain/MessagesButton';
+import { FeaturedCard } from '@/components/domain/FeaturedCard';
+import { FEATURED_MIN_JOBS } from '@/lib/dispatch';
 import { formatMoney } from '@/lib/format';
 import { incomeSummary } from '@/lib/income';
 import { daysLabel, planById } from '@/lib/plans';
@@ -45,9 +47,11 @@ export default function ArtisanDashboard() {
   const nearby = useNearbyRequests(user.uid, user.location);
   const history = useJobHistory(user.uid);
   const rating = useMyRating();
-  // Customers see this count on the public profile.
-  useSyncCompletedJobs(user.uid, history.data?.completed.length);
   const tabBarSpace = useTabBarSpace();
+  // Featured artisan: completed jobs as counted by the server, against the
+  // number set in the dashboard.
+  const featuredMin = useSupportContacts().data?.featuredMinJobs ?? FEATURED_MIN_JOBS;
+  const completedJobs = profile.data?.profile.completedJobs ?? history.data?.completed.length ?? 0;
 
   // Artisans are matched to jobs by distance, so ask for the device location
   // the first time the app opens (once per account; the chip below re-opens it).
@@ -87,6 +91,7 @@ export default function ArtisanDashboard() {
                   {user.fullName.split(' ')[0]}
                 </Text>
               </View>
+              <MessagesButton style={{ width: 44, height: 44, borderRadius: 14 }} iconSize={20} />
               <NotificationBell style={{ width: 44, height: 44, borderRadius: 14 }} iconSize={20} />
             </View>
 
@@ -149,6 +154,13 @@ export default function ArtisanDashboard() {
             </Animated.View>
           ))}
         </View>
+
+        {/* Featured artisan: the badge, or how far from it */}
+        {profile.data && (
+          <View style={{ paddingHorizontal: 20, marginTop: 16 }}>
+            <FeaturedCard featured={profile.data.profile.featured === true} completed={completedJobs} threshold={featuredMin} />
+          </View>
+        )}
 
         {/* Nearby requests */}
         <View style={{ paddingHorizontal: 20, marginTop: 24 }}>

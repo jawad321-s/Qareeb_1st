@@ -41,6 +41,7 @@ export type AuthErrorKey =
   | 'auth.errWrongRole'
   | 'auth.errNetwork'
   | 'auth.errTooMany'
+  | 'auth.errDisabled'
   | 'auth.errGeneric';
 
 function toAuthError(err: unknown): AuthError {
@@ -59,6 +60,9 @@ function toAuthError(err: unknown): AuthError {
       return new AuthError('auth.errNetwork');
     case 'auth/too-many-requests':
       return new AuthError('auth.errTooMany');
+    // Suspended from the admin dashboard.
+    case 'auth/user-disabled':
+      return new AuthError('auth.errDisabled');
     default:
       console.warn('[auth]', err);
       return new AuthError('auth.errGeneric', code || (err as Error)?.message || 'unknown');
@@ -91,6 +95,10 @@ export async function signInWithPhone(phone: string, password: string, role: Use
     if (profile.role !== role) {
       await fbSignOut(auth());
       throw new AuthError('auth.errWrongRole');
+    }
+    if (profile.status === 'suspended') {
+      await fbSignOut(auth());
+      throw new AuthError('auth.errDisabled');
     }
     return profile;
   } catch (err) {

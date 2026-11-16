@@ -14,9 +14,8 @@ import { useAuth } from '@/store/auth';
 import { useTheme } from '@/theme/ThemeProvider';
 import { useThemeStore } from '@/theme/ThemeProvider';
 import { useT } from '@/i18n';
-import { useJobHistory } from '@/hooks/queries';
+import { useArtisan, useJobHistory } from '@/hooks/queries';
 import { useMyRating } from '@/hooks/useMyRating';
-import { useSyncCompletedJobs } from '@/hooks/useSyncCompletedJobs';
 import { ratingValue } from '@/lib/rating';
 import { useMySubscription } from '@/store/subscription';
 import { planById } from '@/lib/plans';
@@ -30,9 +29,8 @@ export default function ArtisanProfile() {
   // Real figures: verification from the account, jobs from the work history
   // (same count as the dashboard and income screens).
   const history = useJobHistory(user?.uid ?? '');
+  const featured = useArtisan(user?.uid ?? '').data?.profile.featured === true;
   const rating = useMyRating();
-  // Customers see this count on the public profile.
-  useSyncCompletedJobs(user?.uid ?? '', history.data?.completed.length);
   // The premium badge reflects the plan the artisan actually paid for.
   const plan = useMySubscription(user?.uid);
 
@@ -71,8 +69,9 @@ export default function ArtisanProfile() {
               <Text variant="h2" tone="inverse">
                 {user.fullName}
               </Text>
-              <View style={{ flexDirection: 'row', gap: 8 }}>
-                {plan.isPaid && plan.record && <Badge label={planById(plan.record.planId)?.name[locale] ?? t('ad.premium')} variant="warning" icon="award" />}
+              <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', gap: 8 }}>
+                {featured && <Badge label={t('featured.badge')} variant="warning" icon="star-filled" />}
+                {plan.isPaid && plan.record && <Badge label={planById(plan.record.planId)?.name[locale] ?? t('ad.premium')} variant="info" icon="award" />}
                 <Badge label={user.verified ? t('ad.verified') : t('ap.pending')} variant={user.verified ? 'success' : 'warning'} icon="shield" />
               </View>
               <View style={{ flexDirection: 'row', gap: 28, marginTop: 8 }}>

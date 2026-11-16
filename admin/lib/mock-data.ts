@@ -19,6 +19,8 @@ export interface AdminUser {
   /** Artisans: the featured badge (completed jobs counted by Cloud Functions). */
   featured?: boolean;
   suspendReason?: string;
+  /** Artisans: the services (category ids) on their profile now. */
+  services?: string[];
 }
 
 export interface VerificationItem {
@@ -93,6 +95,8 @@ const CITIES = ['رام الله', 'نابلس', 'الخليل', 'بيت لحم'
 const CATS = ['سباكة', 'كهرباء', 'تكييف', 'تنظيف', 'نجارة', 'دهان', 'نقل عفش', 'بستنة'];
 const name = () => `${FIRST[rnd(0, FIRST.length)]} ${LAST[rnd(0, LAST.length)]}`;
 
+const DEMO_SERVICES = ['plumbing', 'electrical', 'carpentry', 'ac', 'painting', 'cleaning', 'repair', 'appliance'];
+
 export const USERS: AdminUser[] = Array.from({ length: 48 }).map((_, i) => {
   const role: UserRole = i % 3 === 0 ? 'artisan' : 'customer';
   const n = name();
@@ -107,6 +111,7 @@ export const USERS: AdminUser[] = Array.from({ length: 48 }).map((_, i) => {
     jobs: role === 'artisan' ? rnd(5, 320) : rnd(1, 40),
     city: CITIES[rnd(0, CITIES.length)],
     joinedAt: Date.now() - rnd(1, 400) * day,
+    services: role === 'artisan' ? DEMO_SERVICES.filter((_, k) => (i + k) % 4 === 0) : undefined,
   };
 });
 

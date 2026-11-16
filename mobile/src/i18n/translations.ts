@@ -513,7 +513,6 @@ export const translations = {
     'suggest.sent': 'Thank you! Your suggestion reached the Qareeb team.',
     'suggest.failed': 'Could not send the suggestion. Please try again.',
     'suggest.cta': 'Suggest',
-    'suggest.notFoundCustomer': "Can't find the service you need?",
     'suggest.notFoundArtisan': "Your service isn't on the list?",
 
     // location permission
@@ -1282,7 +1281,6 @@ export const translations = {
     'suggest.sent': 'شكراً لك! وصل اقتراحك إلى فريق قريب.',
     'suggest.failed': 'تعذّر إرسال الاقتراح. حاول مجدداً.',
     'suggest.cta': 'اقترح',
-    'suggest.notFoundCustomer': 'لم تجد الخدمة التي تحتاجها؟',
     'suggest.notFoundArtisan': 'خدمتك غير موجودة في القائمة؟',
 
     // location permission

@@ -19,7 +19,7 @@ export function SuggestServiceLink({ label }: { label: string }) {
       <Text variant="caption" tone="muted" style={{ flex: 1 }}>
         {label}
       </Text>
-      <Button label={t('suggest.cta')} size="sm" variant="outline" onPress={() => router.push('/(shared)/suggest')} />
+      <Button label={t('suggest.cta')} size="sm" variant="outline" fullWidth={false} onPress={() => router.push('/(shared)/suggest')} />
     </View>
   );
 }

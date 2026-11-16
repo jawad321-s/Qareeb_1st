@@ -9,7 +9,9 @@ import {
   Briefcase, Camera, Car, Droplet, Drill, Hammer, House, Key, Leaf, Lightbulb, Lock, Monitor, Package,
   Paintbrush, Plug, SatelliteDish, Scissors, Shield, Sparkles, Sun, Truck, Wind, Wrench, Zap, type LucideIcon,
 } from 'lucide-react';
-import { CATEGORY_NAMES, type LiveDoc } from './live-data';
+import { useCallback } from 'react';
+import { CATEGORY_NAMES, categoryName, useCollection, type LiveDoc } from './live-data';
+import { useT } from './i18n';
 
 /** App icon key → the same picture in the dashboard. */
 export const ICONS: Record<string, LucideIcon> = {
@@ -60,4 +62,22 @@ export function registerCategoryNames(docs: LiveDoc[]) {
     if (!ar) continue;
     CATEGORY_NAMES[d.id] = { ar, en: d.name?.en?.trim() || ar };
   }
+}
+
+/**
+ * A service's name as it is now (renamed built-ins and added services
+ * included), re-rendering when the admin changes the catalog.
+ */
+export function useServiceName(): (id: string) => string {
+  const { locale } = useT();
+  const docs = useCollection('categories');
+  return useCallback(
+    (id: string) => {
+      const d = docs?.find((x) => x.id === id);
+      const ar = d?.name?.ar?.trim();
+      if (ar) return locale === 'ar' ? ar : d?.name?.en?.trim() || ar;
+      return categoryName(id, locale);
+    },
+    [docs, locale],
+  );
 }

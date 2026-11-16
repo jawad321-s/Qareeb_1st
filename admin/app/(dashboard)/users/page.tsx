@@ -13,6 +13,7 @@ import { useT, type TKey } from '@/lib/i18n';
 import { isLive } from '@/lib/firebase';
 import { useCollection, toAdminUsers } from '@/lib/live-data';
 import { manageUser, PASSWORD_MIN, UserActionFailed, type UserAction } from '@/lib/users.service';
+import { useServiceName } from '@/lib/catalog';
 
 type Filter = 'all' | 'customer' | 'artisan' | 'suspended';
 
@@ -36,6 +37,8 @@ export default function UsersPage() {
   );
   const [filter, setFilter] = useState<Filter>('all');
   const [selected, setSelected] = useState<string | null>(null);
+  // Live: an artisan's services follow their profile as they add or remove them.
+  const serviceName = useServiceName();
 
   const shown = rows.filter((u) => (filter === 'all' ? true : filter === 'suspended' ? u.status === 'suspended' : u.role === filter));
   const counts: Record<Filter, number> = {
@@ -54,9 +57,9 @@ export default function UsersPage() {
   const columns = useMemo<ColumnDef<AdminUser, any>[]>(
     () => [
       {
-        // Name and phone (both spellings), so the search box finds either.
+        // Name, phone (both spellings) and services, so the search box finds any.
         id: 'fullName',
-        accessorFn: (u) => `${u.fullName} ${u.phone} ${u.phone.replace(/^\+97[02]/, '0')}`,
+        accessorFn: (u) => `${u.fullName} ${u.phone} ${u.phone.replace(/^\+97[02]/, '0')} ${(u.services ?? []).map(serviceName).join(' ')}`,
         header: t('col.user'),
         cell: ({ row }) => (
           <div className="flex items-center gap-3">
@@ -77,6 +80,12 @@ export default function UsersPage() {
         accessorKey: 'role',
         header: t('col.role'),
         cell: ({ getValue }) => <Badge tone={getValue() === 'artisan' ? 'brand' : 'neutral'}>{t(`role.${getValue()}` as TKey)}</Badge>,
+      },
+      {
+        id: 'services',
+        header: t('col.services'),
+        enableSorting: false,
+        cell: ({ row }) => <ServiceChips ids={row.original.services} name={serviceName} max={2} />,
       },
       { accessorKey: 'city', header: t('col.city') },
       {
@@ -115,7 +124,7 @@ export default function UsersPage() {
         ),
       },
     ],
-    [t, locale],
+    [t, locale, serviceName],
   );
 
   const current = rows.find((u) => u.uid === selected) ?? null;
@@ -135,6 +144,7 @@ export default function UsersPage() {
       {current && (
         <UserPanel
           user={current}
+          serviceName={serviceName}
           complaints={against.get(current.uid) ?? 0}
           onClose={() => setSelected(null)}
           onDemoChange={(patch) => setDemo((d) => ({ ...d, [current.uid]: patch === null ? null : { ...d[current.uid], ...patch } }))}
@@ -159,11 +169,13 @@ function Initials({ name, size = 'h-9 w-9 text-xs' }: { name: string; size?: str
  */
 function UserPanel({
   user,
+  serviceName,
   complaints,
   onClose,
   onDemoChange,
 }: {
   user: AdminUser;
+  serviceName: (id: string) => string;
   complaints: number;
   onClose: () => void;
   onDemoChange: (patch: Partial<AdminUser> | null) => void;
@@ -247,6 +259,18 @@ function UserPanel({
               <span className={complaints ? 'font-semibold text-red-500' : ''}>{complaints}</span>
             </Info>
           </dl>
+          {artisan && (
+            <div className="space-y-2">
+              <p className="text-xs text-muted">
+                {t('users.services')} ({user.services?.length ?? 0})
+              </p>
+              {user.services?.length ? (
+                <ServiceChips ids={user.services} name={serviceName} />
+              ) : (
+                <p className="text-sm text-muted">{t('users.noServices')}</p>
+              )}
+            </div>
+          )}
           {suspended && user.suspendReason && (
             <p className="rounded-xl bg-red-500/10 p-3 text-sm">
               {t('users.suspendedFor')} {user.suspendReason}
@@ -353,5 +377,22 @@ function Section({ title, hint, danger, children }: { title: string; hint: strin
       <p className="text-xs text-muted">{hint}</p>
       {children}
     </section>
+  );
+}
+
+/** An artisan's services as small chips; `max` shows the first few and "+N". */
+function ServiceChips({ ids, name, max }: { ids?: string[]; name: (id: string) => string; max?: number }) {
+  if (!ids) return <span className="text-muted">—</span>;
+  if (ids.length === 0) return <span className="text-xs text-muted">0</span>;
+  const shown = max ? ids.slice(0, max) : ids;
+  return (
+    <div className="flex flex-wrap gap-1">
+      {shown.map((id) => (
+        <span key={id} className="rounded-full bg-brand-500/10 px-2 py-0.5 text-xs font-medium text-brand-600 dark:text-brand-400">
+          {name(id)}
+        </span>
+      ))}
+      {max && ids.length > max && <span className="rounded-full bg-slate-500/10 px-2 py-0.5 text-xs text-muted">+{ids.length - max}</span>}
+    </div>
   );
 }

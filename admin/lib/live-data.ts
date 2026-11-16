@@ -191,6 +191,7 @@ export function recentActivity(
 /** users/{uid} docs → rows for the users table. */
 export function toAdminUsers(users: LiveDoc[], requests: LiveDoc[], profiles: LiveDoc[] = []): AdminUser[] {
   const featured = new Set(profiles.filter((p) => p.featured === true).map((p) => p.id));
+  const services = new Map(profiles.map((p) => [p.id, Array.isArray(p.categoryIds) ? (p.categoryIds as string[]) : []]));
   const jobs = new Map<string, number>();
   for (const r of requests) {
     if (r.status !== 'COMPLETED') continue;
@@ -211,6 +212,7 @@ export function toAdminUsers(users: LiveDoc[], requests: LiveDoc[], profiles: Li
       joinedAt: toMillis(u.createdAt),
       featured: featured.has(u.id),
       suspendReason: u.suspendReason ?? undefined,
+      services: u.role === 'artisan' ? services.get(u.id) ?? [] : undefined,
     }))
     .sort((a, b) => b.joinedAt - a.joinedAt);
 }

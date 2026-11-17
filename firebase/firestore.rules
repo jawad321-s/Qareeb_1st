@@ -75,6 +75,11 @@ service cloud.firestore {
       match /fcmTokens/{tokenId} {
         allow read, write: if isAuthed() && uid() == userId;
       }
+      // Chats the user deleted for themselves (requestId → hiddenAt): the
+      // other side keeps theirs, and only the owner sees this list.
+      match /hiddenChats/{requestId} {
+        allow read, write: if isSignedIn() && uid() == userId;
+      }
     }
 
     // ── artisanProfiles/{uid} ────────────────────────────────────────────────

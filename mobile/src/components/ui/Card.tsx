@@ -13,6 +13,7 @@ import { useTheme } from '@/theme/ThemeProvider';
 
 interface CardProps extends ViewProps {
   onPress?: () => void;
+  onLongPress?: () => void;
   padded?: boolean;
   elevated?: boolean;
   glass?: boolean;
@@ -29,6 +30,7 @@ interface CardProps extends ViewProps {
  *  Pressable cards spring on touch for a tactile, premium feel. */
 export function Card({
   onPress,
+  onLongPress,
   padded = true,
   elevated = true,
   glass = false,
@@ -83,6 +85,14 @@ export function Card({
     return (
       <Pressable
         onPress={press}
+        onLongPress={
+          onLongPress
+            ? () => {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium).catch(() => {});
+                onLongPress();
+              }
+            : undefined
+        }
         onPressIn={() => {
           if (!reduceMotion) scale.value = withSpring(0.96, { damping: 18, stiffness: 320 });
         }}

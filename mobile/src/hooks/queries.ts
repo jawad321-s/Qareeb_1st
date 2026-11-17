@@ -213,6 +213,18 @@ export function useUpdateOfferPrice(requestId: string, artisanId: string) {
   });
 }
 
+/** Deletes a chat for the signed-in user only (the other side keeps theirs). */
+export function useHideConversation() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ uid, requestId }: { uid: string; requestId: string }) => api.hideConversation(uid, requestId),
+    onSuccess: (_r, { uid, requestId }) => {
+      qc.invalidateQueries({ queryKey: qk.conversations(uid) });
+      qc.invalidateQueries({ queryKey: qk.messages(requestId) });
+    },
+  });
+}
+
 export function useSendMessage(requestId: string) {
   const qc = useQueryClient();
   return useMutation({

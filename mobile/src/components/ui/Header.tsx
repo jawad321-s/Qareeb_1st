@@ -11,13 +11,15 @@ interface HeaderProps {
   showBack?: boolean;
   rightIcon?: IconName;
   onRightPress?: () => void;
+  /** What the right button does, for screen readers (e.g. "Delete chat"). */
+  rightLabel?: string;
   onBack?: () => void;
   /** Makes the title a link (e.g. to the profile of the person in a chat). */
   onTitlePress?: () => void;
   transparent?: boolean;
 }
 
-export function Header({ title, subtitle, showBack, rightIcon, onRightPress, onBack, onTitlePress, transparent }: HeaderProps) {
+export function Header({ title, subtitle, showBack, rightIcon, onRightPress, rightLabel, onBack, onTitlePress, transparent }: HeaderProps) {
   const { colors } = useTheme();
 
   // Safe back: some screens are reached via router.replace (e.g. the new
@@ -68,6 +70,8 @@ export function Header({ title, subtitle, showBack, rightIcon, onRightPress, onB
       {rightIcon && (
         <Pressable
           onPress={onRightPress}
+          accessibilityRole="button"
+          accessibilityLabel={rightLabel}
           hitSlop={8}
           style={{
             width: 44,

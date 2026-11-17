@@ -67,6 +67,23 @@ async function settleOverdue(list: ServiceRequest[]): Promise<ServiceRequest[]> 
 // Chat threads live under their request: requests/{id}/messages (see rules),
 // encrypted with the conversation's key (lib/chatCrypto).
 const messagesOf = (requestId: string) => collection(db(), 'requests', requestId, 'messages');
+/**
+ * Chats the signed-in user deleted for themselves: requestId → when. Read once
+ * per account and kept up to date by hideConversation.
+ */
+let hiddenCache: { uid: string; map: Promise<Record<string, number>> } | null = null;
+function hiddenChats(): Promise<Record<string, number>> {
+  const uid = useAuth.getState().user?.uid;
+  if (!uid) return Promise.resolve({});
+  if (hiddenCache?.uid !== uid) {
+    const map = getDocs(collection(db(), 'users', uid, 'hiddenChats'))
+      .then((snap) => Object.fromEntries(snap.docs.map((d) => [d.id, Number(d.data().hiddenAt) || 0])))
+      .catch(() => ({}) as Record<string, number>);
+    hiddenCache = { uid, map };
+  }
+  return hiddenCache.map;
+}
+
 const chatKeyRef = (requestId: string) => doc(db(), 'requests', requestId, 'private', 'chatKey');
 const chatKeys = new Map<string, string>();
 
@@ -435,6 +452,8 @@ export const firebaseApi: typeof mockApi = {
     const snap = await getDocs(messagesOf(requestId));
     if (snap.empty) return [];
     const key = await chatKey(requestId, false);
+    // A chat this user deleted shows only what came after.
+    const since = (await hiddenChats())[requestId] ?? 0;
     return snap.docs
       .map((d) => {
         const { cipher, text: _t, mediaUrl: _m, ...rest } = d.data();
@@ -447,7 +466,20 @@ export const firebaseApi: typeof mockApi = {
           createdAt: ms(rest.createdAt),
         } as ChatMessage);
       })
+      .filter((m) => m.createdAt > since)
       .sort((a, b) => a.createdAt - b.createdAt);
+  },
+
+  /**
+   * Deletes a chat for this user only: it leaves their list and its messages
+   * are no longer shown to them. The other side keeps theirs; a new message
+   * brings the chat back with just that.
+   */
+  async hideConversation(uid: string, requestId: string): Promise<void> {
+    const at = Date.now();
+    await setDoc(doc(db(), 'users', uid, 'hiddenChats', requestId), { hiddenAt: at });
+    const cache = await hiddenChats();
+    cache[requestId] = at;
   },
 
   // Only who sent it, its kind and when are stored in the clear; the text and
@@ -465,6 +497,7 @@ export const firebaseApi: typeof mockApi = {
     const party = role === 'customer' ? 'customerId' : 'acceptedArtisanId';
     const snap = await getDocs(query(collection(db(), 'requests'), where(party, '==', userId)));
     const withArtisan = await settleOverdue(snap.docs.map((d) => mapRequest(d.id, d.data())).filter((r) => r.acceptedArtisanId));
+    const hidden = await hiddenChats();
     const convos = await Promise.all(
       withArtisan.map(async (r) => {
         const thread = await firebaseApi.getMessages(r.id).catch(() => [] as ChatMessage[]);
@@ -475,7 +508,8 @@ export const firebaseApi: typeof mockApi = {
         };
       }),
     );
-    return convos.sort(
+    // A chat the user deleted stays out of the list until a new message comes.
+    return convos.filter((c) => !hidden[c.request.id] || c.lastMessage).sort(
       (a, b) => (b.lastMessage?.createdAt ?? b.request.updatedAt) - (a.lastMessage?.createdAt ?? a.request.updatedAt),
     );
   },

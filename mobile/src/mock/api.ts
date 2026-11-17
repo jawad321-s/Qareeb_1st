@@ -24,6 +24,8 @@ const currentUid = () => useAuth.getState().user?.uid ?? null;
 let requests = [...MOCK_REQUESTS];
 let offers = [...MOCK_OFFERS];
 let messages = [...MOCK_MESSAGES];
+/** Chats deleted on this device (demo): requestId → when. */
+const hiddenChats: Record<string, number> = {};
 // The demo artisan's "available" switch (for this session).
 let demoAvailable = true;
 // Reviews the user submitted are kept on the device. Everything else here resets
@@ -268,7 +270,14 @@ export const mockApi = {
 
   async getMessages(requestId: string): Promise<ChatMessage[]> {
     await delay(250);
-    return clone(messages.filter((m) => m.requestId === requestId).sort((a, b) => a.createdAt - b.createdAt));
+    const since = hiddenChats[requestId] ?? 0;
+    return clone(messages.filter((m) => m.requestId === requestId && m.createdAt > since).sort((a, b) => a.createdAt - b.createdAt));
+  },
+
+  /** Deletes a chat for this user only (see firebase-api). */
+  async hideConversation(_uid: string, requestId: string): Promise<void> {
+    await delay(150);
+    hiddenChats[requestId] = Date.now();
   },
 
   async sendMessage(requestId: string, msg: Omit<ChatMessage, 'id' | 'read' | 'createdAt'>): Promise<ChatMessage> {
@@ -289,13 +298,14 @@ export const mockApi = {
       requests
         .filter((r) => r.acceptedArtisanId && (role === 'customer' ? r.customerId === userId : r.acceptedArtisanId === userId))
         .map((r) => {
-          const thread = messages.filter((m) => m.requestId === r.id).sort((a, b) => a.createdAt - b.createdAt);
+          const thread = messages.filter((m) => m.requestId === r.id && m.createdAt > (hiddenChats[r.id] ?? 0)).sort((a, b) => a.createdAt - b.createdAt);
           return {
             request: r,
             otherUserId: role === 'customer' ? r.acceptedArtisanId! : r.customerId,
             lastMessage: thread[thread.length - 1],
           };
         })
+        .filter((c) => !hiddenChats[c.request.id] || c.lastMessage)
         .sort((a, b) => (b.lastMessage?.createdAt ?? b.request.updatedAt) - (a.lastMessage?.createdAt ?? a.request.updatedAt)),
     );
   },

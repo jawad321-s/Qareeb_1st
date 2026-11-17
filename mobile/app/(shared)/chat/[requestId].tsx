@@ -20,6 +20,7 @@ import { useTheme } from '@/theme/ThemeProvider';
 import { useFont, useT } from '@/i18n';
 import { timeAgo } from '@/lib/format';
 import { localizedTextAlign } from '@/i18n/rtl';
+import { useDeleteChat } from '@/components/domain/ConversationList';
 
 export default function Chat() {
   const { colors, isDark } = useTheme();
@@ -33,6 +34,7 @@ export default function Chat() {
   const [sendingPhoto, setSendingPhoto] = useState(false);
   const scrollRef = useRef<ScrollViewInstance>(null);
   const toast = useToast();
+  const deleteChat = useDeleteChat();
   const { data: request } = useRequest(requestId!);
   // The other party: the assigned artisan for a customer, the customer for an artisan.
   const otherId = request ? (me.uid === request.customerId ? request.acceptedArtisanId : request.customerId) : undefined;
@@ -77,6 +79,14 @@ export default function Chat() {
           title={other?.fullName || (me.uid !== request?.customerId ? request?.customerName : '') || ''}
           subtitle={request?.title}
           onTitlePress={otherId ? () => router.push(me.uid === request?.customerId ? `/(shared)/artisan/${otherId}` : `/(shared)/customer/${otherId}`) : undefined}
+          // Delete this chat (for me only); back to where they came from.
+          rightIcon="trash"
+          rightLabel={t('conv.deleteTitle')}
+          onRightPress={async () => {
+            if (await deleteChat(me.uid, requestId!)) {
+              if (router.canGoBack()) router.back();
+            }
+          }}
         />
       </View>
 

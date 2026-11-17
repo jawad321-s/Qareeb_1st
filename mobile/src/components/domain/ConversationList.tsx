@@ -8,7 +8,9 @@ import { Avatar } from '../ui/Avatar';
 import { Badge } from '../ui/Badge';
 import { CardSkeleton } from '../feedback/Skeleton';
 import { EmptyState } from '../feedback/EmptyState';
-import { useConversations, useUser } from '@/hooks/queries';
+import { useConversations, useHideConversation, useUser } from '@/hooks/queries';
+import { useToast } from '../feedback/Toast';
+import { confirmAction } from '@/lib/confirm';
 import { useAuth } from '@/store/auth';
 import { timeAgo } from '@/lib/format';
 import { isChatOpen } from '@/lib/requestRules';
@@ -50,12 +52,41 @@ export function ConversationList() {
           <ConversationRow conversation={c} myId={user!.uid} />
         </Animated.View>
       ))}
+      <Text variant="caption" tone="muted" center style={{ marginTop: 4 }}>
+        {t('conv.deleteHint')}
+      </Text>
     </View>
   );
 }
 
+/** Asks, then deletes the chat for this user only. Resolves true when deleted. */
+export function useDeleteChat() {
+  const { t } = useT();
+  const toast = useToast();
+  const hide = useHideConversation();
+  return async (uid: string, requestId: string) => {
+    const ok = await confirmAction({
+      title: t('conv.deleteTitle'),
+      message: t('conv.deleteBody'),
+      confirmLabel: t('conv.delete'),
+      cancelLabel: t('common.cancel'),
+      destructive: true,
+    });
+    if (!ok) return false;
+    try {
+      await hide.mutateAsync({ uid, requestId });
+      toast('success', t('conv.deleted'));
+      return true;
+    } catch {
+      toast('error', t('conv.deleteFailed'));
+      return false;
+    }
+  };
+}
+
 function ConversationRow({ conversation, myId }: { conversation: Conversation; myId: string }) {
   const { t } = useT();
+  const deleteChat = useDeleteChat();
   const { request, lastMessage, otherUserId } = conversation;
   const { data: other } = useUser(otherUserId);
   const open = isChatOpen(request.status);
@@ -67,7 +98,11 @@ function ConversationRow({ conversation, myId }: { conversation: Conversation; m
     : t('conv.noMessages');
 
   return (
-    <Card onPress={() => router.push(`/(shared)/chat/${request.id}`)} style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+    <Card
+      onPress={() => router.push(`/(shared)/chat/${request.id}`)}
+      // Press and hold: delete this chat (for me).
+      onLongPress={() => void deleteChat(myId, request.id)}
+      style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
       <Avatar uri={other?.photoUrl} name={other?.fullName} size={50} verified={other?.verified} />
       <View style={{ flex: 1, gap: 2 }}>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>

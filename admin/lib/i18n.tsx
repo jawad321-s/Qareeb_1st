@@ -23,8 +23,6 @@ const dict = {
     'nav.settings': 'Settings',
     'nav.menu': 'Menu',
     'nav.backHome': 'Back to overview',
-    'sidebar.help': 'Need help?',
-    'sidebar.helpDesc': 'Check the docs or contact support.',
     // topbar
     'topbar.search': 'Search users, requests, artisans…',
     'topbar.signOut': 'Sign out',
@@ -396,8 +394,6 @@ const dict = {
     'nav.settings': 'الإعدادات',
     'nav.menu': 'القائمة',
     'nav.backHome': 'الرجوع للرئيسية',
-    'sidebar.help': 'تحتاج مساعدة؟',
-    'sidebar.helpDesc': 'راجع الوثائق أو تواصل مع الدعم.',
     'topbar.search': 'ابحث عن مستخدمين، طلبات، حرفيين…',
     'topbar.signOut': 'تسجيل الخروج',
     'topbar.admin': 'المسؤول',

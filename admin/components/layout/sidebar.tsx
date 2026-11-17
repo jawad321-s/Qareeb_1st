@@ -98,17 +98,12 @@ function NavLinks({ onNavigate }: { onNavigate?: () => void }) {
 }
 
 export function Sidebar() {
-  const { t } = useT();
   return (
     <aside className="hidden lg:flex w-64 shrink-0 flex-col border-e border-base surface">
       <div className="flex items-center px-6 h-16 border-b border-base">
         <Brand />
       </div>
       <NavLinks />
-      <div className="m-3 rounded-xl bg-gradient-to-br from-brand-600 to-accent-500 p-4 text-white">
-        <p className="text-sm font-semibold">{t('sidebar.help')}</p>
-        <p className="mt-1 text-xs text-white/80">{t('sidebar.helpDesc')}</p>
-      </div>
     </aside>
   );
 }

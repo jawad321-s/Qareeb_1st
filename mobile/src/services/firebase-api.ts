@@ -13,6 +13,7 @@ import type { mockApi } from '@/mock/api';
 import { getDb } from '@/lib/firebase';
 import { useAuth } from '@/store/auth';
 import { isExpired, isVisibleToArtisan, sortOffers } from '@/lib/dispatch';
+import { decryptChat, encryptChat, newChatKey } from '@/lib/chatCrypto';
 import type { Reason } from '@/lib/reasons';
 import { MOCK_CUSTOMER } from '@/mock/data';
 import { servicesOf, toServiceId } from '@/constants/services';
@@ -63,8 +64,39 @@ async function settleOverdue(list: ServiceRequest[]): Promise<ServiceRequest[]> 
   );
 }
 
-// Chat threads live under their request: requests/{id}/messages (see rules).
+// Chat threads live under their request: requests/{id}/messages (see rules),
+// encrypted with the conversation's key (lib/chatCrypto).
 const messagesOf = (requestId: string) => collection(db(), 'requests', requestId, 'messages');
+const chatKeyRef = (requestId: string) => doc(db(), 'requests', requestId, 'private', 'chatKey');
+const chatKeys = new Map<string, string>();
+
+/**
+ * The conversation's key. Made by whoever sends the first message; when both
+ * sides do so at once the rules refuse the second write, which then reads
+ * the key the other one saved.
+ */
+async function chatKey(requestId: string, create: boolean): Promise<string | null> {
+  const cached = chatKeys.get(requestId);
+  if (cached) return cached;
+  const read = async () => {
+    const snap = await getDoc(chatKeyRef(requestId)).catch(() => null);
+    const key = snap?.exists() ? (snap.data().key as string) : null;
+    if (key) chatKeys.set(requestId, key);
+    return key;
+  };
+  const existing = await read();
+  if (existing || !create) return existing;
+  const key = newChatKey();
+  try {
+    await setDoc(chatKeyRef(requestId), { key, createdAt: Date.now() });
+    chatKeys.set(requestId, key);
+    return key;
+  } catch (err) {
+    const theirs = await read();
+    if (theirs) return theirs;
+    throw err;
+  }
+}
 
 export const firebaseApi: typeof mockApi = {
   async getCurrentUser(): Promise<AppUser> {
@@ -390,16 +422,32 @@ export const firebaseApi: typeof mockApi = {
 
   async getMessages(requestId: string): Promise<ChatMessage[]> {
     const snap = await getDocs(messagesOf(requestId));
+    if (snap.empty) return [];
+    const key = await chatKey(requestId, false);
     return snap.docs
-      .map((d) => withId<ChatMessage>(d.id, { ...d.data(), requestId, createdAt: ms(d.data().createdAt) }))
+      .map((d) => {
+        const { cipher, text: _t, mediaUrl: _m, ...rest } = d.data();
+        const opened = typeof cipher === 'string' && key ? decryptChat(cipher, key) : null;
+        return withId<ChatMessage>(d.id, {
+          ...rest,
+          ...(opened ?? {}),
+          locked: !opened,
+          requestId,
+          createdAt: ms(rest.createdAt),
+        } as ChatMessage);
+      })
       .sort((a, b) => a.createdAt - b.createdAt);
   },
 
+  // Only who sent it, its kind and when are stored in the clear; the text and
+  // the photo link are encrypted.
   async sendMessage(requestId, msg): Promise<ChatMessage> {
     const now = Date.now();
-    const payload = { ...msg, read: false, createdAt: now };
-    const refDoc = await addDoc(messagesOf(requestId), payload);
-    return { ...payload, requestId, id: refDoc.id } as ChatMessage;
+    const key = await chatKey(requestId, true);
+    const { text, mediaUrl, ...meta } = msg;
+    const cipher = encryptChat({ text, mediaUrl }, key!);
+    const refDoc = await addDoc(messagesOf(requestId), { ...meta, cipher, v: 1, read: false, createdAt: now });
+    return { ...msg, read: false, createdAt: now, requestId, id: refDoc.id } as ChatMessage;
   },
 
   async getConversations(userId, role): Promise<Conversation[]> {

@@ -153,12 +153,31 @@ service cloud.firestore {
           return get(/databases/$(database)/documents/requests/$(requestId)).data;
         }
         allow read: if isSignedIn() && (req().customerId == uid() || req().acceptedArtisanId == uid() || isAdmin());
-        // The thread closes once the job is completed or cancelled.
+        // The thread closes once the job is completed or cancelled. Messages
+        // are stored encrypted only (`cipher`, see mobile/src/lib/chatCrypto):
+        // a plain text or photo link is refused.
         allow create: if isSignedIn()
                       && incoming().senderId == uid()
                       && (req().customerId == uid() || req().acceptedArtisanId == uid())
-                      && req().status in ['ACCEPTED', 'ON_THE_WAY', 'WORKING'];
-        allow update: if isSignedIn() && (req().customerId == uid() || req().acceptedArtisanId == uid());
+                      && req().status in ['ACCEPTED', 'ON_THE_WAY', 'WORKING']
+                      && incoming().cipher is string && incoming().cipher.size() <= 20000
+                      && !incoming().keys().hasAny(['text', 'mediaUrl']);
+        // Only the read mark changes afterwards.
+        allow update: if isSignedIn() && (req().customerId == uid() || req().acceptedArtisanId == uid())
+                      && incoming().diff(existing()).affectedKeys().hasOnly(['read']);
+      }
+
+      // The conversation's encryption key, readable by its two parties only.
+      // Written once (by whoever sends the first message), never changed.
+      match /private/{docId} {
+        function parties() {
+          let r = get(/databases/$(database)/documents/requests/$(requestId)).data;
+          return isSignedIn() && (r.customerId == uid() || r.get('acceptedArtisanId', '') == uid());
+        }
+        allow read: if parties();
+        allow create: if parties() && docId == 'chatKey'
+                      && incoming().keys().hasOnly(['key', 'createdAt'])
+                      && incoming().key is string && incoming().key.size() == 44;
       }
     }
 

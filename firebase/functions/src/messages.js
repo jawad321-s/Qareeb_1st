@@ -82,9 +82,10 @@ export const MESSAGES = {
     ar: (p) => ({ title: 'لم نجد حرفياً متاحاً', body: `انتهت مهلة طلب "${clip(p.title, 60)}" بدون عروض وتم إلغاؤه. جرّب مرة أخرى لاحقاً` }),
     en: (p) => ({ title: 'No artisan available', body: `"${clip(p.title, 60)}" got no offers in time and was cancelled. Please try again later` }),
   },
+  // Chats are stored encrypted: the notification never carries the text.
   newMessage: {
-    ar: (p) => ({ title: p.senderName, body: p.text ? clip(p.text) : '📷 صورة' }),
-    en: (p) => ({ title: p.senderName, body: p.text ? clip(p.text) : '📷 Photo' }),
+    ar: (p) => ({ title: p.senderName, body: p.image ? '📷 صورة' : 'رسالة جديدة' }),
+    en: (p) => ({ title: p.senderName, body: p.image ? '📷 Photo' : 'New message' }),
   },
   // A message the admin wrote in the dashboard (same text in both languages).
   system: {

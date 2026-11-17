@@ -14,6 +14,7 @@
 import { initializeApp } from 'firebase-admin/app';
 import { getAuth } from 'firebase-admin/auth';
 import { getFirestore } from 'firebase-admin/firestore';
+import { getStorage } from 'firebase-admin/storage';
 import { logger, setGlobalOptions } from 'firebase-functions/v2';
 import { onDocumentCreated, onDocumentUpdated } from 'firebase-functions/v2/firestore';
 import { onCall } from 'firebase-functions/v2/https';
@@ -25,6 +26,7 @@ import { notifyOfferClosed, notifyRequestCancelled } from './handlers.js';
 import { backfillFeatured, onJobCompleted } from './featured.js';
 import { manageUser } from './adminUsers.js';
 import { deliverBroadcast } from './broadcast.js';
+import { removePlainChats } from './chatCleanup.js';
 import { resetPasswordWithPhone as resetPassword } from './passwordReset.js';
 
 initializeApp();
@@ -42,6 +44,8 @@ export const dispatchTick = onSchedule({ schedule: 'every 1 minutes', timeZone: 
   // Once after a deploy (and when the admin changes the number): give the
   // badge to artisans who already have the jobs. Never holds up dispatch.
   await backfillFeatured(db).catch((e) => logger.error('Featured backfill failed', e));
+  // Once: chats saved before they were encrypted are deleted.
+  await removePlainChats(db, () => getStorage().bucket()).catch((e) => logger.error('Chat cleanup failed', e));
   await runDispatchTick(db);
 });
 
@@ -102,7 +106,7 @@ export const onMessageCreated = onDocumentCreated('requests/{requestId}/messages
   const req = (await db.collection('requests').doc(id).get()).data();
   if (!req) return;
   const recipient = msg.senderId === req.customerId ? req.acceptedArtisanId : req.customerId;
-  await notifyUsers(db, [recipient], 'newMessage', { senderName: await nameOf(msg.senderId), text: msg.text }, { route: `/(shared)/chat/${id}`, requestId: id });
+  await notifyUsers(db, [recipient], 'newMessage', { senderName: await nameOf(msg.senderId), image: msg.type === 'image' }, { route: `/(shared)/chat/${id}`, requestId: id });
 });
 
 export const resetPasswordWithPhone = onCall((request) =>

@@ -109,7 +109,12 @@ export default function Chat() {
                     paddingVertical: 10,
                   }}
                 >
-                  {m.type === 'image' && m.mediaUrl ? (
+                  {m.locked ? (
+                    // Encrypted and couldn't be opened here.
+                    <Text variant="body" tone={mine ? 'inverse' : 'muted'} style={{ lineHeight: 20, fontStyle: 'italic' }}>
+                      {t('chat.locked')}
+                    </Text>
+                  ) : m.type === 'image' && m.mediaUrl ? (
                     <Image source={{ uri: m.mediaUrl }} style={{ width: 200, height: 200, borderRadius: 12 }} contentFit="cover" transition={150} />
                   ) : (
                     <Text variant="body" tone={mine ? 'inverse' : 'default'} style={{ lineHeight: 20 }}>
@@ -148,7 +153,7 @@ export default function Chat() {
                 <Icon name="mic" size={20} color={colors.muted} />
               </Pressable>
             </View>
-            <Pressable onPress={submit} style={{ width: 44, height: 44, borderRadius: 14, backgroundColor: colors.tint, alignItems: 'center', justifyContent: 'center' }}>
+            <Pressable onPress={submit} accessibilityRole="button" accessibilityLabel={t('chat.send')} style={{ width: 44, height: 44, borderRadius: 14, backgroundColor: colors.tint, alignItems: 'center', justifyContent: 'center' }}>
               <Icon name="send" size={20} color="#FFF" />
             </Pressable>
           </View>

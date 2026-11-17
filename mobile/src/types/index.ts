@@ -190,6 +190,8 @@ export interface ChatMessage {
   durationMs?: number;
   read: boolean;
   createdAt: number;
+  /** Stored encrypted and couldn't be opened on this device. */
+  locked?: boolean;
 }
 
 /** One chat thread — every request with an assigned artisan has one. */

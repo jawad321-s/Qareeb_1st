@@ -13,6 +13,7 @@ import { useT, type TKey } from '@/lib/i18n';
 import { isLive } from '@/lib/firebase';
 import { useCollection } from '@/lib/live-data';
 import { COMPLAINTS, SUGGESTIONS } from '@/lib/mock-data';
+import { AccountControls } from './topbar';
 
 const NAV: { href: string; label: TKey; icon: any }[] = [
   { href: '/', label: 'nav.overview', icon: LayoutDashboard },
@@ -104,6 +105,7 @@ export function Sidebar() {
         <Brand />
       </div>
       <NavLinks />
+      <AccountControls />
     </aside>
   );
 }
@@ -148,6 +150,8 @@ export function MobileNav() {
               </button>
             </div>
             <NavLinks onNavigate={() => setOpen(false)} />
+            {/* The bell is on the phone bar itself. */}
+            <AccountControls bell={false} />
           </aside>
         </div>,
         document.body,

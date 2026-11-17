@@ -24,7 +24,6 @@ const dict = {
     'nav.menu': 'Menu',
     'nav.backHome': 'Back to overview',
     // topbar
-    'topbar.search': 'Search users, requests, artisans…',
     'topbar.signOut': 'Sign out',
     'topbar.admin': 'Admin',
     'topbar.superAdmin': 'Super admin',
@@ -393,7 +392,6 @@ const dict = {
     'nav.settings': 'الإعدادات',
     'nav.menu': 'القائمة',
     'nav.backHome': 'الرجوع للرئيسية',
-    'topbar.search': 'ابحث عن مستخدمين، طلبات، حرفيين…',
     'topbar.signOut': 'تسجيل الخروج',
     'topbar.admin': 'المسؤول',
     'topbar.superAdmin': 'مسؤول عام',

@@ -44,7 +44,7 @@ const readSeen = () => {
  * notifications that couldn't be sent. The red count is what arrived since
  * the bell was last opened; each line opens its page.
  */
-export function NotificationsMenu() {
+export function NotificationsMenu({ placement = 'down' }: { placement?: 'down' | 'up' }) {
   const { t, locale } = useT();
   const router = useRouter();
   const live = isLive();
@@ -128,7 +128,15 @@ export function NotificationsMenu() {
         </span>
       )}
       {open && (
-        <div role="dialog" aria-label={t('notif.title')} className="surface absolute end-0 top-full z-30 mt-2 w-[22rem] max-w-[calc(100vw-2rem)] overflow-hidden rounded-2xl border border-base shadow-xl">
+        <div
+          role="dialog"
+          aria-label={t('notif.title')}
+          className={cn(
+            'surface absolute z-30 w-[22rem] max-w-[calc(100vw-2rem)] overflow-hidden rounded-2xl border border-base shadow-xl',
+            // From the sidebar's foot it opens upwards, over the page; from the phone bar, downwards.
+            placement === 'up' ? 'bottom-full start-0 mb-2' : 'end-0 top-full mt-2',
+          )}
+        >
           <div className="border-b border-base p-4">
             <p className="font-semibold">{t('notif.title')}</p>
             {counts.length > 0 && (

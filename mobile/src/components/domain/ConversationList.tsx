@@ -16,6 +16,13 @@ import { useT } from '@/i18n';
 import type { Conversation } from '@/types';
 
 /**
+ * A thread is listed once it has messages, or while its job is in progress (so
+ * the first message can be sent). A finished or cancelled job with no messages
+ * is left out.
+ */
+export const isListed = (c: Conversation) => !!c.lastMessage || isChatOpen(c.request.status);
+
+/**
  * The user's chat history: one thread per request with an assigned artisan,
  * newest first. Threads of finished or cancelled jobs stay readable but are
  * marked closed.
@@ -23,7 +30,8 @@ import type { Conversation } from '@/types';
 export function ConversationList() {
   const user = useAuth((s) => s.user);
   const { t } = useT();
-  const { data, isLoading } = useConversations(user);
+  const { data: all, isLoading } = useConversations(user);
+  const data = all?.filter(isListed);
 
   if (isLoading) return <View style={{ gap: 12 }}>{[0, 1, 2].map((i) => <CardSkeleton key={i} />)}</View>;
 

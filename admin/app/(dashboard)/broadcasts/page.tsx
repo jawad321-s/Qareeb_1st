@@ -140,7 +140,6 @@ export default function BroadcastsPage() {
               value={title}
               maxLength={TITLE_MAX}
               onChange={(e) => setTitle(e.target.value)}
-              placeholder={t('bc.titlePlaceholder')}
               className="surface w-full rounded-xl border border-base px-3 py-2 text-sm outline-none focus:border-brand-500"
             />
           </label>
@@ -154,7 +153,6 @@ export default function BroadcastsPage() {
               maxLength={BODY_MAX}
               rows={4}
               onChange={(e) => setBody(e.target.value)}
-              placeholder={t('bc.bodyPlaceholder')}
               className="surface w-full rounded-xl border border-base px-3 py-2 text-sm outline-none focus:border-brand-500"
             />
           </label>
@@ -177,8 +175,8 @@ export default function BroadcastsPage() {
                 <Megaphone className="h-4 w-4 text-violet-600 rtl:-scale-x-100" />
               </div>
               <div className="min-w-0">
-                <p className="text-sm font-semibold">{title.trim() || t('bc.titlePlaceholder')}</p>
-                <p className="mt-0.5 whitespace-pre-wrap break-words text-xs text-muted">{body.trim() || t('bc.bodyPlaceholder')}</p>
+                {title.trim() && <p className="text-sm font-semibold">{title.trim()}</p>}
+                {body.trim() && <p className="mt-0.5 whitespace-pre-wrap break-words text-xs text-muted">{body.trim()}</p>}
                 <p className="mt-1 text-[10px] text-muted">{t('bc.now')}</p>
               </div>
             </div>

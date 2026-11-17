@@ -8,10 +8,8 @@
 main() {
   cd "$(dirname "$0")" || return 1
   bash scripts/update.sh || return 1
-  cd firebase/functions || return 1
-  echo; echo "Installing the Cloud Functions libraries..."
-  npm ci --no-audit --no-fund || return 1
-  cd .. || return 1
+  bash scripts/install-libraries.sh firebase/functions || return 1
+  cd firebase || return 1
   echo; echo "Publishing. If it asks a question, press Enter."
   npx -y firebase-tools deploy --only functions,firestore:rules --project qareeb-b9a54 || return 1
   echo

@@ -11,12 +11,9 @@ rem block that cmd parses before running any of them.
 (
   call scripts\update.cmd
   if errorlevel 1 goto fail
-  cd firebase\functions
-  echo.
-  echo Installing the Cloud Functions libraries...
-  call npm ci --no-audit --no-fund
+  call scripts\install-libraries.cmd firebase\functions
   if errorlevel 1 goto fail
-  cd ..
+  cd firebase
   echo.
   echo Publishing. If it asks a question, press Enter.
   call npx -y firebase-tools deploy --only functions,firestore:rules --project qareeb-b9a54

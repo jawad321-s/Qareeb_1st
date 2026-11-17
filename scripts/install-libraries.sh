@@ -1,6 +1,6 @@
 #!/bin/bash
 # Mac version of install-libraries.cmd: installs the libraries of one package
-# (mobile or admin) when they are missing, package-lock.json changed since the
+# (mobile, admin or firebase/functions) when they are missing, package-lock.json changed since the
 # last install, or the libraries on disk no longer match it (a library added
 # or removed by hand, e.g. `npm install something`).
 cd "$(dirname "$0")/../$1" || exit 1

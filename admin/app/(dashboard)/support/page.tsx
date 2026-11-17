@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { LifeBuoy, Loader2, Phone, Send, ShieldOff } from 'lucide-react';
+import { LifeBuoy, Loader2, Phone, Send, ShieldOff, Trash2 } from 'lucide-react';
 import { Badge, Button, Card, FilterTabs, StatusPill } from '@/components/ui/primitives';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { Initials } from '@/components/ui/people';
@@ -12,6 +12,7 @@ import { cn, timeAgo } from '@/lib/utils';
 import { useT, type TKey } from '@/lib/i18n';
 import {
   SUPPORT_TEXT_MAX,
+  deleteThreads,
   markThreadRead,
   replyToThread,
   subscribeSupportMessages,
@@ -34,6 +35,9 @@ export default function SupportPage() {
   const [threads, setThreads] = useState<SupportThread[] | null>(null);
   const [selected, setSelected] = useState<string | null>(null);
   const [filter, setFilter] = useState<Filter>('waiting');
+  // Deleting every conversation (asked first): the count it was asked for, and progress.
+  const [clearing, setClearing] = useState<{ busy: boolean } | null>(null);
+  const [notice, setNotice] = useState<{ ok: boolean; text: string } | null>(null);
   useEffect(() => subscribeSupportThreads(setThreads), []);
   // The account as it is now (status, reason), not as the thread last saw it.
   const users = useCollection('users');
@@ -51,7 +55,19 @@ export default function SupportPage() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold">{t('sup.title')}</h1>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <h1 className="text-2xl font-bold">{t('sup.title')}</h1>
+        {all.length > 0 && (
+          <Button variant="outline" size="sm" onClick={() => setClearing({ busy: false })}>
+            <Trash2 className="h-4 w-4 text-red-500" /> {t('sup.deleteAll')}
+          </Button>
+        )}
+      </div>
+      {notice && (
+        <p role="status" className={cn('rounded-xl p-3 text-sm', notice.ok ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400' : 'bg-red-500/10 text-red-600')}>
+          {notice.text}
+        </p>
+      )}
       <FilterTabs
         value={filter}
         onChange={setFilter}
@@ -102,7 +118,7 @@ export default function SupportPage() {
 
         {/* Conversation */}
         {current ? (
-          <Conversation key={current.uid} thread={current} user={userOf(current.uid)} />
+          <Conversation key={current.uid} thread={current} user={userOf(current.uid)} onDeleted={() => setSelected(null)} />
         ) : (
           <div className="grid place-items-center p-10 text-center text-sm text-muted">
             <div className="space-y-2">
@@ -112,11 +128,38 @@ export default function SupportPage() {
           </div>
         )}
       </Card>
+
+      {clearing && (
+        <ConfirmDialog
+          title={t('sup.deleteAllTitle')}
+          confirmLabel={t('sup.deleteAllConfirm')}
+          cancelLabel={t('price.cancel')}
+          danger
+          busy={clearing.busy}
+          onConfirm={async () => {
+            setClearing({ busy: true });
+            try {
+              const n = all.length;
+              await deleteThreads(all.map((x) => x.uid));
+              setSelected(null);
+              setNotice({ ok: true, text: t('sup.deletedAll').replace('{n}', String(n)) });
+            } catch (e) {
+              console.warn('[support delete]', e);
+              setNotice({ ok: false, text: t('sup.deleteFailed') });
+            } finally {
+              setClearing(null);
+            }
+          }}
+          onCancel={() => setClearing(null)}
+        >
+          <p>{t('sup.deleteAllBody').replace('{n}', String(all.length))}</p>
+        </ConfirmDialog>
+      )}
     </div>
   );
 }
 
-function Conversation({ thread, user }: { thread: SupportThread; user?: Record<string, any> }) {
+function Conversation({ thread, user, onDeleted }: { thread: SupportThread; user?: Record<string, any>; onDeleted: () => void }) {
   const { t, locale } = useT();
   const [messages, setMessages] = useState<SupportMessage[] | null>(null);
   const [text, setText] = useState('');
@@ -124,6 +167,7 @@ function Conversation({ thread, user }: { thread: SupportThread; user?: Record<s
   const [error, setError] = useState<string | null>(null);
   const [confirming, setConfirming] = useState(false);
   const [reactivating, setReactivating] = useState(false);
+  const [deleting, setDeleting] = useState<{ busy: boolean } | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const end = useRef<HTMLDivElement>(null);
 
@@ -192,6 +236,9 @@ function Conversation({ thread, user }: { thread: SupportThread; user?: Record<s
             {t('users.reactivate')}
           </Button>
         )}
+        <Button size="sm" variant="ghost" title={t('sup.delete')} onClick={() => setDeleting({ busy: false })}>
+          <Trash2 className="h-4 w-4 text-red-500" />
+        </Button>
       </div>
       {suspended && user?.suspendReason && (
         <p className="border-b border-base bg-red-500/5 px-4 py-2 text-xs text-red-600">
@@ -252,6 +299,29 @@ function Conversation({ thread, user }: { thread: SupportThread; user?: Record<s
         </Button>
       </div>
 
+      {deleting && (
+        <ConfirmDialog
+          title={t('sup.deleteTitle').replace('{name}', name)}
+          confirmLabel={t('sup.delete')}
+          cancelLabel={t('price.cancel')}
+          danger
+          busy={deleting.busy}
+          onConfirm={async () => {
+            setDeleting({ busy: true });
+            try {
+              await deleteThreads([thread.uid]);
+              onDeleted();
+            } catch (e) {
+              console.warn('[support delete]', e);
+              setError(t('sup.deleteFailed'));
+              setDeleting(null);
+            }
+          }}
+          onCancel={() => setDeleting(null)}
+        >
+          <p>{t('sup.deleteBody')}</p>
+        </ConfirmDialog>
+      )}
       {confirming && (
         <ConfirmDialog
           title={t('sup.reactivateTitle').replace('{name}', name)}

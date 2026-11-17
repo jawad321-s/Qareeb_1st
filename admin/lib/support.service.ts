@@ -5,7 +5,7 @@
 // threads in memory.
 'use client';
 
-import { addDoc, collection, doc, onSnapshot, orderBy, query, updateDoc } from 'firebase/firestore';
+import { addDoc, collection, doc, getDocs, onSnapshot, orderBy, query, updateDoc, writeBatch } from 'firebase/firestore';
 import { getAuthClient, getDb, isLive } from './firebase';
 
 export const SUPPORT_TEXT_MAX = 1000;
@@ -138,4 +138,33 @@ export async function replyToThread(uid: string, text: string): Promise<void> {
     unreadForUser: true,
     updatedAt: at,
   });
+}
+
+/**
+ * Deletes conversations for good: every message, then the thread itself. The
+ * person can still write again later, which starts a new one.
+ */
+export async function deleteThreads(uids: string[]): Promise<void> {
+  const db = getDb();
+  if (!db || !isLive()) {
+    for (const uid of uids) {
+      const i = DEMO_THREADS.findIndex((x) => x.uid === uid);
+      if (i >= 0) DEMO_THREADS.splice(i, 1);
+      delete DEMO_MESSAGES[uid];
+    }
+    demoEmit();
+    return;
+  }
+  for (const uid of uids) {
+    const messages = await getDocs(collection(db, 'supportThreads', uid, 'messages'));
+    // A batch holds at most 500 writes.
+    for (let i = 0; i < messages.docs.length; i += 450) {
+      const batch = writeBatch(db);
+      messages.docs.slice(i, i + 450).forEach((m) => batch.delete(m.ref));
+      await batch.commit();
+    }
+    const batch = writeBatch(db);
+    batch.delete(doc(db, 'supportThreads', uid));
+    await batch.commit();
+  }
 }

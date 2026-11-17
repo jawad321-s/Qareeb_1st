@@ -3,7 +3,7 @@
 // Firebase project is configured. Reads/writes the shared collections the admin
 // dashboard also uses, giving live mobile ↔ admin integration.
 import {
-  addDoc, collection, doc, getDoc, getDocs, limit, orderBy, query,
+  addDoc, collection, doc, getCountFromServer, getDoc, getDocs, limit, orderBy, query,
   setDoc, updateDoc, where, writeBatch,
 } from 'firebase/firestore';
 import type {
@@ -18,7 +18,7 @@ import type { Reason } from '@/lib/reasons';
 import { MOCK_CUSTOMER } from '@/mock/data';
 import { servicesOf, toServiceId } from '@/constants/services';
 import { allCategories } from '@/constants/categories';
-import { ACTIVE_STATUSES, NEXT_STATUS, canCancelRequest, isOverdue } from '@/lib/requestRules';
+import { ACTIVE_STATUSES, MAX_OPEN_REQUESTS, NEXT_STATUS, OPEN_STATUSES, OpenRequestLimitError, canCancelRequest, isOverdue } from '@/lib/requestRules';
 import { completedRecord, rejectedRecord } from '@/lib/jobHistory';
 import { uploadRequestPhoto } from '@/services/media.service';
 
@@ -176,10 +176,19 @@ export const firebaseApi: typeof mockApi = {
 
   async createRequest(input): Promise<ServiceRequest> {
     const now = Date.now();
+    // Each request notifies every nearby artisan, so a customer has at most a
+    // few open at once (the server cancels any request over the limit too).
+    const [settings, open] = await Promise.all([
+      firebaseApi.getSupportContacts().catch(() => ({}) as SupportContacts),
+      getCountFromServer(query(collection(db(), 'requests'), where('customerId', '==', input.customerId), where('status', 'in', OPEN_STATUSES))),
+    ]);
+    const max = settings.maxOpenRequests ?? MAX_OPEN_REQUESTS;
+    if (open.data().count >= max) throw new OpenRequestLimitError(max);
     // The picked photos exist only on this phone: upload them first, so the
-    // request stores links the artisans (and the admin) can open.
+    // request stores links the artisans (and the admin) can open. A request
+    // posted again keeps the photos it already has online.
     const refDoc = doc(collection(db(), 'requests'));
-    const images = await Promise.all((input.images ?? []).map((uri) => uploadRequestPhoto(refDoc.id, uri)));
+    const images = await Promise.all((input.images ?? []).map((uri) => (/^https?:\/\//.test(uri) ? uri : uploadRequestPhoto(refDoc.id, uri))));
     const payload = { ...input, images, status: 'PENDING' as const, offerCount: 0, createdAt: now, updatedAt: now };
     // Denormalise the customer name so the admin table can render it directly.
     const customerName = useAuth.getState().user?.fullName ?? '';
@@ -410,6 +419,7 @@ export const firebaseApi: typeof mockApi = {
       supportEmail: v.supportEmail || undefined,
       featuredMinJobs: Number.isInteger(v.featuredMinJobs) && v.featuredMinJobs > 0 ? v.featuredMinJobs : undefined,
       featuredMinRating: Number.isFinite(v.featuredMinRating) && v.featuredMinRating >= 0 && v.featuredMinRating < 5 ? v.featuredMinRating : undefined,
+      maxOpenRequests: Number.isInteger(v.maxOpenRequests) && v.maxOpenRequests > 0 ? v.maxOpenRequests : undefined,
     };
   },
 

@@ -17,6 +17,23 @@ export function canCancelRequest(status: RequestStatus): boolean {
 /** A job with an assigned artisan that hasn't finished yet. */
 export const ACTIVE_STATUSES: RequestStatus[] = ['ACCEPTED', 'ON_THE_WAY', 'WORKING'];
 
+/** Requests that are still open: waiting for offers or a job in progress. */
+export const OPEN_STATUSES: RequestStatus[] = ['PENDING', ...ACTIVE_STATUSES];
+
+/**
+ * How many open requests a customer may have at once (each new one notifies
+ * every nearby artisan). The dashboard can change it (settings/platform
+ * .maxOpenRequests); the server enforces the same number.
+ */
+export const MAX_OPEN_REQUESTS = 10;
+
+/** Posting would go over the limit (the message shows `max`). */
+export class OpenRequestLimitError extends Error {
+  constructor(public max: number) {
+    super('open-request-limit');
+  }
+}
+
 export function isActiveJob(status: RequestStatus): boolean {
   return ACTIVE_STATUSES.includes(status);
 }

@@ -33,3 +33,10 @@ export function targetRadiusKm(elapsedMs) {
   const steps = Math.max(0, Math.floor(elapsedMs / STEP_MS));
   return Math.min(INITIAL_RADIUS_KM + steps * STEP_KM, MAX_RADIUS_KM);
 }
+
+// Open requests (waiting for offers or in progress) a customer may have at
+// once: each new one notifies every nearby artisan. The dashboard can change
+// it (settings/platform.maxOpenRequests); a request over it is cancelled
+// before anyone is told.
+export const MAX_OPEN_REQUESTS = 10;
+export const OPEN_STATUSES = ['PENDING', 'ACCEPTED', 'ON_THE_WAY', 'WORKING'];

@@ -100,6 +100,7 @@ export default function SettingsPage() {
       </Card>
 
       <FeaturedSettings />
+      <RequestLimitSettings />
 
       <Card className="p-6">
         <h2 className="mb-2 font-semibold">{t('set.admins')}</h2>
@@ -195,6 +196,84 @@ function FeaturedSettings() {
       </div>
       <div className="mt-6 flex items-center justify-end gap-3">
         {!valid && <span className="text-sm text-red-500">{t('set.featuredInvalid')}</span>}
+        {state === 'saved' && <span className="text-sm text-emerald-600">{t('set.saved')}</span>}
+        {state === 'failed' && <span className="text-sm text-red-500">{t('set.saveFailed')}</span>}
+        <Button disabled={!loaded || !valid || state === 'saving'} onClick={save}>
+          {t('set.save')}
+        </Button>
+      </div>
+    </Card>
+  );
+}
+
+/** Same default as the app and the server (MAX_OPEN_REQUESTS). */
+const MAX_OPEN_REQUESTS = 10;
+
+/**
+ * How many open requests (waiting for offers or in progress) a customer may
+ * have at once: each new request notifies every nearby artisan, so this stops
+ * one person flooding them. The app says so before posting; the server
+ * cancels anything over it.
+ */
+function RequestLimitSettings() {
+  const { t } = useT();
+  const live = isLive();
+  const [max, setMax] = useState(String(MAX_OPEN_REQUESTS));
+  const [loaded, setLoaded] = useState(!live);
+  const [state, setState] = useState<'idle' | 'saving' | 'saved' | 'failed'>('idle');
+
+  useEffect(() => {
+    const db = getDb();
+    if (!live || !db) return;
+    return onSnapshot(
+      doc(db, 'settings', 'platform'),
+      (snap) => {
+        const v = snap.get('maxOpenRequests');
+        setMax(String(Number.isInteger(v) && v > 0 ? v : MAX_OPEN_REQUESTS));
+        setLoaded(true);
+      },
+      () => setLoaded(true),
+    );
+  }, [live]);
+
+  const n = Number(max);
+  const valid = Number.isInteger(n) && n >= 1 && n <= 100;
+
+  const save = async () => {
+    if (!valid) return;
+    const db = getDb();
+    setState('saving');
+    try {
+      if (live && db) await setDoc(doc(db, 'settings', 'platform'), { maxOpenRequests: n, updatedAt: Date.now() }, { merge: true });
+      setState('saved');
+    } catch {
+      setState('failed');
+    }
+  };
+
+  return (
+    <Card className="p-6">
+      <h2 className="font-semibold">{t('set.requestLimit')}</h2>
+      <p className="mb-4 mt-1 text-xs text-muted">{t('set.requestLimitHint')}</p>
+      <div className="grid grid-cols-3 items-center gap-4">
+        <label className="text-sm text-muted">{t('set.maxOpenRequests')}</label>
+        <Input
+          aria-label={t('set.maxOpenRequests')}
+          type="number"
+          value={max}
+          disabled={!loaded}
+          min={1}
+          max={100}
+          inputMode="numeric"
+          onChange={(e) => {
+            setMax(e.target.value);
+            setState('idle');
+          }}
+          className="col-span-2"
+        />
+      </div>
+      <div className="mt-6 flex items-center justify-end gap-3">
+        {!valid && <span className="text-sm text-red-500">{t('set.requestLimitInvalid')}</span>}
         {state === 'saved' && <span className="text-sm text-emerald-600">{t('set.saved')}</span>}
         {state === 'failed' && <span className="text-sm text-red-500">{t('set.saveFailed')}</span>}
         <Button disabled={!loaded || !valid || state === 'saving'} onClick={save}>

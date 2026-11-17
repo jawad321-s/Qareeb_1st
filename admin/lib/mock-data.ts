@@ -39,6 +39,8 @@ export interface VerificationItem {
   files?: string[];
   /** Photos from the older Storage-based flow, by name. */
   legacyUrls?: Record<string, string>;
+  /** Why it was rejected (shown to the artisan). */
+  rejectReason?: string;
 }
 
 export interface AdminRequest {

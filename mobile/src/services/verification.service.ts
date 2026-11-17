@@ -127,14 +127,14 @@ export async function openVerificationRequest(
 }
 
 /**
- * Subscribes to the artisan's own verification status so the UI updates the
- * moment an admin approves or rejects. A request opened at sign-up without
+ * Subscribes to the artisan's own verification status (and the reason, when
+ * rejected) so the UI updates the moment an admin approves or rejects. A request opened at sign-up without
  * documents reads as "unsubmitted", so the artisan can still send them.
  * Returns an unsubscribe function.
  */
 export function watchVerificationStatus(
   uid: string,
-  cb: (status: VerificationStatus) => void,
+  cb: (status: VerificationStatus, rejectReason?: string) => void,
 ): () => void {
   const db = getDb();
   if (!db || !isLive()) return () => {};
@@ -144,7 +144,8 @@ export function watchVerificationStatus(
       const data = snap.data();
       if (!data?.status) return;
       const hasDocuments = data.documentsSubmitted === true || !!data.idFrontUrl;
-      cb(data.status === 'pending' && !hasDocuments ? 'unsubmitted' : (data.status as VerificationStatus));
+      const reason = data.status === 'rejected' && typeof data.rejectReason === 'string' ? data.rejectReason : undefined;
+      cb(data.status === 'pending' && !hasDocuments ? 'unsubmitted' : (data.status as VerificationStatus), reason);
     },
     // Refused reads (e.g. signed out mid-listen) keep the status the app
     // already has instead of surfacing an uncaught listener error.

@@ -15,13 +15,13 @@ import { OfferCard } from '@/components/domain/OfferCard';
 import { PersonRow } from '@/components/domain/PersonRow';
 import { ReportLink } from '@/components/domain/ReportLink';
 import { CardSkeleton } from '@/components/feedback/Skeleton';
-import { useRequest, useOffers, useAcceptOffer, useRejectOffer, useCancelRequest, useHasReviewed, useUser } from '@/hooks/queries';
+import { useRequest, useOffers, useAcceptOffer, useRejectOffer, useCancelRequest, useCreateRequest, useHasReviewed, useUser } from '@/hooks/queries';
 import { useAuth } from '@/store/auth';
 import { usePastArtisans } from '@/hooks/usePastArtisans';
 import { useToast } from '@/components/feedback/Toast';
 import { categoryById } from '@/constants/categories';
 import { formatMoney } from '@/lib/format';
-import { AUTO_COMPLETE_HOURS, canCancelRequest } from '@/lib/requestRules';
+import { AUTO_COMPLETE_HOURS, OpenRequestLimitError, canCancelRequest } from '@/lib/requestRules';
 import { ReasonSheet } from '@/components/feedback/ReasonSheet';
 import { reasonText, type Reason } from '@/lib/reasons';
 import { shownPhotos } from '@/services/media.service';
@@ -41,6 +41,7 @@ export default function RequestDetail() {
   const accept = useAcceptOffer(id!);
   const reject = useRejectOffer(id!);
   const cancel = useCancelRequest(id!);
+  const repost = useCreateRequest(uid ?? '');
   const [acceptingId, setAcceptingId] = useState<string | null>(null);
   // Which reason sheet is open: cancelling the request, or declining an offer.
   const [asking, setAsking] = useState<{ kind: 'cancel' } | { kind: 'reject'; offerId: string } | null>(null);
@@ -69,6 +70,29 @@ export default function RequestDetail() {
     await accept.mutateAsync(offerId);
     setAcceptingId(null);
     toast('success', t('offer.acceptedToast'));
+  };
+
+  // The window ran out with no deal: post the same request again (same
+  // service, title, description, photos and place) instead of typing it anew.
+  const expired = isCancelled && (request.cancelReason === 'NO_OFFERS' || request.cancelReason === 'EXPIRED');
+  const onRepost = async () => {
+    try {
+      const next = await repost.mutateAsync({
+        customerId: request.customerId,
+        serviceId: request.serviceId,
+        categoryId: request.categoryId,
+        title: request.title,
+        description: request.description,
+        images: request.images ?? [],
+        location: request.location,
+        preferredTime: Date.now(),
+      });
+      toast('success', t('req.reposted'));
+      router.replace(`/(shared)/request/${next.id}`);
+    } catch (err) {
+      if (err instanceof OpenRequestLimitError) toast('error', t('create.tooMany').replace('{n}', String(err.max)));
+      else toast('error', t('create.failed'));
+    }
   };
 
   // Declining an offer and cancelling the request both ask why; the artisan(s) are told.
@@ -151,11 +175,25 @@ export default function RequestDetail() {
           </Text>
         </Card>
       )}
-      {isCancelled && (request.cancelReason === 'NO_OFFERS' || request.cancelReason === 'EXPIRED') && (
+      {expired && (
+        <Card style={{ marginTop: 16, gap: 12, backgroundColor: '#EF444412' }}>
+          <View style={{ flexDirection: 'row', gap: 10, alignItems: 'center' }}>
+            <Icon name="alert-circle" size={18} color="#EF4444" />
+            <Text variant="caption" style={{ flex: 1 }}>
+              {t(request.cancelReason === 'EXPIRED' ? 'req.expiredCancelled' : 'req.noOffersCancelled')}
+            </Text>
+          </View>
+          {uid === request.customerId && (
+            <Button label={t('req.repost')} iconLeft="send" size="sm" loading={repost.isPending} onPress={onRepost} />
+          )}
+        </Card>
+      )}
+      {/* Over the open-request limit when it was posted (server check). */}
+      {isCancelled && request.cancelReason === 'TOO_MANY_OPEN' && (
         <Card style={{ marginTop: 16, flexDirection: 'row', gap: 10, alignItems: 'center', backgroundColor: '#EF444412' }}>
           <Icon name="alert-circle" size={18} color="#EF4444" />
           <Text variant="caption" style={{ flex: 1 }}>
-            {t(request.cancelReason === 'EXPIRED' ? 'req.expiredCancelled' : 'req.noOffersCancelled')}
+            {t('req.tooManyCancelled')}
           </Text>
         </Card>
       )}

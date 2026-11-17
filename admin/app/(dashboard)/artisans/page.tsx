@@ -36,10 +36,10 @@ export default function ArtisansPage() {
   // Live queue from Firestore (falls back to the mock list on mock mode).
   useEffect(() => subscribeVerifications(setItems), []);
 
-  const decide = (item: VerificationItem, status: 'approved' | 'rejected') => {
-    // Optimistic UI; persists to Firestore when live.
-    setItems((prev) => prev.map((v) => (v.id === item.id ? { ...v, status } : v)));
-    void decideVerification(item, status);
+  const decide = (item: VerificationItem, status: 'approved' | 'rejected', reason?: string) => {
+    // Optimistic UI; persists to Firestore when live (the artisan is notified).
+    setItems((prev) => prev.map((v) => (v.id === item.id ? { ...v, status, rejectReason: status === 'rejected' ? reason : undefined } : v)));
+    void decideVerification(item, status, reason);
   };
 
   const rows: Row[] = useMemo(
@@ -145,7 +145,7 @@ export default function ArtisansPage() {
       />
       <DataTable columns={columns} data={shown} searchPlaceholder={t('ver.search')} />
 
-      {current && <VerificationPanel item={current} serviceName={serviceName} onClose={() => setSelected(null)} onDecide={decide} />}
+      {current && <VerificationPanel key={current.id} item={current} serviceName={serviceName} onClose={() => setSelected(null)} onDecide={decide} />}
     </div>
   );
 }
@@ -160,10 +160,15 @@ function VerificationPanel({
   item: Row;
   serviceName: (id: string) => string;
   onClose: () => void;
-  onDecide: (item: VerificationItem, status: 'approved' | 'rejected') => void;
+  onDecide: (item: VerificationItem, status: 'approved' | 'rejected', reason?: string) => void;
 }) {
   const { t, locale } = useT();
   const [photos, setPhotos] = useState<VerificationPhoto[] | null>(null);
+  // Rejecting asks why: the artisan gets it as a notification and on their
+  // Verification page, so they know what to fix.
+  const [rejecting, setRejecting] = useState(false);
+  const [reason, setReason] = useState('');
+  const quickReasons = ['ver.rr.blurry', 'ver.rr.selfie', 'ver.rr.name', 'ver.rr.missing'] as const;
   const [failed, setFailed] = useState(false);
   const [zoomed, setZoomed] = useState<VerificationPhoto | null>(null);
 
@@ -246,6 +251,13 @@ function VerificationPanel({
             {item.services.length ? <ServiceChips ids={item.services} name={serviceName} /> : <p className="text-sm text-muted">{t('users.noServices')}</p>}
           </div>
 
+          {item.status === 'rejected' && item.rejectReason && (
+            <div className="rounded-xl bg-red-500/5 p-3 text-sm">
+              <p className="text-xs text-muted">{t('ver.rejectReason')}</p>
+              <p className="mt-0.5 text-red-600">{item.rejectReason}</p>
+            </div>
+          )}
+
           <div className="space-y-2">
             <p className="text-xs text-muted">{t('ver.col.documents')}</p>
             {item.hasDocuments === false ? (
@@ -274,14 +286,48 @@ function VerificationPanel({
           </div>
         </div>
 
-        {item.status === 'pending' && (
+        {item.status === 'pending' && !rejecting && (
           <div className="flex gap-2 border-t border-base p-4">
-            <Button variant="outline" className="flex-1" onClick={() => onDecide(item, 'rejected')}>
+            <Button variant="outline" className="flex-1" onClick={() => setRejecting(true)}>
               <X className="h-4 w-4" /> {t('ver.reject')}
             </Button>
             <Button className="flex-1" onClick={() => onDecide(item, 'approved')}>
               <Check className="h-4 w-4" /> {t('ver.approve')}
             </Button>
+          </div>
+        )}
+        {item.status === 'pending' && rejecting && (
+          <div className="space-y-3 border-t border-base p-4">
+            <p className="text-sm font-medium">{t('ver.rejectWhy')}</p>
+            <div className="flex flex-wrap gap-1.5">
+              {quickReasons.map((k) => (
+                <button
+                  key={k}
+                  type="button"
+                  onClick={() => setReason(t(k))}
+                  className="rounded-full border border-base px-2.5 py-1 text-xs hover:bg-slate-500/10"
+                >
+                  {t(k)}
+                </button>
+              ))}
+            </div>
+            <textarea
+              value={reason}
+              maxLength={300}
+              rows={2}
+              aria-label={t('ver.rejectReason')}
+              onChange={(e) => setReason(e.target.value)}
+              className="surface w-full rounded-xl border border-base px-3 py-2 text-sm outline-none focus:border-brand-500"
+            />
+            <p className="text-xs text-muted">{t('ver.rejectNote')}</p>
+            <div className="flex gap-2">
+              <Button variant="ghost" className="flex-1" onClick={() => setRejecting(false)}>
+                {t('price.cancel')}
+              </Button>
+              <Button variant="danger" className="flex-1" disabled={reason.trim().length < 3} onClick={() => onDecide(item, 'rejected', reason.trim())}>
+                <X className="h-4 w-4" /> {t('ver.rejectSend')}
+              </Button>
+            </div>
           </div>
         )}
       </aside>

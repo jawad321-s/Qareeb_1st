@@ -119,6 +119,8 @@ export const translations = {
     'vrf.statusPending': 'Under review',
     'vrf.statusApproved': 'Verified',
     'vrf.statusRejected': 'Rejected — please resubmit',
+    'vrf.reason': 'Reason from the Qareeb team',
+    'vrf.rejectedDesc': 'Fix what is asked and send your documents again below.',
     'vrf.statusUnsubmitted': 'Not submitted yet',
     'vrf.pendingDesc': 'Your documents are being reviewed. You can keep using the app meanwhile.',
     'vrf.secure': 'Your documents are encrypted and used only for verification.',
@@ -158,6 +160,7 @@ export const translations = {
     'create.reviewTitle': 'Review your request',
     'create.submit': 'Submit request',
     'create.failed': 'The request could not be sent. Check your connection and try again.',
+    'create.tooMany': 'You already have {n} open requests. Wait for them to finish, or cancel one, before posting a new one.',
 
     // orders
     'orders.title': 'My orders',
@@ -355,6 +358,9 @@ export const translations = {
     'req.searching': 'Looking for artisans within {km} km · {n} notified so far · the request closes in {min} min if no offers arrive',
     'req.acceptBefore': 'Accept an offer within {min} min, or the request is cancelled automatically',
     'req.expiredCancelled': 'No offer was accepted within 30 minutes, so this request was cancelled. You can post it again.',
+    'req.repost': 'Post this request again',
+    'req.reposted': 'Posted again: nearby artisans are being told',
+    'req.tooManyCancelled': 'Not sent: you had too many open requests at the time.',
     'req.noOffersCancelled': 'No artisan sent an offer in time, so this request was cancelled. You can post it again.',
     'req.yourArtisan': 'Your artisan',
     'req.chat': 'Chat',
@@ -922,6 +928,8 @@ export const translations = {
     'vrf.statusPending': 'قيد المراجعة',
     'vrf.statusApproved': 'موثّق',
     'vrf.statusRejected': 'مرفوض — يرجى إعادة الإرسال',
+    'vrf.reason': 'السبب من فريق قريب',
+    'vrf.rejectedDesc': 'صحّح المطلوب وأرسل المستندات من جديد بالأسفل.',
     'vrf.statusUnsubmitted': 'لم يتم الإرسال بعد',
     'vrf.pendingDesc': 'يتم مراجعة مستنداتك، ويمكنك استخدام التطبيق في هذه الأثناء.',
     'vrf.secure': 'مستنداتك مشفّرة وتُستخدم للتوثيق فقط.',
@@ -961,6 +969,7 @@ export const translations = {
     'create.reviewTitle': 'راجع طلبك',
     'create.submit': 'إرسال الطلب',
     'create.failed': 'تعذّر إرسال الطلب. تأكد من الإنترنت وحاول مرة ثانية.',
+    'create.tooMany': 'عندك {n} طلبات مفتوحة. انتظر حتى تنتهي أو ألغِ واحداً منها قبل نشر طلب جديد.',
 
     // orders
     'orders.title': 'طلباتي',
@@ -1158,6 +1167,9 @@ export const translations = {
     'req.searching': 'نبحث عن حرفيين ضمن {km} كم · أبلغنا {n} حتى الآن · يُلغى الطلب بعد {min} دقيقة إذا لم تصل عروض',
     'req.acceptBefore': 'اقبل عرضاً خلال {min} دقيقة، وإلا يُلغى الطلب تلقائياً',
     'req.expiredCancelled': 'لم يُقبل أي عرض خلال 30 دقيقة، فتم إلغاء الطلب. يمكنك نشره مرة أخرى.',
+    'req.repost': 'إعادة نشر الطلب',
+    'req.reposted': 'تم نشر الطلب من جديد، ويتم إبلاغ الحرفيين القريبين',
+    'req.tooManyCancelled': 'لم يُرسل: كان عندك طلبات مفتوحة كثيرة وقتها.',
     'req.noOffersCancelled': 'لم يقدّم أي حرفي عرضاً خلال المهلة، فتم إلغاء الطلب. يمكنك نشره مرة أخرى.',
     'req.yourArtisan': 'الحرفي الخاص بك',
     'req.chat': 'محادثة',

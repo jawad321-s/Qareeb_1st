@@ -13,7 +13,8 @@ import { Card } from '@/components/ui/Card';
 import { useTabBarSpace } from '@/components/ui/TabBar';
 import { useToast } from '@/components/feedback/Toast';
 import { categoryById, useCategories } from '@/constants/categories';
-import { useCreateRequest } from '@/hooks/queries';
+import { useCreateRequest, useMyRequests, useSupportContacts } from '@/hooks/queries';
+import { MAX_OPEN_REQUESTS, OPEN_STATUSES, OpenRequestLimitError } from '@/lib/requestRules';
 import { useAuth } from '@/store/auth';
 import { useTheme } from '@/theme/ThemeProvider';
 import { useFont, useT } from '@/i18n';
@@ -41,6 +42,12 @@ export default function CreateRequest() {
   const [locating, setLocating] = useState(false);
   const toast = useToast();
   const STEPS = [t('create.step.service'), t('create.step.details'), t('create.step.review')];
+  // At most a few open requests at once (each one notifies every nearby
+  // artisan): said up front, before the customer fills in a new one.
+  const maxOpen = useSupportContacts().data?.maxOpenRequests ?? MAX_OPEN_REQUESTS;
+  const openCount = (useMyRequests(user.uid).data ?? []).filter((r) => OPEN_STATUSES.includes(r.status)).length;
+  const atLimit = openCount >= maxOpen;
+  const limitText = t('create.tooMany').replace('{n}', String(maxOpen));
 
   const [step, setStep] = useState(0);
   // A category tapped on the home screen arrives as ?category=… and is preselected.
@@ -103,8 +110,9 @@ export default function CreateRequest() {
         preferredTime: Date.now(),
       });
       router.replace(`/(shared)/request/${req.id}`);
-    } catch {
-      toast('error', t('create.failed'));
+    } catch (err) {
+      if (err instanceof OpenRequestLimitError) toast('error', t('create.tooMany').replace('{n}', String(err.max)));
+      else toast('error', t('create.failed'));
     }
   };
 
@@ -126,6 +134,14 @@ export default function CreateRequest() {
       </View>
 
       <ScrollView {...keyboardScrollProps} style={{ flex: 1 }} contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 24 }} showsVerticalScrollIndicator={false}>
+        {atLimit && (
+          <Card style={{ flexDirection: 'row', gap: 10, alignItems: 'center', marginBottom: 16, backgroundColor: '#F59E0B14', borderColor: '#F59E0B55' }}>
+            <Icon name="alert-circle" size={18} color="#F59E0B" />
+            <Text variant="caption" style={{ flex: 1 }}>
+              {limitText}
+            </Text>
+          </Card>
+        )}
         {step === 0 && (
           <Animated.View entering={FadeIn} style={{ gap: 16 }}>
             <Text variant="h3">{t('create.whatNeed')}</Text>
@@ -246,6 +262,7 @@ export default function CreateRequest() {
               label={user.location ? t('create.submit') : t('home.setLocation')}
               iconRight={user.location ? 'send' : 'map-pin'}
               loading={create.isPending || locating}
+              disabled={atLimit}
               onPress={submit}
             />
           </View>

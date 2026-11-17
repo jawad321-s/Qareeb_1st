@@ -12,6 +12,9 @@ export async function notifyRequestCancelled(db, id, after) {
   if (after.cancelReason === 'NO_OFFERS') {
     return notifyUsers(db, [after.customerId], 'noOffers', { title: after.title }, customerRoute);
   }
+  if (after.cancelReason === 'TOO_MANY_OPEN') {
+    return notifyUsers(db, [after.customerId], 'tooManyOpen', { title: after.title }, customerRoute);
+  }
   if (after.cancelReason === 'EXPIRED') {
     // Offers came in but none was accepted within the window.
     await notifyUsers(db, [after.customerId], 'requestExpired', { title: after.title }, customerRoute);

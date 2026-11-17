@@ -29,6 +29,11 @@ const initialLocale: Locale = (storage.getString(LOCALE_KEY) as Locale) ?? confi
 // back to memory when it isn't ready this early, and memory does not survive a
 // reload.
 //
+// Expo Go goes further: it resets the direction itself every time a project
+// opens, so a flag set here never sticks there. That is why app.json forces
+// RTL (expo-localization `forcesRTL`, also in `extra`): the app is Arabic first,
+// and the layout must be right-to-left even on a phone set to English.
+//
 // So the flag is set and the app simply renders. Text still aligns correctly
 // for the locale through `localizedTextAlign`, and the native flip applies on
 // the next full launch. Only an explicit language switch by the user restarts

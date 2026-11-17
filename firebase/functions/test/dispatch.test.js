@@ -154,3 +154,25 @@ test('working hours: requests reach artisans only inside their days and hours (P
   assert.deepEqual(await search(monHalfEight), ['a_1km', 'a_offhours']);
   assert.deepEqual(await search(monNine), ['a_1km']);
 });
+
+test('a customer over the open-request limit: the request is cancelled before anyone is told', async () => {
+  await db.doc('users/c_many').set({ uid: 'c_many', role: 'customer', fullName: 'Many', phone: '+970599777000', locale: 'ar' });
+  await db.doc('settings/platform').set({ maxOpenRequests: 2 }, { merge: true });
+  // Two open already (one waiting, one in progress), one finished that doesn't count.
+  await db.doc('requests/m_open').set({ customerId: 'c_many', status: 'PENDING', title: 'a' });
+  await db.doc('requests/m_work').set({ customerId: 'c_many', status: 'WORKING', title: 'b' });
+  await db.doc('requests/m_done').set({ customerId: 'c_many', status: 'COMPLETED', title: 'c' });
+  const before = (await inbox('a_1km')).length;
+  await startDispatch(db, 'm_new', await newRequest('m_new', { customerId: 'c_many' }));
+  const r = await get('m_new');
+  assert.equal(r.status, 'CANCELLED');
+  assert.equal(r.cancelReason, 'TOO_MANY_OPEN');
+  assert.equal(r.dispatch, undefined);
+  assert.equal((await inbox('a_1km')).length, before, 'no artisan was notified');
+  // Under the limit again (one finished): the next one goes out.
+  await db.doc('requests/m_work').update({ status: 'COMPLETED' });
+  await startDispatch(db, 'm_next', await newRequest('m_next', { customerId: 'c_many' }));
+  assert.equal((await get('m_next')).status, 'PENDING');
+  assert.ok((await get('m_next')).dispatch);
+  await db.doc('settings/platform').update({ maxOpenRequests: null });
+});

@@ -8,7 +8,9 @@
     "icon": "./assets/icon.png",
     "scheme": "qareeb",
     "userInterfaceStyle": "automatic",
-    "assetBundlePatterns": ["**/*"],
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.qareeb.app",
@@ -53,6 +55,22 @@
           "image": "./assets/splash.png",
           "imageWidth": 200
         }
+      ],
+      [
+        "expo-localization",
+        {
+          "forcesRTL": true,
+          "supportedLocales": {
+            "ios": [
+              "ar",
+              "en"
+            ],
+            "android": [
+              "ar",
+              "en"
+            ]
+          }
+        }
       ]
     ],
     "experiments": {
@@ -63,7 +81,8 @@
       "eas": {
         "projectId": "76ba06a5-0a3a-4c8e-9b72-00ae3a9b6e05"
       },
-      "supportsRTL": true
+      "supportsRTL": true,
+      "forcesRTL": true
     }
   }
 }

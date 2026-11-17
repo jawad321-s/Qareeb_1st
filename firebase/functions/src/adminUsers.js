@@ -59,7 +59,7 @@ export async function manageUser(db, auth, caller, data) {
       const profile = db.collection('artisanProfiles').doc(uid);
       if ((await profile.get()).exists) await profile.update({ verificationStatus: approved ? 'approved' : 'rejected' });
       const request = db.collection('verificationRequests').doc(uid);
-      if ((await request.get()).exists) await request.update({ status: approved ? 'approved' : 'rejected', reviewedAt: now });
+      if ((await request.get()).exists) await request.update({ status: approved ? 'approved' : 'rejected', rejectReason: null, reviewedAt: now });
       break;
     }
   }

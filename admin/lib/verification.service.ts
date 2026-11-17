@@ -47,6 +47,7 @@ export function subscribeVerifications(cb: (items: VerificationItem[]) => void):
           phone: v.phone ?? undefined,
           categoryIds: Array.isArray(v.categoryIds) ? v.categoryIds : undefined,
           hasDocuments: v.documentsSubmitted === true || files.length > 0 || Object.keys(legacyUrls).length > 0,
+          rejectReason: typeof v.rejectReason === 'string' ? v.rejectReason : undefined,
           files,
           legacyUrls,
         };
@@ -92,18 +93,21 @@ export async function loadVerificationPhotos(item: VerificationItem): Promise<Ve
  * Persists an approve/reject decision. Updates the request, and reflects the
  * result on the artisan's user + profile records so the mobile badge updates.
  */
-export async function decideVerification(item: VerificationItem, status: Decision): Promise<boolean> {
+export async function decideVerification(item: VerificationItem, status: Decision, reason?: string): Promise<boolean> {
   const db = getDb();
   if (!db || !isLive()) return false;
 
+  // The artisan is notified (Cloud Function onVerificationUpdated), with the
+  // reason when it is a rejection, and sees it on their Verification page.
   await updateDoc(doc(db, VERIFICATION_COLLECTION, item.id), {
     status,
+    rejectReason: status === 'rejected' ? (reason ?? '').trim().slice(0, 300) || null : null,
     reviewedAt: serverTimestamp(),
   });
+  // The account's own status (active / suspended) is the Users page's business.
   await Promise.all([
     updateDoc(doc(db, 'users', item.artisanId), {
       verified: status === 'approved',
-      status: status === 'approved' ? 'active' : 'active',
       updatedAt: serverTimestamp(),
     }).catch(() => {}),
     updateDoc(doc(db, 'artisanProfiles', item.artisanId), {

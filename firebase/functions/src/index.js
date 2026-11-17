@@ -14,6 +14,7 @@
 //  • onBroadcastCreated → a system notification from the dashboard to everyone,
 //                         customers or artisans
 //  • onSupportMessageCreated → the team answered in the support chat: tell the user
+//  • onVerificationUpdated → an artisan's verification approved / rejected (with the reason)
 import { initializeApp } from 'firebase-admin/app';
 import { getAuth } from 'firebase-admin/auth';
 import { getFirestore } from 'firebase-admin/firestore';
@@ -31,6 +32,7 @@ import { manageUser, migrateSuspendedLogins } from './adminUsers.js';
 import { deliverBroadcast } from './broadcast.js';
 import { removePlainChats } from './chatCleanup.js';
 import { deleteOwnAccount } from './accountDeletion.js';
+import { notifyVerificationDecision } from './verification.js';
 import { resetPasswordWithPhone as resetPassword } from './passwordReset.js';
 
 initializeApp();
@@ -164,3 +166,8 @@ export const onSupportMessageCreated = onDocumentCreated('supportThreads/{uid}/m
   if (msg?.from !== 'admin') return;
   await notifyUsers(db, [event.params.uid], 'supportReply', { text: msg.text }, { route: '/(shared)/support' });
 });
+
+/** The team approved or rejected an artisan's verification: tell them at once. */
+export const onVerificationUpdated = onDocumentUpdated('verificationRequests/{id}', (event) =>
+  notifyVerificationDecision(db, event.params.id, event.data.before.data(), event.data.after.data()),
+);

@@ -29,6 +29,8 @@ interface VerificationSnapshot {
   draft: ArtisanDraft;
   /** The account these photos and status belong to. */
   owner?: string;
+  /** Why the team rejected it (dashboard), shown on the Verification page. */
+  rejectReason?: string;
 }
 
 interface VerificationState extends VerificationSnapshot {
@@ -55,12 +57,13 @@ const EMPTY: VerificationSnapshot = {
   submittedAt: undefined,
   draft: { categoryIds: [] },
   owner: undefined,
+  rejectReason: undefined,
 };
 
 export const useVerification = create<VerificationState>((set, get) => {
   const save = () => {
-    const { status, idPhoto, selfie, certificates, submittedAt, draft, owner } = get();
-    kv.set<VerificationSnapshot>(STORE_KEY, { status, idPhoto, selfie, certificates, submittedAt, draft, owner });
+    const { status, idPhoto, selfie, certificates, submittedAt, draft, owner, rejectReason } = get();
+    kv.set<VerificationSnapshot>(STORE_KEY, { status, idPhoto, selfie, certificates, submittedAt, draft, owner, rejectReason });
   };
 
   return {
@@ -79,6 +82,7 @@ export const useVerification = create<VerificationState>((set, get) => {
         submittedAt: saved?.submittedAt,
         draft: saved?.draft ?? EMPTY.draft,
         owner: saved?.owner,
+        rejectReason: saved?.rejectReason,
         hydrated: true,
       });
     },
@@ -127,14 +131,14 @@ export const useVerification = create<VerificationState>((set, get) => {
         selfie,
         certificates: certificates.map((c) => c.uri),
       });
-      set({ status: 'pending', submittedAt: Date.now() });
+      set({ status: 'pending', submittedAt: Date.now(), rejectReason: undefined });
       save();
     },
 
     // Live-subscribe to admin decisions; keeps local status in sync.
     watch: (uid) =>
-      watchVerificationStatus(uid, (status) => {
-        set({ status });
+      watchVerificationStatus(uid, (status, rejectReason) => {
+        set({ status, rejectReason });
         save();
       }),
 

@@ -31,7 +31,7 @@ export default function Verification() {
   const { t } = useT();
   const showToast = useToast();
   const user = useAuth((s) => s.user);
-  const { status, idPhoto, selfie, certificates, setDoc, addCertificate, removeCertificate, submit, watch, bind } =
+  const { status, rejectReason, idPhoto, selfie, certificates, setDoc, addCertificate, removeCertificate, submit, watch, bind } =
     useVerification();
   const [submitting, setSubmitting] = useState(false);
 
@@ -99,7 +99,7 @@ export default function Verification() {
         </Text>
       </Animated.View>
 
-      {status !== 'unsubmitted' && <StatusBanner status={status} colors={colors} t={t} />}
+      {status !== 'unsubmitted' && <StatusBanner status={status} reason={rejectReason} colors={colors} t={t} />}
 
       {/* ID section */}
       <Animated.View entering={FadeInDown.delay(120).duration(450)} style={{ gap: 12, marginTop: 20 }}>
@@ -258,11 +258,22 @@ function UploadTile({
   );
 }
 
-function StatusBanner({ status, colors, t }: { status: string; colors: ReturnType<typeof useTheme>['colors']; t: (k: any) => string }) {
+function StatusBanner({
+  status,
+  reason,
+  colors,
+  t,
+}: {
+  status: string;
+  /** Why the team rejected it, when they said. */
+  reason?: string;
+  colors: ReturnType<typeof useTheme>['colors'];
+  t: (k: any) => string;
+}) {
   const map: Record<string, { icon: IconName; color: string; label: string; desc?: string }> = {
     pending: { icon: 'clock', color: '#F59E0B', label: t('vrf.statusPending'), desc: t('vrf.pendingDesc') },
     approved: { icon: 'check-circle', color: '#10B981', label: t('vrf.statusApproved') },
-    rejected: { icon: 'x', color: '#EF4444', label: t('vrf.statusRejected') },
+    rejected: { icon: 'x', color: '#EF4444', label: t('vrf.statusRejected'), desc: t('vrf.rejectedDesc') },
   };
   const s = map[status];
   if (!s) return null;
@@ -276,6 +287,14 @@ function StatusBanner({ status, colors, t }: { status: string; colors: ReturnTyp
           <Text variant="bodyMedium" style={{ color: s.color }}>
             {s.label}
           </Text>
+          {status === 'rejected' && !!reason && (
+            <View style={{ marginTop: 4, marginBottom: 2, padding: 10, borderRadius: radius.md, backgroundColor: colors.surface }}>
+              <Text variant="caption" tone="muted">
+                {t('vrf.reason')}
+              </Text>
+              <Text variant="bodyMedium">{reason}</Text>
+            </View>
+          )}
           {s.desc && (
             <Text variant="caption" tone="muted">
               {s.desc}

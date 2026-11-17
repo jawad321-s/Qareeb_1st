@@ -3,7 +3,7 @@
 // the response window runs out. Pure Firestore logic so it can be tested
 // against the emulator without the Functions runtime.
 import { FieldValue } from 'firebase-admin/firestore';
-import { FEATURED_BONUS_KM, INITIAL_RADIUS_KM, REQUIRE_VERIFIED, TIMEOUT_MS, targetRadiusKm } from './config.js';
+import { FEATURED_BONUS_KM, INITIAL_RADIUS_KM, MAX_OPEN_REQUESTS, OPEN_STATUSES, REQUIRE_VERIFIED, TIMEOUT_MS, targetRadiusKm } from './config.js';
 import { distanceKm, normalizePhone } from './geo.js';
 import { isWithinAvailability } from './availability.js';
 import { notifyUsers } from './notify.js';
@@ -52,10 +52,23 @@ async function notifyNewJob(db, requestId, request, found) {
   );
 }
 
+/** The open-request limit (dashboard setting, else MAX_OPEN_REQUESTS). */
+export async function maxOpenRequests(db) {
+  const v = (await db.collection('settings').doc('platform').get()).get('maxOpenRequests');
+  return Number.isInteger(v) && v > 0 ? v : MAX_OPEN_REQUESTS;
+}
+
 /** First wave, run when the request is created. */
 export async function startDispatch(db, requestId, request, now = Date.now()) {
   if (request.status !== 'PENDING' || request.dispatch) return;
   const ref = db.collection('requests').doc(requestId);
+  // The app stops a customer at the limit; this catches the rest (two posts at
+  // once, an old app) before a single artisan is notified.
+  const open = await db.collection('requests').where('customerId', '==', request.customerId).where('status', 'in', OPEN_STATUSES).count().get();
+  if (open.data().count > (await maxOpenRequests(db))) {
+    await ref.update({ status: 'CANCELLED', cancelReason: 'TOO_MANY_OPEN', cancelledAt: now, updatedAt: now });
+    return;
+  }
   const found = request.location
     ? await findArtisans(db, {
         categoryId: request.categoryId,

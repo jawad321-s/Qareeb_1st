@@ -92,6 +92,26 @@ export const MESSAGES = {
     ar: (p) => ({ title: p.title, body: p.body }),
     en: (p) => ({ title: p.title, body: p.body }),
   },
+  // A request over the open-request limit was not sent to anyone.
+  tooManyOpen: {
+    ar: (p) => ({ title: 'لم يُرسل طلبك', body: `"${p.title}" لم يُرسل لأن عندك طلبات مفتوحة كثيرة. انتظر حتى ينتهي أحدها أو ألغِه ثم أعد النشر.` }),
+    en: (p) => ({ title: 'Your request was not sent', body: `"${p.title}" wasn't sent because you have too many open requests. Wait for one to finish, or cancel one, then post again.` }),
+  },
+  // The team decided on the artisan's verification (dashboard).
+  verificationApproved: {
+    ar: () => ({ title: 'تم توثيق حسابك ✅', body: 'صار حسابك موثّقاً، وبتوصلك من الآن طلبات الزبائن القريبين منك.' }),
+    en: () => ({ title: 'Your account is verified ✅', body: 'You now receive requests from customers near you.' }),
+  },
+  verificationRejected: {
+    ar: (p) => ({
+      title: 'لم يتم قبول توثيق حسابك',
+      body: p.reason ? `السبب: ${clip(p.reason)}. صحّح المطلوب وأرسل المستندات من جديد من صفحة التوثيق.` : 'افتح صفحة التوثيق وأرسل المستندات من جديد.',
+    }),
+    en: (p) => ({
+      title: 'Your verification was not accepted',
+      body: p.reason ? `Reason: ${clip(p.reason)}. Fix it and send your documents again from the Verification page.` : 'Open the Verification page and send your documents again.',
+    }),
+  },
   // The Qareeb team answered in the support chat (the reply, shortened).
   supportReply: {
     ar: (p) => ({ title: 'رد من فريق قريب', body: clip(p.text ?? '') }),

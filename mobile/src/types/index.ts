@@ -79,6 +79,8 @@ export interface SupportContacts {
   featuredMinJobs?: number;
   /** The rating a featured artisan must be above (default FEATURED_MIN_RATING). */
   featuredMinRating?: number;
+  /** Open requests a customer may have at once (dashboard setting). */
+  maxOpenRequests?: number;
 }
 
 export interface Category {
@@ -129,7 +131,7 @@ export interface ServiceRequest {
   dispatch?: { radiusKm: number; startedAt: number; expiresAt: number };
   notifiedArtisanIds?: string[];
   /** Set when the 30-minute window ran out: NO_OFFERS (none came) or EXPIRED (none accepted). */
-  cancelReason?: 'NO_OFFERS' | 'EXPIRED';
+  cancelReason?: 'NO_OFFERS' | 'EXPIRED' | 'TOO_MANY_OPEN';
   /** Why the customer or the artisan cancelled (lib/reasons), and their own words. */
   cancelChoice?: string;
   cancelNote?: string;

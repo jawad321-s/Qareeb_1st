@@ -14,46 +14,19 @@ import { isLive } from '@/lib/firebase';
 import { useCollection } from '@/lib/live-data';
 import { COMPLAINTS, SUGGESTIONS } from '@/lib/mock-data';
 
-type NavItem = { href: string; label: TKey; icon: any };
-
-/** The sidebar, in sections: daily overview, accounts, the service itself, what users send in, and the system. */
-const NAV_GROUPS: { label?: TKey; items: NavItem[] }[] = [
-  {
-    items: [
-      { href: '/', label: 'nav.overview', icon: LayoutDashboard },
-      { href: '/analytics', label: 'nav.analytics', icon: BarChart3 },
-    ],
-  },
-  {
-    label: 'nav.group.accounts',
-    items: [
-      { href: '/users', label: 'nav.users', icon: Users },
-      { href: '/artisans', label: 'nav.verifications', icon: ShieldCheck },
-    ],
-  },
-  {
-    label: 'nav.group.services',
-    items: [
-      { href: '/requests', label: 'nav.requests', icon: ClipboardList },
-      { href: '/categories', label: 'nav.categories', icon: Layers },
-      { href: '/subscriptions', label: 'nav.subscriptions', icon: CreditCard },
-    ],
-  },
-  {
-    label: 'nav.group.inbox',
-    items: [
-      { href: '/support', label: 'nav.support', icon: LifeBuoy },
-      { href: '/complaints', label: 'nav.complaints', icon: MessageSquareWarning },
-      { href: '/suggestions', label: 'nav.suggestions', icon: Lightbulb },
-    ],
-  },
-  {
-    label: 'nav.group.system',
-    items: [
-      { href: '/broadcasts', label: 'nav.broadcasts', icon: Megaphone },
-      { href: '/settings', label: 'nav.settings', icon: Settings },
-    ],
-  },
+const NAV: { href: string; label: TKey; icon: any }[] = [
+  { href: '/', label: 'nav.overview', icon: LayoutDashboard },
+  { href: '/users', label: 'nav.users', icon: Users },
+  { href: '/artisans', label: 'nav.verifications', icon: ShieldCheck },
+  { href: '/requests', label: 'nav.requests', icon: ClipboardList },
+  { href: '/analytics', label: 'nav.analytics', icon: BarChart3 },
+  { href: '/categories', label: 'nav.categories', icon: Layers },
+  { href: '/complaints', label: 'nav.complaints', icon: MessageSquareWarning },
+  { href: '/support', label: 'nav.support', icon: LifeBuoy },
+  { href: '/suggestions', label: 'nav.suggestions', icon: Lightbulb },
+  { href: '/subscriptions', label: 'nav.subscriptions', icon: CreditCard },
+  { href: '/broadcasts', label: 'nav.broadcasts', icon: Megaphone },
+  { href: '/settings', label: 'nav.settings', icon: Settings },
 ];
 
 function Brand() {
@@ -91,40 +64,35 @@ function NavLinks({ onNavigate }: { onNavigate?: () => void }) {
   const { t } = useT();
   const waiting = useWaitingCounts();
   return (
-    <nav className="flex-1 space-y-5 overflow-y-auto px-3 py-4">
-      {NAV_GROUPS.map((group, gi) => (
-        <div key={group.label ?? gi} className="space-y-1">
-          {group.label && <p className="px-3 pb-1 text-[11px] font-semibold uppercase tracking-wide text-muted/80">{t(group.label)}</p>}
-          {group.items.map((item) => {
-            const active = item.href === '/' ? pathname === '/' : pathname.startsWith(item.href);
-            const Icon = item.icon;
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                onClick={onNavigate}
+    <nav className="flex-1 space-y-1 overflow-y-auto p-3">
+      {NAV.map((item) => {
+        const active = item.href === '/' ? pathname === '/' : pathname.startsWith(item.href);
+        const Icon = item.icon;
+        return (
+          <Link
+            key={item.href}
+            href={item.href}
+            onClick={onNavigate}
+            className={cn(
+              'flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors',
+              active ? 'bg-brand-600 text-white shadow-sm' : 'text-muted hover:bg-slate-500/10',
+            )}
+          >
+            <Icon className="h-[18px] w-[18px]" />
+            {t(item.label)}
+            {!!waiting[item.href] && (
+              <span
                 className={cn(
-                  'flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition-colors',
-                  active ? 'bg-brand-600 text-white shadow-sm' : 'text-muted hover:bg-slate-500/10 hover:text-[rgb(var(--fg))]',
+                  'ms-auto min-w-5 rounded-full px-1.5 text-center text-xs font-semibold',
+                  active ? 'bg-white/25 text-white' : 'bg-red-500 text-white',
                 )}
               >
-                <Icon className="h-[18px] w-[18px] shrink-0" />
-                {t(item.label)}
-                {!!waiting[item.href] && (
-                  <span
-                    className={cn(
-                      'ms-auto min-w-5 rounded-full px-1.5 text-center text-xs font-semibold',
-                      active ? 'bg-white/25 text-white' : 'bg-red-500 text-white',
-                    )}
-                  >
-                    {waiting[item.href]}
-                  </span>
-                )}
-              </Link>
-            );
-          })}
-        </div>
-      ))}
+                {waiting[item.href]}
+              </span>
+            )}
+          </Link>
+        );
+      })}
     </nav>
   );
 }

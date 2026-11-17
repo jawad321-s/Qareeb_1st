@@ -51,10 +51,7 @@ export default function SupportPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold">{t('sup.title')}</h1>
-        <p className="text-sm text-muted">{t('sup.subtitle')}</p>
-      </div>
+      <h1 className="text-2xl font-bold">{t('sup.title')}</h1>
       <FilterTabs
         value={filter}
         onChange={setFilter}

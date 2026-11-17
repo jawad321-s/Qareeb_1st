@@ -35,11 +35,15 @@ before(async () => {
   await db.doc('requests/del_work').set({ customerId: 'x', acceptedArtisanId: 'del_busy', status: 'WORKING', title: 'Paint' });
   await db.doc('verificationRequests/del_art').set({ artisanId: 'del_art', status: 'pending' });
   await db.doc('verificationRequests/del_art/files/id').set({ dataUrl: 'x' });
+  await db.doc('supportThreads/del_cust').set({ uid: 'del_cust', lastFrom: 'user' });
+  await db.doc('supportThreads/del_cust/messages/m1').set({ from: 'user', text: 'hi' });
 });
 
 test('needs a signed-in user who just entered their password', async () => {
   await rejects(deleteOwnAccount(db, auth, bucket, null), 'unauthenticated');
   await rejects(deleteOwnAccount(db, auth, bucket, { uid: 'del_cust', authTime: nowS() - 3600 }), 'failed-precondition', 'recent-login');
+  // A suspended account talks to the team instead.
+  await rejects(deleteOwnAccount(db, auth, bucket, { uid: 'del_cust', authTime: nowS(), suspended: true }), 'failed-precondition', 'suspended');
   assert.ok((await db.doc('users/del_cust').get()).exists);
 });
 
@@ -55,6 +59,7 @@ test('a customer is removed for good; open requests are cancelled, history kept'
   assert.equal((await db.doc('users/del_cust').get()).exists, false);
   assert.equal((await db.doc('users/del_cust/notifications/n1').get()).exists, false);
   assert.equal((await db.doc('publicProfiles/del_cust').get()).exists, false);
+  assert.equal((await db.doc('supportThreads/del_cust/messages/m1').get()).exists, false);
   assert.equal((await db.doc('requests/del_open').get()).get('status'), 'CANCELLED');
   assert.equal((await db.doc('offers/del_o1').get()).get('closedReason'), 'REQUEST_CANCELLED');
   assert.equal((await db.doc('requests/del_done').get()).get('status'), 'COMPLETED');

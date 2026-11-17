@@ -92,6 +92,11 @@ export const MESSAGES = {
     ar: (p) => ({ title: p.title, body: p.body }),
     en: (p) => ({ title: p.title, body: p.body }),
   },
+  // The Qareeb team answered in the support chat (the reply, shortened).
+  supportReply: {
+    ar: (p) => ({ title: 'رد من فريق قريب', body: clip(p.text ?? '') }),
+    en: (p) => ({ title: 'Reply from the Qareeb team', body: clip(p.text ?? '') }),
+  },
   becameFeatured: {
     ar: (p) => ({ title: 'مبروك! صرت حرفياً مميزاً ⭐', body: `أكملت ${p.jobs} طلبات وتقييمك أعلى من ${p.rating ?? 4}، فصار عندك شارة "حرفي مميز" وتصلك الطلبات الجديدة قبل غيرك.` }),
     en: (p) => ({ title: "Congratulations, you're a featured artisan ⭐", body: `${p.jobs} jobs done and a rating above ${p.rating ?? 4}: you now carry the "Featured" badge and get new requests before others.` }),

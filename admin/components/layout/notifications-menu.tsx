@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@heroui/react';
-import { Bell, Lightbulb, Megaphone, MessageSquareWarning, ShieldCheck, type LucideIcon } from 'lucide-react';
+import { Bell, LifeBuoy, Lightbulb, Megaphone, MessageSquareWarning, ShieldCheck, type LucideIcon } from 'lucide-react';
 import { useT, type TKey } from '@/lib/i18n';
 import { isLive } from '@/lib/firebase';
 import { toMillis, useCollection, toComplaints, toSuggestions } from '@/lib/live-data';
@@ -12,7 +12,7 @@ import { complaintReason } from '@/lib/feedback';
 import { COMPLAINTS, SUGGESTIONS, type VerificationItem } from '@/lib/mock-data';
 import { timeAgo, cn } from '@/lib/utils';
 
-type Kind = 'verify' | 'complaint' | 'suggestion' | 'broadcast';
+type Kind = 'verify' | 'complaint' | 'support' | 'suggestion' | 'broadcast';
 interface Item {
   id: string;
   kind: Kind;
@@ -24,6 +24,7 @@ interface Item {
 const KIND: Record<Kind, { icon: LucideIcon; color: string; href: string; label: TKey }> = {
   verify: { icon: ShieldCheck, color: 'text-emerald-600 bg-emerald-500/10', href: '/artisans', label: 'notif.kind.verify' },
   complaint: { icon: MessageSquareWarning, color: 'text-red-600 bg-red-500/10', href: '/complaints', label: 'notif.kind.complaint' },
+  support: { icon: LifeBuoy, color: 'text-sky-600 bg-sky-500/10', href: '/support', label: 'notif.kind.support' },
   suggestion: { icon: Lightbulb, color: 'text-amber-600 bg-amber-500/10', href: '/suggestions', label: 'notif.kind.suggestion' },
   broadcast: { icon: Megaphone, color: 'text-violet-600 bg-violet-500/10', href: '/broadcasts', label: 'notif.kind.broadcast' },
 };
@@ -39,7 +40,7 @@ const readSeen = () => {
 
 /**
  * The bell in the top bar: what is waiting for the team — artisans asking to
- * be verified, open complaints, new service suggestions and system
+ * be verified, open complaints, unread support chats, new service suggestions and system
  * notifications that couldn't be sent. The red count is what arrived since
  * the bell was last opened; each line opens its page.
  */
@@ -52,6 +53,7 @@ export function NotificationsMenu() {
   const complaints = useCollection('complaints');
   const suggestions = useCollection('suggestions');
   const broadcasts = useCollection('broadcasts');
+  const support = useCollection('supportThreads');
   const [open, setOpen] = useState(false);
   const [seen, setSeen] = useState(0);
   // What was new when the menu opened keeps its dot until it closes.
@@ -69,6 +71,10 @@ export function NotificationsMenu() {
       const about = x.target ? t('notif.complaintAbout').replace('{name}', x.target) : t('notif.complaintGeneral');
       list.push({ id: `c_${x.id}`, kind: 'complaint', text: `${about}: ${complaintReason(x, locale)}`, time: x.createdAt, href: KIND.complaint.href });
     }
+    for (const x of (support ?? []).filter((x) => x.unreadForAdmin === true)) {
+      const text = t('notif.support').replace('{name}', x.name ?? '').replace('{text}', String(x.lastMessage ?? '').slice(0, 60));
+      list.push({ id: `h_${x.id}`, kind: 'support', text, time: Number(x.lastAt) || 0, href: KIND.support.href });
+    }
     const s = live ? toSuggestions(suggestions ?? []) : SUGGESTIONS;
     for (const x of s.filter((x) => x.status === 'new')) {
       list.push({ id: `s_${x.id}`, kind: 'suggestion', text: t('notif.suggestion').replace('{name}', x.name), time: x.createdAt, href: KIND.suggestion.href });
@@ -77,7 +83,7 @@ export function NotificationsMenu() {
       list.push({ id: `b_${b.id}`, kind: 'broadcast', text: t('notif.broadcastFailed').replace('{title}', b.title ?? ''), time: toMillis(b.createdAt), href: KIND.broadcast.href });
     }
     return list.sort((a, b) => b.time - a.time);
-  }, [verifications, complaints, suggestions, broadcasts, live, t, locale]);
+  }, [verifications, complaints, support, suggestions, broadcasts, live, t, locale]);
 
   const fresh = items.filter((i) => i.time > seen).length;
   const counts = (Object.keys(KIND) as Kind[]).map((k) => ({ kind: k, n: items.filter((i) => i.kind === k).length })).filter((c) => c.n > 0);

@@ -23,6 +23,7 @@ import { useTheme } from '@/theme/ThemeProvider';
 import { useT } from '@/i18n';
 import { NotificationBell } from '@/components/domain/NotificationBell';
 import { MessagesButton } from '@/components/domain/MessagesButton';
+import { SupportButton } from '@/components/domain/SupportButton';
 import { FeaturedCard } from '@/components/domain/FeaturedCard';
 import { FEATURED_MIN_JOBS, FEATURED_MIN_RATING } from '@/lib/dispatch';
 import { formatMoney } from '@/lib/format';
@@ -94,6 +95,7 @@ export default function ArtisanDashboard() {
                 </Text>
               </View>
               <MessagesButton style={{ width: 44, height: 44, borderRadius: 14 }} iconSize={20} />
+              <SupportButton style={{ width: 44, height: 44, borderRadius: 14 }} iconSize={20} />
               <NotificationBell style={{ width: 44, height: 44, borderRadius: 14 }} iconSize={20} />
             </View>
 

@@ -34,6 +34,8 @@ interface AuthState {
   signOut: () => void;
   /** Updates the account here at once; the promise is the save to Firestore. */
   updateUser: (patch: Partial<AppUser>) => Promise<void>;
+  /** Changes the account here only (what the server already changed, e.g. a suspension). */
+  patchLocal: (patch: Partial<AppUser>) => void;
   hydrate: () => void;
 }
 
@@ -127,6 +129,14 @@ export const useAuth = create<AuthState>((set, get) => ({
     // The verification photos picked on this device belong to this account.
     useVerification.getState().reset();
     set({ user: null });
+  },
+
+  patchLocal: (patch) => {
+    const current = get().user;
+    if (!current) return;
+    const next = { ...current, ...patch };
+    kv.set(SESSION_KEY, next);
+    set({ user: next });
   },
 
   updateUser: (patch) => {

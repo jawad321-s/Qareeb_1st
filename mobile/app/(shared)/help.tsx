@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Linking, View, Pressable } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
+import { router } from 'expo-router';
 import { Screen } from '@/components/ui/Screen';
 import { Header } from '@/components/ui/Header';
 import { Text } from '@/components/ui/Text';
@@ -59,13 +60,12 @@ export default function HelpCenter() {
           {t('help.browse')}
         </Text>
         <View style={{ marginTop: 4, flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+          <Button label={t('support.open')} variant="secondary" size="sm" iconLeft="headphones" onPress={() => router.push('/(shared)/support')} fullWidth={false} />
           {channels.length > 0 ? (
             channels.map((c) => (
               <Button key={c.url} label={c.label} variant="secondary" size="sm" iconLeft={c.icon} onPress={() => openChannel(c.url)} fullWidth={false} />
             ))
-          ) : (
-            <Button label={t('help.contact')} variant="secondary" size="sm" iconLeft="message" onPress={() => toast('info', t('help.noContacts'))} fullWidth={false} />
-          )}
+          ) : null}
         </View>
       </LinearGradient>
 

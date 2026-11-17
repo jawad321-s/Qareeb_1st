@@ -1,7 +1,8 @@
 // The dashboard's user management, done by the `adminManageUser` Cloud
-// Function (firebase/functions/src/adminUsers.js): only it can disable a
-// login. Accounts are suspended, never deleted, and passwords are the users'
-// own business (changed in the app). Demo mode only pretends.
+// Function (firebase/functions/src/adminUsers.js): only it can mark a login as
+// suspended (the app is then closed to it, except the support chat). Accounts
+// are suspended, never deleted, and passwords are the users' own business
+// (changed in the app). Demo mode only pretends.
 'use client';
 
 import { httpsCallable } from 'firebase/functions';

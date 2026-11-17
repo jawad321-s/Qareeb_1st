@@ -20,7 +20,8 @@ export async function removePlainChats(db, bucket) {
   let messages = 0;
   let photos = 0;
   const all = await db.collectionGroup('messages').get();
-  const plain = all.docs.filter((d) => typeof d.get('cipher') !== 'string');
+  // Request chats only: the support chat with the team is not encrypted.
+  const plain = all.docs.filter((d) => d.ref.parent.parent?.parent?.id === 'requests' && typeof d.get('cipher') !== 'string');
   for (let i = 0; i < plain.length; i += 400) {
     const batch = db.batch();
     plain.slice(i, i + 400).forEach((d) => batch.delete(d.ref));

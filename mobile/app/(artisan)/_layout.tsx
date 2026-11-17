@@ -22,7 +22,10 @@ const META = {
 export default function ArtisanLayout() {
   // Auth gate for the whole artisan stack — see the customer layout for why this
   // ancestor guard prevents a null-user crash on sign-out.
-  const user = useAuth((s) => s.user);
+  const signedIn = useAuth((s) => s.user);
+  // A suspended account only has the "account suspended" screen: nothing here
+  // runs for it (it is sent there below).
+  const user = signedIn?.status === 'suspended' ? null : signedIn;
   const { colors } = useTheme();
   // Called before the early returns below (rules of hooks); idle until signed in.
   const pendingReview = usePendingReview(user);
@@ -30,6 +33,7 @@ export default function ArtisanLayout() {
   useEnsureTrial(user?.uid, user?.role === 'artisan');
   useRefreshLocation(user?.role === 'artisan');
   useEnsureVerificationRequest(user);
+  if (signedIn?.status === 'suspended') return <Redirect href="/suspended" />;
   if (!user) return <Redirect href="/(auth)/welcome" />;
   // Role gate — see the customer layout: ambiguous tab paths must not land a
   // customer inside the artisan app.

@@ -24,6 +24,8 @@ export interface AppUser {
   location?: GeoLocation;
   locale: Locale;
   status: UserStatus;
+  /** Why the team suspended the account (dashboard), when they said. */
+  suspendReason?: string | null;
   verified: boolean;
   rating: number;
   ratingCount: number;

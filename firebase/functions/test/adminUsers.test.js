@@ -9,7 +9,7 @@ import { getAuth } from 'firebase-admin/auth';
 import { getFirestore } from 'firebase-admin/firestore';
 
 process.env.PUSH_DRY_RUN = 'true';
-const { manageUser } = await import('../src/adminUsers.js');
+const { manageUser, migrateSuspendedLogins } = await import('../src/adminUsers.js');
 // Same project as the emulator, so a sign-in over REST sees the accounts made here.
 initializeApp({ projectId: process.env.GCLOUD_PROJECT ?? 'demo-adminusers' });
 const db = getFirestore();
@@ -50,15 +50,19 @@ test('only admins may call it, and never on themselves', async () => {
   await rejects(call({ action: 'suspend', uid: 'adm' }), 'failed-precondition', 'self');
 });
 
-test('suspend disables the login, marks the account and withdraws open offers; reactivate undoes it', async () => {
+test('suspend restricts the login (claim), marks the account and withdraws open offers; reactivate undoes it', async () => {
+  await auth.setCustomUserClaims('auart', { tier: 'x' });
   const res = await call({ action: 'suspend', uid: 'auart', reason: 'شكاوى متكررة' });
   assert.equal(res.withdrawnOffers, 1);
-  assert.equal((await auth.getUser('auart')).disabled, true);
+  // Still able to sign in (to reach the support chat), with the claim the rules check.
+  assert.equal((await auth.getUser('auart')).disabled, false);
+  assert.deepEqual((await auth.getUser('auart')).customClaims, { tier: 'x', suspended: true });
   assert.equal((await user('auart')).status, 'suspended');
   assert.equal((await user('auart')).suspendReason, 'شكاوى متكررة');
   assert.equal((await db.doc('offers/o_auart').get()).get('status'), 'WITHDRAWN');
   await call({ action: 'reactivate', uid: 'auart' });
   assert.equal((await auth.getUser('auart')).disabled, false);
+  assert.deepEqual((await auth.getUser('auart')).customClaims, { tier: 'x' });
   assert.equal((await user('auart')).status, 'active');
   const log = await db.collection('adminLog').where('uid', '==', 'auart').get();
   assert.deepEqual(log.docs.map((d) => d.get('action')).sort(), ['reactivate', 'suspend']);
@@ -83,4 +87,14 @@ test('passwords cannot be set from the dashboard', async () => {
 test('accounts cannot be deleted from the dashboard', async () => {
   await rejects(call({ action: 'delete', uid: 'augone' }), 'invalid-argument');
   assert.ok((await user('augone')).uid, 'still there');
+});
+
+test('accounts suspended the old way (login disabled) get the claim once', async () => {
+  await account('aulegacy', 'customer', { status: 'suspended' });
+  await auth.updateUser('aulegacy', { disabled: true });
+  assert.ok((await migrateSuspendedLogins(db, auth)) >= 1);
+  const u = await auth.getUser('aulegacy');
+  assert.equal(u.disabled, false);
+  assert.equal(u.customClaims?.suspended, true);
+  assert.equal(await migrateSuspendedLogins(db, auth), null, 'runs a single time');
 });

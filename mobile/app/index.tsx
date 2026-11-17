@@ -39,12 +39,13 @@ export default function Index() {
   const restore = storage.getString(RESTORE_ROUTE_KEY);
   if (restore) {
     storage.delete(RESTORE_ROUTE_KEY);
-    if (user || restore.startsWith('/welcome') || restore.startsWith('/login') || restore.startsWith('/register')) {
+    if ((user && user.status !== 'suspended') || restore.startsWith('/welcome') || restore.startsWith('/login') || restore.startsWith('/register')) {
       return <Redirect href={resolveForRole(restore, user?.role) as any} />;
     }
   }
 
   if (!user) return <Redirect href="/(auth)/welcome" />;
+  if (user.status === 'suspended') return <Redirect href="/suspended" />;
   if (user.role === 'artisan') return <Redirect href="/(artisan)/dashboard" />;
   return <Redirect href="/(customer)/home" />;
 }

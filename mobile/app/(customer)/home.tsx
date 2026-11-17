@@ -18,6 +18,7 @@ import { useAuth } from '@/store/auth';
 import { useTheme } from '@/theme/ThemeProvider';
 import { useT } from '@/i18n';
 import { NotificationBell } from '@/components/domain/NotificationBell';
+import { SupportButton } from '@/components/domain/SupportButton';
 
 export default function Home() {
   const { colors, isDark } = useTheme();
@@ -58,6 +59,7 @@ export default function Home() {
                   {user?.fullName ?? ''}
                 </Text>
               </View>
+              <SupportButton style={{ width: 42, height: 42, borderRadius: 21 }} />
               <NotificationBell style={{ width: 42, height: 42, borderRadius: 21 }} />
             </View>
             <Pressable

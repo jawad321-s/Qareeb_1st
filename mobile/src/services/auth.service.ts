@@ -100,10 +100,8 @@ export async function signInWithPhone(phone: string, password: string, role: Use
       await fbSignOut(auth());
       throw new AuthError('auth.errWrongRole');
     }
-    if (profile.status === 'suspended') {
-      await fbSignOut(auth());
-      throw new AuthError('auth.errDisabled');
-    }
+    // A suspended account signs in to the "account suspended" screen only;
+    // its token carries the claim that keeps everything else closed.
     return profile;
   } catch (err) {
     throw toAuthError(err);

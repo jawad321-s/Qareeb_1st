@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
   LayoutDashboard, Users, ShieldCheck, ClipboardList, BarChart3,
-  Layers, MessageSquareWarning, Lightbulb, Megaphone, CreditCard, Settings, Menu, X,
+  Layers, MessageSquareWarning, Lightbulb, LifeBuoy, Megaphone, CreditCard, Settings, Menu, X,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useT, type TKey } from '@/lib/i18n';
@@ -22,6 +22,7 @@ const NAV: { href: string; label: TKey; icon: any }[] = [
   { href: '/analytics', label: 'nav.analytics', icon: BarChart3 },
   { href: '/categories', label: 'nav.categories', icon: Layers },
   { href: '/complaints', label: 'nav.complaints', icon: MessageSquareWarning },
+  { href: '/support', label: 'nav.support', icon: LifeBuoy },
   { href: '/suggestions', label: 'nav.suggestions', icon: Lightbulb },
   { href: '/subscriptions', label: 'nav.subscriptions', icon: CreditCard },
   { href: '/broadcasts', label: 'nav.broadcasts', icon: Megaphone },
@@ -43,16 +44,18 @@ function Brand() {
   );
 }
 
-/** What waits for the team: open complaints and new suggestions, shown on their links. */
+/** What waits for the team: open complaints, unread support chats and new suggestions, shown on their links. */
 function useWaitingCounts(): Record<string, number> {
   const live = isLive();
   const complaints = useCollection('complaints');
   const suggestions = useCollection('suggestions');
+  const support = useCollection('supportThreads');
   const c = (live ? complaints ?? [] : COMPLAINTS).map((x) => x.status ?? 'open');
   const s = (live ? suggestions ?? [] : SUGGESTIONS).map((x) => x.status ?? 'new');
   return {
     '/complaints': c.filter((st) => st === 'open' || st === 'reviewing').length,
     '/suggestions': s.filter((st) => st === 'new').length,
+    '/support': (support ?? []).filter((x) => x.unreadForAdmin === true).length,
   };
 }
 

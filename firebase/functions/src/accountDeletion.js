@@ -3,20 +3,22 @@
 // first, so the sign-in must be recent. Refused while a job is in progress, so
 // nobody is left half-way. Open requests are cancelled (the artisans who
 // offered are told) and open offers withdrawn; the login, the profile, the
-// notifications and the user's photos go. Finished requests, reviews and
-// complaints stay for the records.
+// notifications, the support chat and the user's photos go. Finished requests,
+// reviews and complaints stay for the records. A suspended account can't.
 import { HttpsError } from 'firebase-functions/v2/https';
 
 const ACTIVE_JOB = ['ACCEPTED', 'ON_THE_WAY', 'WORKING'];
 const RECENT_LOGIN_S = 10 * 60;
 
 /**
- * @param caller  { uid, authTime } from the callable's token, or null
+ * @param caller  { uid, authTime, suspended } from the callable's token, or null
  * @param bucket  () => Storage bucket, for the user's photos (failures ignored)
  */
 export async function deleteOwnAccount(db, auth, bucket, caller, now = Date.now()) {
   if (!caller?.uid) throw new HttpsError('unauthenticated', 'Sign in first.');
   if (!caller.authTime || now / 1000 - caller.authTime > RECENT_LOGIN_S) throw new HttpsError('failed-precondition', 'recent-login');
+  // A suspended account talks to the team first; it can't erase itself.
+  if (caller.suspended) throw new HttpsError('failed-precondition', 'suspended');
   return deleteAccount(db, auth, bucket, caller.uid);
 }
 
@@ -48,6 +50,7 @@ export async function deleteAccount(db, auth, bucket, uid) {
   });
   await db.recursiveDelete(db.collection('users').doc(uid));
   await db.recursiveDelete(db.collection('verificationRequests').doc(uid));
+  await db.recursiveDelete(db.collection('supportThreads').doc(uid));
   await Promise.all([db.collection('artisanProfiles').doc(uid).delete(), db.collection('publicProfiles').doc(uid).delete()]);
   try {
     await bucket().deleteFiles({ prefix: `users/${uid}/` });

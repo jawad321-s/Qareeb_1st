@@ -63,8 +63,10 @@ function RootNavigator() {
   const pathname = usePathname();
   usePushNotifications(uid, hydrated && fontsLoaded && splashDone);
   // What other users see of this account; the full user doc stays private.
-  usePublicProfile(user);
-  // Suspended or deleted from the admin dashboard: out at once.
+  // (A suspended account changes nothing.)
+  usePublicProfile(user?.status === 'suspended' ? null : user);
+  // Suspended from the admin dashboard: to the "account suspended" screen at
+  // once (and back when reactivated); signed out if the account is gone.
   useAccountGuard(uid);
   // The admin's renamed, hidden and added services, followed live.
   useEffect(() => {
@@ -108,6 +110,7 @@ function RootNavigator() {
         <Stack.Screen name="(customer)" options={{ animation: 'fade' }} />
         <Stack.Screen name="(artisan)" options={{ animation: 'fade' }} />
         <Stack.Screen name="(shared)" options={{ presentation: 'card', animation: 'slide_from_right' }} />
+        <Stack.Screen name="suspended" options={{ animation: 'fade', gestureEnabled: false }} />
       </Stack>
       {!splashDone && <AnimatedSplash onFinish={() => setSplashDone(true)} />}
     </View>

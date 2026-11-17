@@ -13,6 +13,7 @@
 //  • deleteMyAccount    → a user deletes their own account from the app (callable)
 //  • onBroadcastCreated → a system notification from the dashboard to everyone,
 //                         customers or artisans
+//  • onSupportMessageCreated → the team answered in the support chat: tell the user
 import { initializeApp } from 'firebase-admin/app';
 import { getAuth } from 'firebase-admin/auth';
 import { getFirestore } from 'firebase-admin/firestore';
@@ -26,7 +27,7 @@ import { offerOpenRequests, runDispatchTick, startDispatch } from './dispatch.js
 import { notifyUsers } from './notify.js';
 import { notifyOfferClosed, notifyRequestCancelled } from './handlers.js';
 import { backfillFeatured, onArtisanRated, onJobCompleted } from './featured.js';
-import { manageUser } from './adminUsers.js';
+import { manageUser, migrateSuspendedLogins } from './adminUsers.js';
 import { deliverBroadcast } from './broadcast.js';
 import { removePlainChats } from './chatCleanup.js';
 import { deleteOwnAccount } from './accountDeletion.js';
@@ -49,6 +50,8 @@ export const dispatchTick = onSchedule({ schedule: 'every 1 minutes', timeZone: 
   await backfillFeatured(db).catch((e) => logger.error('Featured backfill failed', e));
   // Once: chats saved before they were encrypted are deleted.
   await removePlainChats(db, () => getStorage().bucket()).catch((e) => logger.error('Chat cleanup failed', e));
+  // Once: accounts suspended before the support chat can sign in to reach it.
+  await migrateSuspendedLogins(db, getAuth()).catch((e) => logger.error('Suspended-login migration failed', e));
   await runDispatchTick(db);
 });
 
@@ -124,7 +127,7 @@ export const resetPasswordWithPhone = onCall((request) =>
   ),
 );
 
-/** Suspend / reactivate / verify / set a password / delete — from the admin dashboard. */
+/** Suspend / reactivate / verify / unverify — from the admin dashboard. */
 export const adminManageUser = onCall((request) =>
   manageUser(
     db,
@@ -151,6 +154,13 @@ export const deleteMyAccount = onCall((request) =>
     db,
     getAuth(),
     () => getStorage().bucket(),
-    request.auth && { uid: request.auth.uid, authTime: request.auth.token.auth_time },
+    request.auth && { uid: request.auth.uid, authTime: request.auth.token.auth_time, suspended: request.auth.token.suspended === true },
   ),
 );
+
+/** The Qareeb team answered in the support chat (dashboard → Support). */
+export const onSupportMessageCreated = onDocumentCreated('supportThreads/{uid}/messages/{id}', async (event) => {
+  const msg = event.data?.data();
+  if (msg?.from !== 'admin') return;
+  await notifyUsers(db, [event.params.uid], 'supportReply', { text: msg.text }, { route: '/(shared)/support' });
+});

@@ -4,6 +4,10 @@
 // deleted, and passwords are changed by their owners in the app. Only callers
 // whose token carries role=admin may use it, and every action is recorded in
 // `adminLog`.
+//
+// A suspended account can still sign in, but only to the "account suspended"
+// screen and its chat with the Qareeb team: the `suspended` claim on its token
+// makes the security rules refuse everything else.
 import { HttpsError } from 'firebase-functions/v2/https';
 
 export const ACTIONS = ['suspend', 'reactivate', 'verify', 'unverify'];
@@ -35,17 +39,16 @@ export async function manageUser(db, auth, caller, data) {
 
   switch (action) {
     case 'suspend': {
-      await auth.updateUser(uid, { disabled: true }).catch(ignoreMissing);
-      // Signs the account out on every device within the hour; the app's own
-      // watcher on users/{uid}.status signs it out at once.
-      await auth.revokeRefreshTokens(uid).catch(ignoreMissing);
+      // The app sees users/{uid}.status change at once and moves to the
+      // suspended screen with a fresh token that carries the claim.
+      await setSuspended(auth, uid, true);
       const reason = typeof data.reason === 'string' ? data.reason.trim().slice(0, 300) : '';
       await userRef.update({ status: 'suspended', suspendedAt: now, suspendReason: reason || null, updatedAt: now });
       result = { withdrawnOffers: await withdrawPendingOffers(db, uid) };
       break;
     }
     case 'reactivate':
-      await auth.updateUser(uid, { disabled: false }).catch(ignoreMissing);
+      await setSuspended(auth, uid, false);
       await userRef.update({ status: 'active', suspendedAt: null, suspendReason: null, updatedAt: now });
       break;
     case 'verify':
@@ -72,6 +75,34 @@ export async function manageUser(db, auth, caller, data) {
     ...(action === 'suspend' && data.reason ? { reason: String(data.reason).slice(0, 300) } : {}),
   });
   return { ok: true, action, uid, ...result };
+}
+
+/**
+ * Adds or removes the `suspended` claim (other claims are kept). Suspensions
+ * before the support chat disabled the login instead, so it is enabled again.
+ */
+export async function setSuspended(auth, uid, suspended) {
+  const user = await auth.getUser(uid).catch((e) => {
+    ignoreMissing(e);
+    return null;
+  });
+  if (!user) return;
+  const { suspended: _was, ...claims } = user.customClaims ?? {};
+  await auth.setCustomUserClaims(uid, suspended ? { ...claims, suspended: true } : claims);
+  if (user.disabled) await auth.updateUser(uid, { disabled: false });
+}
+
+/**
+ * Once: accounts suspended the old way (login disabled) get the claim and can
+ * sign in to reach support. A marker in meta/suspendedLogin makes it run once.
+ */
+export async function migrateSuspendedLogins(db, auth) {
+  const marker = db.collection('meta').doc('suspendedLogin');
+  if ((await marker.get()).exists) return null;
+  const suspended = await db.collection('users').where('status', '==', 'suspended').get();
+  for (const d of suspended.docs) await setSuspended(auth, d.id, true);
+  await marker.set({ at: Date.now(), accounts: suspended.size });
+  return suspended.size;
 }
 
 /** An artisan's offers still waiting for an answer are taken back. */

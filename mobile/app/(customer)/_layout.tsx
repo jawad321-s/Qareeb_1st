@@ -21,12 +21,16 @@ export default function CustomerLayout() {
   // Auth gate for the whole customer stack. On sign-out `user` becomes null and
   // this ancestor re-renders first, unmounting every tab screen (which assume a
   // signed-in user) before any of them can read a null `user` and crash.
-  const user = useAuth((s) => s.user);
+  const signedIn = useAuth((s) => s.user);
+  // A suspended account only has the "account suspended" screen: nothing here
+  // runs for it (it is sent there below).
+  const user = signedIn?.status === 'suspended' ? null : signedIn;
   const { colors } = useTheme();
   // Called before the early returns below (rules of hooks); idle until signed in.
   const pendingReview = usePendingReview(user);
   // Requests go out from the customer's saved location: keep it where they are.
   useRefreshLocation(user?.role === 'customer');
+  if (signedIn?.status === 'suspended') return <Redirect href="/suspended" />;
   if (!user) return <Redirect href="/(auth)/welcome" />;
   // Role gate: tab paths like /profile exist in BOTH groups, and an ambiguous
   // link (deep link, post-restart restore) can land an artisan here — showing

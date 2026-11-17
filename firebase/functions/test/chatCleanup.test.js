@@ -21,6 +21,8 @@ before(async () => {
     mediaUrl: 'https://firebasestorage.googleapis.com/v0/b/demo.appspot.com/o/chat%2Fr1%2F123.jpg?alt=media&token=x',
   });
   await db.doc('requests/r1/messages/m3').set({ senderId: 'c', type: 'text', cipher: 'AAAA', v: 1, createdAt: 3 });
+  // The support chat with the team is plain text on purpose.
+  await db.doc('supportThreads/c/messages/s1').set({ senderId: 'c', from: 'user', text: 'حسابي موقوف', createdAt: 3 });
   await db.doc('users/a/notifications/n1').set({ type: 'newMessage', title: 'C', body: 'رقم بيتي 12' });
   await db.doc('users/a/notifications/n2').set({ type: 'newJob', title: 'Job', body: 'x' });
 });
@@ -37,6 +39,7 @@ test('removes plain messages, their photos and the notifications quoting them �
   assert.deepEqual(deleted, ['chat/r1/123.jpg']);
   assert.equal((await db.doc('requests/r1/messages/m1').get()).exists, false);
   assert.equal((await db.doc('requests/r1/messages/m3').get()).exists, true, 'encrypted message kept');
+  assert.equal((await db.doc('supportThreads/c/messages/s1').get()).exists, true, 'support chat kept');
   assert.equal((await db.doc('users/a/notifications/n2').get()).exists, true, 'other notifications kept');
   // A plain message written later (an old app) is not swept by a second run.
   await db.doc('requests/r1/messages/m4').set({ senderId: 'c', type: 'text', text: 'later', createdAt: 4 });

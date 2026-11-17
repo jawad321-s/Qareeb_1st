@@ -9,7 +9,12 @@ service cloud.firestore {
   match /databases/{database}/documents {
 
     // ── Helpers ──────────────────────────────────────────────────────────────
+    // A suspended account (claim set by the dashboard) is signed in only for
+    // its own profile and the support chat; every other rule refuses it.
     function isSignedIn() {
+      return request.auth != null && request.auth.token.get('suspended', false) != true;
+    }
+    function isAuthed() {
       return request.auth != null;
     }
     function uid() {
@@ -47,10 +52,8 @@ service cloud.firestore {
       // (listings, profiles, chat headers). A customer's doc holds their phone
       // number and home location, so only they and the admins read it; what
       // others see of a customer comes from publicProfiles/{uid}.
-      allow read: if isSignedIn() && (
-                    uid() == userId
-                    || isAdmin()
-                    || resource.data.role == 'artisan');
+      allow read: if (isAuthed() && uid() == userId)
+                  || (isSignedIn() && (isAdmin() || resource.data.role == 'artisan'));
       allow create: if isSignedIn() && uid() == userId
                     && incoming().role in ['customer', 'artisan'];
       allow update: if isSignedIn() && (
@@ -62,13 +65,15 @@ service cloud.firestore {
                       || isAdmin());
       allow delete: if isAdmin();
 
+      // Their own notifications and push tokens stay theirs while suspended,
+      // so the team's replies in the support chat still reach the phone.
       match /notifications/{notifId} {
-        allow read, update: if isSignedIn() && uid() == userId;
+        allow read, update: if isAuthed() && uid() == userId;
         allow create: if isAdmin(); // written by Cloud Functions (admin SDK)
-        allow delete: if isSignedIn() && uid() == userId;
+        allow delete: if isAuthed() && uid() == userId;
       }
       match /fcmTokens/{tokenId} {
-        allow read, write: if isSignedIn() && uid() == userId;
+        allow read, write: if isAuthed() && uid() == userId;
       }
     }
 
@@ -326,6 +331,34 @@ service cloud.firestore {
                               && incoming().dataUrl.size() <= 900000
                               && incoming().dataUrl[0:11] == 'data:image/';
         allow delete: if isAdmin() || (isArtisan() && id == uid());
+      }
+    }
+
+    // ── supportThreads/{uid} ─────────────────────────────────────────────────
+    // A user's chat with the Qareeb team (dashboard → Support), one thread per
+    // account; a suspended account can still use it. Messages are plain text:
+    // they are for the team to read. The header (who, last message, unread
+    // marks) is kept up to date by whoever writes.
+    match /supportThreads/{userId} {
+      function owner() {
+        return isAuthed() && uid() == userId;
+      }
+      allow read: if owner() || isAdmin();
+      allow create: if owner() && incoming().uid == userId && incoming().lastFrom == 'user';
+      allow update: if isAdmin()
+                    || (owner() && incoming().uid == userId
+                        && incoming().diff(existing()).affectedKeys()
+                             .hasOnly(['name', 'role', 'phone', 'lastMessage', 'lastAt', 'lastFrom', 'unreadForAdmin', 'unreadForUser', 'updatedAt'])
+                        && (incoming().get('lastFrom', '') == existing().get('lastFrom', '') || incoming().lastFrom == 'user'));
+      allow delete: if isAdmin();
+
+      match /messages/{messageId} {
+        allow read: if owner() || isAdmin();
+        allow create: if isValidString(incoming().text, 1000)
+                      && incoming().createdAt is number
+                      && incoming().senderId == uid()
+                      && ((owner() && incoming().from == 'user') || (isAdmin() && incoming().from == 'admin'));
+        allow delete: if isAdmin();
       }
     }
 

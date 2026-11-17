@@ -1,7 +1,7 @@
 // Runs against the Auth + Firestore emulators:
 //   firebase emulators:exec --only auth,firestore "cd functions && npm test"
 // The dashboard's user management: only admins, and each action does what
-// the console would (login disabled, password set, account removed).
+// the console would (login disabled, artisan verified); no passwords or deletions.
 import { test, before } from 'node:test';
 import assert from 'node:assert/strict';
 import { initializeApp } from 'firebase-admin/app';
@@ -76,16 +76,8 @@ test('verify / unverify an artisan (not a customer)', async () => {
   await rejects(call({ action: 'verify', uid: 'aucust' }), 'failed-precondition', 'not-artisan');
 });
 
-test('set a new password (6 characters or more)', async () => {
-  await rejects(call({ action: 'setPassword', uid: 'aucust', password: '123' }), 'invalid-argument', 'weak-password');
-  await call({ action: 'setPassword', uid: 'aucust', password: 'newpass1' });
-  // The emulator accepts a sign-in with the new password.
-  const r = await fetch('http://127.0.0.1:9099/identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=fake', {
-    method: 'POST',
-    headers: { 'content-type': 'application/json' },
-    body: JSON.stringify({ email: 'customer-aucust@phone.qareeb.app', password: 'newpass1', returnSecureToken: true }),
-  });
-  assert.equal(r.status, 200);
+test('passwords cannot be set from the dashboard', async () => {
+  await rejects(call({ action: 'setPassword', uid: 'aucust', password: 'newpass1' }), 'invalid-argument');
 });
 
 test('accounts cannot be deleted from the dashboard', async () => {

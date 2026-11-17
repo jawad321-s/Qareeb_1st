@@ -13,10 +13,12 @@ export const MAX_RADIUS_KM = 12;
 export const REQUIRE_VERIFIED = process.env.REQUIRE_VERIFIED !== 'false';
 
 // Featured artisans ("حرفي مميز"): an artisan with at least FEATURED_MIN_JOBS
-// completed jobs gets the badge and is reached FEATURED_BONUS_KM further out
-// at every step of the search, i.e. one step (STEP_MS) before the others. The
-// admin can change the number in the dashboard (settings/platform.featuredMinJobs).
+// completed jobs AND an average rating above FEATURED_MIN_RATING gets the
+// badge and is reached FEATURED_BONUS_KM further out at every step of the
+// search, i.e. one step (STEP_MS) before the others. The admin can change both
+// numbers in the dashboard (settings/platform.featuredMinJobs / featuredMinRating).
 export const FEATURED_MIN_JOBS = 10;
+export const FEATURED_MIN_RATING = 4;
 export const FEATURED_BONUS_KM = STEP_KM;
 
 // Artisans' working hours (artisanProfiles.availability) are read in this zone.

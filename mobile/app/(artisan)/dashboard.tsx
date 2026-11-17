@@ -24,7 +24,7 @@ import { useT } from '@/i18n';
 import { NotificationBell } from '@/components/domain/NotificationBell';
 import { MessagesButton } from '@/components/domain/MessagesButton';
 import { FeaturedCard } from '@/components/domain/FeaturedCard';
-import { FEATURED_MIN_JOBS } from '@/lib/dispatch';
+import { FEATURED_MIN_JOBS, FEATURED_MIN_RATING } from '@/lib/dispatch';
 import { formatMoney } from '@/lib/format';
 import { incomeSummary } from '@/lib/income';
 import { daysLabel, planById } from '@/lib/plans';
@@ -50,7 +50,9 @@ export default function ArtisanDashboard() {
   const tabBarSpace = useTabBarSpace();
   // Featured artisan: completed jobs as counted by the server, against the
   // number set in the dashboard.
-  const featuredMin = useSupportContacts().data?.featuredMinJobs ?? FEATURED_MIN_JOBS;
+  const platform = useSupportContacts().data;
+  const featuredMin = platform?.featuredMinJobs ?? FEATURED_MIN_JOBS;
+  const featuredRating = platform?.featuredMinRating ?? FEATURED_MIN_RATING;
   const completedJobs = profile.data?.profile.completedJobs ?? history.data?.completed.length ?? 0;
 
   // Artisans are matched to jobs by distance, so ask for the device location
@@ -158,7 +160,13 @@ export default function ArtisanDashboard() {
         {/* Featured artisan: the badge, or how far from it */}
         {profile.data && (
           <View style={{ paddingHorizontal: 20, marginTop: 16 }}>
-            <FeaturedCard featured={profile.data.profile.featured === true} completed={completedJobs} threshold={featuredMin} />
+            <FeaturedCard
+              featured={profile.data.profile.featured === true}
+              completed={completedJobs}
+              threshold={featuredMin}
+              rating={rating?.count ? rating.average : 0}
+              minRating={featuredRating}
+            />
           </View>
         )}
 

@@ -93,8 +93,8 @@ export const MESSAGES = {
     en: (p) => ({ title: p.title, body: p.body }),
   },
   becameFeatured: {
-    ar: (p) => ({ title: 'مبروك! صرت حرفياً مميزاً ⭐', body: `أكملت ${p.jobs} طلبات، فصار عندك شارة "حرفي مميز" وتصلك الطلبات الجديدة قبل غيرك.` }),
-    en: (p) => ({ title: "Congratulations, you're a featured artisan ⭐", body: `You completed ${p.jobs} jobs: you now carry the "Featured" badge and get new requests before others.` }),
+    ar: (p) => ({ title: 'مبروك! صرت حرفياً مميزاً ⭐', body: `أكملت ${p.jobs} طلبات وتقييمك أعلى من ${p.rating ?? 4}، فصار عندك شارة "حرفي مميز" وتصلك الطلبات الجديدة قبل غيرك.` }),
+    en: (p) => ({ title: "Congratulations, you're a featured artisan ⭐", body: `${p.jobs} jobs done and a rating above ${p.rating ?? 4}: you now carry the "Featured" badge and get new requests before others.` }),
   },
 };
 

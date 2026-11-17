@@ -185,6 +185,9 @@ EXPO_PUBLIC_FIREBASE_EMULATOR_HOST=192.168.1.20
 - **نسيت كلمة المرور** في التطبيق: رمز SMS حقيقي (Firebase Phone Auth). قبل الإرسال بيطلع
   مربع "أنا لست روبوت" (reCAPTCHA)، وبعد الرمز الـ Cloud Function `resetPasswordWithPhone`
   بتغيّر كلمة المرور. بيحتاج تفعيل **Phone** (الخطوة 1) ونشر الـ functions.
+- **تغيير كلمة المرور وحذف الحساب** من التطبيق (تعديل الملف الشخصي): التغيير يتأكد من
+  كلمة المرور الحالية ويحدّثها على Firebase Auth مباشرة. الحذف نهائي عبر الـ Cloud Function
+  `deleteMyAccount` (بيحتاج نشر الـ functions)، ومرفوض لو عند الشخص طلب قيد التنفيذ.
 - **صور المعرض والمحادثة** بتنرفع على **Storage** (مضغوطة، JPEG لحد 1600 بكسل)، وFirestore
   بيحفظ رابطها بس. لازم يكون Storage مفعّل (Firebase Console ← **Storage** ← **Get started**)
   وقواعده منشورة: `cd firebase` ثم `npx firebase-tools deploy --only storage --project qareeb-b9a54`.

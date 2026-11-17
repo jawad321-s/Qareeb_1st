@@ -117,18 +117,20 @@ export default function SettingsPage() {
   );
 }
 
-/** Default number of completed jobs for the "featured artisan" badge (Cloud Functions use the same). */
+/** Defaults for the "featured artisan" badge (Cloud Functions use the same). */
 const FEATURED_MIN_JOBS = 10;
+const FEATURED_MIN_RATING = 4;
 
 /**
- * settings/platform.featuredMinJobs: completed jobs that make an artisan
- * featured. Cloud Functions recount every artisan against a new number within
- * a minute of saving it.
+ * settings/platform.featuredMinJobs / featuredMinRating: an artisan becomes
+ * featured with at least this many completed jobs AND a rating above this.
+ * Cloud Functions recount every artisan within a minute of a change.
  */
 function FeaturedSettings() {
   const { t } = useT();
   const live = isLive();
-  const [value, setValue] = useState(String(FEATURED_MIN_JOBS));
+  const [jobs, setJobs] = useState(String(FEATURED_MIN_JOBS));
+  const [rating, setRating] = useState(String(FEATURED_MIN_RATING));
   const [loaded, setLoaded] = useState(!live);
   const [state, setState] = useState<'idle' | 'saving' | 'saved' | 'failed'>('idle');
 
@@ -139,48 +141,57 @@ function FeaturedSettings() {
       doc(db, 'settings', 'platform'),
       (snap) => {
         const n = snap.get('featuredMinJobs');
-        setValue(String(Number.isInteger(n) && n > 0 ? n : FEATURED_MIN_JOBS));
+        const r = snap.get('featuredMinRating');
+        setJobs(String(Number.isInteger(n) && n > 0 ? n : FEATURED_MIN_JOBS));
+        setRating(String(typeof r === 'number' && r >= 0 && r < 5 ? r : FEATURED_MIN_RATING));
         setLoaded(true);
       },
       () => setLoaded(true),
     );
   }, [live]);
 
-  const n = Number(value);
-  const valid = Number.isInteger(n) && n >= 1 && n <= 1000;
+  const n = Number(jobs);
+  const r = Number(rating.replace(',', '.'));
+  const valid = Number.isInteger(n) && n >= 1 && n <= 1000 && Number.isFinite(r) && r >= 0 && r < 5;
 
   const save = async () => {
     if (!valid) return;
     const db = getDb();
     setState('saving');
     try {
-      if (live && db) await setDoc(doc(db, 'settings', 'platform'), { featuredMinJobs: n, updatedAt: Date.now() }, { merge: true });
+      const rounded = Math.round(r * 10) / 10;
+      if (live && db) await setDoc(doc(db, 'settings', 'platform'), { featuredMinJobs: n, featuredMinRating: rounded, updatedAt: Date.now() }, { merge: true });
       setState('saved');
     } catch {
       setState('failed');
     }
   };
 
+  const field = (label: string, value: string, onChange: (v: string) => void, extra: Record<string, string | number>) => (
+    <div className="grid grid-cols-3 items-center gap-4">
+      <label className="text-sm text-muted">{label}</label>
+      <Input
+        aria-label={label}
+        type="number"
+        value={value}
+        disabled={!loaded}
+        onChange={(e) => {
+          onChange(e.target.value);
+          setState('idle');
+        }}
+        className="col-span-2"
+        {...extra}
+      />
+    </div>
+  );
+
   return (
     <Card className="p-6">
       <h2 className="font-semibold">{t('set.featured')}</h2>
       <p className="mb-4 mt-1 text-xs text-muted">{t('set.featuredHint')}</p>
-      <div className="grid grid-cols-3 items-center gap-4">
-        <label className="text-sm text-muted">{t('set.featuredMinJobs')}</label>
-        <Input
-          aria-label={t('set.featuredMinJobs')}
-          type="number"
-          min={1}
-          max={1000}
-          inputMode="numeric"
-          value={value}
-          disabled={!loaded}
-          onChange={(e) => {
-            setValue(e.target.value);
-            setState('idle');
-          }}
-          className="col-span-2"
-        />
+      <div className="space-y-4">
+        {field(t('set.featuredMinJobs'), jobs, setJobs, { min: 1, max: 1000, inputMode: 'numeric' })}
+        {field(t('set.featuredMinRating'), rating, setRating, { min: 0, max: 4.9, step: 0.1, inputMode: 'decimal' })}
       </div>
       <div className="mt-6 flex items-center justify-end gap-3">
         {!valid && <span className="text-sm text-red-500">{t('set.featuredInvalid')}</span>}

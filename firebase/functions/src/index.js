@@ -7,8 +7,10 @@
 //  • onArtisanProfileUpdated → a service added: offer its open requests
 //  • onMessageCreated   → tell the other party about a chat message
 //  • resetPasswordWithPhone → set a new password after an SMS code (callable)
-//  • a completed job recounts the artisan's jobs (featured badge at 10)
+//  • a completed job or a new review recounts the artisan's jobs and rating
+//    (featured badge: 10 jobs and a rating above 4)
 //  • adminManageUser    → the dashboard's user management (callable, admins only)
+//  • deleteMyAccount    → a user deletes their own account from the app (callable)
 //  • onBroadcastCreated → a system notification from the dashboard to everyone,
 //                         customers or artisans
 import { initializeApp } from 'firebase-admin/app';
@@ -23,10 +25,11 @@ import { REGION } from './config.js';
 import { offerOpenRequests, runDispatchTick, startDispatch } from './dispatch.js';
 import { notifyUsers } from './notify.js';
 import { notifyOfferClosed, notifyRequestCancelled } from './handlers.js';
-import { backfillFeatured, onJobCompleted } from './featured.js';
+import { backfillFeatured, onArtisanRated, onJobCompleted } from './featured.js';
 import { manageUser } from './adminUsers.js';
 import { deliverBroadcast } from './broadcast.js';
 import { removePlainChats } from './chatCleanup.js';
+import { deleteOwnAccount } from './accountDeletion.js';
 import { resetPasswordWithPhone as resetPassword } from './passwordReset.js';
 
 initializeApp();
@@ -134,4 +137,20 @@ export const adminManageUser = onCall((request) =>
 /** A system notification written in the dashboard goes out to its audience. */
 export const onBroadcastCreated = onDocumentCreated({ document: 'broadcasts/{id}', timeoutSeconds: 540, memory: '512MiB' }, (event) =>
   deliverBroadcast(db, event.params.id),
+);
+
+/** A new review can make an artisan featured (or no longer). */
+export const onReviewCreated = onDocumentCreated('reviews/{id}', async (event) => {
+  const review = event.data?.data();
+  if (review?.targetId) await onArtisanRated(db, review.targetId);
+});
+
+/** "Delete my account" in the app (after the user re-entered their password). */
+export const deleteMyAccount = onCall((request) =>
+  deleteOwnAccount(
+    db,
+    getAuth(),
+    () => getStorage().bucket(),
+    request.auth && { uid: request.auth.uid, authTime: request.auth.token.auth_time },
+  ),
 );

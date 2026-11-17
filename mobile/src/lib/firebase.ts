@@ -8,6 +8,7 @@ import * as firebaseAuth from 'firebase/auth';
 import type { Auth } from 'firebase/auth';
 import { connectFirestoreEmulator, getFirestore, initializeFirestore, type Firestore } from 'firebase/firestore';
 import { connectStorageEmulator, getStorage, type FirebaseStorage } from 'firebase/storage';
+import { connectFunctionsEmulator, getFunctions, type Functions } from 'firebase/functions';
 import { config } from './config';
 
 /** Local emulators (firebase emulators:start) instead of the real project, when set. */
@@ -17,6 +18,10 @@ let app: FirebaseApp | null = null;
 let db: Firestore | null = null;
 let storage: FirebaseStorage | null = null;
 let auth: Auth | null = null;
+let functions: Functions | null = null;
+
+// Must match the Cloud Functions region (firebase/functions/src/config.js).
+const REGION = 'europe-west1';
 
 function ensureApp(): FirebaseApp | null {
   if (config.useMock) return null;
@@ -50,6 +55,17 @@ export function getBucket(): FirebaseStorage | null {
   storage = getStorage(a);
   if (emulator) connectStorageEmulator(storage, emulator, 9199);
   return storage;
+}
+
+/** Callable Cloud Functions, as the signed-in user. */
+export function getFunctionsClient(): Functions | null {
+  if (config.useMock) return null;
+  if (functions) return functions;
+  const a = ensureApp();
+  if (!a) return null;
+  functions = getFunctions(a, REGION);
+  if (emulator) connectFunctionsEmulator(functions, emulator, 5001);
+  return functions;
 }
 
 export function getAuthClient(): Auth | null {

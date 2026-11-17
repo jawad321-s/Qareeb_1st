@@ -75,6 +75,8 @@ export interface SupportContacts {
   supportEmail?: string;
   /** Completed jobs that make an artisan featured (default FEATURED_MIN_JOBS). */
   featuredMinJobs?: number;
+  /** The rating a featured artisan must be above (default FEATURED_MIN_RATING). */
+  featuredMinRating?: number;
 }
 
 export interface Category {

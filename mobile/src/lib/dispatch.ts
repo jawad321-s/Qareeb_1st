@@ -11,11 +11,13 @@ export const STEP_MS = 2 * 60_000;
 export const TIMEOUT_MS = 30 * 60_000;
 export const MAX_RADIUS_KM = 12;
 /**
- * Featured artisans ("حرفي مميز", FEATURED_MIN_JOBS completed jobs or the
- * number set in the dashboard) are reached FEATURED_BONUS_KM further out,
- * i.e. one step before the others, and their offers are listed first.
+ * Featured artisans ("حرفي مميز": FEATURED_MIN_JOBS completed jobs and a rating
+ * above FEATURED_MIN_RATING, or the numbers set in the dashboard) are reached
+ * FEATURED_BONUS_KM further out, i.e. one step before the others, and their
+ * offers are listed first.
  */
 export const FEATURED_MIN_JOBS = 10;
+export const FEATURED_MIN_RATING = 4;
 export const FEATURED_BONUS_KM = STEP_KM;
 /**
  * Only admin-verified artisans receive requests (approve them from the admin

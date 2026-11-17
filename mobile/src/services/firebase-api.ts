@@ -409,6 +409,7 @@ export const firebaseApi: typeof mockApi = {
       supportWhatsApp: v.supportWhatsApp || undefined,
       supportEmail: v.supportEmail || undefined,
       featuredMinJobs: Number.isInteger(v.featuredMinJobs) && v.featuredMinJobs > 0 ? v.featuredMinJobs : undefined,
+      featuredMinRating: Number.isFinite(v.featuredMinRating) && v.featuredMinRating >= 0 && v.featuredMinRating < 5 ? v.featuredMinRating : undefined,
     };
   },
 

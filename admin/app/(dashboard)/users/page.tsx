@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
 import type { ColumnDef } from '@tanstack/react-table';
-import { CheckCircle2, KeyRound, Phone, ShieldCheck, ShieldOff, Star, UserCheck, UserX, X } from 'lucide-react';
+import { CheckCircle2, Phone, ShieldCheck, ShieldOff, Star, UserCheck, UserX, X } from 'lucide-react';
 import { DataTable } from '@/components/ui/data-table';
 import { Badge, Button, FilterTabs, StatusPill } from '@/components/ui/primitives';
 import { USERS, type AdminUser } from '@/lib/mock-data';
@@ -12,8 +12,9 @@ import { formatPhone } from '@/lib/phone';
 import { useT, type TKey } from '@/lib/i18n';
 import { isLive } from '@/lib/firebase';
 import { useCollection, toAdminUsers } from '@/lib/live-data';
-import { manageUser, PASSWORD_MIN, UserActionFailed, type UserAction } from '@/lib/users.service';
+import { manageUser, UserActionFailed, type UserAction } from '@/lib/users.service';
 import { useServiceName } from '@/lib/catalog';
+import { Initials, ServiceChips } from '@/components/ui/people';
 
 type Filter = 'all' | 'customer' | 'artisan' | 'suspended';
 
@@ -154,19 +155,10 @@ export default function UsersPage() {
   );
 }
 
-function Initials({ name, size = 'h-9 w-9 text-xs' }: { name: string; size?: string }) {
-  return (
-    <div className={`grid shrink-0 place-items-center rounded-full bg-gradient-to-br from-brand-400 to-accent-400 font-bold text-white ${size}`}>
-      {name.split(' ').map((n) => n[0]).join('').slice(0, 2)}
-    </div>
-  );
-}
-
 /**
  * Everything the team can do to one account, in a side panel: suspend or
- * reactivate it (accounts are never deleted), verify an artisan (or take it
- * back), set a new password. Each action runs on the server (Cloud Function
- * adminManageUser).
+ * reactivate it (accounts are never deleted) and verify an artisan (or take
+ * it back). Each action runs on the server (Cloud Function adminManageUser).
  */
 function UserPanel({
   user,
@@ -185,7 +177,6 @@ function UserPanel({
   const [busy, setBusy] = useState<UserAction | null>(null);
   const [message, setMessage] = useState<{ ok: boolean; text: string } | null>(null);
   const [reason, setReason] = useState('');
-  const [password, setPassword] = useState('');
   const suspended = user.status === 'suspended';
   const artisan = user.role === 'artisan';
 
@@ -195,7 +186,7 @@ function UserPanel({
     return () => window.removeEventListener('keydown', onKey);
   }, [onClose]);
 
-  const run = async (action: UserAction, extra: { reason?: string; password?: string } = {}) => {
+  const run = async (action: UserAction, extra: { reason?: string } = {}) => {
     setBusy(action);
     setMessage(null);
     try {
@@ -206,11 +197,9 @@ function UserPanel({
           reactivate: { status: 'active', suspendReason: undefined },
           verify: { verified: true },
           unverify: { verified: false },
-          setPassword: {},
         };
         onDemoChange(patch[action]);
       }
-      if (action === 'setPassword') setPassword('');
       if (action === 'suspend') setReason('');
       setMessage({ ok: true, text: t(`users.done.${action}` as TKey) });
     } catch (e) {
@@ -316,23 +305,6 @@ function UserPanel({
             </Section>
           )}
 
-          <Section title={t('users.sec.password')} hint={t('users.passwordHint')}>
-            <div className="flex flex-col gap-2 sm:flex-row">
-              <input
-                type="text"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder={t('users.newPassword')}
-                aria-label={t('users.newPassword')}
-                autoComplete="off"
-                dir="ltr"
-                className="surface flex-1 rounded-xl border border-base px-3 py-2 text-sm outline-none focus:border-brand-500"
-              />
-              <Button variant="outline" disabled={!!busy || password.length < PASSWORD_MIN} onClick={() => run('setPassword', { password })}>
-                <KeyRound className="h-4 w-4" /> {t('users.setPassword')}
-              </Button>
-            </div>
-          </Section>
 
         </div>
       </aside>
@@ -360,19 +332,3 @@ function Section({ title, hint, danger, children }: { title: string; hint: strin
   );
 }
 
-/** An artisan's services as small chips; `max` shows the first few and "+N". */
-function ServiceChips({ ids, name, max }: { ids?: string[]; name: (id: string) => string; max?: number }) {
-  if (!ids) return <span className="text-muted">—</span>;
-  if (ids.length === 0) return <span className="text-xs text-muted">0</span>;
-  const shown = max ? ids.slice(0, max) : ids;
-  return (
-    <div className="flex flex-wrap gap-1">
-      {shown.map((id) => (
-        <span key={id} className="rounded-full bg-brand-500/10 px-2 py-0.5 text-xs font-medium text-brand-600 dark:text-brand-400">
-          {name(id)}
-        </span>
-      ))}
-      {max && ids.length > max && <span className="rounded-full bg-slate-500/10 px-2 py-0.5 text-xs text-muted">+{ids.length - max}</span>}
-    </div>
-  );
-}

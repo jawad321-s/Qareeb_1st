@@ -6,12 +6,16 @@
 // the only account identity; the internal address is never shown.
 import {
   createUserWithEmailAndPassword,
+  EmailAuthProvider,
+  reauthenticateWithCredential,
   signInWithEmailAndPassword,
   signOut as fbSignOut,
+  updatePassword,
   updateProfile,
 } from 'firebase/auth';
 import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
-import { getAuthClient, getDb } from '@/lib/firebase';
+import { httpsCallable } from 'firebase/functions';
+import { getAuthClient, getDb, getFunctionsClient } from '@/lib/firebase';
 import { nationalNumber, normalizePhone } from '@/lib/phone';
 import { openVerificationRequest } from './verification.service';
 import type { AppUser, UserRole } from '@/types';
@@ -193,4 +197,89 @@ export async function saveProfile(uid: string, patch: Partial<AppUser>): Promise
 export async function signOutFirebase(): Promise<void> {
   const a = getAuthClient();
   if (a) await fbSignOut(a);
+}
+
+// ---------------------------------------------------------------------------
+// The signed-in user's own account: change the password, delete the account.
+// Both ask for the current password first (Firebase wants a recent sign-in for
+// these, and it stops someone else holding the phone from doing it).
+
+export type AccountErrorKey =
+  | 'cp.errWrong'
+  | 'cp.errWeak'
+  | 'del.errActiveJobs'
+  | 'del.errUnreachable'
+  | 'auth.errNetwork'
+  | 'auth.errTooMany'
+  | 'auth.errGeneric';
+
+export class AccountError extends Error {
+  constructor(public key: AccountErrorKey, public detail?: string) {
+    super(key);
+  }
+}
+
+function toAccountError(err: unknown): AccountError {
+  if (err instanceof AccountError) return err;
+  const code = (err as { code?: string })?.code ?? '';
+  const message = (err as Error)?.message ?? '';
+  switch (code) {
+    case 'auth/invalid-credential':
+    case 'auth/invalid-login-credentials':
+    case 'auth/wrong-password':
+    case 'auth/missing-password':
+      return new AccountError('cp.errWrong');
+    case 'auth/weak-password':
+      return new AccountError('cp.errWeak');
+    case 'auth/network-request-failed':
+      return new AccountError('auth.errNetwork');
+    case 'auth/too-many-requests':
+      return new AccountError('auth.errTooMany');
+    // A job in progress: finish or cancel it first.
+    case 'functions/failed-precondition':
+      if (message === 'active-jobs') return new AccountError('del.errActiveJobs');
+      break;
+    // The function isn't deployed yet, or the server can't be reached.
+    case 'functions/not-found':
+    case 'functions/unavailable':
+    case 'functions/internal':
+    case 'functions/deadline-exceeded':
+      return new AccountError('del.errUnreachable', code);
+  }
+  console.warn('[account]', err);
+  return new AccountError('auth.errGeneric', code || message || 'unknown');
+}
+
+/** Proves the password again on the signed-in account. */
+async function reauthenticate(password: string) {
+  const user = auth().currentUser;
+  if (!user?.email) throw new AccountError('auth.errGeneric', 'not-signed-in');
+  await reauthenticateWithCredential(user, EmailAuthProvider.credential(user.email, password));
+  return user;
+}
+
+/** Sets a new password after checking the current one. The next sign-in uses the new one. */
+export async function changePassword(current: string, next: string): Promise<void> {
+  try {
+    const user = await reauthenticate(current);
+    await updatePassword(user, next);
+  } catch (err) {
+    throw toAccountError(err);
+  }
+}
+
+/**
+ * Deletes the signed-in account for good (Cloud Function deleteMyAccount): the
+ * login, the profile, notifications and photos. Refused while a job is in
+ * progress. The caller signs out locally afterwards.
+ */
+export async function deleteMyAccount(password: string): Promise<void> {
+  try {
+    await reauthenticate(password);
+    const functions = getFunctionsClient();
+    if (!functions) throw new AccountError('auth.errGeneric', 'functions');
+    await httpsCallable(functions, 'deleteMyAccount')();
+  } catch (err) {
+    throw toAccountError(err);
+  }
 }

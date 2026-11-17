@@ -154,7 +154,12 @@ export function Button({
       ) : (
         <>
           {iconLeft && <Icon name={iconLeft} size={18} color={contentColor} />}
-          <Text variant="bodyMedium" tone={textTone} style={{ fontFamily: 'Inter_600SemiBold' }}>
+          <Text
+            variant="bodyMedium"
+            tone={textTone}
+            // An accent override also colours the label of outline / ghost buttons.
+            style={{ fontFamily: 'Inter_600SemiBold', ...(accent && textTone === 'primary' ? { color: tint } : {}) }}
+          >
             {label}
           </Text>
           {iconRight && <Icon name={iconRight} size={18} color={contentColor} />}

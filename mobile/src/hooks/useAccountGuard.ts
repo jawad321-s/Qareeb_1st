@@ -6,6 +6,12 @@ import { useAuth } from '@/store/auth';
 import { useToast } from '@/components/feedback/Toast';
 import { useT } from '@/i18n';
 
+/** The account the user is deleting themselves: its removal is not a closure. */
+let leaving: string | null = null;
+export function markAccountLeaving(uid: string | null) {
+  leaving = uid;
+}
+
 /**
  * Signs the user out as soon as an admin suspends or deletes their account
  * (dashboard → Users). The server also disables the login, but a session
@@ -23,7 +29,7 @@ export function useAccountGuard(uid: string | undefined) {
         // A cached "missing" (offline, nothing stored yet) says nothing about the account.
         if (snap.metadata.fromCache) return;
         if (snap.exists() && snap.data().status !== 'suspended') return;
-        if (useAuth.getState().user?.uid !== uid) return;
+        if (useAuth.getState().user?.uid !== uid || leaving === uid) return;
         useAuth.getState().signOut();
         toast('error', t('auth.accountClosed'));
       },

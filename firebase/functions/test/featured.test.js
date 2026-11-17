@@ -8,7 +8,7 @@ import { initializeApp } from 'firebase-admin/app';
 import { getFirestore } from 'firebase-admin/firestore';
 
 process.env.PUSH_DRY_RUN = 'true';
-const { refreshArtisanStats, onJobCompleted, backfillFeatured, featuredThreshold } = await import('../src/featured.js');
+const { refreshArtisanStats, onJobCompleted, onArtisanRated, backfillFeatured, featuredThreshold, featuredCriteria } = await import('../src/featured.js');
 const { findArtisans, startDispatch } = await import('../src/dispatch.js');
 initializeApp({ projectId: 'demo-featured' });
 const db = getFirestore();
@@ -19,6 +19,11 @@ const inbox = async (uid) => (await db.collection(`users/${uid}/notifications`).
 async function artisan(uid, km, profileExtra = {}) {
   await db.doc(`users/${uid}`).set({ uid, role: 'artisan', fullName: uid, phone: `05991111${uid.length}${km}`, locale: 'ar', verified: true, status: 'active', location: at(km) });
   await db.doc(`artisanProfiles/${uid}`).set({ uid, categoryIds: ['painting'], completedJobs: 0, ...profileExtra });
+}
+async function rate(artisanId, ...stars) {
+  for (const [i, rating] of stars.entries()) {
+    await db.doc(`reviews/${artisanId}_r${i}_${rating}`).set({ requestId: `${artisanId}_COMPLETED_${i}`, authorId: 'c', targetId: artisanId, rating });
+  }
 }
 async function jobs(artisanId, n, status = 'COMPLETED', from = 0) {
   for (let i = 0; i < n; i++) {
@@ -35,21 +40,24 @@ before(async () => {
   await jobs('newbie', 9);
   await jobs('newbie', 4, 'CANCELLED');
   await jobs('newbie', 2, 'WORKING');
+  await rate('pro', 5, 4, 5, 4); // 4.5
+  await rate('newbie', 5, 5);   // 5.0
 });
 
-test('threshold defaults to 10 and follows the dashboard setting', async () => {
-  assert.equal(await featuredThreshold(db), 10);
-  await db.doc('settings/platform').set({ featuredMinJobs: 5 });
+test('criteria default to 10 jobs and a rating above 4, and follow the dashboard', async () => {
+  assert.deepEqual(await featuredCriteria(db), { minJobs: 10, minRating: 4 });
+  await db.doc('settings/platform').set({ featuredMinJobs: 5, featuredMinRating: 4.5 });
+  assert.deepEqual(await featuredCriteria(db), { minJobs: 5, minRating: 4.5 });
   assert.equal(await featuredThreshold(db), 5);
-  await db.doc('settings/platform').set({ featuredMinJobs: 'x' });
-  assert.equal(await featuredThreshold(db), 10);
+  await db.doc('settings/platform').set({ featuredMinJobs: 'x', featuredMinRating: 9 });
+  assert.deepEqual(await featuredCriteria(db), { minJobs: 10, minRating: 4 });
   await db.doc('settings/platform').delete();
 });
 
 test('only completed jobs count; 10 makes an artisan featured, 9 does not', async () => {
-  assert.deepEqual(await refreshArtisanStats(db, 'pro'), { completedJobs: 10, featured: true, became: true });
+  assert.deepEqual(await refreshArtisanStats(db, 'pro'), { completedJobs: 10, rating: 4.5, featured: true, became: true });
   assert.equal((await profile('pro')).featured, true);
-  assert.deepEqual(await refreshArtisanStats(db, 'newbie'), { completedJobs: 9, featured: false, became: false });
+  assert.deepEqual(await refreshArtisanStats(db, 'newbie'), { completedJobs: 9, rating: 5, featured: false, became: false });
   assert.equal((await profile('newbie')).completedJobs, 9);
   // A figure written by hand is replaced by the real count.
   await refreshArtisanStats(db, 'liar');
@@ -98,4 +106,26 @@ test('featured artisans are reached one step (2 km) further out, and listed firs
   await db.doc('requests/new1').set({ customerId: 'c', title: 'Paint', categoryId: 'painting', status: 'PENDING', offerCount: 0, location: at(0) });
   await startDispatch(db, 'new1', (await db.doc('requests/new1').get()).data(), 5_000_000);
   assert.ok((await db.doc('requests/new1').get()).get('notifiedArtisanIds').includes('pro'));
+});
+
+test('10 jobs are not enough with a rating of 4 or less; a better rating brings the badge', async () => {
+  await artisan('steady', 2);
+  await jobs('steady', 12);
+  await rate('steady', 4, 4); // exactly 4: not above 4
+  assert.equal((await refreshArtisanStats(db, 'steady')).featured, false);
+  await db.doc('reviews/steady_extra').set({ requestId: 'x', authorId: 'c', targetId: 'steady', rating: 5 });
+  const stats = await onArtisanRated(db, 'steady'); // 4.3
+  assert.equal(stats.featured, true);
+  assert.equal(stats.became, true);
+  const congrats = (await inbox('steady')).filter((n) => n.type === 'becameFeatured');
+  assert.equal(congrats.length, 1);
+  assert.match(congrats[0].body, /أعلى من 4/);
+  // Bad reviews take it away again.
+  for (let i = 0; i < 4; i++) await db.doc(`reviews/steady_bad${i}`).set({ requestId: 'y', authorId: 'c', targetId: 'steady', rating: 1 });
+  assert.equal((await onArtisanRated(db, 'steady')).featured, false);
+  assert.equal((await profile('steady')).featured, false);
+});
+
+test('reviews of customers change nothing', async () => {
+  assert.equal(await onArtisanRated(db, 'c'), null);
 });

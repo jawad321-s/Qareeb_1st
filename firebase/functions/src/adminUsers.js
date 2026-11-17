@@ -1,12 +1,12 @@
 // User management from the admin dashboard (callable `adminManageUser`), so
 // the team never has to open the Firebase console: suspend / reactivate an
-// account, verify an artisan or take it back, set a new password. Accounts are
-// suspended, never deleted. Only callers whose token carries role=admin may
-// use it, and every action is recorded in `adminLog`.
+// account, verify an artisan or take it back. Accounts are suspended, never
+// deleted, and passwords are changed by their owners in the app. Only callers
+// whose token carries role=admin may use it, and every action is recorded in
+// `adminLog`.
 import { HttpsError } from 'firebase-functions/v2/https';
 
-export const PASSWORD_MIN = 6;
-export const ACTIONS = ['suspend', 'reactivate', 'verify', 'unverify', 'setPassword'];
+export const ACTIONS = ['suspend', 'reactivate', 'verify', 'unverify'];
 
 /** Auth errors for an account that only exists in Firestore are not failures here. */
 const ignoreMissing = (e) => {
@@ -17,7 +17,7 @@ const ignoreMissing = (e) => {
  * @param db      Firestore (admin)
  * @param auth    Auth (admin)
  * @param caller  { uid, role, email } from the callable's token, or null
- * @param data    { action, uid, reason?, password? }
+ * @param data    { action, uid, reason? }
  */
 export async function manageUser(db, auth, caller, data) {
   if (!caller || caller.role !== 'admin') throw new HttpsError('permission-denied', 'Admins only.');
@@ -57,17 +57,6 @@ export async function manageUser(db, auth, caller, data) {
       if ((await profile.get()).exists) await profile.update({ verificationStatus: approved ? 'approved' : 'rejected' });
       const request = db.collection('verificationRequests').doc(uid);
       if ((await request.get()).exists) await request.update({ status: approved ? 'approved' : 'rejected', reviewedAt: now });
-      break;
-    }
-    case 'setPassword': {
-      const password = typeof data.password === 'string' ? data.password : '';
-      if (password.length < PASSWORD_MIN) throw new HttpsError('invalid-argument', 'weak-password');
-      try {
-        await auth.updateUser(uid, { password });
-      } catch (e) {
-        if (e?.code === 'auth/user-not-found') throw new HttpsError('not-found', 'no-login');
-        throw e;
-      }
       break;
     }
   }

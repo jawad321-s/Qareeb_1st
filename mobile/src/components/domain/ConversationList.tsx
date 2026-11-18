@@ -16,6 +16,7 @@ import { timeAgo } from '@/lib/format';
 import { isChatOpen } from '@/lib/requestRules';
 import { useT } from '@/i18n';
 import type { Conversation } from '@/types';
+import { useNow } from '@/hooks/useNow';
 
 /**
  * A thread is listed once it has messages, or while its job is in progress (so
@@ -85,6 +86,7 @@ export function useDeleteChat() {
 }
 
 function ConversationRow({ conversation, myId }: { conversation: Conversation; myId: string }) {
+  useNow(); // keeps the relative time moving
   const { t } = useT();
   const deleteChat = useDeleteChat();
   const { request, lastMessage, otherUserId } = conversation;

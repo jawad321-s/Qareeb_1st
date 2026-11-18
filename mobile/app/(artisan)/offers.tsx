@@ -18,6 +18,7 @@ import { useAuth } from '@/store/auth';
 import { useT } from '@/i18n';
 import { reasonText } from '@/lib/reasons';
 import type { OfferStatus } from '@/types';
+import { useNow } from '@/hooks/useNow';
 
 const STATUS_VARIANT: Record<OfferStatus, React.ComponentProps<typeof Badge>['variant']> = {
   PENDING: 'warning',
@@ -27,6 +28,7 @@ const STATUS_VARIANT: Record<OfferStatus, React.ComponentProps<typeof Badge>['va
 };
 
 export default function ArtisanOffers() {
+  useNow(); // keeps the relative time moving
   const { t, locale } = useT();
   const uid = useAuth((s) => s.user?.uid ?? '');
   // The signed-in artisan's own offers, newest first.

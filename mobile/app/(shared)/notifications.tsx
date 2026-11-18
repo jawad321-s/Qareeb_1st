@@ -18,6 +18,7 @@ import { timeAgo } from '@/lib/format';
 import { useTheme } from '@/theme/ThemeProvider';
 import { useT } from '@/i18n';
 import { config } from '@/lib/config';
+import { useNow } from '@/hooks/useNow';
 
 type Tab = 'all' | 'unread';
 
@@ -114,6 +115,7 @@ export default function Notifications() {
 }
 
 function Row({ n, onOpen, onDelete }: { n: FeedItem; onOpen: () => void; onDelete: () => void }) {
+  useNow(); // keeps the relative time moving
   const { colors } = useTheme();
   const { t } = useT();
   return (

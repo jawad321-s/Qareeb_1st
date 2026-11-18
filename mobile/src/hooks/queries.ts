@@ -35,11 +35,20 @@ export function useMyRequests(customerId: string) {
     queryKey: qk.requests(customerId),
     queryFn: () => api.getMyRequests(customerId),
     enabled: !!customerId,
+    // Offers arriving, jobs moving along, a request expiring: shown as they happen.
+    refetchInterval: 8000,
+    staleTime: 0,
   });
 }
 
 export function useRequest(id: string) {
-  return useQuery({ queryKey: qk.request(id), queryFn: async () => (await api.getRequest(id)) ?? null, enabled: !!id });
+  return useQuery({
+    queryKey: qk.request(id),
+    queryFn: async () => (await api.getRequest(id)) ?? null,
+    enabled: !!id,
+    refetchInterval: 6000,
+    staleTime: 0,
+  });
 }
 
 export type NearbyRequest = ServiceRequest & { distanceKm?: number };
@@ -81,7 +90,8 @@ export function useSetAvailable(artisanId: string) {
 }
 
 export function useOffers(requestId: string) {
-  return useQuery({ queryKey: qk.offers(requestId), queryFn: () => api.getOffers(requestId), enabled: !!requestId });
+  // New offers show up while the customer is looking at the request.
+  return useQuery({ queryKey: qk.offers(requestId), queryFn: () => api.getOffers(requestId), enabled: !!requestId, refetchInterval: 5000, staleTime: 0 });
 }
 
 export function useReviews(targetId: string) {
@@ -265,12 +275,12 @@ export function useUnreadChats(user: Pick<AppUser, 'uid' | 'role'> | null) {
 
 /** Jobs assigned to the artisan that are still in progress. */
 export function useArtisanJobs(artisanId: string) {
-  return useQuery({ queryKey: qk.artisanJobs(artisanId), queryFn: () => api.getArtisanJobs(artisanId), enabled: !!artisanId });
+  return useQuery({ queryKey: qk.artisanJobs(artisanId), queryFn: () => api.getArtisanJobs(artisanId), enabled: !!artisanId, refetchInterval: 10_000, staleTime: 0 });
 }
 
 /** Every offer the artisan has sent (the Offers tab). */
 export function useArtisanOffers(artisanId: string) {
-  return useQuery({ queryKey: qk.artisanOffers(artisanId), queryFn: () => api.getArtisanOffers(artisanId), enabled: !!artisanId });
+  return useQuery({ queryKey: qk.artisanOffers(artisanId), queryFn: () => api.getArtisanOffers(artisanId), enabled: !!artisanId, refetchInterval: 10_000, staleTime: 0 });
 }
 
 /** The artisan's completed jobs and turned-down offers (income → history). */

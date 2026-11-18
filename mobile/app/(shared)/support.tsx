@@ -12,6 +12,7 @@ import { useTheme } from '@/theme/ThemeProvider';
 import { useFont, useT } from '@/i18n';
 import { localizedTextAlign } from '@/i18n/rtl';
 import { timeAgo } from '@/lib/format';
+import { useNow } from '@/hooks/useNow';
 import {
   SUPPORT_TEXT_MAX,
   markSupportRead,
@@ -26,6 +27,7 @@ import {
  * the only thing a suspended account can use.
  */
 export default function Support() {
+  useNow(); // keeps the relative time moving
   const { colors, isDark } = useTheme();
   const { t, isRTL } = useT();
   const font = useFont();

@@ -10,6 +10,7 @@ import type { Offer } from '@/types';
 import { formatMoney, timeAgo } from '@/lib/format';
 import { useT } from '@/i18n';
 import { useTheme } from '@/theme/ThemeProvider';
+import { useNow } from '@/hooks/useNow';
 
 interface Props {
   offer: Offer;
@@ -23,6 +24,7 @@ interface Props {
 }
 
 export function OfferCard({ offer, best, onAccept, onReject, onPressArtisan, pastJobs, loading }: Props) {
+  useNow(); // keeps the relative time moving
   const a = offer.artisan;
   const { t } = useT();
   const { colors } = useTheme();

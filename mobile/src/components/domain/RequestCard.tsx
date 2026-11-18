@@ -12,6 +12,7 @@ import { categoryById } from '@/constants/categories';
 import { formatDistance, timeAgo } from '@/lib/format';
 import { useT } from '@/i18n';
 import { useTheme } from '@/theme/ThemeProvider';
+import { useNow } from '@/hooks/useNow';
 
 export function RequestCard({
   request,
@@ -26,6 +27,7 @@ export function RequestCard({
   /** Artisan side: who posted the request, so they know who they'd work for. */
   showCustomer?: boolean;
 }) {
+  useNow(); // keeps the relative time moving
   const cat = categoryById(request.categoryId);
   const { t } = useT();
   const { isDark, colors } = useTheme();

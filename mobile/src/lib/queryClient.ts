@@ -1,4 +1,5 @@
-import { QueryClient } from '@tanstack/react-query';
+import { AppState, Platform } from 'react-native';
+import { focusManager, QueryClient } from '@tanstack/react-query';
 
 export const queryClient = new QueryClient({
   defaultOptions: {
@@ -6,13 +7,22 @@ export const queryClient = new QueryClient({
       staleTime: 1000 * 30,
       gcTime: 1000 * 60 * 60 * 24,
       retry: 1,
-      refetchOnWindowFocus: false,
+      // Coming back to the app (from the home screen or another app) refreshes
+      // whatever is stale, so offers and statuses are current at once.
+      refetchOnWindowFocus: true,
     },
     mutations: {
       retry: 0,
     },
   },
 });
+
+// React Native has no "window focus": tell React Query when the app returns to
+// the foreground instead (it also pauses polling while the app is in the
+// background).
+if (Platform.OS !== 'web') {
+  AppState.addEventListener('change', (status) => focusManager.setFocused(status === 'active'));
+}
 
 // Centralized query keys keep cache invalidation consistent and typo-free.
 export const qk = {

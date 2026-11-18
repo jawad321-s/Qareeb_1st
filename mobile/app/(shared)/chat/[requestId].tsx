@@ -21,8 +21,10 @@ import { useFont, useT } from '@/i18n';
 import { timeAgo } from '@/lib/format';
 import { localizedTextAlign } from '@/i18n/rtl';
 import { useDeleteChat } from '@/components/domain/ConversationList';
+import { useNow } from '@/hooks/useNow';
 
 export default function Chat() {
+  useNow(); // keeps the relative time moving
   const { colors, isDark } = useTheme();
   const { requestId } = useLocalSearchParams<{ requestId: string }>();
   const me = useAuth((s) => s.user)!;

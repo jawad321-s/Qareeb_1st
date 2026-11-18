@@ -85,7 +85,8 @@ export function NotificationsMenu({ placement = 'down' }: { placement?: 'down' |
     return list.sort((a, b) => b.time - a.time);
   }, [verifications, complaints, support, suggestions, broadcasts, live, t, locale]);
 
-  const fresh = items.filter((i) => i.time > seen).length;
+  // Support messages keep counting until they are read (opening the bell doesn't clear them).
+  const fresh = items.filter((i) => i.kind === 'support' || i.time > seen).length;
   const counts = (Object.keys(KIND) as Kind[]).map((k) => ({ kind: k, n: items.filter((i) => i.kind === k).length })).filter((c) => c.n > 0);
 
   const toggle = () => {
@@ -165,7 +166,7 @@ export function NotificationsMenu({ placement = 'down' }: { placement?: 'down' |
                         <span className="block text-sm leading-snug">{i.text}</span>
                         <span className="mt-0.5 block text-xs text-muted">{timeAgo(i.time, locale)}</span>
                       </span>
-                      {i.time > seenBefore && <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-red-500" aria-label={t('notif.new')} />}
+                      {(i.kind === 'support' || i.time > seenBefore) && <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-red-500" aria-label={t('notif.new')} />}
                     </button>
                   </li>
                 );

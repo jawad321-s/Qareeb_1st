@@ -2,11 +2,13 @@ import { Sidebar } from '@/components/layout/sidebar';
 import { MobileBar } from '@/components/layout/topbar';
 import { AuthGuard } from '@/components/layout/auth-guard';
 import { CatalogSync } from '@/components/layout/catalog-sync';
+import { TabAlert } from '@/components/layout/tab-alert';
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   return (
     <AuthGuard>
       <CatalogSync />
+      <TabAlert />
       {/* The sidebar stays where it is; only the page scrolls. */}
       <div className="flex h-dvh overflow-hidden">
         <Sidebar />

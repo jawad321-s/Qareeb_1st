@@ -48,11 +48,6 @@ export default function SupportPage() {
   const shown = filter === 'waiting' ? waiting : all;
   const current = all.find((x) => x.uid === selected) ?? null;
 
-  // Open the first thread on arrival, so the page never starts empty.
-  useEffect(() => {
-    if (!selected && shown.length) setSelected(shown[0].uid);
-  }, [selected, shown]);
-
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
@@ -172,8 +167,17 @@ function Conversation({ thread, user, onDeleted }: { thread: SupportThread; user
   const end = useRef<HTMLDivElement>(null);
 
   useEffect(() => subscribeSupportMessages(thread.uid, setMessages), [thread.uid]);
+  // Read only when someone is actually looking: the thread was opened by a
+  // click and this tab is in front. A message arriving while the tab is hidden
+  // stays unread (the alerts keep showing) until the tab is shown again.
   useEffect(() => {
-    if (thread.unreadForAdmin) void markThreadRead(thread.uid);
+    if (!thread.unreadForAdmin) return;
+    const markIfVisible = () => {
+      if (document.visibilityState === 'visible') void markThreadRead(thread.uid);
+    };
+    markIfVisible();
+    document.addEventListener('visibilitychange', markIfVisible);
+    return () => document.removeEventListener('visibilitychange', markIfVisible);
   }, [thread.uid, thread.unreadForAdmin]);
   // Braces: newer browsers return a promise from scrollIntoView, and an effect
   // must not return anything but a cleanup function.

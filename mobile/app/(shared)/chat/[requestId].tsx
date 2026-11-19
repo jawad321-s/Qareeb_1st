@@ -164,11 +164,8 @@ export default function Chat() {
                 multiline
                 style={{ flex: 1, color: colors.fg, fontSize: 15, fontFamily: font('Inter_400Regular'), textAlign: localizedTextAlign(isRTL), maxHeight: 100, paddingVertical: 10 }}
               />
-              <Pressable hitSlop={6}>
-                <Icon name="mic" size={20} color={colors.muted} />
-              </Pressable>
             </View>
-            <Pressable onPress={submit} accessibilityRole="button" accessibilityLabel={t('chat.send')} style={{ width: 44, height: 44, borderRadius: 14, backgroundColor: colors.tint, alignItems: 'center', justifyContent: 'center' }}>
+            <Pressable onPress={submit} accessibilityRole="button" accessibilityLabel={t('chat.send')} style={{ width: 44, height: 44, borderRadius: 14, backgroundColor: gradient[1], alignItems: 'center', justifyContent: 'center' }}>
               <Icon name="send" size={20} color="#FFF" />
             </Pressable>
           </View>

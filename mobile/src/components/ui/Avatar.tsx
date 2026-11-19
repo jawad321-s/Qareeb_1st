@@ -36,7 +36,21 @@ export function Avatar({ uri, name, size = 48, verified }: AvatarProps) {
             justifyContent: 'center',
           }}
         >
-          <Text variant="bodyMedium" tone="inverse" style={{ fontSize: size * 0.36 }}>
+          {/* The line has to be as tall as the bigger letter: with the body text's
+              line height, iOS cut the top off (a "J" showed as just its hook). */}
+          <Text
+            variant="bodyMedium"
+            tone="inverse"
+            center
+            numberOfLines={1}
+            style={{
+              fontSize: Math.round(size * 0.36),
+              lineHeight: Math.round(size * 0.36 * 1.5),
+              fontFamily: 'Inter_600SemiBold',
+              letterSpacing: 0,
+              includeFontPadding: false,
+            }}
+          >
             {name ? initials(name) : '?'}
           </Text>
         </LinearGradient>

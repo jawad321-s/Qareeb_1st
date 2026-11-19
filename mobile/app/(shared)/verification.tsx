@@ -123,6 +123,9 @@ export default function Verification() {
                     Haptics.selectionAsync().catch(() => {});
                     removeCertificate(c.id);
                   }}
+                  hitSlop={10}
+                  accessibilityRole="button"
+                  accessibilityLabel={t('a11y.removePhoto')}
                   style={{ position: 'absolute', top: 6, right: 6, width: 28, height: 28, borderRadius: 14, backgroundColor: 'rgba(0,0,0,0.55)', alignItems: 'center', justifyContent: 'center' }}
                 >
                   <Icon name="trash" size={15} color="#FFFFFF" />

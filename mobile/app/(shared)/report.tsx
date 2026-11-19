@@ -94,7 +94,7 @@ export default function Report() {
         </View>
       )}
 
-      <Text variant="overline" tone="muted" style={{ marginBottom: 10, marginLeft: 4 }}>
+      <Text variant="caption" tone="muted" style={{ marginBottom: 10, marginLeft: 4 }}>
         {t('report.reason')}
       </Text>
       <View style={{ gap: 10, marginBottom: 20 }}>
@@ -119,7 +119,7 @@ export default function Report() {
         })}
       </View>
 
-      <Text variant="overline" tone="muted" style={{ marginBottom: 10, marginLeft: 4 }}>
+      <Text variant="caption" tone="muted" style={{ marginBottom: 10, marginLeft: 4 }}>
         {t(reason === 'other' ? 'report.detailsRequired' : 'report.details')}
       </Text>
       <TextInput

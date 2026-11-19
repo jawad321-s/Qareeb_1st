@@ -85,7 +85,7 @@ export default function EditProfile() {
     <Screen scroll>
       <Header showBack title={t('edit.title')} />
       <View style={{ alignItems: 'center', marginBottom: 24 }}>
-        <Pressable onPress={pick}>
+        <Pressable onPress={pick} accessibilityRole="button" accessibilityLabel={t('a11y.changePhoto')}>
           <Avatar uri={photo} name={fullName} size={96} verified={user.verified} />
           <View style={{ position: 'absolute', bottom: 0, right: 0, backgroundColor: colors.tint, borderRadius: 999, padding: 6, borderWidth: 2, borderColor: colors.bg }}>
             <Icon name="camera" size={16} color="#FFF" />

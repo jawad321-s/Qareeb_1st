@@ -63,7 +63,7 @@ export default function Subscription() {
       return (
         <Card style={{ gap: 10 }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-            <Text variant="overline" tone="muted">
+            <Text variant="caption" tone="muted">
               {t('sub.yourPlan')}
             </Text>
             <Badge label={sub.status === 'trial' ? t('sub.trialLeft') : t('sub.current')} variant="success" icon="check-circle" />
@@ -115,7 +115,7 @@ export default function Subscription() {
 
       {/* What every plan includes — plans differ only in length and price. */}
       <Card style={{ gap: 8, marginTop: 14 }}>
-        <Text variant="overline" tone="muted">
+        <Text variant="caption" tone="muted">
           {t('sub.allFeatures')}
         </Text>
         {PLAN_FEATURES[locale].map((f) => (

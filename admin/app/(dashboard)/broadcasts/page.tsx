@@ -177,7 +177,7 @@ export default function BroadcastsPage() {
               <div className="min-w-0">
                 {title.trim() && <p className="text-sm font-semibold">{title.trim()}</p>}
                 {body.trim() && <p className="mt-0.5 whitespace-pre-wrap break-words text-xs text-muted">{body.trim()}</p>}
-                <p className="mt-1 text-[10px] text-muted">{t('bc.now')}</p>
+                <p className="mt-1 text-xs text-muted">{t('bc.now')}</p>
               </div>
             </div>
           </div>

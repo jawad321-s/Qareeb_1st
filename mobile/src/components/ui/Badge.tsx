@@ -2,16 +2,19 @@ import React from 'react';
 import { View, type ViewStyle } from 'react-native';
 import { Text } from './Text';
 import { Icon, type IconName } from './Icon';
+import { useTheme } from '@/theme/ThemeProvider';
 
 type Variant = 'neutral' | 'primary' | 'success' | 'warning' | 'danger' | 'info';
 
-const COLORS: Record<Variant, { bg: string; fg: string }> = {
-  neutral: { bg: 'rgba(100,116,139,0.15)', fg: '#64748B' },
-  primary: { bg: 'rgba(37,99,235,0.15)', fg: '#2563EB' },
-  success: { bg: 'rgba(16,185,129,0.15)', fg: '#059669' },
-  warning: { bg: 'rgba(245,158,11,0.15)', fg: '#D97706' },
-  danger: { bg: 'rgba(239,68,68,0.15)', fg: '#DC2626' },
-  info: { bg: 'rgba(59,130,246,0.15)', fg: '#2563EB' },
+// Text colors reach 4.5:1 on their own tint: darker shades on the light theme,
+// lighter ones on the dark theme.
+const COLORS: Record<Variant, { bg: string; light: string; dark: string }> = {
+  neutral: { bg: 'rgba(100,116,139,0.15)', light: '#475569', dark: '#94A3B8' },
+  primary: { bg: 'rgba(37,99,235,0.15)', light: '#1D4ED8', dark: '#60A5FA' },
+  success: { bg: 'rgba(16,185,129,0.15)', light: '#047857', dark: '#34D399' },
+  warning: { bg: 'rgba(245,158,11,0.15)', light: '#B45309', dark: '#FBBF24' },
+  danger: { bg: 'rgba(239,68,68,0.15)', light: '#B91C1C', dark: '#F87171' },
+  info: { bg: 'rgba(59,130,246,0.15)', light: '#1D4ED8', dark: '#60A5FA' },
 };
 
 interface BadgeProps {
@@ -22,7 +25,9 @@ interface BadgeProps {
 }
 
 export function Badge({ label, variant = 'neutral', icon, style }: BadgeProps) {
-  const c = COLORS[variant];
+  const { isDark } = useTheme();
+  const base = COLORS[variant];
+  const c = { bg: base.bg, fg: isDark ? base.dark : base.light };
   return (
     <View
       style={[

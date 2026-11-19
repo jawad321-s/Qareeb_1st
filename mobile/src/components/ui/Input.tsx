@@ -27,7 +27,7 @@ export function Input({
 }: InputProps) {
   const { colors } = useTheme();
   const font = useFont();
-  const { isRTL } = useT();
+  const { t, isRTL } = useT();
   const [focused, setFocused] = useState(false);
   const [hidden, setHidden] = useState(!!secure);
 
@@ -87,7 +87,12 @@ export function Input({
           {...rest}
         />
         {secure && (
-          <Pressable onPress={() => setHidden((h) => !h)} hitSlop={12}>
+          <Pressable
+            onPress={() => setHidden((h) => !h)}
+            hitSlop={12}
+            accessibilityRole="button"
+            accessibilityLabel={hidden ? t('a11y.showPassword') : t('a11y.hidePassword')}
+          >
             <Icon name={hidden ? 'eye' : 'eye-off'} size={20} color={colors.muted} />
           </Pressable>
         )}

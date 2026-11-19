@@ -19,6 +19,7 @@ import { useT } from '@/i18n';
 import { reasonText } from '@/lib/reasons';
 import type { OfferStatus } from '@/types';
 import { useNow } from '@/hooks/useNow';
+import { useTabBarSpace } from '@/components/ui/TabBar';
 
 const STATUS_VARIANT: Record<OfferStatus, React.ComponentProps<typeof Badge>['variant']> = {
   PENDING: 'warning',
@@ -28,6 +29,7 @@ const STATUS_VARIANT: Record<OfferStatus, React.ComponentProps<typeof Badge>['va
 };
 
 export default function ArtisanOffers() {
+  const tabBarSpace = useTabBarSpace(); // keeps the last item clear of the floating tab bar
   useNow(); // keeps the relative time moving
   const { t, locale } = useT();
   const uid = useAuth((s) => s.user?.uid ?? '');
@@ -59,7 +61,7 @@ export default function ArtisanOffers() {
           onChange={setTab}
         />
       </View>
-      <ScrollView contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 16, paddingBottom: 140, gap: 12 }} showsVerticalScrollIndicator={false}>
+      <ScrollView contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 16, paddingBottom: tabBarSpace + 24, gap: 12 }} showsVerticalScrollIndicator={false}>
         {isLoading && [0, 1, 2].map((i) => <CardSkeleton key={i} />)}
         {!isLoading && !offers?.length && (
           <View style={{ marginTop: 60 }}>

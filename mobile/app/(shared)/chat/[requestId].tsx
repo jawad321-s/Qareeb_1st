@@ -148,6 +148,9 @@ export default function Chat() {
             <Pressable
               onPress={sendPhoto}
               disabled={sendingPhoto}
+              hitSlop={6}
+              accessibilityRole="button"
+              accessibilityLabel={t('a11y.sendPhoto')}
               style={{ width: 40, height: 40, borderRadius: 12, backgroundColor: colors.surface2, alignItems: 'center', justifyContent: 'center' }}
             >
               {sendingPhoto ? <ActivityIndicator size="small" color={colors.tint} /> : <Icon name="image" size={20} color={colors.tint} />}

@@ -17,6 +17,7 @@ import { useAuth } from '@/store/auth';
 import { useThemeStore } from '@/theme/ThemeProvider';
 import { useTheme } from '@/theme/ThemeProvider';
 import { useT } from '@/i18n';
+import { useTabBarSpace } from '@/components/ui/TabBar';
 
 interface Item {
   icon: IconName;
@@ -27,6 +28,7 @@ interface Item {
 }
 
 export default function Profile() {
+  const tabBarSpace = useTabBarSpace(); // keeps the last item clear of the floating tab bar
   const { colors, isDark, gradient, gradientSoft } = useTheme();
   const user = useAuth((s) => s.user);
   const signOut = useAuth((s) => s.signOut);
@@ -71,7 +73,7 @@ export default function Profile() {
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
       <StatusBar style="light" />
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 140 }}>
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: tabBarSpace + 24 }}>
         <LinearGradient colors={gradient} style={{ paddingBottom: 28, overflow: 'hidden' }}>
           <FloatingBlobs
             blobs={[
@@ -99,7 +101,7 @@ export default function Profile() {
         <View style={{ paddingHorizontal: 20, marginTop: 20, gap: 22 }}>
           {sections.map((section) => (
             <View key={section.title} style={{ gap: 10 }}>
-              <Text variant="overline" tone="muted" style={{ marginLeft: 4 }}>
+              <Text variant="caption" tone="muted" style={{ marginLeft: 4 }}>
                 {section.title.toUpperCase()}
               </Text>
               <Card padded={false}>

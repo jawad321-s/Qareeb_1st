@@ -14,8 +14,10 @@ import { isWithinAvailability } from '@/lib/availability';
 import { useTheme } from '@/theme/ThemeProvider';
 import { useAuth } from '@/store/auth';
 import { useT } from '@/i18n';
+import { useTabBarSpace } from '@/components/ui/TabBar';
 
 export default function ArtisanRequests() {
+  const tabBarSpace = useTabBarSpace(); // keeps the last item clear of the floating tab bar
   const user = useAuth((s) => s.user)!;
   const { t } = useT();
   const { colors } = useTheme();
@@ -48,7 +50,7 @@ export default function ArtisanRequests() {
         </Text>
       </View>
       <ScrollView
-        contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 16, paddingBottom: 140, gap: 12 }}
+        contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 16, paddingBottom: tabBarSpace + 24, gap: 12 }}
         showsVerticalScrollIndicator={false}
         refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={() => { refetch(); jobs.refetch(); }} tintColor={colors.tint} />}
       >

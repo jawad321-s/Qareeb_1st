@@ -122,6 +122,8 @@ export default function Gallery() {
             <Pressable
               onPress={() => removePhoto(uri)}
               hitSlop={8}
+              accessibilityRole="button"
+              accessibilityLabel={t('a11y.removePhoto')}
               style={{
                 position: 'absolute',
                 top: 8,

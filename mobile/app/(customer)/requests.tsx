@@ -12,11 +12,13 @@ import { useMyRequests } from '@/hooks/queries';
 import { useAuth } from '@/store/auth';
 import { useT } from '@/i18n';
 import type { RequestStatus } from '@/types';
+import { useTabBarSpace } from '@/components/ui/TabBar';
 
 type Tab = 'active' | 'completed' | 'cancelled' | 'all';
 const ACTIVE: RequestStatus[] = ['PENDING', 'ACCEPTED', 'ON_THE_WAY', 'WORKING'];
 
 export default function Requests() {
+  const tabBarSpace = useTabBarSpace(); // keeps the last item clear of the floating tab bar
   const { t } = useT();
   const user = useAuth((s) => s.user)!;
   const { data, isLoading, refetch } = useMyRequests(user.uid);
@@ -56,7 +58,7 @@ export default function Requests() {
       </View>
 
       <ScrollView
-        contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 16, paddingBottom: 140, gap: 12 }}
+        contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 16, paddingBottom: tabBarSpace + 24, gap: 12 }}
         showsVerticalScrollIndicator={false}
         refreshControl={undefined}
       >

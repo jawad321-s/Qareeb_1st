@@ -97,7 +97,7 @@ export default function SupportPage() {
                     <div className="flex items-center gap-2">
                       <p className={cn('truncate text-sm', x.unreadForAdmin ? 'font-bold' : 'font-medium')}>{name}</p>
                       {u?.status === 'suspended' && <ShieldOff className="h-3.5 w-3.5 shrink-0 text-red-500" aria-label={t('status.suspended')} />}
-                      <span className="ms-auto shrink-0 text-[11px] text-muted">{timeAgo(x.lastAt, locale)}</span>
+                      <span className="ms-auto shrink-0 text-xs text-muted">{timeAgo(x.lastAt, locale)}</span>
                     </div>
                     <p className={cn('mt-0.5 truncate text-xs', x.unreadForAdmin ? 'text-[rgb(var(--fg))]' : 'text-muted')}>
                       {x.lastFrom === 'admin' ? `${t('sup.you')}: ` : ''}
@@ -266,9 +266,9 @@ function Conversation({ thread, user, onDeleted }: { thread: SupportThread; user
                     team ? 'rounded-ee-md bg-brand-600 text-white' : 'rounded-es-md border border-base bg-slate-500/5',
                   )}
                 >
-                  {team && <p className="mb-0.5 text-[10px] font-semibold opacity-80">{t('sup.team')}</p>}
+                  {team && <p className="mb-0.5 text-xs font-semibold opacity-80">{t('sup.team')}</p>}
                   <p className="whitespace-pre-wrap break-words">{m.text}</p>
-                  <p className={cn('mt-1 text-[10px]', team ? 'text-white/70' : 'text-muted')}>{timeAgo(m.createdAt, locale)}</p>
+                  <p className={cn('mt-1 text-xs', team ? 'text-white/70' : 'text-muted')}>{timeAgo(m.createdAt, locale)}</p>
                 </div>
               </div>
             );

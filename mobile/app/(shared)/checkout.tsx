@@ -142,7 +142,7 @@ export default function Checkout() {
         </View>
         <Animated.View entering={FadeInDown.delay(150).duration(400)}>
           <Card style={{ gap: 12 }}>
-            <Text variant="overline" tone="muted">
+            <Text variant="caption" tone="muted">
               {t('pay.receipt')}
             </Text>
             {rows.map(([k, v]) => (
@@ -210,7 +210,7 @@ export default function Checkout() {
 
       {/* Order summary */}
       <Card style={{ gap: 10, marginTop: 14 }}>
-        <Text variant="overline" tone="muted">
+        <Text variant="caption" tone="muted">
           {t('pay.summary')}
         </Text>
         <Row label={t('pay.plan')} value={plan.name[locale]} />

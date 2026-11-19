@@ -33,7 +33,7 @@ export default function Settings() {
     <Screen scroll>
       <Header showBack title={t('settings.title')} />
 
-      <Text variant="overline" tone="muted" style={{ marginBottom: 10, marginLeft: 4 }}>
+      <Text variant="caption" tone="muted" style={{ marginBottom: 10, marginLeft: 4 }}>
         {t('settings.appearance')}
       </Text>
       <Card padded={false} style={{ marginBottom: 22 }}>
@@ -52,7 +52,7 @@ export default function Settings() {
         </View>
       </Card>
 
-      <Text variant="overline" tone="muted" style={{ marginBottom: 10, marginLeft: 4 }}>
+      <Text variant="caption" tone="muted" style={{ marginBottom: 10, marginLeft: 4 }}>
         {t('settings.language')}
       </Text>
       <Card padded={false} style={{ marginBottom: 22 }}>
@@ -71,7 +71,7 @@ export default function Settings() {
         </View>
       </Card>
 
-      <Text variant="overline" tone="muted" style={{ marginBottom: 10, marginLeft: 4 }}>
+      <Text variant="caption" tone="muted" style={{ marginBottom: 10, marginLeft: 4 }}>
         {t('settings.notifications')}
       </Text>
       <Card padded={false} style={{ marginBottom: 22 }}>
@@ -79,7 +79,7 @@ export default function Settings() {
         <ToggleRow icon="map-pin" label={t('settings.locationServices')} value={location} onChange={setLocation} />
       </Card>
 
-      <Text variant="overline" tone="muted" style={{ marginBottom: 10, marginLeft: 4 }}>
+      <Text variant="caption" tone="muted" style={{ marginBottom: 10, marginLeft: 4 }}>
         {t('set.about')}
       </Text>
       <Card padded={false}>

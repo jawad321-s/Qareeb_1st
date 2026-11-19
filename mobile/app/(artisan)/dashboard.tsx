@@ -123,7 +123,13 @@ export default function ArtisanDashboard() {
             </Pressable>
 
             {/* Availability toggle */}
-            <Pressable onPress={toggleOnline} disabled={setAvailable.isPending}>
+            <Pressable
+              onPress={toggleOnline}
+              disabled={setAvailable.isPending}
+              accessibilityRole="switch"
+              accessibilityState={{ checked: online, disabled: setAvailable.isPending }}
+              accessibilityLabel={online ? t('artisan.online') : t('artisan.offline')}
+            >
               <Card style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
                 <View style={{ width: 44, height: 44, borderRadius: 12, backgroundColor: (online ? '#10B981' : '#94A3B8') + '20', alignItems: 'center', justifyContent: 'center' }}>
                   <Icon name={online ? 'zap' : 'moon'} size={22} color={online ? '#10B981' : '#94A3B8'} />
@@ -151,7 +157,7 @@ export default function ArtisanDashboard() {
               <Card style={{ gap: 8, paddingVertical: 16 }}>
                 <Icon name={s.icon} size={20} color={s.color} />
                 <Text variant="h3">{s.value}</Text>
-                <Text variant="overline" tone="muted">
+                <Text variant="caption" tone="muted">
                   {s.label}
                 </Text>
               </Card>

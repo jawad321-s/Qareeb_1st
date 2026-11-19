@@ -5,7 +5,7 @@ import { RevenueChart, RequestsBarChart, CategoryPie } from '@/components/charts
 import { REVENUE_SERIES, CATEGORY_SPLIT, REQUESTS_BY_STATUS } from '@/lib/mock-data';
 import { useT } from '@/lib/i18n';
 import { isLive } from '@/lib/firebase';
-import { useCollection, monthlySeries, categorySplit, requestsByStatus } from '@/lib/live-data';
+import { useCollection, monthlySeries, categorySplit, requestsByStatus, demoSeries } from '@/lib/live-data';
 
 const STATUS_KEY: Record<string, string> = { Pending: 'an.pending', Active: 'an.active', Completed: 'an.completed', Cancelled: 'an.cancelled' };
 
@@ -14,7 +14,7 @@ export default function AnalyticsPage() {
   const live = isLive();
   const requests = useCollection('requests');
   const subscriptions = useCollection('subscriptions');
-  const series = live ? monthlySeries(subscriptions ?? [], requests ?? [], locale) : REVENUE_SERIES;
+  const series = live ? monthlySeries(subscriptions ?? [], requests ?? [], locale) : demoSeries(REVENUE_SERIES, locale);
   const split = live ? categorySplit(requests ?? [], locale) : CATEGORY_SPLIT;
   const byStatus = live ? requestsByStatus(requests ?? []) : REQUESTS_BY_STATUS;
   const total = byStatus.reduce((s, r) => s + r.value, 0);

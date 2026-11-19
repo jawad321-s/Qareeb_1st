@@ -129,8 +129,17 @@ export function Button({
         ? 'primary'
         : 'default';
 
-  const contentColor =
-    textTone === 'inverse' ? '#FFFFFF' : variant === 'secondary' ? colors.fg : tint;
+  // A disabled filled button turns into a flat grey one with readable grey
+  // text (a faded gradient with faded white text was unreadable).
+  const flatDisabled = !!disabled && !loading && (variant === 'primary' || variant === 'danger');
+
+  const contentColor = flatDisabled
+    ? colors.muted
+    : textTone === 'inverse'
+      ? '#FFFFFF'
+      : variant === 'secondary'
+        ? colors.fg
+        : tint;
 
   // Ripple tint: light over dark buttons, tinted over light ones.
   const rippleColor =
@@ -158,7 +167,11 @@ export function Button({
             variant="bodyMedium"
             tone={textTone}
             // An accent override also colours the label of outline / ghost buttons.
-            style={{ fontFamily: 'Inter_600SemiBold', ...(accent && textTone === 'primary' ? { color: tint } : {}) }}
+            style={{
+              fontFamily: 'Inter_600SemiBold',
+              ...(accent && textTone === 'primary' ? { color: tint } : {}),
+              ...(flatDisabled ? { color: colors.muted } : {}),
+            }}
           >
             {label}
           </Text>
@@ -171,7 +184,7 @@ export function Button({
   const containerBase: ViewStyle = {
     borderRadius: radius.lg,
     overflow: 'hidden',
-    opacity: isDisabled ? 0.55 : 1,
+    opacity: flatDisabled ? 1 : isDisabled ? 0.55 : 1,
     width: fullWidth ? '100%' : undefined,
     // Primary CTAs glow softly in brand color — depth reserved for the action
     // that matters, not sprinkled everywhere.
@@ -197,7 +210,7 @@ export function Button({
         disabled={isDisabled}
         style={pressedStyle}
       >
-        {variant === 'primary' ? (
+        {variant === 'primary' && !flatDisabled ? (
           <LinearGradient colors={gradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}>
             {Content}
             {Ripple}
@@ -206,8 +219,10 @@ export function Button({
           <View
             style={{
               backgroundColor:
-                variant === 'danger'
-                  ? '#EF4444'
+                flatDisabled
+                  ? colors.surface2
+                  : variant === 'danger'
+                  ? '#DC2626' // white text on it: 4.8:1 (was #EF4444, 3.8:1)
                   : variant === 'secondary'
                     ? colors.surface2
                     : 'transparent',

@@ -124,7 +124,7 @@ export function NotificationsMenu({ placement = 'down' }: { placement?: 'down' |
         <Bell className="h-[18px] w-[18px]" />
       </Button>
       {fresh > 0 && (
-        <span className="pointer-events-none absolute -end-1 -top-1 grid h-5 min-w-5 place-items-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white">
+        <span className="pointer-events-none absolute -end-1 -top-1 grid h-5 min-w-5 place-items-center rounded-full bg-red-500 px-1 text-xs font-bold text-white">
           {fresh > 9 ? '9+' : fresh}
         </span>
       )}

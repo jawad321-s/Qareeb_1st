@@ -89,7 +89,7 @@ export default function Notifications() {
           ) : (
             groupByDay(shown).map(({ group, items }) => (
               <View key={group} style={{ marginTop: 18, gap: 10 }}>
-                <Text variant="overline" tone="muted" style={{ marginHorizontal: 4 }}>
+                <Text variant="caption" tone="muted" style={{ marginHorizontal: 4 }}>
                   {t(`notif.${group}`)}
                 </Text>
                 {items.map((n, i) => (
@@ -134,7 +134,7 @@ function Row({ n, onOpen, onDelete }: { n: FeedItem; onOpen: () => void; onDelet
           <Text variant="caption" tone="muted" style={{ lineHeight: 18 }}>
             {n.body}
           </Text>
-          <Text variant="overline" tone="muted" style={{ marginTop: 2 }}>
+          <Text variant="caption" tone="muted" style={{ marginTop: 2 }}>
             {timeAgo(n.ts)}
           </Text>
         </View>

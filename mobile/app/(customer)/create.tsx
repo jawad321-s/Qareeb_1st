@@ -212,13 +212,13 @@ export default function CreateRequest() {
                 {images.map((uri) => (
                   <View key={uri}>
                     <Image source={{ uri }} style={{ width: 76, height: 76, borderRadius: 14 }} />
-                    <Pressable onPress={() => setImages((p) => p.filter((u) => u !== uri))} style={{ position: 'absolute', top: -6, right: -6, backgroundColor: '#EF4444', borderRadius: 999, padding: 3 }}>
+                    <Pressable onPress={() => setImages((p) => p.filter((u) => u !== uri))} hitSlop={14} accessibilityRole="button" accessibilityLabel={t('a11y.removePhoto')} style={{ position: 'absolute', top: -6, right: -6, backgroundColor: '#EF4444', borderRadius: 999, padding: 3 }}>
                       <Icon name="x" size={12} color="#FFF" strokeWidth={3} />
                     </Pressable>
                   </View>
                 ))}
                 {images.length < 4 && (
-                  <Pressable onPress={pickImage} style={{ width: 76, height: 76, borderRadius: 14, borderWidth: 1.5, borderStyle: 'dashed', borderColor: colors.border, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.surface }}>
+                  <Pressable onPress={pickImage} accessibilityRole="button" accessibilityLabel={t('a11y.addPhoto')} style={{ width: 76, height: 76, borderRadius: 14, borderWidth: 1.5, borderStyle: 'dashed', borderColor: colors.border, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.surface }}>
                     <Icon name="camera" size={22} color={colors.muted} />
                   </Pressable>
                 )}

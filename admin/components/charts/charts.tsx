@@ -27,7 +27,7 @@ export function RevenueChart({ data }: { data: { month: string; revenue: number 
           </linearGradient>
         </defs>
         <CartesianGrid strokeDasharray="3 3" stroke={GRID} vertical={false} />
-        <XAxis dataKey="month" tickLine={false} axisLine={false} tick={AXIS} />
+        <XAxis dataKey="month" tickLine={false} axisLine={false} tick={AXIS} interval="preserveStartEnd" minTickGap={14} />
         <YAxis tickLine={false} axisLine={false} tick={AXIS} tickFormatter={(v) => `${v / 1000}k`} />
         <Tooltip contentStyle={tooltipStyle} formatter={(v: number) => [`${v.toLocaleString()} ₪`, 'Revenue']} />
         <Area type="monotone" dataKey="revenue" stroke="#3B82F6" strokeWidth={2.5} fill="url(#rev)" />
@@ -41,7 +41,7 @@ export function RequestsBarChart({ data }: { data: { month: string; requests: nu
     <ResponsiveContainer width="100%" height={280}>
       <BarChart data={data} margin={{ left: -10, right: 8, top: 8 }}>
         <CartesianGrid strokeDasharray="3 3" stroke={GRID} vertical={false} />
-        <XAxis dataKey="month" tickLine={false} axisLine={false} tick={AXIS} />
+        <XAxis dataKey="month" tickLine={false} axisLine={false} tick={AXIS} interval="preserveStartEnd" minTickGap={14} />
         <YAxis tickLine={false} axisLine={false} tick={AXIS} />
         <Tooltip contentStyle={tooltipStyle} cursor={{ fill: 'rgb(148 163 184 / 0.1)' }} />
         <Bar dataKey="requests" fill="#0EA5E9" radius={[6, 6, 0, 0]} maxBarSize={28} />

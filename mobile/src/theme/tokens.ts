@@ -47,9 +47,9 @@ export const themes: { light: ThemeColors; dark: ThemeColors } = {
     card: '#FFFFFF',
     border: '#E5EAF2',
     fg: '#0F172A',
-    muted: '#61708A',
+    muted: '#566480', // 5.3:1 even on the grey chips (surface2)
     tint: '#2563EB',
-    tabInactive: '#94A3B8',
+    tabInactive: '#64748B', // 4.7:1 on white
     overlay: 'rgba(15,23,42,0.45)',
   },
   dark: {
@@ -64,7 +64,7 @@ export const themes: { light: ThemeColors; dark: ThemeColors } = {
     fg: '#F1F5F9',
     muted: '#94A3B8',
     tint: '#60A5FA',
-    tabInactive: '#64748B',
+    tabInactive: '#94A3B8',
     overlay: 'rgba(0,0,0,0.6)',
   },
 };
@@ -99,7 +99,7 @@ export const typography = {
   body: { fontSize: 15, lineHeight: 22, fontFamily: 'Inter_400Regular', letterSpacing: 0 },
   bodyMedium: { fontSize: 15, lineHeight: 22, fontFamily: 'Inter_500Medium', letterSpacing: -0.1 },
   caption: { fontSize: 13, lineHeight: 18, fontFamily: 'Inter_400Regular', letterSpacing: 0 },
-  overline: { fontSize: 11, lineHeight: 14, fontFamily: 'Inter_600SemiBold', letterSpacing: 0.7 },
+  overline: { fontSize: 12, lineHeight: 16, fontFamily: 'Inter_600SemiBold', letterSpacing: 0.7 },
 } as const;
 
 // Elevation presets (iOS shadow + Android elevation). Deliberately restrained:
@@ -147,7 +147,8 @@ export const shadows = {
 } as const;
 
 export const gradients = {
-  brand: ['#1D4ED8', '#2563EB', '#0EA5E9'] as const,
+  // White text sits on these: every stop is dark enough (4.5:1 or more).
+  brand: ['#1D4ED8', '#2563EB', '#0369A1'] as const,
   brandSoft: ['#3B82F6', '#38BDF8'] as const,
   sunset: ['#F59E0B', '#EF4444'] as const,
   success: ['#10B981', '#0EA5E9'] as const,
@@ -171,15 +172,15 @@ export const roleAccents: Record<'customer' | 'artisan', RoleAccent> = {
   customer: {
     tintLight: '#2563EB',
     tintDark: '#60A5FA',
-    gradient: ['#1D4ED8', '#2563EB', '#0EA5E9'],
+    gradient: ['#1D4ED8', '#2563EB', '#0369A1'],
     gradientSoft: ['#3B82F6', '#38BDF8'],
     heroLight: ['#E9EFFB', '#F6F8FB'],
     heroDark: ['#141F3C', '#0A0F1E'],
   },
   artisan: {
-    tintLight: '#E96D0A', // logo wrench orange, deepened for contrast
+    tintLight: '#C2410C', // logo wrench orange, deepened until text in it reads (4.9:1)
     tintDark: '#FB923C',
-    gradient: ['#C2410C', '#F97316', '#FB923C'],
+    gradient: ['#9A3412', '#B83A0C', '#C2410C'],
     gradientSoft: ['#F97316', '#FBA94C'],
     heroLight: ['#FBEFE1', '#F6F8FB'],
     heroDark: ['#33200B', '#0A0F1E'],

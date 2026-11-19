@@ -13,7 +13,7 @@ import { useT } from '@/lib/i18n';
 import { isLive } from '@/lib/firebase';
 import {
   useCollection, monthOverMonth, monthlySeries, categorySplit, recentActivity, toMillis, categoryNames, artisanCategories,
-  type ActivityItem,
+  demoSeries, type ActivityItem,
 } from '@/lib/live-data';
 
 const ACTIVITY_AR: Record<number, string> = {
@@ -58,7 +58,7 @@ export default function OverviewPage() {
         requestsDelta: monthOverMonth(requests ?? []),
       }
     : KPIS;
-  const series = live ? monthlySeries(paid, requests ?? [], locale) : REVENUE_SERIES;
+  const series = live ? monthlySeries(paid, requests ?? [], locale) : demoSeries(REVENUE_SERIES, locale);
   const split = live ? categorySplit(requests ?? [], locale) : CATEGORY_SPLIT;
   const activity = live
     ? recentActivity({ users: users ?? [], requests: requests ?? [], verifications: verifications ?? [], complaints: complaints ?? [], subscriptions: paid })

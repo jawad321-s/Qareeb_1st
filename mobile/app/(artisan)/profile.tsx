@@ -19,8 +19,10 @@ import { useMyRating } from '@/hooks/useMyRating';
 import { ratingValue } from '@/lib/rating';
 import { useMySubscription } from '@/store/subscription';
 import { planById } from '@/lib/plans';
+import { useTabBarSpace } from '@/components/ui/TabBar';
 
 export default function ArtisanProfile() {
+  const tabBarSpace = useTabBarSpace(); // keeps the last item clear of the floating tab bar
   const { colors, isDark } = useTheme();
   const user = useAuth((s) => s.user);
   const signOut = useAuth((s) => s.signOut);
@@ -55,8 +57,8 @@ export default function ArtisanProfile() {
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
       <StatusBar style="light" />
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 140 }}>
-        <LinearGradient colors={['#C2410C', '#F97316']} style={{ paddingBottom: 28, overflow: 'hidden' }}>
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: tabBarSpace + 24 }}>
+        <LinearGradient colors={['#9A3412', '#C2410C']} style={{ paddingBottom: 28, overflow: 'hidden' }}>
           <FloatingBlobs
             blobs={[
               { size: 200, colors: ['#FDBA74', '#F97316'], top: -70, right: -40, range: 26 },

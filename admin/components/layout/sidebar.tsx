@@ -39,7 +39,7 @@ function Brand() {
       </div>
       <div>
         <p className="font-bold leading-none">{t('app.name')}</p>
-        <p className="text-[11px] text-muted">{t('app.console')}</p>
+        <p className="text-xs text-muted">{t('app.console')}</p>
       </div>
     </div>
   );

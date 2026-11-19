@@ -143,7 +143,7 @@ function HourPicker({ label, value, blocked, onChange }: { label: string; value:
   const { colors } = useTheme();
   return (
     <Card>
-      <Text variant="overline" tone="muted" style={{ marginBottom: 10 }}>
+      <Text variant="caption" tone="muted" style={{ marginBottom: 10 }}>
         {label}
       </Text>
       <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>

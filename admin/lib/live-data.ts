@@ -98,6 +98,11 @@ const MONTHS = {
   ar: ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'],
 };
 
+/** The demo data's months, named in the dashboard's language like the live ones. */
+export function demoSeries<T extends { month: string }>(series: T[], locale: 'en' | 'ar'): T[] {
+  return series.map((p, i) => ({ ...p, month: MONTHS[locale][i] ?? p.month }));
+}
+
 /** The last 12 months: revenue (subscription payments) and requests created. */
 export function monthlySeries(subscriptions: LiveDoc[], requests: LiveDoc[], locale: 'en' | 'ar') {
   const now = monthKey(Date.now());

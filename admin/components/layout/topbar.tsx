@@ -55,7 +55,7 @@ export function AccountControls({ bell = true }: { bell?: boolean }) {
         </Avatar>
         <div className="min-w-0 flex-1">
           <p className="truncate text-sm font-semibold leading-tight">{t('topbar.admin')}</p>
-          <p className="truncate text-[11px] text-muted">{t('topbar.superAdmin')}</p>
+          <p className="truncate text-xs text-muted">{t('topbar.superAdmin')}</p>
         </div>
         <Button variant="ghost" isIconOnly aria-label={t('topbar.signOut')} onPress={logout} className="text-muted hover:text-red-500">
           <LogOut className="h-[18px] w-[18px] rtl:-scale-x-100" />

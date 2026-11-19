@@ -26,10 +26,20 @@ const TONE_TO_COLOR: Record<BadgeTone, 'default' | 'accent' | 'success' | 'warni
   info: 'accent',
 };
 
+// Text shades that stay readable (4.5:1) on each chip's soft tint, light and dark.
+const TONE_TEXT: Record<BadgeTone, string> = {
+  neutral: 'text-slate-600 dark:text-slate-300',
+  brand: 'text-blue-700 dark:text-blue-300',
+  info: 'text-blue-700 dark:text-blue-300',
+  success: 'text-emerald-700 dark:text-emerald-300',
+  warning: 'text-amber-700 dark:text-amber-300',
+  danger: 'text-red-700 dark:text-red-300',
+};
+
 export function Badge({ tone = 'neutral', children }: { tone?: BadgeTone; children: React.ReactNode }) {
   return (
     <HeroChip color={TONE_TO_COLOR[tone]} variant="soft" size="sm">
-      <HeroChip.Label>{children}</HeroChip.Label>
+      <HeroChip.Label className={TONE_TEXT[tone]}>{children}</HeroChip.Label>
     </HeroChip>
   );
 }

@@ -38,7 +38,7 @@ export default function Welcome() {
   return (
     <View style={{ flex: 1 }}>
       <StatusBar style="light" />
-      <LinearGradient colors={['#1E3A8A', '#2563EB', '#0EA5E9']} style={{ flex: 1 }}>
+      <LinearGradient colors={['#1E3A8A', '#2563EB', '#0369A1']} style={{ flex: 1 }}>
         <FloatingBlobs
           blobs={[
             { size: 260, colors: ['#60A5FA', '#2563EB'], top: -60, right: -50, range: 34 },

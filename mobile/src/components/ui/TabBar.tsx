@@ -184,7 +184,7 @@ function TabItem({
             <Icon name={icon} size={20} color={focused ? '#FFFFFF' : inactive} />
           </Animated.View>
         </View>
-        <Text variant="overline" style={{ color: focused ? tint : inactive, fontSize: 10 }}>
+        <Text variant="overline" style={{ color: focused ? tint : inactive, fontSize: 11 }}>
           {label}
         </Text>
       </View>

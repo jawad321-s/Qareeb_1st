@@ -127,7 +127,8 @@ export default function OverviewPage() {
               <p className="text-xs text-muted">{t('ov.monthlyGross')} (₪)</p>
             </div>
           </div>
-          <RevenueChart data={series} />
+          {/* As tall as the category card beside it, with its list. */}
+          <RevenueChart data={series} height={split.length ? 400 : 280} />
         </Card>
         <Card className="p-5">
           <h2 className="font-semibold">{t('ov.byCategory')}</h2>

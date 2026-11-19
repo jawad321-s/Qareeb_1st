@@ -85,6 +85,7 @@ const dict = {
     'ov.recentActivity': 'Recent activity',
     'ov.pendingVerifications': 'Pending verifications',
     'ov.noData': 'No data yet.',
+    'ov.other': 'Other',
     'ov.noPending': 'No verification requests waiting for review.',
     'ov.review': 'Review',
     // users
@@ -459,6 +460,7 @@ const dict = {
     'ov.recentActivity': 'النشاط الأخير',
     'ov.pendingVerifications': 'طلبات التوثيق المعلّقة',
     'ov.noData': 'لا توجد بيانات بعد.',
+    'ov.other': 'أخرى',
     'ov.noPending': 'لا توجد طلبات توثيق بانتظار المراجعة.',
     'ov.review': 'مراجعة',
     'users.title': 'المستخدمون',

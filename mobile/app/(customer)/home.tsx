@@ -19,6 +19,7 @@ import { useTheme } from '@/theme/ThemeProvider';
 import { useT } from '@/i18n';
 import { NotificationBell } from '@/components/domain/NotificationBell';
 import { SupportButton } from '@/components/domain/SupportButton';
+import { isListed } from '@/components/domain/ConversationList';
 
 export default function Home() {
   const { colors, isDark } = useTheme();
@@ -36,9 +37,11 @@ export default function Home() {
 
   const requests = useMyRequests(user?.uid ?? '');
   const conversations = useConversations(user);
+  // The same threads the Messages tab lists (hidden and empty closed ones left out).
+  const chats = (conversations.data ?? []).filter(isListed);
 
   const recent = (requests.data ?? []).slice(0, 2);
-  const unread = (conversations.data ?? []).filter(
+  const unread = chats.filter(
     (c) => c.lastMessage && !c.lastMessage.read && c.lastMessage.senderId !== user?.uid,
   ).length;
 
@@ -102,7 +105,7 @@ export default function Home() {
               <View style={{ flex: 1 }}>
                 <Text variant="bodyMedium">{t('home.messages')}</Text>
                 <Text variant="caption" tone="muted" numberOfLines={1}>
-                  {conversations.data?.length ? `${conversations.data.length} ${t('home.chats')}` : t('home.messagesHint')}
+                  {chats.length ? `${chats.length} ${t('home.chats')}` : t('home.messagesHint')}
                 </Text>
               </View>
               {unread > 0 && (

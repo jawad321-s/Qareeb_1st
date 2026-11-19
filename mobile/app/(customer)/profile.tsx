@@ -87,7 +87,7 @@ export default function Profile() {
               <Text variant="h2" tone="inverse">
                 {user.fullName}
               </Text>
-              <Text variant="caption" style={{ color: 'rgba(255,255,255,0.85)' }}>
+              <Text variant="caption" style={{ color: 'rgba(255,255,255,0.95)' }}>
                 {displayPhone(user.phone)}
               </Text>
               <View style={{ flexDirection: 'row', gap: 24, marginTop: 8 }}>
@@ -138,7 +138,7 @@ function Stat({ label, value }: { label: string; value: string }) {
       <Text variant="h3" tone="inverse">
         {value}
       </Text>
-      <Text variant="caption" style={{ color: 'rgba(255,255,255,0.8)' }}>
+      <Text variant="caption" style={{ color: 'rgba(255,255,255,0.95)' }}>
         {label}
       </Text>
     </View>

@@ -176,7 +176,7 @@ function Party({ label, name, role, phone }: { label: string; name: string; role
         {role && <span className="ms-1 text-xs font-normal text-muted">({t(`role.${role}` as any)})</span>}
       </p>
       {phone && (
-        <a href={`tel:${phone}`} className="inline-flex items-center gap-1 text-xs text-brand-500 hover:underline">
+        <a href={`tel:${phone}`} className="inline-flex items-center gap-1 text-xs text-brand-600 dark:text-brand-400 hover:underline">
           <Phone className="h-3 w-3" /> <span dir="ltr">{formatPhone(phone)}</span>
         </a>
       )}

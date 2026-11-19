@@ -31,8 +31,8 @@ const TONE_TEXT: Record<BadgeTone, string> = {
   neutral: 'text-slate-600 dark:text-slate-300',
   brand: 'text-blue-700 dark:text-blue-300',
   info: 'text-blue-700 dark:text-blue-300',
-  success: 'text-emerald-700 dark:text-emerald-300',
-  warning: 'text-amber-700 dark:text-amber-300',
+  success: 'text-emerald-800 dark:text-emerald-300',
+  warning: 'text-amber-800 dark:text-amber-300',
   danger: 'text-red-700 dark:text-red-300',
 };
 
@@ -118,7 +118,7 @@ export function FilterTabs<K extends string>({
           >
             {tab.label}
             {tab.count !== undefined && (
-              <span className={cn('rounded-full px-1.5 text-xs', active ? 'bg-white/20' : 'bg-slate-500/10')}>{tab.count}</span>
+              <span className={cn('rounded-full px-1.5 text-xs', active ? 'bg-black/25' : 'bg-slate-500/10')}>{tab.count}</span>
             )}
           </button>
         );

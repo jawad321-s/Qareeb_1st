@@ -233,7 +233,7 @@ function UserPanel({
         <div className="flex-1 space-y-5 overflow-y-auto p-5">
           <dl className="grid grid-cols-2 gap-3 text-sm">
             <Info label={t('users.phone')}>
-              <a href={`tel:${user.phone}`} className="inline-flex items-center gap-1 text-brand-500 hover:underline">
+              <a href={`tel:${user.phone}`} className="inline-flex items-center gap-1 text-brand-600 dark:text-brand-400 hover:underline">
                 <Phone className="h-3.5 w-3.5" /> <span dir="ltr">{formatPhone(user.phone)}</span>
               </a>
             </Info>
@@ -264,7 +264,7 @@ function UserPanel({
           )}
 
           {message && (
-            <p role="status" className={`rounded-xl p-3 text-sm ${message.ok ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400' : 'bg-red-500/10 text-red-600'}`}>
+            <p role="status" className={`rounded-xl p-3 text-sm ${message.ok ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400' : 'bg-red-500/10 text-red-700 dark:text-red-400'}`}>
               {message.text}
             </p>
           )}
@@ -325,7 +325,7 @@ function Info({ label, children }: { label: string; children: React.ReactNode })
 function Section({ title, hint, danger, children }: { title: string; hint: string; danger?: boolean; children: React.ReactNode }) {
   return (
     <section className={`space-y-2 rounded-2xl border p-4 ${danger ? 'border-red-500/40' : 'border-base'}`}>
-      <h3 className={`font-semibold ${danger ? 'text-red-600' : ''}`}>{title}</h3>
+      <h3 className={`font-semibold ${danger ? 'text-red-700 dark:text-red-400' : ''}`}>{title}</h3>
       <p className="text-xs text-muted">{hint}</p>
       {children}
     </section>

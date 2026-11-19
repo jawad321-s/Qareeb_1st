@@ -4,6 +4,8 @@ import { router } from 'expo-router';
 import { Icon } from '@/components/ui/Icon';
 import { Text } from '@/components/ui/Text';
 import { useT } from '@/i18n';
+import { useTheme } from '@/theme/ThemeProvider';
+import { dangerText } from '@/theme/tokens';
 
 interface Props {
   /** The person the complaint is about. */
@@ -16,6 +18,7 @@ interface Props {
 /** A quiet "file a complaint about this artisan/customer" link at the end of a page. */
 export function ReportLink({ targetId, targetRole, requestId }: Props) {
   const { t } = useT();
+  const { isDark } = useTheme();
   const open = () =>
     router.push({ pathname: '/(shared)/report', params: { targetId, targetRole, ...(requestId ? { requestId } : {}) } });
   return (
@@ -25,8 +28,8 @@ export function ReportLink({ targetId, targetRole, requestId }: Props) {
       accessibilityRole="link"
       style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, marginTop: 24, paddingVertical: 8 }}
     >
-      <Icon name="flag" size={15} color="#DC2626" />
-      <Text variant="caption" style={{ color: '#DC2626' }}>
+      <Icon name="flag" size={15} color={dangerText(isDark)} />
+      <Text variant="caption" style={{ color: dangerText(isDark) }}>
         {t(targetRole === 'artisan' ? 'report.linkArtisan' : 'report.linkCustomer')}
       </Text>
     </Pressable>

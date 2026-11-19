@@ -59,7 +59,7 @@ export default function SupportPage() {
         )}
       </div>
       {notice && (
-        <p role="status" className={cn('rounded-xl p-3 text-sm', notice.ok ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400' : 'bg-red-500/10 text-red-600')}>
+        <p role="status" className={cn('rounded-xl p-3 text-sm', notice.ok ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400' : 'bg-red-500/10 text-red-700 dark:text-red-400')}>
           {notice.text}
         </p>
       )}
@@ -230,7 +230,7 @@ function Conversation({ thread, user, onDeleted }: { thread: SupportThread; user
             {status && <StatusPill status={status} />}
           </div>
           {phone && (
-            <a href={`tel:${phone}`} className="mt-0.5 inline-flex items-center gap-1 text-xs text-brand-500 hover:underline">
+            <a href={`tel:${phone}`} className="mt-0.5 inline-flex items-center gap-1 text-xs text-brand-600 dark:text-brand-400 hover:underline">
               <Phone className="h-3 w-3" /> <span dir="ltr">{formatPhone(phone)}</span>
             </a>
           )}
@@ -245,7 +245,7 @@ function Conversation({ thread, user, onDeleted }: { thread: SupportThread; user
         </Button>
       </div>
       {suspended && user?.suspendReason && (
-        <p className="border-b border-base bg-red-500/5 px-4 py-2 text-xs text-red-600">
+        <p className="border-b border-base bg-red-500/5 px-4 py-2 text-xs text-red-700 dark:text-red-400">
           {t('sup.suspendedFor')}: {String(user.suspendReason)}
         </p>
       )}
@@ -278,7 +278,7 @@ function Conversation({ thread, user, onDeleted }: { thread: SupportThread; user
       </div>
 
       {(error || notice) && (
-        <p role="status" className={cn('mx-4 mb-2 rounded-xl p-2.5 text-sm', error ? 'bg-red-500/10 text-red-600' : 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400')}>
+        <p role="status" className={cn('mx-4 mb-2 rounded-xl p-2.5 text-sm', error ? 'bg-red-500/10 text-red-700 dark:text-red-400' : 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400')}>
           {error ?? notice}
         </p>
       )}

@@ -77,7 +77,7 @@ export default function OverviewPage() {
 
   const KPI_CARDS = [
     { label: t('ov.totalRevenue'), value: formatMoney(kpis.revenue), delta: kpis.revenueDelta, icon: Wallet, iconCls: 'bg-brand-500/10 text-brand-600 dark:text-brand-400' },
-    { label: t('ov.totalUsers'), value: formatNumber(kpis.users), delta: kpis.usersDelta, icon: Users, iconCls: 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400' },
+    { label: t('ov.totalUsers'), value: formatNumber(kpis.users), delta: kpis.usersDelta, icon: Users, iconCls: 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400' },
     { label: t('ov.activeArtisans'), value: formatNumber(kpis.artisans), delta: kpis.artisansDelta, icon: Wrench, iconCls: 'bg-cyan-500/10 text-cyan-600 dark:text-cyan-400' },
     { label: t('ov.totalRequests'), value: formatNumber(kpis.requests), delta: kpis.requestsDelta, icon: ClipboardList, iconCls: 'bg-violet-500/10 text-violet-600 dark:text-violet-400' },
   ];
@@ -105,7 +105,7 @@ export default function OverviewPage() {
               <div className="mt-3 flex items-center gap-2">
                 <span
                   className={`inline-flex items-center gap-0.5 rounded-full px-2 py-0.5 text-xs font-semibold ${
-                    up ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400' : 'bg-red-500/10 text-red-600 dark:text-red-400'
+                    up ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400' : 'bg-red-500/10 text-red-700 dark:text-red-400'
                   }`}
                 >
                   {up ? <ArrowUpRight className="h-3 w-3" /> : <ArrowDownRight className="h-3 w-3" />}
@@ -149,7 +149,7 @@ export default function OverviewPage() {
                 subscription: { icon: CreditCard, cls: 'bg-violet-500/10 text-violet-600 dark:text-violet-400' },
                 request: { icon: ClipboardList, cls: 'bg-cyan-500/10 text-cyan-600 dark:text-cyan-400' },
                 category: { icon: Layers, cls: 'bg-slate-500/10 text-slate-600 dark:text-slate-400' },
-                user: { icon: Users, cls: 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400' },
+                user: { icon: Users, cls: 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400' },
               };
               const m = meta[a.type] ?? meta.request;
               const AIcon = m.icon;
@@ -170,7 +170,7 @@ export default function OverviewPage() {
         <Card className="p-5">
           <div className="mb-4 flex items-center justify-between gap-2">
             <h2 className="font-semibold">{t('ov.pendingVerifications')}</h2>
-            <Link href="/artisans" className="text-xs font-medium text-brand-500 hover:underline">
+            <Link href="/artisans" className="text-xs font-medium text-brand-600 dark:text-brand-400 hover:underline">
               {t('ov.review')}
             </Link>
           </div>
@@ -179,7 +179,7 @@ export default function OverviewPage() {
             {/* Each row opens the verification queue, where the documents are reviewed. */}
             {pendingVerifications.slice(0, 4).map((v) => (
               <Link key={v.id} href="/artisans" className="-m-1.5 flex items-center gap-3 rounded-xl p-1.5 hover:bg-slate-500/5">
-                <div className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-gradient-to-br from-brand-500 to-accent-500 text-xs font-bold text-white">
+                <div className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-gradient-to-br from-brand-700 to-brand-600 text-xs font-bold text-white">
                   {v.name.split(' ').map((n: string) => n[0]).join('').slice(0, 2)}
                 </div>
                 <div className="min-w-0 flex-1">

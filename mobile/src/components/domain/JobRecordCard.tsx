@@ -10,6 +10,7 @@ import { formatDate, formatMoney } from '@/lib/format';
 import { useTheme } from '@/theme/ThemeProvider';
 import { useT } from '@/i18n';
 import type { JobRecord } from '@/types';
+import { successText } from '@/theme/tokens';
 
 /** One row of the artisan's work history: a finished job or a turned-down offer. */
 export function JobRecordCard({ record, onPress }: { record: JobRecord; onPress?: () => void }) {
@@ -34,7 +35,7 @@ export function JobRecordCard({ record, onPress }: { record: JobRecord; onPress?
           </Text>
         </View>
         {record.price !== undefined && (
-          <Text variant="bodyMedium" style={{ color: record.kind === 'completed' ? '#059669' : colors.muted }}>
+          <Text variant="bodyMedium" style={{ color: record.kind === 'completed' ? successText(isDark) : colors.muted }}>
             {formatMoney(record.price)}
           </Text>
         )}

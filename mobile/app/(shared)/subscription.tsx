@@ -161,15 +161,15 @@ export default function Subscription() {
                       {plan.name[locale]}
                     </Text>
                     {mine ? (
-                      <Badge label={t('sub.current')} variant="success" icon="check-circle" />
+                      <Badge label={t('sub.current')} variant="success" icon="check-circle" onDark={onGradient} />
                     ) : (
-                      plan.badge && <Badge label={plan.badge[locale]} variant="warning" icon="award" />
+                      plan.badge && <Badge label={plan.badge[locale]} variant="warning" icon="award" onDark={onGradient} />
                     )}
                   </View>
                   <Text variant="display" tone={onGradient ? 'inverse' : 'default'}>
                     {formatMoney(plan.price)}
                   </Text>
-                  <Text variant="caption" style={{ color: onGradient ? 'rgba(255,255,255,0.85)' : colors.muted }}>
+                  <Text variant="caption" style={{ color: onGradient ? 'rgba(255,255,255,0.95)' : colors.muted }}>
                     ≈ {formatMoney(perMonth(plan))} / {t('sub.month')}
                   </Text>
                 </LinearGradient>

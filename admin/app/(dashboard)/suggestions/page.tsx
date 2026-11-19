@@ -70,7 +70,7 @@ export default function SuggestionsPage() {
             {top.map((g) => (
               <span key={g.name} className="inline-flex items-center gap-2 rounded-full border border-base px-3 py-1 text-sm">
                 {g.name}
-                <span className="rounded-full bg-amber-500/15 px-1.5 text-xs font-semibold text-amber-600">×{g.count}</span>
+                <span className="rounded-full bg-amber-500/15 px-1.5 text-xs font-semibold text-amber-800 dark:text-amber-300">×{g.count}</span>
               </span>
             ))}
           </div>
@@ -98,7 +98,7 @@ export default function SuggestionsPage() {
                 <span className="font-medium">{s.author}</span>
                 {s.authorRole && <span className="ms-1 text-xs text-muted">({t(`role.${s.authorRole}`)})</span>}
                 {s.authorPhone && (
-                  <a href={`tel:${s.authorPhone}`} className="ms-3 inline-flex items-center gap-1 text-xs text-brand-500 hover:underline">
+                  <a href={`tel:${s.authorPhone}`} className="ms-3 inline-flex items-center gap-1 text-xs text-brand-600 dark:text-brand-400 hover:underline">
                     <Phone className="h-3 w-3" /> <span dir="ltr">{formatPhone(s.authorPhone)}</span>
                   </a>
                 )}
@@ -117,7 +117,7 @@ export default function SuggestionsPage() {
                   <Button size="sm" variant="ghost" onClick={() => decide(s, 'new')}>{t('sug.reopen')}</Button>
                 )}
                 {s.status !== 'added' && s.status !== 'declined' && (
-                  <Link href={`/categories?new=${encodeURIComponent(s.name)}`} className="inline-flex items-center gap-1.5 rounded-xl px-2 py-1.5 text-sm text-brand-500 hover:underline">
+                  <Link href={`/categories?new=${encodeURIComponent(s.name)}`} className="inline-flex items-center gap-1.5 rounded-xl px-2 py-1.5 text-sm text-brand-600 dark:text-brand-400 hover:underline">
                     <Layers className="h-4 w-4" /> {t('sug.addCategory')}
                   </Link>
                 )}

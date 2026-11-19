@@ -19,7 +19,7 @@ import { config } from '@/lib/config';
 import { qk } from '@/lib/queryClient';
 import { displayPhone } from '@/lib/phone';
 import { useTheme } from '@/theme/ThemeProvider';
-import { palette, radius } from '@/theme/tokens';
+import { dangerText, radius } from '@/theme/tokens';
 import { useT } from '@/i18n';
 
 const NAME_MIN = 2;
@@ -31,7 +31,7 @@ const BIO_MIN = 10;
  * "About" text customers read on their public profile.
  */
 export default function EditProfile() {
-  const { colors } = useTheme();
+  const { colors, isDark } = useTheme();
   const { t } = useT();
   const toast = useToast();
   const qc = useQueryClient();
@@ -131,7 +131,7 @@ export default function EditProfile() {
         )}
         <Button label={t('common.save')} onPress={save} loading={saving} disabled={!nameOk || !bioOk} style={{ marginTop: 8 }} />
         <Button label={t('edit.changePassword')} variant="ghost" iconLeft="lock" onPress={() => router.push('/(shared)/change-password')} />
-        <Button label={t('edit.deleteAccount')} variant="ghost" iconLeft="trash" accent={{ gradient: [palette.danger, palette.danger], tint: palette.danger }} onPress={() => router.push('/(shared)/delete-account')} />
+        <Button label={t('edit.deleteAccount')} variant="ghost" iconLeft="trash" accent={{ gradient: [dangerText(isDark), dangerText(isDark), dangerText(isDark)], tint: dangerText(isDark) }} onPress={() => router.push('/(shared)/delete-account')} />
       </View>
     </Screen>
   );

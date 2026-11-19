@@ -157,7 +157,7 @@ export default function BroadcastsPage() {
             />
           </label>
           {result && (
-            <p role="status" className={`rounded-xl p-3 text-sm ${result.ok ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400' : 'bg-red-500/10 text-red-600'}`}>
+            <p role="status" className={`rounded-xl p-3 text-sm ${result.ok ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400' : 'bg-red-500/10 text-red-700 dark:text-red-400'}`}>
               {result.text}
             </p>
           )}

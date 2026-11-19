@@ -44,7 +44,7 @@
   --surface: 255 255 255;
   --border: 229 234 242;
   --fg: 15 23 42;
-  --muted: 97 112 138;
+  --muted: 84 98 125;
 
   /* Point HeroUI's primary action color at the Qareeb brand blue. */
   --accent: #2563eb;
@@ -57,8 +57,8 @@
   --fg: 241 245 249;
   --muted: 148 163 184;
 
-  --accent: #3b82f6;
-  --accent-hover: #60a5fa;
+  --accent: #2563eb;
+  --accent-hover: #3b82f6;
 }
 
 body {

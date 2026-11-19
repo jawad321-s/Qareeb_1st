@@ -40,7 +40,7 @@ export function SupportButton({ style, iconSize = 19 }: { style: ViewStyle; icon
             width: 14,
             height: 14,
             borderRadius: 7,
-            backgroundColor: '#EF4444',
+            backgroundColor: '#DC2626',
             borderWidth: 2,
             borderColor: colors.bg,
           }}

@@ -34,7 +34,7 @@ const isAllDay = (av: Availability) => av.from === av.to;
 
 /** Weekly working days + hours customers can book the artisan in. */
 export default function AvailabilityScreen() {
-  const { colors } = useTheme();
+  const { colors, gradient } = useTheme();
   const { t } = useT();
   // Live: the artisan's own hours, kept on their profile (artisanProfiles) and
   // cached per account on the device. Demo: the demo artisan's hours.
@@ -96,9 +96,9 @@ export default function AvailabilityScreen() {
                   alignItems: 'center',
                   paddingVertical: 12,
                   borderRadius: 13,
-                  backgroundColor: active ? colors.tint : colors.surface2,
+                  backgroundColor: active ? gradient[1] : colors.surface2,
                   borderWidth: 1.5,
-                  borderColor: active ? colors.tint : 'transparent',
+                  borderColor: active ? gradient[1] : 'transparent',
                 }}
               >
                 <Text
@@ -140,7 +140,7 @@ export default function AvailabilityScreen() {
 }
 
 function HourPicker({ label, value, blocked, onChange }: { label: string; value: string; blocked: string; onChange: (h: string) => void }) {
-  const { colors } = useTheme();
+  const { colors, gradient } = useTheme();
   return (
     <Card>
       <Text variant="caption" tone="muted" style={{ marginBottom: 10 }}>
@@ -159,8 +159,7 @@ function HourPicker({ label, value, blocked, onChange }: { label: string; value:
                 paddingHorizontal: 14,
                 paddingVertical: 9,
                 borderRadius: 999,
-                backgroundColor: active ? colors.tint : colors.surface2,
-                opacity: off ? 0.35 : 1,
+                backgroundColor: active ? gradient[1] : colors.surface2,
               }}
             >
               <Text
@@ -169,6 +168,8 @@ function HourPicker({ label, value, blocked, onChange }: { label: string; value:
                   color: active ? '#FFFFFF' : colors.muted,
                   fontFamily: active ? 'Inter_600SemiBold' : 'Inter_400Regular',
                   fontVariant: ['tabular-nums'],
+                  // A blocked hour stays readable, crossed out instead of faded.
+                  ...(off ? { textDecorationLine: 'line-through' as const } : {}),
                 }}
               >
                 {h}

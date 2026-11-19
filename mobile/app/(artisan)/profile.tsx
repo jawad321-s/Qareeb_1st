@@ -72,9 +72,9 @@ export default function ArtisanProfile() {
                 {user.fullName}
               </Text>
               <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', gap: 8 }}>
-                {featured && <Badge label={t('featured.badge')} variant="warning" icon="star-filled" />}
-                {plan.isPaid && plan.record && <Badge label={planById(plan.record.planId)?.name[locale] ?? t('ad.premium')} variant="info" icon="award" />}
-                <Badge label={user.verified ? t('ad.verified') : t('ap.pending')} variant={user.verified ? 'success' : 'warning'} icon="shield" />
+                {featured && <Badge label={t('featured.badge')} variant="warning" icon="star-filled" onDark />}
+                {plan.isPaid && plan.record && <Badge label={planById(plan.record.planId)?.name[locale] ?? t('ad.premium')} variant="info" icon="award" onDark />}
+                <Badge label={user.verified ? t('ad.verified') : t('ap.pending')} variant={user.verified ? 'success' : 'warning'} icon="shield" onDark />
               </View>
               <View style={{ flexDirection: 'row', gap: 28, marginTop: 8 }}>
                 <Stat value={history.data ? String(history.data.completed.length) : '…'} label={t('ad.jobs')} />
@@ -114,7 +114,7 @@ function Stat({ value, label }: { value: string; label: string }) {
       <Text variant="h3" tone="inverse">
         {value}
       </Text>
-      <Text variant="caption" style={{ color: 'rgba(255,255,255,0.8)' }}>
+      <Text variant="caption" style={{ color: 'rgba(255,255,255,0.95)' }}>
         {label}
       </Text>
     </View>

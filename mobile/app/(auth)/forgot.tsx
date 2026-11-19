@@ -14,7 +14,7 @@ import { confirmReset, resetErrorMessage, sendResetCode } from '@/services/passw
 import { useT } from '@/i18n';
 import { config } from '@/lib/config';
 import { useTheme } from '@/theme/ThemeProvider';
-import { roleAccents } from '@/theme/tokens';
+import { dangerText, roleAccents } from '@/theme/tokens';
 
 const RESEND_AFTER_S = 60;
 
@@ -162,7 +162,7 @@ export default function Forgot() {
           )}
 
           {!!error && (
-            <Text variant="caption" style={{ color: '#EF4444', marginTop: 16, textAlign: 'center' }}>
+            <Text variant="caption" style={{ color: dangerText(isDark), marginTop: 16, textAlign: 'center' }}>
               {error}
             </Text>
           )}

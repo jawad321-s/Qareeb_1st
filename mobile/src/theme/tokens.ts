@@ -69,6 +69,12 @@ export const themes: { light: ThemeColors; dark: ThemeColors } = {
   },
 };
 
+/** Red for TEXT: dark enough on light, light enough on dark (4.5:1+). */
+export const dangerText = (isDark: boolean) => (isDark ? '#F87171' : '#B91C1C');
+
+/** Green for TEXT (amounts, "done"): readable on both themes. */
+export const successText = (isDark: boolean) => (isDark ? '#34D399' : '#047857');
+
 export const spacing = {
   xs: 4,
   sm: 8,

@@ -25,7 +25,7 @@ import { useNow } from '@/hooks/useNow';
 
 export default function Chat() {
   useNow(); // keeps the relative time moving
-  const { colors, isDark } = useTheme();
+  const { colors, isDark, gradient } = useTheme();
   const { requestId } = useLocalSearchParams<{ requestId: string }>();
   const me = useAuth((s) => s.user)!;
   const { data: messages } = useMessages(requestId!);
@@ -111,7 +111,7 @@ export default function Chat() {
                 <View
                   style={{
                     maxWidth: '76%',
-                    backgroundColor: mine ? colors.tint : colors.surface,
+                    backgroundColor: mine ? gradient[1] : colors.surface, // white text: always a deep shade
                     borderWidth: mine ? 0 : 1,
                     borderColor: colors.border,
                     borderRadius: 18,
@@ -133,7 +133,7 @@ export default function Chat() {
                       {m.text}
                     </Text>
                   )}
-                  <Text variant="overline" style={{ color: mine ? 'rgba(255,255,255,0.7)' : colors.muted, marginTop: 4, alignSelf: 'flex-end' }}>
+                  <Text variant="overline" style={{ color: mine ? 'rgba(255,255,255,0.97)' : colors.muted, marginTop: 4, alignSelf: 'flex-end' }}>
                     {timeAgo(m.createdAt)}
                   </Text>
                 </View>

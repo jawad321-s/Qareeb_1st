@@ -130,12 +130,12 @@ export default function LoginPage() {
               />
             </div>
             <div className="flex justify-end">
-              <button type="button" onClick={forgot} disabled={loading} className="text-xs font-medium text-brand-500 hover:underline disabled:opacity-50">
+              <button type="button" onClick={forgot} disabled={loading} className="text-xs font-medium text-brand-600 dark:text-brand-400 hover:underline disabled:opacity-50">
                 {t('login.forgot')}
               </button>
             </div>
             {error && <p className="text-xs font-medium text-red-500">{error}</p>}
-            {notice && <p className="text-xs font-medium text-emerald-600">{notice}</p>}
+            {notice && <p className="text-xs font-medium text-emerald-700 dark:text-emerald-400">{notice}</p>}
             <Button className="w-full" onClick={submit} disabled={loading}>
               {t('login.signIn')}
             </Button>

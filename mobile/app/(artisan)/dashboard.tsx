@@ -203,7 +203,7 @@ export default function ArtisanDashboard() {
             ended — a prompt to subscribe. Opens the plans screen. */}
         <Pressable onPress={() => router.push('/(shared)/subscription')} style={{ paddingHorizontal: 20, marginTop: 24 }}>
           <LinearGradient
-            colors={currentPlan ? ['#F59E0B', '#EF4444'] : ['#DC2626', '#B91C1C']}
+            colors={currentPlan ? ['#B45309', '#B91C1C'] : ['#DC2626', '#B91C1C']}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
             style={{ borderRadius: 20, padding: 20, flexDirection: 'row', alignItems: 'center', gap: 14 }}
@@ -213,13 +213,13 @@ export default function ArtisanDashboard() {
               <Text variant="bodyMedium" tone="inverse">
                 {currentPlan ? `${t('sub.yourPlan')}: ${currentPlan.name[locale]}` : t('sub.expired')}
               </Text>
-              <Text variant="caption" style={{ color: 'rgba(255,255,255,0.9)' }}>
+              <Text variant="caption" style={{ color: 'rgba(255,255,255,0.95)' }}>
                 {currentPlan
                   ? `${daysLabel(subscription.daysLeft, locale)} ${t('sub.left')}`
                   : t('sub.needPlanTitle')}
               </Text>
             </View>
-            {currentPlan ? <Badge label="✓" variant="success" /> : <Icon name="chevron-right" size={22} color="#FFF" />}
+            {currentPlan ? <Badge label="✓" variant="success" onDark /> : <Icon name="chevron-right" size={22} color="#FFF" />}
           </LinearGradient>
         </Pressable>
       </ScrollView>

@@ -52,12 +52,12 @@ export default function Income() {
       <Header title={t('artisan.income')} />
 
       <Animated.View entering={FadeInDown.duration(400)}>
-        <LinearGradient colors={['#059669', '#34D399']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ borderRadius: 24, padding: 24, gap: 4 }}>
-          <Text variant="caption" style={{ color: 'rgba(255,255,255,0.85)' }}>
+        <LinearGradient colors={['#047857', '#0369A1']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ borderRadius: 24, padding: 24, gap: 4 }}>
+          <Text variant="caption" style={{ color: 'rgba(255,255,255,0.95)' }}>
             {t('inc.total')}
           </Text>
           <AnimatedNumber value={income.total} format={(n) => formatMoney(Math.round(n))} variant="display" tone="inverse" />
-          <Text variant="caption" style={{ color: 'rgba(255,255,255,0.85)' }}>
+          <Text variant="caption" style={{ color: 'rgba(255,255,255,0.95)' }}>
             {t('inc.basis')}
           </Text>
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 12, paddingTop: 12, borderTopWidth: 1, borderTopColor: 'rgba(255,255,255,0.25)' }}>
@@ -66,7 +66,7 @@ export default function Income() {
             </Text>
             {/* Change vs last month, once there is a last month to compare with. */}
             {income.change !== undefined && (
-              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: 'rgba(255,255,255,0.2)', paddingHorizontal: 8, paddingVertical: 3, borderRadius: 999 }}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: 'rgba(0,0,0,0.25)', paddingHorizontal: 8, paddingVertical: 3, borderRadius: 999 }}>
                 <Icon name={income.change >= 0 ? 'trending-up' : 'trending-down'} size={12} color="#FFF" />
                 <Text variant="overline" tone="inverse">
                   {income.change >= 0 ? '+' : ''}

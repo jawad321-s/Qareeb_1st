@@ -56,7 +56,7 @@ export default function HelpCenter() {
         <Text variant="h3" tone="inverse">
           {t('help.howHelp')}
         </Text>
-        <Text variant="caption" style={{ color: 'rgba(255,255,255,0.85)' }}>
+        <Text variant="caption" style={{ color: 'rgba(255,255,255,0.95)' }}>
           {t('help.browse')}
         </Text>
         <View style={{ marginTop: 4, flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>

@@ -71,9 +71,9 @@ export default function ArtisanDetail() {
                 {user.fullName}
               </Text>
               <View style={{ flexDirection: 'row', gap: 8 }}>
-                {profile.featured && <Badge label={t('featured.badge')} variant="warning" icon="star-filled" />}
-                {profile.premium && <Badge label={t('ad.premium')} variant="info" icon="award" />}
-                {user.verified && <Badge label={t('ad.verified')} variant="success" icon="shield" />}
+                {profile.featured && <Badge label={t('featured.badge')} variant="warning" icon="star-filled" onDark />}
+                {profile.premium && <Badge label={t('ad.premium')} variant="info" icon="award" onDark />}
+                {user.verified && <Badge label={t('ad.verified')} variant="success" icon="shield" onDark />}
               </View>
               <View style={{ flexDirection: 'row', gap: 28, marginTop: 12 }}>
                 <Stat value={ratingValue(rating)} label={t('profile.rating')} />
@@ -156,7 +156,7 @@ function Stat({ value, label }: { value: string; label: string }) {
       <Text variant="h3" tone="inverse">
         {value}
       </Text>
-      <Text variant="caption" style={{ color: 'rgba(255,255,255,0.8)' }}>
+      <Text variant="caption" style={{ color: 'rgba(255,255,255,0.95)' }}>
         {label}
       </Text>
     </View>

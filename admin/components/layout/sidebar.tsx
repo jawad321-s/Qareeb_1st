@@ -85,7 +85,7 @@ function NavLinks({ onNavigate }: { onNavigate?: () => void }) {
               <span
                 className={cn(
                   'ms-auto min-w-5 rounded-full px-1.5 text-center text-xs font-semibold',
-                  active ? 'bg-white/25 text-white' : 'bg-red-500 text-white',
+                  active ? 'bg-black/25 text-white' : 'bg-red-600 text-white',
                 )}
               >
                 {waiting[item.href]}

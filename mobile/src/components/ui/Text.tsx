@@ -1,6 +1,6 @@
 import React from 'react';
 import { Text as RNText, StyleSheet, type TextProps as RNTextProps } from 'react-native';
-import { typography } from '@/theme/tokens';
+import { dangerText, typography } from '@/theme/tokens';
 import { useTheme } from '@/theme/ThemeProvider';
 import { useT } from '@/i18n';
 import { localizedTextAlign } from '@/i18n/rtl';
@@ -35,14 +35,14 @@ export function Text({
   maxFontSizeMultiplier = DEFAULT_MAX_FONT_SCALE,
   ...rest
 }: TextProps) {
-  const { colors } = useTheme();
+  const { colors, isDark } = useTheme();
   const { isRTL } = useT();
   const toneColor: Record<Tone, string> = {
     default: colors.fg,
     muted: colors.muted,
     primary: colors.tint,
-    success: '#10B981',
-    danger: '#EF4444',
+    success: isDark ? '#34D399' : '#047857',
+    danger: dangerText(isDark),
     inverse: '#FFFFFF',
   };
 

@@ -131,9 +131,11 @@ export function Button({
 
   // A disabled filled button turns into a flat grey one with readable grey
   // text (a faded gradient with faded white text was unreadable).
-  const flatDisabled = !!disabled && !loading && (variant === 'primary' || variant === 'danger');
+  const flatDisabled = !!disabled && !loading && (variant === 'primary' || variant === 'danger' || variant === 'secondary');
+  // Outline / ghost buttons keep their look when disabled, just in grey.
+  const mutedDisabled = !!disabled && !loading && (variant === 'outline' || variant === 'ghost');
 
-  const contentColor = flatDisabled
+  const contentColor = flatDisabled || mutedDisabled
     ? colors.muted
     : textTone === 'inverse'
       ? '#FFFFFF'
@@ -170,7 +172,7 @@ export function Button({
             style={{
               fontFamily: 'Inter_600SemiBold',
               ...(accent && textTone === 'primary' ? { color: tint } : {}),
-              ...(flatDisabled ? { color: colors.muted } : {}),
+              ...(flatDisabled || mutedDisabled ? { color: colors.muted } : {}),
             }}
           >
             {label}
@@ -184,7 +186,7 @@ export function Button({
   const containerBase: ViewStyle = {
     borderRadius: radius.lg,
     overflow: 'hidden',
-    opacity: flatDisabled ? 1 : isDisabled ? 0.55 : 1,
+    opacity: flatDisabled || mutedDisabled ? 1 : isDisabled ? 0.55 : 1,
     width: fullWidth ? '100%' : undefined,
     // Primary CTAs glow softly in brand color — depth reserved for the action
     // that matters, not sprinkled everywhere.

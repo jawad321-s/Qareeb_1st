@@ -70,7 +70,7 @@ export default function AddService() {
                     borderWidth: 1.5,
                     borderColor: on ? colors.tint : colors.border,
                     backgroundColor: on ? colors.tint + (isDark ? '22' : '10') : colors.card,
-                    opacity: already ? 0.6 : 1,
+                    opacity: 1,
                   }}
                 >
                   <View style={{ width: 40, height: 40, borderRadius: 12, alignItems: 'center', justifyContent: 'center', backgroundColor: color + (isDark ? '26' : '14') }}>

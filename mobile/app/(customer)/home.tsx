@@ -106,7 +106,7 @@ export default function Home() {
                 </Text>
               </View>
               {unread > 0 && (
-                <View style={{ minWidth: 22, height: 22, borderRadius: 11, paddingHorizontal: 6, backgroundColor: '#EF4444', alignItems: 'center', justifyContent: 'center' }}>
+                <View style={{ minWidth: 22, height: 22, borderRadius: 11, paddingHorizontal: 6, backgroundColor: '#DC2626', alignItems: 'center', justifyContent: 'center' }}>
                   <Text variant="caption" style={{ color: '#FFF', fontFamily: 'Inter_600SemiBold' }}>
                     {unread}
                   </Text>
@@ -140,7 +140,7 @@ export default function Home() {
             high-contrast white CTA (banner owns the color, button owns focus). */}
         <View style={{ paddingHorizontal: 20, marginTop: 20 }}>
           <LinearGradient
-            colors={['#1E40AF', '#2563EB', '#0891D1']}
+            colors={['#1E3A8A', '#1D4ED8', '#0369A1']}
             start={{ x: 0, y: 0 }}
             end={{ x: 1.1, y: 1.2 }}
             style={{ borderRadius: 24, padding: 20, overflow: 'hidden' }}
@@ -152,7 +152,7 @@ export default function Home() {
                 <Text variant="h3" tone="inverse">
                   {t('home.promoTitle')}
                 </Text>
-                <Text variant="caption" style={{ color: 'rgba(255,255,255,0.82)', lineHeight: 18 }}>
+                <Text variant="caption" style={{ color: 'rgba(255,255,255,0.95)', lineHeight: 18 }}>
                   {t('home.promoDesc')}
                 </Text>
               </View>

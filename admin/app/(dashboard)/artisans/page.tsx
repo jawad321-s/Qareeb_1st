@@ -133,7 +133,7 @@ export default function ArtisansPage() {
           <h1 className="text-2xl font-bold">{t('ver.title')}</h1>
           <p className="text-sm text-muted">{counts.pending} {t('ver.subtitle')}</p>
         </div>
-        <span className="inline-flex items-center gap-2 rounded-xl bg-brand-500/10 px-3 py-2 text-sm font-medium text-brand-500">
+        <span className="inline-flex items-center gap-2 rounded-xl bg-brand-500/10 px-3 py-2 text-sm font-medium text-brand-700 dark:text-brand-300">
           <ShieldCheck className="h-4 w-4" /> {counts.pending} {t('ver.pending')}
         </span>
       </div>
@@ -231,7 +231,7 @@ function VerificationPanel({
               <dt className="text-xs text-muted">{t('users.phone')}</dt>
               <dd className="mt-0.5 font-medium">
                 {item.phone ? (
-                  <a href={`tel:${item.phone}`} className="inline-flex items-center gap-1 text-brand-500 hover:underline">
+                  <a href={`tel:${item.phone}`} className="inline-flex items-center gap-1 text-brand-600 dark:text-brand-400 hover:underline">
                     <Phone className="h-3.5 w-3.5" /> <span dir="ltr">{formatPhone(item.phone)}</span>
                   </a>
                 ) : (
@@ -254,7 +254,7 @@ function VerificationPanel({
           {item.status === 'rejected' && item.rejectReason && (
             <div className="rounded-xl bg-red-500/5 p-3 text-sm">
               <p className="text-xs text-muted">{t('ver.rejectReason')}</p>
-              <p className="mt-0.5 text-red-600">{item.rejectReason}</p>
+              <p className="mt-0.5 text-red-700 dark:text-red-400">{item.rejectReason}</p>
             </div>
           )}
 

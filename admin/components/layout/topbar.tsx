@@ -51,7 +51,7 @@ export function AccountControls({ bell = true }: { bell?: boolean }) {
       </div>
       <div className="flex items-center gap-2.5 rounded-xl bg-slate-500/5 p-2">
         <Avatar>
-          <Avatar.Fallback className="bg-gradient-to-br from-brand-400 to-accent-400 text-sm font-bold text-white">A</Avatar.Fallback>
+          <Avatar.Fallback className="bg-gradient-to-br from-brand-700 to-brand-600 text-sm font-bold text-white">A</Avatar.Fallback>
         </Avatar>
         <div className="min-w-0 flex-1">
           <p className="truncate text-sm font-semibold leading-tight">{t('topbar.admin')}</p>

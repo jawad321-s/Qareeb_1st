@@ -22,12 +22,14 @@ interface BadgeProps {
   variant?: Variant;
   icon?: IconName;
   style?: ViewStyle;
+  /** On a coloured / gradient hero: white text on a translucent white pill. */
+  onDark?: boolean;
 }
 
-export function Badge({ label, variant = 'neutral', icon, style }: BadgeProps) {
+export function Badge({ label, variant = 'neutral', icon, style, onDark }: BadgeProps) {
   const { isDark } = useTheme();
   const base = COLORS[variant];
-  const c = { bg: base.bg, fg: isDark ? base.dark : base.light };
+  const c = onDark ? { bg: 'rgba(0,0,0,0.3)', fg: '#FFFFFF' } : { bg: base.bg, fg: isDark ? base.dark : base.light };
   return (
     <View
       style={[

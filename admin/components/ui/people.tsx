@@ -5,7 +5,7 @@ import { cn } from '@/lib/utils';
 /** A person's initials in a gradient circle (users, verifications). */
 export function Initials({ name, size = 'h-9 w-9 text-xs' }: { name: string; size?: string }) {
   return (
-    <div className={cn('grid shrink-0 place-items-center rounded-full bg-gradient-to-br from-brand-400 to-accent-400 font-bold text-white', size)}>
+    <div className={cn('grid shrink-0 place-items-center rounded-full bg-gradient-to-br from-brand-700 to-brand-600 font-bold text-white', size)}>
       {name.split(' ').map((n) => n[0]).join('').slice(0, 2)}
     </div>
   );

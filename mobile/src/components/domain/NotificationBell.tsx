@@ -28,7 +28,7 @@ export function NotificationBell({ style, iconSize = 19 }: { style: ViewStyle; i
             height: 20,
             paddingHorizontal: 5,
             borderRadius: 10,
-            backgroundColor: '#EF4444',
+            backgroundColor: '#DC2626',
             borderWidth: 2,
             borderColor: colors.bg,
             alignItems: 'center',

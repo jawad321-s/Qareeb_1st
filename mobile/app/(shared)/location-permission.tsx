@@ -65,7 +65,7 @@ export default function LocationPermission() {
               <Text variant="h1" tone="inverse" center>
                 {t('loc.title')}
               </Text>
-              <Text variant="body" center style={{ color: 'rgba(255,255,255,0.85)', maxWidth: 300 }}>
+              <Text variant="body" center style={{ color: 'rgba(255,255,255,0.95)', maxWidth: 300 }}>
                 {isArtisan ? t('loc.subtitleArtisan') : t('loc.subtitle')}
               </Text>
             </Animated.View>

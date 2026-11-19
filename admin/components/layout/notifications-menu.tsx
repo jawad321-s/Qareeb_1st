@@ -22,8 +22,8 @@ interface Item {
 }
 
 const KIND: Record<Kind, { icon: LucideIcon; color: string; href: string; label: TKey }> = {
-  verify: { icon: ShieldCheck, color: 'text-emerald-600 bg-emerald-500/10', href: '/artisans', label: 'notif.kind.verify' },
-  complaint: { icon: MessageSquareWarning, color: 'text-red-600 bg-red-500/10', href: '/complaints', label: 'notif.kind.complaint' },
+  verify: { icon: ShieldCheck, color: 'text-emerald-700 dark:text-emerald-400 bg-emerald-500/10', href: '/artisans', label: 'notif.kind.verify' },
+  complaint: { icon: MessageSquareWarning, color: 'text-red-700 dark:text-red-400 bg-red-500/10', href: '/complaints', label: 'notif.kind.complaint' },
   support: { icon: LifeBuoy, color: 'text-sky-600 bg-sky-500/10', href: '/support', label: 'notif.kind.support' },
   suggestion: { icon: Lightbulb, color: 'text-amber-600 bg-amber-500/10', href: '/suggestions', label: 'notif.kind.suggestion' },
   broadcast: { icon: Megaphone, color: 'text-violet-600 bg-violet-500/10', href: '/broadcasts', label: 'notif.kind.broadcast' },
@@ -124,7 +124,7 @@ export function NotificationsMenu({ placement = 'down' }: { placement?: 'down' |
         <Bell className="h-[18px] w-[18px]" />
       </Button>
       {fresh > 0 && (
-        <span className="pointer-events-none absolute -end-1 -top-1 grid h-5 min-w-5 place-items-center rounded-full bg-red-500 px-1 text-xs font-bold text-white">
+        <span className="pointer-events-none absolute -end-1 -top-1 grid h-5 min-w-5 place-items-center rounded-full bg-red-600 px-1 text-xs font-bold text-white">
           {fresh > 9 ? '9+' : fresh}
         </span>
       )}

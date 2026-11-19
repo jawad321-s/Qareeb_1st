@@ -221,7 +221,7 @@ export default function CategoriesPage() {
                   </Button>
                   {/* An added service nobody used yet can go; otherwise hide it. */}
                   {c.custom && !c.artisans && !c.requests && (
-                    <Button size="sm" variant="ghost" className="text-red-600" disabled={saving === c.id} onClick={() => remove(c)}>
+                    <Button size="sm" variant="ghost" className="text-red-700 dark:text-red-400" disabled={saving === c.id} onClick={() => remove(c)}>
                       {t('cat.delete')}
                     </Button>
                   )}

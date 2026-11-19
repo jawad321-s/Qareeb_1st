@@ -77,7 +77,7 @@ export default function Notifications() {
           />
           <Pressable onPress={clearAll} hitSlop={8} style={{ flexDirection: 'row', alignItems: 'center', gap: 6, alignSelf: 'flex-end', marginTop: 14 }}>
             <Icon name="trash" size={14} color="#EF4444" />
-            <Text variant="caption" style={{ color: '#EF4444' }}>
+            <Text variant="caption" tone="danger">
               {t('notif.clearAll')}
             </Text>
           </Pressable>

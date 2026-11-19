@@ -22,6 +22,7 @@ import { useAuth } from '@/store/auth';
 import { useTheme } from '@/theme/ThemeProvider';
 import { useT } from '@/i18n';
 import { reasonText } from '@/lib/reasons';
+import { successText } from '@/theme/tokens';
 
 /** Full record of one history entry: the job, the customer, the artisan's offer and how it ended. */
 export default function JobRecordScreen() {
@@ -110,7 +111,7 @@ export default function JobRecordScreen() {
           <Text variant="h3">{t('hist.result')}</Text>
           {/* Not how the customer rated the job: the artisan only sees their overall rating. */}
           {done ? (
-            <Detail icon="check-circle" color="#059669" label={t('hist.done')} />
+            <Detail icon="check-circle" color={successText(isDark)} label={t('hist.done')} />
           ) : (
             <>
               <Detail icon="x-circle" color="#DC2626" label={t(`hist.reason.${record.reason ?? 'declined'}` as any)} />

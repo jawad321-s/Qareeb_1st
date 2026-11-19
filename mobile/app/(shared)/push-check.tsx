@@ -107,7 +107,7 @@ export default function PushCheck() {
 
       {result && (
         <Card style={{ marginTop: 16, borderColor: result.ok ? '#10B981' : '#EF4444' }}>
-          <Text variant="body" style={{ color: result.ok ? '#10B981' : '#EF4444' }}>
+          <Text variant="body" tone={result.ok ? 'success' : 'danger'}>
             {result.text}
           </Text>
         </Card>

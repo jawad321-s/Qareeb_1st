@@ -91,7 +91,7 @@ export default function SettingsPage() {
           ))}
         </div>
         <div className="mt-6 flex items-center justify-end gap-3">
-          {state === 'saved' && <span className="text-sm text-emerald-600">{t('set.saved')}</span>}
+          {state === 'saved' && <span className="text-sm text-emerald-700 dark:text-emerald-400">{t('set.saved')}</span>}
           {state === 'failed' && <span className="text-sm text-red-500">{t('set.saveFailed')}</span>}
           <Button disabled={!loaded || state === 'saving'} onClick={save}>
             {t('set.save')}
@@ -196,7 +196,7 @@ function FeaturedSettings() {
       </div>
       <div className="mt-6 flex items-center justify-end gap-3">
         {!valid && <span className="text-sm text-red-500">{t('set.featuredInvalid')}</span>}
-        {state === 'saved' && <span className="text-sm text-emerald-600">{t('set.saved')}</span>}
+        {state === 'saved' && <span className="text-sm text-emerald-700 dark:text-emerald-400">{t('set.saved')}</span>}
         {state === 'failed' && <span className="text-sm text-red-500">{t('set.saveFailed')}</span>}
         <Button disabled={!loaded || !valid || state === 'saving'} onClick={save}>
           {t('set.save')}
@@ -274,7 +274,7 @@ function RequestLimitSettings() {
       </div>
       <div className="mt-6 flex items-center justify-end gap-3">
         {!valid && <span className="text-sm text-red-500">{t('set.requestLimitInvalid')}</span>}
-        {state === 'saved' && <span className="text-sm text-emerald-600">{t('set.saved')}</span>}
+        {state === 'saved' && <span className="text-sm text-emerald-700 dark:text-emerald-400">{t('set.saved')}</span>}
         {state === 'failed' && <span className="text-sm text-red-500">{t('set.saveFailed')}</span>}
         <Button disabled={!loaded || !valid || state === 'saving'} onClick={save}>
           {t('set.save')}

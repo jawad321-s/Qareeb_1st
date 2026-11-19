@@ -55,9 +55,9 @@ export default function Welcome() {
               style={{
                 color: '#FFFFFF',
                 fontFamily: 'Inter_600SemiBold',
-                backgroundColor: 'rgba(255,255,255,0.18)',
+                backgroundColor: 'rgba(3,18,64,0.28)',
                 borderWidth: 1,
-                borderColor: 'rgba(255,255,255,0.3)',
+                borderColor: 'rgba(255,255,255,0.4)',
                 paddingHorizontal: 14,
                 paddingVertical: 7,
                 borderRadius: 999,
@@ -86,7 +86,7 @@ export default function Welcome() {
               <Text variant="display" tone="inverse" center>
                 Qareeb
               </Text>
-              <Text variant="body" center style={{ color: 'rgba(255,255,255,0.85)', maxWidth: 300 }}>
+              <Text variant="body" center style={{ color: 'rgba(255,255,255,0.95)', maxWidth: 300 }}>
                 {t('welcome.tagline')}
               </Text>
             </Animated.View>
@@ -112,7 +112,7 @@ export default function Welcome() {
                         <Text variant="bodyMedium" tone="inverse">
                           {f.title}
                         </Text>
-                        <Text variant="caption" style={{ color: 'rgba(255,255,255,0.85)' }}>
+                        <Text variant="caption" style={{ color: 'rgba(255,255,255,0.95)' }}>
                           {f.desc}
                         </Text>
                       </View>
@@ -125,20 +125,20 @@ export default function Welcome() {
 
           <Animated.View entering={FadeInDown.delay(700).duration(500)} style={{ gap: 12, paddingBottom: 12 }}>
             <Button label={t('welcome.getStarted')} variant="secondary" iconRight="arrow-right" onPress={() => router.push('/(auth)/role')} />
-            <Button label={t('welcome.haveAccount')} variant="ghost" onPress={() => router.push({ pathname: '/(auth)/role', params: { mode: 'login' } })} />
+            <Button label={t('welcome.haveAccount')} variant="ghost" accent={{ gradient: ['#FFFFFF', '#FFFFFF', '#FFFFFF'], tint: '#FFFFFF' }} onPress={() => router.push({ pathname: '/(auth)/role', params: { mode: 'login' } })} />
             {/* Demo accounts only exist on mock data — hidden on the live backend. */}
             {config.useMock && (
               <View style={{ flexDirection: 'row', justifyContent: 'center', gap: 16, marginTop: 4 }}>
                 <Text
                   variant="caption"
-                  style={{ color: 'rgba(255,255,255,0.85)', fontFamily: 'Inter_600SemiBold' }}
+                  style={{ color: 'rgba(255,255,255,0.95)', fontFamily: 'Inter_600SemiBold' }}
                   onPress={() => enterDemo('customer')}
                 >
                   Demo: Customer
                 </Text>
                 <Text
                   variant="caption"
-                  style={{ color: 'rgba(255,255,255,0.85)', fontFamily: 'Inter_600SemiBold' }}
+                  style={{ color: 'rgba(255,255,255,0.95)', fontFamily: 'Inter_600SemiBold' }}
                   onPress={() => enterDemo('artisan')}
                 >
                   Demo: Artisan

@@ -15,7 +15,7 @@ interface AvatarProps {
 }
 
 export function Avatar({ uri, name, size = 48, verified }: AvatarProps) {
-  const { gradientSoft } = useTheme();
+  const { gradient } = useTheme();
   return (
     <View style={{ width: size, height: size }}>
       {uri ? (
@@ -27,7 +27,7 @@ export function Avatar({ uri, name, size = 48, verified }: AvatarProps) {
         />
       ) : (
         <LinearGradient
-          colors={gradientSoft}
+          colors={[gradient[0], gradient[1]]}
           style={{
             width: size,
             height: size,

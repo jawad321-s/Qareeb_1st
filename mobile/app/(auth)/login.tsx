@@ -28,6 +28,8 @@ export default function Login() {
   const role: UserRole = roleParam === 'artisan' ? 'artisan' : 'customer';
   const accent = roleAccents[role];
   const tint = isDark ? accent.tintDark : accent.tintLight;
+  // Text on the pale tinted pill: a shade darker than the tint on the light theme.
+  const pillText = isDark ? tint : role === 'artisan' ? '#9A3412' : '#1D4ED8';
 
   const [loading, setLoading] = useState(false);
   const [formError, setFormError] = useState<string | undefined>();
@@ -69,8 +71,8 @@ export default function Login() {
               borderColor: tint + '40',
             }}
           >
-            <Icon name={role === 'artisan' ? 'tools' : 'search'} size={15} color={tint} />
-            <Text variant="caption" style={{ color: tint, fontFamily: 'Inter_600SemiBold' }}>
+            <Icon name={role === 'artisan' ? 'tools' : 'search'} size={15} color={pillText} />
+            <Text variant="caption" style={{ color: pillText, fontFamily: 'Inter_600SemiBold' }}>
               {t(role === 'artisan' ? 'role.artisan.title' : 'role.customer.title')}
             </Text>
           </View>

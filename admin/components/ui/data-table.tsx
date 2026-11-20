@@ -58,7 +58,7 @@ export function DataTable<T>({ columns, data, searchPlaceholder }: DataTableProp
                       key={header.id}
                       onClick={header.column.getToggleSortingHandler()}
                       className={cn(
-                        'px-4 py-3 text-start align-middle text-xs font-semibold uppercase tracking-wide text-muted',
+                        'px-4 py-3 text-start align-middle text-sm font-bold text-muted',
                         header.column.getCanSort() && 'cursor-pointer select-none',
                       )}
                     >

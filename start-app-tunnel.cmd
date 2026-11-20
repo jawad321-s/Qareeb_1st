@@ -6,7 +6,6 @@ rem ngrok, not Expo's own tunnel: that one needs an Expo account with access
 rem to the project and allows one tunnel per account at a time, so a second
 rem computer (or a session not closed yet) failed with "409".
 (
-  set QAREEB_TUNNEL=1
   call "%~dp0start-app.cmd" --tunnel ngrok
   exit /b
 )

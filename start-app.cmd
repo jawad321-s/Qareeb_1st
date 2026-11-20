@@ -13,17 +13,22 @@ rem block that cmd parses before running any of them.
   call scripts\install-libraries.cmd mobile
   if errorlevel 1 goto fail
   cd mobile
+  rem Expo Go on iPhone opens a project only when this computer and the
+  rem phone are signed in to the same Expo account: the team account,
+  rem project-2026-2027. Asked once here, then remembered on this computer.
+  call npx expo whoami >nul 2>&1
+  if errorlevel 1 (
+    echo.
+    echo Sign in to Expo with the team account project-2026-2027, the same account the phones use in Expo Go.
+    call npx expo login
+  )
+  echo.
+  echo Expo account on this computer:
+  call npx expo whoami
+  echo Phones must be signed in to Expo Go with this same account.
   echo.
   echo Scan the QR code with your phone. Press Ctrl+C to stop.
   echo.
-  rem Not tied to any Expo account: whoever runs this, on any computer, and
-  rem any phone (whatever Expo account it is signed in to, or none) opens
-  rem the project. Without it, a computer signed in to an Expo account that
-  rem isn't a member of the project's organization can't serve it.
-  rem Not with the tunnel (start-app-tunnel): it needs Expo online, so
-  rem "offline" would leave it off and fall back to the Wi-Fi address.
-  set EXPO_OFFLINE=
-  if not defined QAREEB_TUNNEL set EXPO_OFFLINE=1
   call npx expo start -c %*
   pause
   exit /b 0

@@ -17,7 +17,7 @@ export function useRefreshLocation(enabled: boolean) {
     let cancelled = false;
     (async () => {
       const { user } = useAuth.getState();
-      const here = await currentLocation(user?.location?.address ?? '');
+      const here = await currentLocation();
       const { user: now, updateUser } = useAuth.getState();
       if (cancelled || !here || !now) return;
       if (now.location && distanceKm(now.location, here) < MIN_MOVE_KM) return;

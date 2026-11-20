@@ -597,6 +597,13 @@ export const translations = {
     'loc.notNow': 'Not now',
     'loc.enabled': 'Location enabled',
     'loc.denied': 'Location permission was denied',
+    'loc.blocked': 'Location is turned off for this app. Allow it in your phone settings, then try again.',
+    'loc.blockedWeb': 'The browser is blocking your location. Click the lock icon next to the page address, allow location, then try again.',
+    'loc.servicesOff': 'Location is switched off on your device. Turn it on, then try again.',
+    'loc.insecure': 'Browsers only share your location on https:// or localhost pages. Open the app from a secure link.',
+    'loc.unavailable': "Couldn't find your location right now. Make sure location (GPS) is on, ideally with Wi-Fi, and try again.",
+    'loc.unavailableWeb': "Couldn't find your location. Make sure location is on for this computer (Windows: Settings → Privacy → Location) and try again.",
+    'loc.here': 'My current location',
 
     // artisans the customer has worked with
     'past.title': 'Artisans you worked with',
@@ -1440,6 +1447,13 @@ export const translations = {
     'loc.notNow': 'ليس الآن',
     'loc.enabled': 'تم تفعيل الموقع',
     'loc.denied': 'تم رفض إذن الموقع',
+    'loc.blocked': 'إذن الموقع مقفول لهذا التطبيق. اسمح به من إعدادات الجهاز ثم حاول مرة ثانية.',
+    'loc.blockedWeb': 'المتصفح مانع الوصول لموقعك. اضغط أيقونة القفل جنب رابط الصفحة واسمح بالموقع، ثم حاول مرة ثانية.',
+    'loc.servicesOff': 'خدمة الموقع مطفأة على جهازك. شغّلها ثم حاول مرة ثانية.',
+    'loc.insecure': 'المتصفح بيعطي الموقع بس على صفحات https:// أو localhost. افتح التطبيق من رابط آمن.',
+    'loc.unavailable': 'تعذّر تحديد موقعك الآن. تأكد إن الموقع (GPS) شغّال، ويُفضّل الواي فاي، وحاول مرة ثانية.',
+    'loc.unavailableWeb': 'تعذّر تحديد موقعك. تأكد إن خدمة الموقع شغّالة على الكمبيوتر (Windows: الإعدادات ← الخصوصية ← الموقع) وحاول مرة ثانية.',
+    'loc.here': 'موقعي الحالي',
 
     // artisans the customer has worked with
     'past.title': 'حرفيون تعاملت معهم',

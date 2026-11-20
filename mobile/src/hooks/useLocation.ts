@@ -1,48 +1,30 @@
 import { useCallback, useState } from 'react';
-import * as Location from 'expo-location';
 import type { GeoLocation } from '@/types';
+import { locate, LocateError, type LocateProblem } from '@/lib/currentLocation';
 
-type PermissionState = 'undetermined' | 'granted' | 'denied';
+export type LocateResult = { location: GeoLocation } | { problem: LocateProblem };
 
 /**
- * Requests foreground location permission and resolves the device's current
- * position into our GeoLocation shape (with a reverse-geocoded address).
+ * The "Enable location" button: asks for the permission (and on Android to
+ * switch location on), then resolves the device's position and address — or
+ * says why it couldn't (see lib/currentLocation).
  */
 export function useLocation() {
-  const [status, setStatus] = useState<PermissionState>('undetermined');
   const [loading, setLoading] = useState(false);
   const [location, setLocation] = useState<GeoLocation | null>(null);
 
-  const request = useCallback(async (): Promise<GeoLocation | null> => {
+  const request = useCallback(async (): Promise<LocateResult> => {
     setLoading(true);
     try {
-      const { status: perm } = await Location.requestForegroundPermissionsAsync();
-      if (perm !== 'granted') {
-        setStatus('denied');
-        return null;
-      }
-      setStatus('granted');
-      const pos = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Balanced });
-      const [place] = await Location.reverseGeocodeAsync({
-        latitude: pos.coords.latitude,
-        longitude: pos.coords.longitude,
-      }).catch(() => [null]);
-
-      const geo: GeoLocation = {
-        latitude: pos.coords.latitude,
-        longitude: pos.coords.longitude,
-        geohash: '',
-        address: place ? [place.district ?? place.name, place.city].filter(Boolean).join(', ') : 'Current location',
-      };
+      const geo = await locate();
       setLocation(geo);
-      return geo;
-    } catch {
-      setStatus('denied');
-      return null;
+      return { location: geo };
+    } catch (e) {
+      return { problem: e instanceof LocateError ? e.problem : 'unavailable' };
     } finally {
       setLoading(false);
     }
   }, []);
 
-  return { status, loading, location, request };
+  return { loading, location, request };
 }

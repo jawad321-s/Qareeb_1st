@@ -1,5 +1,5 @@
 import React from 'react';
-import { View } from 'react-native';
+import { Linking, Platform, View } from 'react-native';
 import { router } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -9,11 +9,22 @@ import { Text } from '@/components/ui/Text';
 import { Button } from '@/components/ui/Button';
 import { Icon } from '@/components/ui/Icon';
 import { useLocation } from '@/hooks/useLocation';
+import type { LocateProblem } from '@/lib/currentLocation';
+import type { TranslationKey } from '@/i18n/translations';
 import { useToast } from '@/components/feedback/Toast';
 import { useAuth } from '@/store/auth';
 import { api } from '@/services/api';
 import { useT } from '@/i18n';
 import { useTheme } from '@/theme/ThemeProvider';
+
+const web = Platform.OS === 'web';
+const PROBLEM_TEXT: Record<LocateProblem, TranslationKey> = {
+  denied: 'loc.denied',
+  blocked: web ? 'loc.blockedWeb' : 'loc.blocked',
+  servicesOff: 'loc.servicesOff',
+  insecure: 'loc.insecure',
+  unavailable: web ? 'loc.unavailableWeb' : 'loc.unavailable',
+};
 
 export default function LocationPermission() {
   const { request, loading } = useLocation();
@@ -39,17 +50,24 @@ export default function LocationPermission() {
         ]
   ) as { icon: 'briefcase' | 'map-pin' | 'clock' | 'navigation'; text: string }[];
 
+  // Back to where it was opened from (or home, when opened directly in a browser).
+  const close = () => (router.canGoBack() ? router.back() : router.replace('/'));
+
   const enable = async () => {
-    const geo = await request();
-    if (geo) {
+    const result = await request();
+    if ('location' in result) {
+      const geo = result.location;
       updateUser({ location: geo });
       // Firebase mode: save it on the user so distances work across devices.
       if (uid) api.updateUserLocation(uid, geo).catch(() => {});
       toast('success', t('loc.enabled'));
-      router.back();
-    } else {
-      toast('error', t('loc.denied'));
+      close();
+      return;
     }
+    // Say what to do about it: allow it, switch location on, or try again.
+    toast('error', t(PROBLEM_TEXT[result.problem]));
+    // Refused for good on the phone: only Settings can allow it now.
+    if (result.problem === 'blocked' && Platform.OS !== 'web') Linking.openSettings().catch(() => {});
   };
 
   return (
@@ -86,7 +104,7 @@ export default function LocationPermission() {
 
           <View style={{ gap: 10, paddingBottom: 16 }}>
             <Button label={t('loc.enable')} variant="secondary" iconLeft="navigation" onPress={enable} loading={loading} />
-            <Button label={t('loc.notNow')} variant="ghost" onPress={() => router.back()} />
+            <Button label={t('loc.notNow')} variant="ghost" onPress={close} />
           </View>
         </SafeAreaView>
       </LinearGradient>

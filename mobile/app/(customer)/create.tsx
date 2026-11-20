@@ -86,7 +86,7 @@ export default function CreateRequest() {
     let location = user.location;
     if (!config.useMock) {
       setLocating(true);
-      const here = await currentLocation(user.location?.address ?? '').catch(() => null);
+      const here = await currentLocation().catch(() => null);
       setLocating(false);
       if (here) {
         location = here;

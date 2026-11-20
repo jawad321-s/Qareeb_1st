@@ -16,6 +16,11 @@ rem block that cmd parses before running any of them.
   echo.
   echo Scan the QR code with your phone. Press Ctrl+C to stop.
   echo.
+  rem Not tied to any Expo account: whoever runs this, on any computer, and
+  rem any phone (whatever Expo account it is signed in to, or none) opens
+  rem the project. Without it, a computer signed in to an Expo account that
+  rem isn't a member of the project's organization can't serve it.
+  set EXPO_OFFLINE=1
   call npx expo start -c %*
   pause
   exit /b 0

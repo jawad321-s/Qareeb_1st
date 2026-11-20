@@ -14,6 +14,10 @@ main() {
   echo
   echo "Scan the QR code with your phone. Press Ctrl+C to stop."
   echo
-  npx expo start -c "$@"
+  # Not tied to any Expo account: whoever runs this, on any computer, and any
+  # phone (whatever Expo account it is signed in to, or none) opens the
+  # project. Without it, a computer signed in to an Expo account that isn't a
+  # member of the project's organization can't serve it.
+  EXPO_OFFLINE=1 npx expo start -c "$@"
 }
 if ! main "$@"; then echo; echo "Something went wrong. Take a screenshot of this window and send it."; read -r -p "Press Enter to close."; exit 1; fi; exit 0

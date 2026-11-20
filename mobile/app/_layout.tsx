@@ -4,7 +4,7 @@ import { View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { QueryClientProvider } from '@tanstack/react-query';
-import { Stack, usePathname } from 'expo-router';
+import { LocaleProvider, Stack, usePathname } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import {
   useFonts,
@@ -25,7 +25,8 @@ import { AnimatedSplash } from '@/components/AnimatedSplash';
 import { queryClient } from '@/lib/queryClient';
 import { setCurrentPathname } from '@/lib/currentRoute';
 import { storage } from '@/lib/mmkv';
-import { LANG_RELOAD_KEY } from '@/i18n';
+import { LANG_RELOAD_KEY, useLocaleStore } from '@/i18n';
+import { directionStyle, screenDirection } from '@/i18n/rtl';
 import { useAuth } from '@/store/auth';
 import { useVerification } from '@/store/verification';
 import { usePushNotifications } from '@/hooks/usePushNotifications';
@@ -61,6 +62,7 @@ function RootNavigator() {
     return !!langReload;
   });
   const pathname = usePathname();
+  const isArabic = useLocaleStore((s) => s.locale === 'ar');
   usePushNotifications(uid, hydrated && fontsLoaded && splashDone);
   // What other users see of this account; the full user doc stays private.
   // (A suspended account changes nothing.)
@@ -96,30 +98,36 @@ function RootNavigator() {
 
   return (
     <View style={{ flex: 1 }}>
-      <Stack
-        screenOptions={{
-          headerShown: false,
-          contentStyle: { backgroundColor: colors.bg },
-          animation: 'slide_from_right',
-          animationDuration: 260,
-          gestureEnabled: true,
-        }}
-      >
-        <Stack.Screen name="index" options={{ animation: 'fade' }} />
-        <Stack.Screen name="(auth)" options={{ animation: 'fade' }} />
-        <Stack.Screen name="(customer)" options={{ animation: 'fade' }} />
-        <Stack.Screen name="(artisan)" options={{ animation: 'fade' }} />
-        <Stack.Screen name="(shared)" options={{ presentation: 'card', animation: 'slide_from_right' }} />
-        <Stack.Screen name="suspended" options={{ animation: 'fade', gestureEnabled: false }} />
-      </Stack>
+      {/* English: screens slide and swipe back left-to-right (see screenDirection). */}
+      <LocaleProvider direction={screenDirection(isArabic)}>
+        <Stack
+          screenOptions={{
+            headerShown: false,
+            contentStyle: { backgroundColor: colors.bg },
+            animation: 'slide_from_right',
+            animationDuration: 260,
+            gestureEnabled: true,
+          }}
+        >
+          <Stack.Screen name="index" options={{ animation: 'fade' }} />
+          <Stack.Screen name="(auth)" options={{ animation: 'fade' }} />
+          <Stack.Screen name="(customer)" options={{ animation: 'fade' }} />
+          <Stack.Screen name="(artisan)" options={{ animation: 'fade' }} />
+          <Stack.Screen name="(shared)" options={{ presentation: 'card', animation: 'slide_from_right' }} />
+          <Stack.Screen name="suspended" options={{ animation: 'fade', gestureEnabled: false }} />
+        </Stack>
+      </LocaleProvider>
       {!splashDone && <AnimatedSplash onFinish={() => setSplashDone(true)} />}
     </View>
   );
 }
 
 export default function RootLayout() {
+  // The engine is right-to-left for Arabic; English turns it back here, for
+  // every screen, sheet and toast below.
+  const isArabic = useLocaleStore((s) => s.locale === 'ar');
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
+    <GestureHandlerRootView style={[{ flex: 1 }, directionStyle(isArabic)]}>
       <SafeAreaProvider>
         <QueryClientProvider client={queryClient}>
           <ThemeProvider>

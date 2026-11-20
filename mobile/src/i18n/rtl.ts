@@ -31,6 +31,30 @@ export function syncNativeRTL(isArabic: boolean): boolean {
 }
 
 /**
+ * The phone's layout engine runs right-to-left whatever the language: app.json
+ * forces it (Expo Go resets the direction on every launch otherwise), which is
+ * what Arabic needs. English is turned back to left-to-right from the top of
+ * the app instead: `direction: 'ltr'` on the root view flips rows, paddings,
+ * start/end positions and text alignment for everything inside it, and the
+ * navigation stack is told as well (screens slide in from the right, swipe
+ * back from the left edge). Arabic is left exactly as the engine lays it out.
+ */
+export function screenDirection(isArabic: boolean): 'rtl' | 'ltr' {
+  if (isArabic) return I18nManager.getConstants().isRTL ? 'rtl' : 'ltr';
+  return 'ltr';
+}
+
+/** For a root view (the app, a modal): left-to-right in English, nothing in Arabic. */
+export function directionStyle(isArabic: boolean): { direction: 'ltr' } | undefined {
+  return isArabic ? undefined : { direction: 'ltr' };
+}
+
+/** Whether screens really run right-to-left, i.e. arrows and chevrons are mirrored. */
+export function isLayoutRTL(isArabic: boolean): boolean {
+  return isArabic && I18nManager.isRTL;
+}
+
+/**
  * Physical text alignment for the active language.
  *
  * When the NATIVE layout direction already matches the locale, return
@@ -39,7 +63,9 @@ export function syncNativeRTL(isArabic: boolean): boolean {
  * inside an RTL layout actually renders on the physical LEFT — which pushed
  * Arabic labels away from their icons. Forcing is only needed when there is a
  * mismatch (e.g. Arabic selected but the RTL flip hasn't applied yet) or on
- * web, where alignment values are literal.
+ * web, where alignment values are literal. (English, with the engine still
+ * right-to-left, gets 'left': under the root's left-to-right direction that
+ * is the physical left.)
  */
 export function localizedTextAlign(isRTL: boolean): 'left' | 'right' | undefined {
   if (Platform.OS !== 'web' && I18nManager.isRTL === isRTL) return undefined;

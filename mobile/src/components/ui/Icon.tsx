@@ -1,10 +1,12 @@
 import React from 'react';
-import { I18nManager } from 'react-native';
 import Svg, { Path, Circle, Line, Polyline, Polygon, Rect } from 'react-native-svg';
 import { useTheme } from '@/theme/ThemeProvider';
+import { useLocaleStore } from '@/i18n';
+import { isLayoutRTL } from '@/i18n/rtl';
 
 // Directional glyphs must mirror in RTL (back arrows point right, chevrons
 // flip) — the layout engine flips positions but never the artwork itself.
+// Only in Arabic: English runs left-to-right even though the engine is RTL.
 const MIRRORED_IN_RTL: ReadonlySet<string> = new Set([
   'chevron-right', 'chevron-left', 'arrow-left', 'arrow-right', 'send', 'log-out',
 ]);
@@ -35,7 +37,8 @@ export function Icon({ name, size = 24, color, strokeWidth = 2 }: IconProps) {
   const { colors } = useTheme();
   const c = color ?? colors.fg;
   const p = { stroke: c, strokeWidth, strokeLinecap: 'round' as const, strokeLinejoin: 'round' as const, fill: 'none' };
-  const mirror = I18nManager.isRTL && MIRRORED_IN_RTL.has(name);
+  const isArabic = useLocaleStore((s) => s.locale === 'ar');
+  const mirror = isLayoutRTL(isArabic) && MIRRORED_IN_RTL.has(name);
 
   return (
     <Svg

@@ -8,6 +8,7 @@ import { Header } from '@/components/ui/Header';
 import { Text } from '@/components/ui/Text';
 import { config } from '@/lib/config';
 import { useT } from '@/i18n';
+import { directionStyle } from '@/i18n/rtl';
 import { useTheme } from '@/theme/ThemeProvider';
 
 // Firebase only sends an SMS code after a reCAPTCHA check, and reCAPTCHA needs
@@ -40,7 +41,7 @@ type Pending = { resolve: (token: string) => void; reject: (err: Error) => void 
  * Render `modal` once; `verifier` opens it when Firebase asks for a check.
  */
 export function usePhoneVerifier(): { verifier: ApplicationVerifier; modal: React.ReactElement } {
-  const { t } = useT();
+  const { t, isRTL } = useT();
   const { colors } = useTheme();
   const [visible, setVisible] = useState(false);
   const [ready, setReady] = useState(false);
@@ -84,7 +85,7 @@ export function usePhoneVerifier(): { verifier: ApplicationVerifier; modal: Reac
 
   const modal = (
     <Modal visible={visible} animationType="slide" presentationStyle="pageSheet" onRequestClose={() => finish({})}>
-      <SafeAreaView style={{ flex: 1, backgroundColor: colors.bg }} edges={['top', 'bottom']}>
+      <SafeAreaView style={[{ flex: 1, backgroundColor: colors.bg }, directionStyle(isRTL)]} edges={['top', 'bottom']}>
         <View style={{ paddingHorizontal: 20 }}>
           <Header showBack onBack={() => finish({})} title={t('reset.robotTitle')} subtitle={t('reset.robotDesc')} />
         </View>

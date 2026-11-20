@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/Button';
 import { Icon } from '@/components/ui/Icon';
 import { keyboardScrollProps } from '@/components/ui/Screen';
 import { REASONS, reasonKey, type Reason, type ReasonContext } from '@/lib/reasons';
-import { localizedTextAlign } from '@/i18n/rtl';
+import { directionStyle, localizedTextAlign } from '@/i18n/rtl';
 import { useFont, useT } from '@/i18n';
 import { useTheme } from '@/theme/ThemeProvider';
 
@@ -45,7 +45,7 @@ export function ReasonSheet({ visible, context, title, confirmLabel, loading, on
   return (
     <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
       <Pressable style={{ flex: 1, backgroundColor: '#0008' }} onPress={onClose} />
-      <SafeAreaView edges={['bottom']} style={{ backgroundColor: colors.bg, borderTopLeftRadius: 24, borderTopRightRadius: 24, maxHeight: '85%' }}>
+      <SafeAreaView edges={['bottom']} style={[{ backgroundColor: colors.bg, borderTopLeftRadius: 24, borderTopRightRadius: 24, maxHeight: '85%' }, directionStyle(isRTL)]}>
         <ScrollView {...keyboardScrollProps} contentContainerStyle={{ padding: 20, gap: 12 }}>
           <Text variant="h3">{title}</Text>
           <Text variant="caption" tone="muted">

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { I18nManager, View, ScrollView, Pressable, TextInput } from 'react-native';
+import { View, ScrollView, Pressable, TextInput } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
 import { Image } from 'expo-image';
@@ -18,7 +18,7 @@ import { MAX_OPEN_REQUESTS, OPEN_STATUSES, OpenRequestLimitError } from '@/lib/r
 import { useAuth } from '@/store/auth';
 import { useTheme } from '@/theme/ThemeProvider';
 import { useFont, useT } from '@/i18n';
-import { localizedTextAlign } from '@/i18n/rtl';
+import { isLayoutRTL, localizedTextAlign } from '@/i18n/rtl';
 import { config } from '@/lib/config';
 import { currentLocation } from '@/lib/currentLocation';
 import { distanceKm } from '@/lib/geo';
@@ -273,12 +273,13 @@ export default function CreateRequest() {
 }
 
 function Row({ label, value }: { label: string; value: string }) {
+  const { isRTL } = useT();
   return (
     <View style={{ flexDirection: 'row', justifyContent: 'space-between', gap: 12 }}>
       <Text variant="body" tone="muted">
         {label}
       </Text>
-      <Text variant="bodyMedium" style={{ flex: 1, textAlign: I18nManager.isRTL ? 'left' : 'right' }} numberOfLines={1}>
+      <Text variant="bodyMedium" style={{ flex: 1, textAlign: isLayoutRTL(isRTL) ? 'left' : 'right' }} numberOfLines={1}>
         {value}
       </Text>
     </View>

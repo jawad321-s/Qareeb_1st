@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/Button';
 import { EmptyState } from '@/components/feedback/EmptyState';
 import { usePhoneVerifier } from '@/components/auth/PhoneVerifier';
 import { confirmReset, resetErrorMessage, sendResetCode } from '@/services/passwordReset.service';
+import { accountExists } from '@/services/auth.service';
 import { useT } from '@/i18n';
 import { config } from '@/lib/config';
 import { useTheme } from '@/theme/ThemeProvider';
@@ -60,6 +61,12 @@ export default function Forgot() {
     setError(null);
     setLoading(true);
     try {
+      // No account of this type for the number: say so before any SMS is sent
+      // (when the server can't tell, the code is sent and the reset says it).
+      if (!config.useMock && step === 'phone' && (await accountExists(phone, role)) === false) {
+        setError(t('reset.err.noAccount'));
+        return;
+      }
       setVerificationId(config.useMock ? 'demo' : await sendResetCode(phone, verifier, code));
       setVia(code);
       setStep('code');

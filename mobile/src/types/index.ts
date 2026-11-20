@@ -81,6 +81,8 @@ export interface SupportContacts {
   featuredMinRating?: number;
   /** Open requests a customer may have at once (dashboard setting). */
   maxOpenRequests?: number;
+  /** New accounts prove their number with an SMS code (dashboard switch; on unless set to false). */
+  smsSignUp?: boolean;
 }
 
 export interface Category {

@@ -16,6 +16,7 @@ import { isExpired, isVisibleToArtisan, sortOffers } from '@/lib/dispatch';
 import { decryptChat, encryptChat, newChatKey } from '@/lib/chatCrypto';
 import type { Reason } from '@/lib/reasons';
 import { MOCK_CUSTOMER } from '@/mock/data';
+import { accountExists } from '@/services/auth.service';
 import { servicesOf, toServiceId } from '@/constants/services';
 import { allCategories } from '@/constants/categories';
 import { ACTIVE_STATUSES, MAX_OPEN_REQUESTS, NEXT_STATUS, OPEN_STATUSES, OpenRequestLimitError, RequestClosedError, canCancelRequest, isOverdue } from '@/lib/requestRules';
@@ -444,6 +445,7 @@ export const firebaseApi: typeof mockApi = {
       featuredMinJobs: Number.isInteger(v.featuredMinJobs) && v.featuredMinJobs > 0 ? v.featuredMinJobs : undefined,
       featuredMinRating: Number.isFinite(v.featuredMinRating) && v.featuredMinRating >= 0 && v.featuredMinRating < 5 ? v.featuredMinRating : undefined,
       maxOpenRequests: Number.isInteger(v.maxOpenRequests) && v.maxOpenRequests > 0 ? v.maxOpenRequests : undefined,
+      smsSignUp: v.smsSignUp !== false,
     };
   },
 
@@ -615,10 +617,11 @@ export const firebaseApi: typeof mockApi = {
     };
   },
 
-  async isPhoneRegistered(_phone, _role): Promise<boolean> {
-    // Firebase Auth already refuses a second account of the same type for a
-    // number (auth/email-already-in-use → auth.errPhoneInUse on sign-up), and
-    // the rules don't let a signed-out visitor look numbers up.
-    return false;
+  async isPhoneRegistered(phone, role): Promise<boolean> {
+    // Asked before any SMS is sent (the checkAccount function: signed-out
+    // visitors can't look numbers up in the database). If it can't tell,
+    // Firebase Auth still refuses a second account of the same type later
+    // (auth/email-already-in-use → auth.errPhoneInUse).
+    return (await accountExists(phone, role)) === true;
   },
 };

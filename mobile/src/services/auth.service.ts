@@ -114,16 +114,27 @@ export async function signInWithPhone(phone: string, password: string, role: Use
   }
 }
 
-/** "No account with this number" or "wrong password"; the plain message if the server can't tell. */
-async function whyRefused(phone: string, role: UserRole): Promise<AuthError> {
+/**
+ * Whether this number has an account of this type (the checkAccount
+ * function; a deleted account doesn't count), or null when it can't tell
+ * (offline, function not deployed).
+ */
+export async function accountExists(phone: string, role: UserRole): Promise<boolean | null> {
   try {
     const functions = getFunctionsClient();
-    if (!functions || (role !== 'customer' && role !== 'artisan')) throw new Error('unavailable');
+    if (!functions || (role !== 'customer' && role !== 'artisan')) return null;
     const { data } = await httpsCallable<{ phone: string; role: string }, { exists: boolean }>(functions, 'checkAccount')({ phone, role });
-    return new AuthError(data.exists ? 'auth.errWrongPassword' : 'auth.errNoAccount');
+    return data.exists === true;
   } catch {
-    return new AuthError('auth.errInvalidCredentials');
+    return null;
   }
+}
+
+/** "No account with this number" or "wrong password"; the plain message if the server can't tell. */
+async function whyRefused(phone: string, role: UserRole): Promise<AuthError> {
+  const exists = await accountExists(phone, role);
+  if (exists === null) return new AuthError('auth.errInvalidCredentials');
+  return new AuthError(exists ? 'auth.errWrongPassword' : 'auth.errNoAccount');
 }
 
 export interface RegisterParams {

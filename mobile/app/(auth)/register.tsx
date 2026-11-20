@@ -108,7 +108,9 @@ export default function Register() {
     if (!config.useMock) {
       // Live: with SMS sign-up on, a code proves the number first and the
       // account comes after it; without, the account is created right away.
-      if (config.smsSignUp) await sendCode('970');
+      // The dashboard can switch the code off (if Firebase stops sending it).
+      const switchedOn = (await api.getSupportContacts().catch(() => ({}) as { smsSignUp?: boolean })).smsSignUp !== false;
+      if (config.smsSignUp && switchedOn) await sendCode('970');
       else await createAccount(setFormError);
       return;
     }

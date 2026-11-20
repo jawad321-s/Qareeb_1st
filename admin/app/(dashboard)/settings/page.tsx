@@ -101,6 +101,7 @@ export default function SettingsPage() {
 
       <FeaturedSettings />
       <RequestLimitSettings />
+      <SmsSignUpSettings />
 
       <Card className="p-6">
         <h2 className="mb-2 font-semibold">{t('set.admins')}</h2>
@@ -279,6 +280,69 @@ function RequestLimitSettings() {
         <Button disabled={!loaded || !valid || state === 'saving'} onClick={save}>
           {t('set.save')}
         </Button>
+      </div>
+    </Card>
+  );
+}
+
+/**
+ * Whether a new account must prove its phone number with an SMS code. On
+ * unless switched off here (settings/platform.smsSignUp = false): if Firebase
+ * stops sending the codes, the team turns it off at once so people can still
+ * sign up, and back on later, with no new version of the app.
+ */
+function SmsSignUpSettings() {
+  const { t } = useT();
+  const live = isLive();
+  const [on, setOn] = useState(true);
+  const [loaded, setLoaded] = useState(!live);
+  const [state, setState] = useState<'idle' | 'saving' | 'saved' | 'failed'>('idle');
+
+  useEffect(() => {
+    const db = getDb();
+    if (!live || !db) return;
+    return onSnapshot(
+      doc(db, 'settings', 'platform'),
+      (snap) => {
+        setOn(snap.get('smsSignUp') !== false);
+        setLoaded(true);
+      },
+      () => setLoaded(true),
+    );
+  }, [live]);
+
+  const change = async (next: boolean) => {
+    const db = getDb();
+    setOn(next);
+    setState('saving');
+    try {
+      if (live && db) await setDoc(doc(db, 'settings', 'platform'), { smsSignUp: next, updatedAt: Date.now() }, { merge: true });
+      setState('saved');
+    } catch {
+      setOn(!next);
+      setState('failed');
+    }
+  };
+
+  return (
+    <Card className="p-6">
+      <h2 className="font-semibold">{t('set.smsSignUp')}</h2>
+      <p className="mb-4 mt-1 text-xs text-muted">{t('set.smsSignUpHint')}</p>
+      <label className="flex cursor-pointer items-center gap-3">
+        <input
+          type="checkbox"
+          role="switch"
+          aria-checked={on}
+          checked={on}
+          disabled={!loaded || state === 'saving'}
+          onChange={(e) => void change(e.target.checked)}
+          className="h-5 w-5 accent-brand-600"
+        />
+        <span className="text-sm font-medium">{t(on ? 'set.smsSignUpOn' : 'set.smsSignUpOff')}</span>
+      </label>
+      <div className="mt-3 min-h-5 text-sm">
+        {state === 'saved' && <span className="text-emerald-700 dark:text-emerald-400">{t('set.saved')}</span>}
+        {state === 'failed' && <span className="text-red-500">{t('set.saveFailed')}</span>}
       </div>
     </Card>
   );

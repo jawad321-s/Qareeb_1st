@@ -7,6 +7,7 @@
 //  • onArtisanProfileUpdated → a service added: offer its open requests
 //  • onMessageCreated   → tell the other party about a chat message
 //  • resetPasswordWithPhone → set a new password after an SMS code (callable)
+//  • checkAccount       → after a failed sign-in: does the number have an account? (callable)
 //  • a completed job or a new review recounts the artisan's jobs and rating
 //    (featured badge: 10 jobs and a rating above 4)
 //  • adminManageUser    → the dashboard's user management (callable, admins only)
@@ -36,7 +37,7 @@ import { deliverBroadcast } from './broadcast.js';
 import { removePlainChats } from './chatCleanup.js';
 import { deleteOwnAccount, onLoginDeleted, sweepDeletedLogins } from './accountDeletion.js';
 import { notifyVerificationDecision } from './verification.js';
-import { resetPasswordWithPhone as resetPassword } from './passwordReset.js';
+import { accountExists, resetPasswordWithPhone as resetPassword } from './passwordReset.js';
 
 initializeApp();
 const db = getFirestore();
@@ -121,6 +122,9 @@ export const onMessageCreated = onDocumentCreated('requests/{requestId}/messages
   const recipient = msg.senderId === req.customerId ? req.acceptedArtisanId : req.customerId;
   await notifyUsers(db, [recipient], 'newMessage', { senderName: await nameOf(msg.senderId), image: msg.type === 'image' }, { route: `/(shared)/chat/${id}`, requestId: id });
 });
+
+/** Sign-in failed: "no account with this number" or a wrong password? */
+export const checkAccount = onCall((request) => accountExists(getAuth(), request.data));
 
 export const resetPasswordWithPhone = onCall((request) =>
   resetPassword(

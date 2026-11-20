@@ -7,6 +7,7 @@
 
 import { addDoc, collection, doc, getDocs, onSnapshot, orderBy, query, updateDoc, writeBatch } from 'firebase/firestore';
 import { getAuthClient, getDb, isLive } from './firebase';
+import { watchCollection } from './live-data';
 
 export const SUPPORT_TEXT_MAX = 1000;
 
@@ -66,13 +67,9 @@ export function subscribeSupportThreads(cb: (threads: SupportThread[]) => void):
     emit();
     return () => demoListeners.delete(emit);
   }
-  return onSnapshot(
-    query(collection(db, 'supportThreads'), orderBy('lastAt', 'desc')),
-    (snap) => cb(snap.docs.map((d) => toThread(d.id, d.data()))),
-    (err) => {
-      console.warn('[support]', err);
-      cb([]);
-    },
+  // The dashboard's shared listener (the sidebar, the bell and the page read the same one).
+  return watchCollection('supportThreads', (docs) =>
+    cb(docs.filter((d) => d.lastAt != null).map((d) => toThread(d.id, d)).sort((a, b) => b.lastAt - a.lastAt)),
   );
 }
 

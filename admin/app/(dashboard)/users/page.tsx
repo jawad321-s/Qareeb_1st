@@ -129,6 +129,12 @@ export default function UsersPage() {
     [t, locale, serviceName],
   );
 
+  // Customers have no services and aren't verified: their tab leaves those columns out.
+  const customerColumns = useMemo(
+    () => columns.filter((c) => !['services', 'verified'].includes(c.id ?? (c as { accessorKey?: string }).accessorKey ?? '')),
+    [columns],
+  );
+
   const current = rows.find((u) => u.uid === selected) ?? null;
 
   return (
@@ -142,7 +148,7 @@ export default function UsersPage() {
         onChange={setFilter}
         tabs={(['all', 'customer', 'artisan', 'suspended', 'deleted'] as Filter[]).map((k) => ({ key: k, label: t(`users.filter.${k}`), count: counts[k] }))}
       />
-      <DataTable columns={columns} data={shown} searchPlaceholder={t('users.search')} />
+      <DataTable columns={filter === 'customer' ? customerColumns : columns} data={shown} searchPlaceholder={t('users.search')} />
       {current && (
         <UserPanel
           user={current}
@@ -246,7 +252,7 @@ function UserPanel({
             <div className="mt-1 flex flex-wrap items-center gap-1.5">
               <Badge tone={artisan ? 'brand' : 'neutral'}>{t(`role.${user.role}` as TKey)}</Badge>
               <StatusPill status={user.status} />
-              {user.verified && <Badge tone="success">{t('users.verifiedBadge')}</Badge>}
+              {artisan && user.verified && <Badge tone="success">{t('users.verifiedBadge')}</Badge>}
               {user.featured && <Badge tone="warning">{t('users.featured')}</Badge>}
             </div>
           </div>

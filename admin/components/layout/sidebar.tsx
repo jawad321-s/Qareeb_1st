@@ -30,6 +30,9 @@ const NAV: { href: string; label: TKey; icon: any }[] = [
   { href: '/settings', label: 'nav.settings', icon: Settings },
 ];
 
+/** Every page of the menu (loaded ahead by WarmUp). */
+export const NAV_HREFS = NAV.map((n) => n.href);
+
 function Brand() {
   const { t } = useT();
   return (

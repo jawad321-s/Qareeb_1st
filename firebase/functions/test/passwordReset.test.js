@@ -7,7 +7,7 @@ import { getAuth } from 'firebase-admin/auth';
 
 initializeApp({ projectId: process.env.GCLOUD_PROJECT ?? 'demo-qareeb' });
 const auth = getAuth();
-const { resetPasswordWithPhone, loginEmail } = await import('../src/passwordReset.js');
+const { resetPasswordWithPhone, loginEmail, accountExists } = await import('../src/passwordReset.js');
 
 let customer;
 before(async () => {
@@ -48,4 +48,16 @@ test('too-short password and unknown role are refused', async () => {
   await assert.rejects(resetPasswordWithPhone(auth, caller(p1), { role: 'customer', newPassword: '123' }), { code: 'invalid-argument' });
   const p2 = await phoneUser('+970599111225');
   await assert.rejects(resetPasswordWithPhone(auth, caller(p2), { role: 'admin', newPassword: '123456' }), { code: 'invalid-argument' });
+});
+
+test('checkAccount: an account of that type for the number, or none (a deleted or other-type one counts as none)', async () => {
+  assert.deepEqual(await accountExists(auth, { phone: '0599111222', role: 'customer' }), { exists: true });
+  assert.deepEqual(await accountExists(auth, { phone: '+970599111222', role: 'artisan' }), { exists: false });
+  assert.deepEqual(await accountExists(auth, { phone: '0599000777', role: 'customer' }), { exists: false });
+  // Deleted: the login is switched off and moved off the number.
+  const gone = await auth.createUser({ email: loginEmail('0599000888', 'customer'), password: 'secret1' });
+  await auth.updateUser(gone.uid, { disabled: true, email: `deleted-${gone.uid}@phone.qareeb.app` });
+  assert.deepEqual(await accountExists(auth, { phone: '0599000888', role: 'customer' }), { exists: false });
+  await assert.rejects(accountExists(auth, { phone: 'abc', role: 'customer' }), (e) => e.code === 'invalid-argument');
+  await assert.rejects(accountExists(auth, { phone: '0599111222', role: 'admin' }), (e) => e.code === 'invalid-argument');
 });

@@ -3,10 +3,9 @@
 // back — flipping the artisan's `verified` flag so the mobile app reflects it.
 'use client';
 
-import {
-  collection, doc, getDocs, onSnapshot, orderBy, query, serverTimestamp, updateDoc,
-} from 'firebase/firestore';
+import { collection, doc, getDocs, serverTimestamp, updateDoc } from 'firebase/firestore';
 import { getDb, isLive } from './firebase';
+import { watchCollection } from './live-data';
 import { VERIFICATIONS, type VerificationItem } from './mock-data';
 
 export const VERIFICATION_COLLECTION = 'verificationRequests';
@@ -25,12 +24,11 @@ export function subscribeVerifications(cb: (items: VerificationItem[]) => void):
     cb(VERIFICATIONS);
     return () => {};
   }
-  const q = query(collection(db, VERIFICATION_COLLECTION), orderBy('submittedAt', 'desc'));
-  return onSnapshot(
-    q,
-    (snap) => {
-      const items: VerificationItem[] = snap.docs.map((d) => {
-        const v = d.data() as Record<string, any>;
+  // The dashboard's shared listener (the bell and the page read the same one).
+  return watchCollection(VERIFICATION_COLLECTION, (docs) => {
+    const items: VerificationItem[] = docs
+      .filter((v) => v.submittedAt != null)
+      .map((v) => {
         const files: string[] = Array.isArray(v.files) ? v.files : [];
         const legacyUrls = legacyPhotoUrls(v);
         const submittedAt =
@@ -38,8 +36,8 @@ export function subscribeVerifications(cb: (items: VerificationItem[]) => void):
             ? v.submittedAt.toMillis()
             : v.submittedAt ?? Date.now();
         return {
-          id: d.id,
-          artisanId: v.artisanId ?? d.id,
+          id: v.id,
+          artisanId: v.artisanId ?? v.id,
           name: v.name ?? '—',
           category: v.category ?? (Array.isArray(v.categoryIds) ? v.categoryIds[0] : '') ?? '',
           submittedAt,
@@ -51,11 +49,10 @@ export function subscribeVerifications(cb: (items: VerificationItem[]) => void):
           files,
           legacyUrls,
         };
-      });
-      cb(items);
-    },
-    (err) => console.warn('[verifications]', err),
-  );
+      })
+      .sort((a, b) => b.submittedAt - a.submittedAt);
+    cb(items);
+  });
 }
 
 /** Older requests kept their photos in Storage as plain URLs. */

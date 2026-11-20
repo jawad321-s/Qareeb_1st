@@ -76,6 +76,21 @@ function readCollection(name: string, onChange: () => void): () => void {
   };
 }
 
+/**
+ * The same shared listener for code outside React hooks (the requests,
+ * verification and support services): `cb` gets what is already loaded at
+ * once, then every change. Returns an unsubscribe.
+ */
+export function watchCollection(name: string, cb: (docs: LiveDoc[]) => void): () => void {
+  const emit = () => {
+    const docs = liveCollections.get(name)?.docs;
+    if (docs) cb(docs);
+  };
+  const stop = readCollection(name, emit);
+  emit();
+  return stop;
+}
+
 /** On sign-out: every listener stops and nothing loaded stays in memory. */
 export function resetLiveCollections() {
   for (const e of liveCollections.values()) {

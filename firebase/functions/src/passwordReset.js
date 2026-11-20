@@ -28,3 +28,17 @@ export async function resetPasswordWithPhone(auth, caller, data) {
     if (caller.provider === 'phone') await auth.deleteUser(caller.uid).catch(() => {});
   }
 }
+
+/**
+ * After a failed sign-in, whether this number has an account of this type, so
+ * the app can say "no account with this number" instead of "wrong password"
+ * (Firebase Auth answers both the same way). A deleted account doesn't count:
+ * its login was moved off the number. Says nothing else about the account.
+ */
+export async function accountExists(auth, data) {
+  const { phone, role } = data ?? {};
+  if (role !== 'customer' && role !== 'artisan') throw new HttpsError('invalid-argument', 'Unknown account type.');
+  if (typeof phone !== 'string' || !/^5\d{8}$/.test(normalizePhone(phone))) throw new HttpsError('invalid-argument', 'Invalid phone number.');
+  const account = await auth.getUserByEmail(loginEmail(phone, role)).catch(() => null);
+  return { exists: !!account && !account.disabled };
+}

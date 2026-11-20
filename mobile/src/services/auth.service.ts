@@ -41,6 +41,8 @@ export function authErrorMessage(err: unknown, t: (key: AuthErrorKey) => string)
 }
 export type AuthErrorKey =
   | 'auth.errInvalidCredentials'
+  | 'auth.errNoAccount'
+  | 'auth.errWrongPassword'
   | 'auth.errPhoneInUse'
   | 'auth.errWrongRole'
   | 'auth.errNetwork'
@@ -104,7 +106,23 @@ export async function signInWithPhone(phone: string, password: string, role: Use
     // its token carries the claim that keeps everything else closed.
     return profile;
   } catch (err) {
-    throw toAuthError(err);
+    const known = toAuthError(err);
+    // Firebase answers "no such account" and "wrong password" the same way:
+    // ask the server which it is (a deleted account has no login any more).
+    if (known.key === 'auth.errInvalidCredentials') throw await whyRefused(phone, role);
+    throw known;
+  }
+}
+
+/** "No account with this number" or "wrong password"; the plain message if the server can't tell. */
+async function whyRefused(phone: string, role: UserRole): Promise<AuthError> {
+  try {
+    const functions = getFunctionsClient();
+    if (!functions || (role !== 'customer' && role !== 'artisan')) throw new Error('unavailable');
+    const { data } = await httpsCallable<{ phone: string; role: string }, { exists: boolean }>(functions, 'checkAccount')({ phone, role });
+    return new AuthError(data.exists ? 'auth.errWrongPassword' : 'auth.errNoAccount');
+  } catch {
+    return new AuthError('auth.errInvalidCredentials');
   }
 }
 

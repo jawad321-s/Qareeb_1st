@@ -3,8 +3,8 @@
 // back to the mock list when no Firebase project is configured.
 'use client';
 
-import { collection, onSnapshot, orderBy, query } from 'firebase/firestore';
 import { getDb, isLive } from './firebase';
+import { watchCollection } from './live-data';
 import { REQUESTS, type AdminRequest } from './mock-data';
 
 export const REQUESTS_COLLECTION = 'requests';
@@ -19,22 +19,25 @@ export function subscribeRequests(cb: (items: AdminRequest[]) => void): () => vo
     cb(REQUESTS);
     return () => {};
   }
-  const q = query(collection(db, REQUESTS_COLLECTION), orderBy('createdAt', 'desc'));
-  return onSnapshot(q, (snap) => {
-    const items: AdminRequest[] = snap.docs.map((d) => {
-      const v = d.data() as Record<string, any>;
-      const createdAt =
-        v.createdAt && typeof v.createdAt.toMillis === 'function' ? v.createdAt.toMillis() : v.createdAt ?? Date.now();
-      return {
-        id: d.id,
-        title: v.title ?? '—',
-        customer: v.customerName ?? v.customerId ?? '—',
-        category: v.category ?? v.categoryId ?? '',
-        status: v.status ?? 'PENDING',
-        offers: v.offerCount ?? v.offers ?? 0,
-        createdAt,
-      };
-    });
-    cb(items);
-  });
+  // The dashboard's shared listener: opening the page again shows the list at once.
+  return watchCollection(REQUESTS_COLLECTION, (docs) =>
+    cb(
+      docs
+        .filter((v) => v.createdAt != null)
+        .map((v) => {
+          const createdAt =
+            v.createdAt && typeof v.createdAt.toMillis === 'function' ? v.createdAt.toMillis() : v.createdAt ?? Date.now();
+          return {
+            id: v.id,
+            title: v.title ?? '—',
+            customer: v.customerName ?? v.customerId ?? '—',
+            category: v.category ?? v.categoryId ?? '',
+            status: v.status ?? 'PENDING',
+            offers: v.offerCount ?? v.offers ?? 0,
+            createdAt,
+          } as AdminRequest;
+        })
+        .sort((a, b) => b.createdAt - a.createdAt),
+    ),
+  );
 }

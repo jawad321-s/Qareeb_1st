@@ -1,6 +1,15 @@
-import { Stack } from 'expo-router';
+import { Redirect, Stack } from 'expo-router';
+import { useAuth } from '@/store/auth';
 
 export default function SharedLayout() {
+  // Every screen here is for a signed-in account. After signing out from one
+  // of them (deleting the account), the screens below it in this stack (edit
+  // profile…) would re-render with no user and crash: this ancestor re-renders
+  // first and leaves for the welcome screen instead. Before the saved session
+  // is read (a notification opening a chat at launch) it just waits.
+  const signedIn = useAuth((s) => !!s.user);
+  const hydrated = useAuth((s) => s.hydrated);
+  if (!signedIn) return hydrated ? <Redirect href="/(auth)/welcome" /> : null;
   return (
     <Stack
       screenOptions={{

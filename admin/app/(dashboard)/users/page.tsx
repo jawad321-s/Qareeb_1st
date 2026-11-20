@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
 import type { ColumnDef } from '@tanstack/react-table';
-import { CheckCircle2, Phone, ShieldCheck, ShieldOff, Star, UserCheck, UserX, X } from 'lucide-react';
+import { CheckCircle2, Lock, Phone, ShieldCheck, ShieldOff, Star, Trash2, UserCheck, UserX, X } from 'lucide-react';
 import { DataTable } from '@/components/ui/data-table';
 import { Badge, Button, FilterTabs, StatusPill } from '@/components/ui/primitives';
 import { USERS, type AdminUser } from '@/lib/mock-data';
@@ -12,11 +12,11 @@ import { formatPhone } from '@/lib/phone';
 import { useT, type TKey } from '@/lib/i18n';
 import { isLive } from '@/lib/firebase';
 import { useCollection, toAdminUsers } from '@/lib/live-data';
-import { manageUser, UserActionFailed, type UserAction } from '@/lib/users.service';
+import { confirmAdminPassword, manageUser, UserActionFailed, type UserAction } from '@/lib/users.service';
 import { useServiceName } from '@/lib/catalog';
 import { Initials, ServiceChips } from '@/components/ui/people';
 
-type Filter = 'all' | 'customer' | 'artisan' | 'suspended';
+type Filter = 'all' | 'customer' | 'artisan' | 'suspended' | 'deleted';
 
 export default function UsersPage() {
   const { t, locale } = useT();
@@ -41,12 +41,13 @@ export default function UsersPage() {
   // Live: an artisan's services follow their profile as they add or remove them.
   const serviceName = useServiceName();
 
-  const shown = rows.filter((u) => (filter === 'all' ? true : filter === 'suspended' ? u.status === 'suspended' : u.role === filter));
+  const shown = rows.filter((u) => (filter === 'all' ? true : filter === 'suspended' || filter === 'deleted' ? u.status === filter : u.role === filter));
   const counts: Record<Filter, number> = {
     all: rows.length,
     customer: rows.filter((u) => u.role === 'customer').length,
     artisan: rows.filter((u) => u.role === 'artisan').length,
     suspended: rows.filter((u) => u.status === 'suspended').length,
+    deleted: rows.filter((u) => u.status === 'deleted').length,
   };
   // Complaints about each person (any status), shown in their panel.
   const against = useMemo(() => {
@@ -139,7 +140,7 @@ export default function UsersPage() {
       <FilterTabs
         value={filter}
         onChange={setFilter}
-        tabs={(['all', 'customer', 'artisan', 'suspended'] as Filter[]).map((k) => ({ key: k, label: t(`users.filter.${k}`), count: counts[k] }))}
+        tabs={(['all', 'customer', 'artisan', 'suspended', 'deleted'] as Filter[]).map((k) => ({ key: k, label: t(`users.filter.${k}`), count: counts[k] }))}
       />
       <DataTable columns={columns} data={shown} searchPlaceholder={t('users.search')} />
       {current && (
@@ -157,8 +158,9 @@ export default function UsersPage() {
 
 /**
  * Everything the team can do to one account, in a side panel: suspend or
- * reactivate it (accounts are never deleted) and verify an artisan (or take
- * it back). Each action runs on the server (Cloud Function adminManageUser).
+ * reactivate it (the admin's password first, to suspend) and verify an
+ * artisan (or take it back). Each action runs on the server (Cloud Function
+ * adminManageUser). An account its owner deleted is shown read-only.
  */
 function UserPanel({
   user,
@@ -177,7 +179,11 @@ function UserPanel({
   const [busy, setBusy] = useState<UserAction | null>(null);
   const [message, setMessage] = useState<{ ok: boolean; text: string } | null>(null);
   const [reason, setReason] = useState('');
+  // Suspending asks for the admin's password first.
+  const [confirming, setConfirming] = useState(false);
+  const [password, setPassword] = useState('');
   const suspended = user.status === 'suspended';
+  const deleted = user.status === 'deleted';
   const artisan = user.role === 'artisan';
 
   useEffect(() => {
@@ -200,7 +206,10 @@ function UserPanel({
         };
         onDemoChange(patch[action]);
       }
-      if (action === 'suspend') setReason('');
+      if (action === 'suspend') {
+        setReason('');
+        setConfirming(false);
+      }
       setMessage({ ok: true, text: t(`users.done.${action}` as TKey) });
     } catch (e) {
       const why = e instanceof UserActionFailed ? e.reason : 'generic';
@@ -208,6 +217,22 @@ function UserPanel({
     } finally {
       setBusy(null);
     }
+  };
+
+  const confirmAndSuspend = async () => {
+    setBusy('suspend');
+    setMessage(null);
+    try {
+      await confirmAdminPassword(password);
+    } catch (e) {
+      const why = e instanceof UserActionFailed ? e.reason : 'generic';
+      setMessage({ ok: false, text: t(`users.err.${why}` as TKey) });
+      setBusy(null);
+      return;
+    } finally {
+      setPassword('');
+    }
+    await run('suspend', { reason: reason.trim() });
   };
 
   return createPortal(
@@ -257,6 +282,20 @@ function UserPanel({
               )}
             </div>
           )}
+          {deleted && (
+            <div className="space-y-1 rounded-xl bg-slate-500/10 p-3 text-sm">
+              <p className="flex items-center gap-1.5 font-semibold">
+                <Trash2 className="h-4 w-4" /> {t('users.deletedTitle')}
+              </p>
+              <p>
+                {t(user.deletedBy === 'console' ? 'users.deletedConsole' : 'users.deletedSelf').replace(
+                  '{when}',
+                  user.deletedAt ? timeAgo(user.deletedAt, locale) : '',
+                )}
+              </p>
+              <p className="text-muted">{t('users.deletedKept')}</p>
+            </div>
+          )}
           {suspended && user.suspendReason && (
             <p className="rounded-xl bg-red-500/10 p-3 text-sm">
               {t('users.suspendedFor')} {user.suspendReason}
@@ -269,11 +308,51 @@ function UserPanel({
             </p>
           )}
 
+          {!deleted && (
           <Section title={t('users.sec.account')} hint={t(suspended ? 'users.reactivateHint' : 'users.suspendHint')}>
             {suspended ? (
               <Button disabled={!!busy} onClick={() => run('reactivate')}>
                 <UserCheck className="h-4 w-4" /> {t('users.reactivate')}
               </Button>
+            ) : confirming ? (
+              <form
+                className="space-y-2 rounded-xl border border-red-500/40 p-3"
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  void confirmAndSuspend();
+                }}
+              >
+                <p className="flex items-center gap-1.5 text-sm font-semibold">
+                  <Lock className="h-4 w-4" /> {t('users.confirmTitle')}
+                </p>
+                <p className="text-xs text-muted">{t('users.confirmHint').replace('{name}', user.fullName)}</p>
+                <input
+                  type="password"
+                  autoFocus
+                  autoComplete="current-password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder={t('users.confirmPassword')}
+                  aria-label={t('users.confirmPassword')}
+                  className="surface w-full rounded-xl border border-base px-3 py-2 text-sm outline-none focus:border-brand-500"
+                />
+                <div className="flex gap-2">
+                  <Button type="submit" variant="danger" disabled={!!busy || !password}>
+                    <UserX className="h-4 w-4" /> {t('users.confirmSuspend')}
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    disabled={!!busy}
+                    onClick={() => {
+                      setConfirming(false);
+                      setPassword('');
+                    }}
+                  >
+                    {t('users.confirmCancel')}
+                  </Button>
+                </div>
+              </form>
             ) : (
               <div className="flex flex-col gap-2 sm:flex-row">
                 <input
@@ -284,14 +363,22 @@ function UserPanel({
                   maxLength={300}
                   className="surface flex-1 rounded-xl border border-base px-3 py-2 text-sm outline-none focus:border-brand-500"
                 />
-                <Button variant="danger" disabled={!!busy} onClick={() => run('suspend', { reason: reason.trim() })}>
+                <Button
+                  variant="danger"
+                  disabled={!!busy}
+                  onClick={() => {
+                    setMessage(null);
+                    setConfirming(true);
+                  }}
+                >
                   <UserX className="h-4 w-4" /> {t('users.suspend')}
                 </Button>
               </div>
             )}
           </Section>
+          )}
 
-          {artisan && (
+          {artisan && !deleted && (
             <Section title={t('users.sec.verification')} hint={t(user.verified ? 'users.unverifyHint' : 'users.verifyHint')}>
               {user.verified ? (
                 <Button variant="outline" disabled={!!busy} onClick={() => run('unverify')}>

@@ -12,7 +12,7 @@ export async function audienceUids(db, audience) {
   const roles = AUDIENCES[audience];
   if (!roles) return [];
   const snap = await db.collection('users').where('role', 'in', roles).get();
-  return snap.docs.filter((d) => d.get('status') !== 'suspended').map((d) => d.id);
+  return snap.docs.filter((d) => !['suspended', 'deleted'].includes(d.get('status'))).map((d) => d.id);
 }
 
 /**

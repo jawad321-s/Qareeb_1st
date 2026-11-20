@@ -280,6 +280,12 @@ export const mockApi = {
     hiddenChats[requestId] = Date.now();
   },
 
+  /** The user opened the chat: the other side's messages are marked read (see firebase-api). */
+  async markChatRead(requestId: string, uid: string): Promise<void> {
+    await delay(100);
+    messages = messages.map((m) => (m.requestId === requestId && m.senderId !== uid && !m.read ? { ...m, read: true } : m));
+  },
+
   async sendMessage(requestId: string, msg: Omit<ChatMessage, 'id' | 'read' | 'createdAt'>): Promise<ChatMessage> {
     await delay(150);
     const req = requests.find((r) => r.id === requestId);

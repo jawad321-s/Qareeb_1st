@@ -2,7 +2,7 @@
 // Swap these getters for Firestore Admin SDK queries when wiring the backend.
 
 export type UserRole = 'customer' | 'artisan' | 'admin';
-export type UserStatus = 'active' | 'suspended' | 'pending';
+export type UserStatus = 'active' | 'suspended' | 'pending' | 'deleted';
 
 export interface AdminUser {
   uid: string;
@@ -21,6 +21,9 @@ export interface AdminUser {
   suspendReason?: string;
   /** Artisans: the services (category ids) on their profile now. */
   services?: string[];
+  /** Deleted accounts are kept (soft delete): when, and whether by the owner in the app or in the Firebase console. */
+  deletedAt?: number;
+  deletedBy?: 'self' | 'console';
 }
 
 export interface VerificationItem {
@@ -102,12 +105,14 @@ const DEMO_SERVICES = ['plumbing', 'electrical', 'carpentry', 'ac', 'painting', 
 export const USERS: AdminUser[] = Array.from({ length: 48 }).map((_, i) => {
   const role: UserRole = i % 3 === 0 ? 'artisan' : 'customer';
   const n = name();
+  const status = (['active', 'active', 'active', 'suspended', 'pending', 'deleted'] as UserStatus[])[rnd(0, 6)];
   return {
     uid: `u_${i + 1}`,
     fullName: n,
     phone: `+97059${String(1000000 + i * 7919).slice(-7)}`,
     role,
-    status: (['active', 'active', 'active', 'suspended', 'pending'] as UserStatus[])[rnd(0, 5)],
+    status,
+    ...(status === 'deleted' ? { deletedAt: Date.now() - rnd(1, 30) * day, deletedBy: 'self' as const } : {}),
     verified: role === 'artisan' ? Math.random() > 0.35 : true,
     rating: Number((3.8 + Math.random() * 1.2).toFixed(1)),
     jobs: role === 'artisan' ? rnd(5, 320) : rnd(1, 40),

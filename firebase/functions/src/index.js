@@ -10,7 +10,9 @@
 //  • a completed job or a new review recounts the artisan's jobs and rating
 //    (featured badge: 10 jobs and a rating above 4)
 //  • adminManageUser    → the dashboard's user management (callable, admins only)
-//  • deleteMyAccount    → a user deletes their own account from the app (callable)
+//  • deleteMyAccount    → a user deletes their own account from the app (callable);
+//                         kept and marked deleted (soft delete)
+//  • onAuthUserDeleted  → a login removed in the Firebase console: account marked deleted
 //  • onBroadcastCreated → a system notification from the dashboard to everyone,
 //                         customers or artisans
 //  • onSupportMessageCreated → the team answered in the support chat: tell the user
@@ -23,6 +25,7 @@ import { logger, setGlobalOptions } from 'firebase-functions/v2';
 import { onDocumentCreated, onDocumentUpdated } from 'firebase-functions/v2/firestore';
 import { onCall } from 'firebase-functions/v2/https';
 import { onSchedule } from 'firebase-functions/v2/scheduler';
+import { region as regionV1 } from 'firebase-functions/v1';
 import { REGION } from './config.js';
 import { offerOpenRequests, runDispatchTick, startDispatch } from './dispatch.js';
 import { notifyUsers } from './notify.js';
@@ -31,7 +34,7 @@ import { backfillFeatured, onArtisanRated, onJobCompleted } from './featured.js'
 import { manageUser, migrateSuspendedLogins } from './adminUsers.js';
 import { deliverBroadcast } from './broadcast.js';
 import { removePlainChats } from './chatCleanup.js';
-import { deleteOwnAccount } from './accountDeletion.js';
+import { deleteOwnAccount, onLoginDeleted, sweepDeletedLogins } from './accountDeletion.js';
 import { notifyVerificationDecision } from './verification.js';
 import { resetPasswordWithPhone as resetPassword } from './passwordReset.js';
 
@@ -54,6 +57,8 @@ export const dispatchTick = onSchedule({ schedule: 'every 1 minutes', timeZone: 
   await removePlainChats(db, () => getStorage().bucket()).catch((e) => logger.error('Chat cleanup failed', e));
   // Once: accounts suspended before the support chat can sign in to reach it.
   await migrateSuspendedLogins(db, getAuth()).catch((e) => logger.error('Suspended-login migration failed', e));
+  // Hourly: accounts whose login was removed in the console are marked deleted.
+  await sweepDeletedLogins(db, getAuth()).catch((e) => logger.error('Deleted-login sweep failed', e));
   await runDispatchTick(db);
 });
 
@@ -134,7 +139,12 @@ export const adminManageUser = onCall((request) =>
   manageUser(
     db,
     getAuth(),
-    request.auth && { uid: request.auth.uid, role: request.auth.token.role, email: request.auth.token.email },
+    request.auth && {
+      uid: request.auth.uid,
+      role: request.auth.token.role,
+      email: request.auth.token.email,
+      authTime: request.auth.token.auth_time,
+    },
     request.data,
   ),
 );
@@ -150,15 +160,22 @@ export const onReviewCreated = onDocumentCreated('reviews/{id}', async (event) =
   if (review?.targetId) await onArtisanRated(db, review.targetId);
 });
 
-/** "Delete my account" in the app (after the user re-entered their password). */
+/** "Delete my account" in the app (after the user re-entered their password). The account is kept, marked deleted. */
 export const deleteMyAccount = onCall((request) =>
   deleteOwnAccount(
     db,
     getAuth(),
-    () => getStorage().bucket(),
     request.auth && { uid: request.auth.uid, authTime: request.auth.token.auth_time, suspended: request.auth.token.suspended === true },
   ),
 );
+
+/**
+ * A login removed in the Firebase console: the account is kept and marked
+ * deleted, as if the user had deleted it (an Auth trigger, so 1st gen).
+ */
+export const onAuthUserDeleted = regionV1(REGION)
+  .auth.user()
+  .onDelete((user) => onLoginDeleted(db, user.uid));
 
 /** The Qareeb team answered in the support chat (dashboard → Support). */
 export const onSupportMessageCreated = onDocumentCreated('supportThreads/{uid}/messages/{id}', async (event) => {

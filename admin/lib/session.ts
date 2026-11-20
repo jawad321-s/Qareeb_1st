@@ -14,6 +14,7 @@ import {
   type User,
 } from 'firebase/auth';
 import { getAuthClient } from './firebase';
+import { resetLiveCollections } from './live-data';
 
 const KEY = 'qareeb.admin.session';
 
@@ -118,6 +119,8 @@ export async function sendPasswordReset(email: string): Promise<void> {
 
 export async function signOut(): Promise<void> {
   localStorage.removeItem(KEY);
+  // The dashboard's shared listeners stop, and what they loaded is dropped.
+  resetLiveCollections();
   const auth = getAuthClient();
   if (auth) await fbSignOut(auth).catch(() => {});
 }

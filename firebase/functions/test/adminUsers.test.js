@@ -14,7 +14,7 @@ const { manageUser, migrateSuspendedLogins } = await import('../src/adminUsers.j
 initializeApp({ projectId: process.env.GCLOUD_PROJECT ?? 'demo-adminusers' });
 const db = getFirestore();
 const auth = getAuth();
-const admin = { uid: 'adm', role: 'admin', email: 'admin@test.dev' };
+const admin = { uid: 'adm', role: 'admin', email: 'admin@test.dev', authTime: Math.floor(Date.now() / 1000) };
 const call = (data, caller = admin) => manageUser(db, auth, caller, data);
 const user = async (uid) => (await db.doc(`users/${uid}`).get()).data();
 const rejects = (p, code, msg) => assert.rejects(p, (e) => e.code === code && (!msg || e.message === msg));
@@ -48,6 +48,9 @@ test('only admins may call it, and never on themselves', async () => {
   await rejects(call({ action: 'suspend', uid: '' }), 'invalid-argument');
   await rejects(call({ action: 'suspend', uid: 'nobody' }), 'not-found');
   await rejects(call({ action: 'suspend', uid: 'adm' }), 'failed-precondition', 'self');
+  // Suspending needs the admin's password entered within the last minutes.
+  await rejects(call({ action: 'suspend', uid: 'aucust' }, { ...admin, authTime: admin.authTime - 3600 }), 'failed-precondition', 'recent-login');
+  await rejects(call({ action: 'suspend', uid: 'aucust' }, { ...admin, authTime: undefined }), 'failed-precondition', 'recent-login');
 });
 
 test('suspend restricts the login (claim), marks the account and withdraws open offers; reactivate undoes it', async () => {
@@ -97,4 +100,12 @@ test('accounts suspended the old way (login disabled) get the claim once', async
   assert.equal(u.disabled, false);
   assert.equal(u.customClaims?.suspended, true);
   assert.equal(await migrateSuspendedLogins(db, auth), null, 'runs a single time');
+});
+
+test('an account its owner deleted is kept for the records: no actions on it', async () => {
+  await account('audeleted', 'artisan', { status: 'deleted' });
+  for (const action of ['suspend', 'reactivate', 'verify']) {
+    await rejects(call({ action, uid: 'audeleted' }), 'failed-precondition', 'deleted');
+  }
+  assert.equal((await user('audeleted')).status, 'deleted');
 });

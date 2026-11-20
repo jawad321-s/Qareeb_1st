@@ -34,7 +34,8 @@ export function useAccountGuard(uid: string | undefined) {
         if (snap.metadata.fromCache) return;
         const current = useAuth.getState().user;
         if (current?.uid !== uid || leaving === uid) return;
-        if (!snap.exists()) {
+        // Gone, or deleted (kept in the records only, e.g. removed in the console).
+        if (!snap.exists() || snap.data().status === 'deleted') {
           useAuth.getState().signOut();
           toast('error', t('auth.accountClosed'));
           return;

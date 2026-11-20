@@ -150,7 +150,8 @@ export const firebaseApi: typeof mockApi = {
   async getRecommendedArtisans(): Promise<AppUser[]> {
     const q = query(collection(db(), 'users'), where('role', '==', 'artisan'), orderBy('rating', 'desc'), limit(20));
     const snap = await getDocs(q);
-    return snap.docs.map((d) => withId<AppUser>(d.id, d.data()));
+    // Deleted accounts are kept in the records, not offered to anyone.
+    return snap.docs.filter((d) => d.get('status') !== 'deleted').map((d) => withId<AppUser>(d.id, d.data()));
   },
 
   async getMyRequests(customerId: string): Promise<ServiceRequest[]> {
@@ -480,6 +481,20 @@ export const firebaseApi: typeof mockApi = {
     await setDoc(doc(db(), 'users', uid, 'hiddenChats', requestId), { hiddenAt: at });
     const cache = await hiddenChats();
     cache[requestId] = at;
+  },
+
+  /**
+   * The user opened the chat: the other side's messages are marked read, so
+   * the home screen and the list stop showing them as new.
+   */
+  async markChatRead(requestId: string, uid: string): Promise<void> {
+    const snap = await getDocs(query(messagesOf(requestId), where('read', '==', false)));
+    const theirs = snap.docs.filter((d) => d.get('senderId') !== uid);
+    for (let i = 0; i < theirs.length; i += 450) {
+      const batch = writeBatch(db());
+      theirs.slice(i, i + 450).forEach((d) => batch.update(d.ref, { read: true }));
+      await batch.commit();
+    }
   },
 
   // Only who sent it, its kind and when are stored in the clear; the text and

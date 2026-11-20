@@ -21,7 +21,8 @@ export async function notifyUsers(db, uids, type, params, data = {}) {
   const pushes = [];
   const batch = db.batch();
   for (const snap of userSnaps) {
-    if (!snap.exists) continue;
+    // A deleted account is kept for the records only: nothing more reaches it.
+    if (!snap.exists || snap.get('status') === 'deleted') continue;
     const locale = snap.get('locale') === 'en' ? 'en' : 'ar';
     const p = typeof params === 'function' ? params(snap.id) : params;
     const { title, body } = render(type, locale, p);

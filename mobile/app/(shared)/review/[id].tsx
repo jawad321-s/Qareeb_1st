@@ -19,16 +19,20 @@ import { useFont, useT } from '@/i18n';
 import { localizedTextAlign } from '@/i18n/rtl';
 import type { TranslationKey } from '@/i18n/translations';
 
-// What each side can praise: customers rate the artisan's work, artisans rate
-// how the customer was to work with.
-const ARTISAN_TAGS: TranslationKey[] = [
-  'review.tag.punctual', 'review.tag.professional', 'review.tag.fairPrice',
-  'review.tag.cleanWork', 'review.tag.friendly', 'review.tag.rehire',
-];
-const CUSTOMER_TAGS: TranslationKey[] = [
-  'review.ctag.respectful', 'review.ctag.clearRequest', 'review.ctag.paidOnTime',
-  'review.ctag.cooperative', 'review.ctag.onSite', 'review.ctag.recommend',
-];
+// Suggested words follow the stars: 1–2 stars what went wrong, 3 a mixed
+// verdict, 4–5 praise. Customers rate the artisan's work; artisans rate how
+// the customer was to work with.
+const ARTISAN_TAGS: Record<'low' | 'mid' | 'high', TranslationKey[]> = {
+  low: ['review.neg.late', 'review.neg.unprofessional', 'review.neg.overpriced', 'review.neg.messy', 'review.neg.rude', 'review.neg.unfinished'],
+  mid: ['review.mid.okWork', 'review.mid.slightlyLate', 'review.mid.pricey', 'review.mid.needsCare', 'review.mid.goodTalk'],
+  high: ['review.tag.punctual', 'review.tag.professional', 'review.tag.fairPrice', 'review.tag.cleanWork', 'review.tag.friendly', 'review.tag.rehire'],
+};
+const CUSTOMER_TAGS: Record<'low' | 'mid' | 'high', TranslationKey[]> = {
+  low: ['review.cneg.rude', 'review.cneg.paidLate', 'review.cneg.absent', 'review.cneg.unclear', 'review.cneg.changed', 'review.cneg.haggled'],
+  mid: ['review.cmid.ok', 'review.cmid.waited', 'review.cmid.moreDetail', 'review.cmid.polite', 'review.cmid.paid'],
+  high: ['review.ctag.respectful', 'review.ctag.clearRequest', 'review.ctag.paidOnTime', 'review.ctag.cooperative', 'review.ctag.onSite', 'review.ctag.recommend'],
+};
+const band = (stars: number) => (stars <= 2 ? 'low' : stars === 3 ? 'mid' : 'high');
 
 /**
  * Rate the other party of a completed job. Rating is mandatory for both the
@@ -83,13 +87,21 @@ export default function ReviewScreen() {
     );
   }
 
-  const TAGS = isArtisan ? CUSTOMER_TAGS : ARTISAN_TAGS;
+  const tagsFor = (stars: number) => (isArtisan ? CUSTOMER_TAGS : ARTISAN_TAGS)[band(stars)];
+  // No suggestions until a star is picked.
+  const TAGS = rating > 0 ? tagsFor(rating) : [];
   const toggle = (k: TranslationKey) => setTags((p) => (p.includes(k) ? p.filter((x) => x !== k) : [...p, k]));
+  // Changing the stars keeps only the picked words that still fit.
+  const rate = (stars: number) => {
+    setRating(stars);
+    const fit = tagsFor(stars);
+    setTags((p) => p.filter((k) => fit.includes(k)));
+  };
   const fallbackName = t(isArtisan ? 'review.theCustomer' : 'review.theArtisan');
 
   const submit = async () => {
     const note = comment.trim();
-    const praise = tags.map((k) => t(k)).join(' · ');
+    const picked = tags.map((k) => t(k)).join(' · ');
     try {
       await submitReview.mutateAsync({
         requestId: request.id,
@@ -97,7 +109,7 @@ export default function ReviewScreen() {
         targetId,
         role: user.role === 'artisan' ? 'artisan' : 'customer',
         rating,
-        comment: [praise, note].filter(Boolean).join('\n'),
+        comment: [picked, note].filter(Boolean).join('\n'),
       });
     } catch {
       toast('error', t('review.failed'));
@@ -130,7 +142,7 @@ export default function ReviewScreen() {
         <Text variant="caption" tone="muted">
           {t(isArtisan ? 'review.howCustomer' : 'review.how')}
         </Text>
-        <Rating value={rating} editable size={40} onChange={setRating} />
+        <Rating value={rating} editable size={40} onChange={rate} />
         {rating === 0 && (
           <Text variant="caption" tone="muted">
             {t('review.pickStars')}

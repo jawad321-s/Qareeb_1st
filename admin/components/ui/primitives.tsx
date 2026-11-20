@@ -81,7 +81,7 @@ export function StatusPill({ status }: { status: string }) {
   const map: Record<string, BadgeTone> = {
     PENDING: 'warning', ACCEPTED: 'info', ON_THE_WAY: 'info', WORKING: 'brand',
     COMPLETED: 'success', CANCELLED: 'danger',
-    active: 'success', suspended: 'danger', pending: 'warning',
+    active: 'success', suspended: 'danger', pending: 'warning', deleted: 'neutral',
     open: 'warning', reviewing: 'info', resolved: 'success', dismissed: 'neutral',
     new: 'warning', reviewed: 'info', added: 'success', declined: 'neutral',
     sending: 'info', sent: 'success', failed: 'danger',

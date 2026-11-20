@@ -267,8 +267,9 @@ export async function changePassword(current: string, next: string): Promise<voi
 }
 
 /**
- * Deletes the signed-in account for good (Cloud Function deleteMyAccount): the
- * login, the profile, notifications and photos. Refused while a job is in
+ * Deletes the signed-in account (Cloud Function deleteMyAccount): the login is
+ * switched off and the account kept in the records, marked deleted; the same
+ * number can sign up again as a new account. Refused while a job is in
  * progress. The caller signs out locally afterwards.
  */
 export async function deleteMyAccount(password: string): Promise<void> {

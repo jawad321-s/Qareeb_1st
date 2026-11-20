@@ -3,7 +3,7 @@
 // the pages keep their demo data (lib/mock-data.ts).
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useSyncExternalStore } from 'react';
 import { collection, onSnapshot } from 'firebase/firestore';
 import { getDb, isLive } from './firebase';
 import type { AdminUser, Complaint, PartyRole, Suggestion } from './mock-data';
@@ -18,19 +18,80 @@ export const toMillis = (v: any): number =>
 /** 'artisan' | 'customer' from a stored role, else undefined. */
 const partyRole = (v: unknown): PartyRole | undefined => (v === 'artisan' || v === 'customer' ? v : undefined);
 
-/** Live snapshot of a whole collection (null while loading, [] on error). */
-export function useCollection(name: string): LiveDoc[] | null {
-  const [docs, setDocs] = useState<LiveDoc[] | null>(null);
-  useEffect(() => {
-    const db = getDb();
-    if (!db || !isLive()) return;
-    return onSnapshot(
+// ── Shared live collections ────────────────────────────────────────────────
+// One Firestore listener per collection for the whole dashboard, kept after
+// the page that opened it closes. Pages used to open their own listeners and
+// drop them on leaving, so every move between pages downloaded the same
+// collections again and showed empty tables meanwhile; now a page opens with
+// what is already loaded and keeps updating live. A collection nobody has
+// looked at for a while stops listening (and starts again, with what it had,
+// when a page needs it).
+const KEEP_ALIVE_MS = 30 * 60 * 1000;
+
+interface LiveEntry {
+  docs: LiveDoc[] | null;
+  readers: Set<() => void>;
+  stop: (() => void) | null;
+  idle: ReturnType<typeof setTimeout> | null;
+}
+const liveCollections = new Map<string, LiveEntry>();
+
+function liveEntry(name: string): LiveEntry {
+  let e = liveCollections.get(name);
+  if (!e) {
+    e = { docs: null, readers: new Set(), stop: null, idle: null };
+    liveCollections.set(name, e);
+  }
+  return e;
+}
+
+function readCollection(name: string, onChange: () => void): () => void {
+  const e = liveEntry(name);
+  e.readers.add(onChange);
+  if (e.idle) {
+    clearTimeout(e.idle);
+    e.idle = null;
+  }
+  const db = getDb();
+  if (!e.stop && db && isLive()) {
+    const changed = (docs: LiveDoc[]) => {
+      e.docs = docs;
+      e.readers.forEach((cb) => cb());
+    };
+    e.stop = onSnapshot(
       collection(db, name),
-      (snap) => setDocs(snap.docs.map((d) => ({ ...d.data(), id: d.id }))),
-      () => setDocs([]),
+      (snap) => changed(snap.docs.map((d) => ({ ...d.data(), id: d.id }))),
+      () => changed([]),
     );
-  }, [name]);
-  return docs;
+  }
+  return () => {
+    e.readers.delete(onChange);
+    if (e.readers.size === 0 && e.stop && !e.idle) {
+      e.idle = setTimeout(() => {
+        e.stop?.();
+        e.stop = null;
+        e.idle = null;
+      }, KEEP_ALIVE_MS);
+    }
+  };
+}
+
+/** On sign-out: every listener stops and nothing loaded stays in memory. */
+export function resetLiveCollections() {
+  for (const e of liveCollections.values()) {
+    if (e.idle) clearTimeout(e.idle);
+    e.stop?.();
+  }
+  liveCollections.clear();
+}
+
+/** Live snapshot of a whole collection (null while loading, [] on error), shared by every page. */
+export function useCollection(name: string): LiveDoc[] | null {
+  return useSyncExternalStore(
+    useCallback((onChange: () => void) => readCollection(name, onChange), [name]),
+    () => liveCollections.get(name)?.docs ?? null,
+    () => null,
+  );
 }
 
 // ── Categories (same ids/names as the app catalog) ──────────────────────────
@@ -217,6 +278,8 @@ export function toAdminUsers(users: LiveDoc[], requests: LiveDoc[], profiles: Li
       joinedAt: toMillis(u.createdAt),
       featured: featured.has(u.id),
       suspendReason: u.suspendReason ?? undefined,
+      deletedAt: u.status === 'deleted' ? toMillis(u.deletedAt) || undefined : undefined,
+      deletedBy: u.status === 'deleted' ? (u.deletedBy === 'console' ? ('console' as const) : ('self' as const)) : undefined,
       services: u.role === 'artisan' ? services.get(u.id) ?? [] : undefined,
     }))
     .sort((a, b) => b.joinedAt - a.joinedAt);

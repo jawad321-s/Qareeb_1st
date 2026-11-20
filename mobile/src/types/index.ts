@@ -5,7 +5,7 @@
 
 export type Locale = 'ar' | 'en';
 export type UserRole = 'customer' | 'artisan' | 'admin';
-export type UserStatus = 'active' | 'suspended' | 'pending';
+export type UserStatus = 'active' | 'suspended' | 'pending' | 'deleted';
 
 export interface GeoLocation {
   latitude: number;

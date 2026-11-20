@@ -56,7 +56,7 @@ export default function BroadcastsPage() {
   // Who would receive it: active customer and artisan accounts.
   const counts = useMemo(() => {
     const list = (live ? users ?? [] : USERS).map((u) => ({ role: u.role as string, status: u.status as string | undefined }));
-    const active = list.filter((u) => u.status !== 'suspended');
+    const active = list.filter((u) => u.status !== 'suspended' && u.status !== 'deleted');
     const customers = active.filter((u) => u.role === 'customer').length;
     const artisans = active.filter((u) => u.role === 'artisan').length;
     return { all: customers + artisans, customers, artisans } as Record<Audience, number>;

@@ -43,7 +43,8 @@ export default function OverviewPage() {
   const artisanProfiles = useCollection('artisanProfiles');
   const complaints = useCollection('complaints');
 
-  const people = (users ?? []).filter((u) => u.role === 'customer' || u.role === 'artisan');
+  // Accounts their owners deleted are kept for the records, not counted.
+  const people = (users ?? []).filter((u) => (u.role === 'customer' || u.role === 'artisan') && u.status !== 'deleted');
   const artisans = people.filter((u) => u.role === 'artisan');
   const paid = subscriptions ?? [];
   const kpis = live

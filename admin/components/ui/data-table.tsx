@@ -58,7 +58,7 @@ export function DataTable<T>({ columns, data, searchPlaceholder }: DataTableProp
                       key={header.id}
                       onClick={header.column.getToggleSortingHandler()}
                       className={cn(
-                        'px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-muted',
+                        'px-4 py-3 text-start align-middle text-xs font-semibold uppercase tracking-wide text-muted',
                         header.column.getCanSort() && 'cursor-pointer select-none',
                       )}
                     >
@@ -84,7 +84,7 @@ export function DataTable<T>({ columns, data, searchPlaceholder }: DataTableProp
               table.getRowModel().rows.map((row) => (
                 <tr key={row.id} className="border-b border-base last:border-0 hover:bg-slate-500/5">
                   {row.getVisibleCells().map((cell) => (
-                    <td key={cell.id} className="px-4 py-3">
+                    <td key={cell.id} className="px-4 py-3 text-start align-middle">
                       {flexRender(cell.column.columnDef.cell, cell.getContext())}
                     </td>
                   ))}

@@ -235,6 +235,30 @@ export function useHideConversation() {
   });
 }
 
+/**
+ * While a chat is open, the other side's messages are marked read (also new
+ * ones as they arrive), and the home badge and the list follow.
+ */
+export function useMarkChatRead(requestId: string, uid: string | undefined, messages: ChatMessage[] | undefined) {
+  const qc = useQueryClient();
+  const unread = (messages ?? []).filter((m) => !m.read && m.senderId !== uid).length;
+  useEffect(() => {
+    if (!uid || !requestId || unread === 0) return;
+    let active = true;
+    api
+      .markChatRead(requestId, uid)
+      .then(() => {
+        if (!active) return;
+        qc.invalidateQueries({ queryKey: qk.messages(requestId) });
+        qc.invalidateQueries({ queryKey: ['conversations'] });
+      })
+      .catch(() => {});
+    return () => {
+      active = false;
+    };
+  }, [requestId, uid, unread, qc]);
+}
+
 export function useSendMessage(requestId: string) {
   const qc = useQueryClient();
   return useMutation({

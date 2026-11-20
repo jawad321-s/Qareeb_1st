@@ -29,7 +29,7 @@ export async function findArtisans(db, { categoryId, origin, radiusKm, excludeId
   return users
     .filter((u) => u.exists)
     .map((u) => ({ uid: u.id, ...u.data() }))
-    .filter((u) => u.role === 'artisan' && (!requireVerified || u.verified === true) && u.status !== 'suspended' && u.location)
+    .filter((u) => u.role === 'artisan' && (!requireVerified || u.verified === true) && !['suspended', 'deleted'].includes(u.status) && u.location)
     .filter((u) => !ownPhone || normalizePhone(u.phone) !== ownPhone)
     .map((u) => ({ uid: u.uid, distanceKm: distanceKm(origin, u.location), featured: featured.has(u.uid) }))
     .filter((u) => u.distanceKm <= radiusKm + (u.featured ? FEATURED_BONUS_KM : 0))

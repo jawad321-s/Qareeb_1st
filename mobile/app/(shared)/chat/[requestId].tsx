@@ -10,7 +10,7 @@ import { Header } from '@/components/ui/Header';
 import { Text } from '@/components/ui/Text';
 import { Icon } from '@/components/ui/Icon';
 import { Avatar } from '@/components/ui/Avatar';
-import { useMessages, useRequest, useSendMessage, useUser } from '@/hooks/queries';
+import { useMarkChatRead, useMessages, useRequest, useSendMessage, useUser } from '@/hooks/queries';
 import { useToast } from '@/components/feedback/Toast';
 import { isChatOpen } from '@/lib/requestRules';
 import { config } from '@/lib/config';
@@ -29,6 +29,8 @@ export default function Chat() {
   const { requestId } = useLocalSearchParams<{ requestId: string }>();
   const me = useAuth((s) => s.user)!;
   const { data: messages } = useMessages(requestId!);
+  // Opening the chat reads it: the home screen stops counting it as new.
+  useMarkChatRead(requestId!, me.uid, messages);
   const send = useSendMessage(requestId!);
   const { t, isRTL } = useT();
   const font = useFont();

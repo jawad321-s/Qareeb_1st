@@ -8,9 +8,16 @@
 // A suspended account can still sign in, but only to the "account suspended"
 // screen and its chat with the Qareeb team: the `suspended` claim on its token
 // makes the security rules refuse everything else.
+//
+// Suspending needs the admin's password again: the dashboard re-checks it just
+// before, and the sign-in on the token must be that recent. An account its
+// owner deleted (status "deleted") is only kept for the records: no actions.
 import { HttpsError } from 'firebase-functions/v2/https';
 
 export const ACTIONS = ['suspend', 'reactivate', 'verify', 'unverify'];
+
+/** How long ago the admin may have entered their password to suspend an account. */
+const RECENT_LOGIN_S = 5 * 60;
 
 /** Auth errors for an account that only exists in Firestore are not failures here. */
 const ignoreMissing = (e) => {
@@ -20,21 +27,24 @@ const ignoreMissing = (e) => {
 /**
  * @param db      Firestore (admin)
  * @param auth    Auth (admin)
- * @param caller  { uid, role, email } from the callable's token, or null
+ * @param caller  { uid, role, email, authTime } from the callable's token, or null
  * @param data    { action, uid, reason? }
  */
-export async function manageUser(db, auth, caller, data) {
+export async function manageUser(db, auth, caller, data, now = Date.now()) {
   if (!caller || caller.role !== 'admin') throw new HttpsError('permission-denied', 'Admins only.');
   const { action, uid } = data ?? {};
   if (!ACTIONS.includes(action)) throw new HttpsError('invalid-argument', 'Unknown action.');
   if (typeof uid !== 'string' || !uid || uid.includes('/')) throw new HttpsError('invalid-argument', 'A user id is required.');
   if (uid === caller.uid) throw new HttpsError('failed-precondition', 'self');
+  if (action === 'suspend' && (!caller.authTime || now / 1000 - caller.authTime > RECENT_LOGIN_S)) {
+    throw new HttpsError('failed-precondition', 'recent-login');
+  }
 
   const userRef = db.collection('users').doc(uid);
   const user = await userRef.get();
   if (!user.exists) throw new HttpsError('not-found', 'No such user.');
+  if (user.get('status') === 'deleted') throw new HttpsError('failed-precondition', 'deleted');
   const role = user.get('role');
-  const now = Date.now();
   let result = {};
 
   switch (action) {

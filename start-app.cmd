@@ -20,7 +20,10 @@ rem block that cmd parses before running any of them.
   rem any phone (whatever Expo account it is signed in to, or none) opens
   rem the project. Without it, a computer signed in to an Expo account that
   rem isn't a member of the project's organization can't serve it.
-  set EXPO_OFFLINE=1
+  rem Not with the tunnel (start-app-tunnel): it needs Expo online, so
+  rem "offline" would leave it off and fall back to the Wi-Fi address.
+  set EXPO_OFFLINE=
+  if not defined QAREEB_TUNNEL set EXPO_OFFLINE=1
   call npx expo start -c %*
   pause
   exit /b 0

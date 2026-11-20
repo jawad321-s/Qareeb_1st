@@ -18,6 +18,11 @@ main() {
   # phone (whatever Expo account it is signed in to, or none) opens the
   # project. Without it, a computer signed in to an Expo account that isn't a
   # member of the project's organization can't serve it.
-  EXPO_OFFLINE=1 npx expo start -c "$@"
+  # Not with the tunnel (start-app-tunnel): it needs Expo online, so
+  # "offline" would leave it off and fall back to the Wi-Fi address.
+  case " $* " in
+    *" --tunnel "*) npx expo start -c "$@" ;;
+    *) EXPO_OFFLINE=1 npx expo start -c "$@" ;;
+  esac
 }
 if ! main "$@"; then echo; echo "Something went wrong. Take a screenshot of this window and send it."; read -r -p "Press Enter to close."; exit 1; fi; exit 0

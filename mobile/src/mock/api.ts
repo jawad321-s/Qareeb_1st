@@ -10,7 +10,7 @@ import {
   MOCK_REVIEWS,
   MOCK_SERVICES,
 } from './data';
-import { NEXT_STATUS, canCancelRequest, isChatOpen, isOverdue } from '@/lib/requestRules';
+import { NEXT_STATUS, RequestClosedError, canCancelRequest, isChatOpen, isOverdue } from '@/lib/requestRules';
 import { sortOffers } from '@/lib/dispatch';
 import { completedRecord, rejectedRecord } from '@/lib/jobHistory';
 import { kv } from '@/lib/mmkv';
@@ -120,6 +120,7 @@ export const mockApi = {
     await delay(500);
     const offer = offers.find((o) => o.id === offerId);
     if (!offer) return;
+    if (requests.find((r) => r.id === offer.requestId)?.status !== 'PENDING' || offer.status !== 'PENDING') throw new RequestClosedError();
     offers = offers.map((o) =>
       o.requestId === offer.requestId
         ? o.id === offerId

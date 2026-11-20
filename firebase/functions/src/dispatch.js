@@ -75,6 +75,8 @@ export async function startDispatch(db, requestId, request, now = Date.now()) {
         origin: request.location,
         radiusKm: INITIAL_RADIUS_KM,
         customerPhone: await customerPhoneOf(db, request.customerId),
+        // A request posted again after its artisan cancelled skips that artisan.
+        excludeIds: request.excludedArtisanIds ?? [],
         now,
       })
     : [];
@@ -125,7 +127,7 @@ export async function runDispatchTick(db, now = Date.now()) {
       categoryId: r.categoryId,
       origin: r.location,
       radiusKm,
-      excludeIds: already,
+      excludeIds: [...already, ...(r.excludedArtisanIds ?? [])],
       customerPhone: await customerPhoneOf(db, r.customerId),
       now,
     });
@@ -153,7 +155,7 @@ export async function offerOpenRequests(db, artisanUid, categoryIds, now = Date.
     for (const doc of open.docs) {
       const r = doc.data();
       if (!r.dispatch || !r.location || now - r.dispatch.startedAt >= TIMEOUT_MS) continue;
-      if ((r.notifiedArtisanIds ?? []).includes(artisanUid)) continue;
+      if ((r.notifiedArtisanIds ?? []).includes(artisanUid) || (r.excludedArtisanIds ?? []).includes(artisanUid)) continue;
       const reachable = await findArtisans(db, {
         categoryId,
         origin: r.location,

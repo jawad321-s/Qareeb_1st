@@ -28,6 +28,7 @@ import { PersonRow } from '@/components/domain/PersonRow';
 import { ReportLink } from '@/components/domain/ReportLink';
 import { StatusBadge } from '@/components/domain/StatusBadge';
 import { TrackingTimeline } from '@/components/domain/TrackingTimeline';
+import { openDirections } from '@/lib/directions';
 import { useToast } from '@/components/feedback/Toast';
 import { categoryById } from '@/constants/categories';
 import { config } from '@/lib/config';
@@ -217,6 +218,16 @@ function JobDetail() {
               </Text>
             </View>
           </View>
+          {/* Directions to the customer in the phone's maps app. */}
+          {request.location && (
+            <Button
+              label={t('job.directions')}
+              variant="outline"
+              size="sm"
+              iconLeft="navigation"
+              onPress={() => openDirections(request.location!)}
+            />
+          )}
         </Card>
       </Animated.View>
 

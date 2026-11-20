@@ -1,0 +1,13 @@
+{
+  "name": "qareeb-rules-test",
+  "private": true,
+  "description": "Firestore security rules tests, run against the emulator: cd firebase && npx firebase-tools emulators:exec --only firestore \"cd rules-test && npm test\"",
+  "type": "module",
+  "scripts": {
+    "test": "node --test *.test.js"
+  },
+  "devDependencies": {
+    "@firebase/rules-unit-testing": "6.0.0",
+    "firebase": "13.0.0"
+  }
+}

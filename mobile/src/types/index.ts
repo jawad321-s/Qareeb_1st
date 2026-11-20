@@ -130,6 +130,8 @@ export interface ServiceRequest {
   /** Set by Cloud Functions: current search radius and response deadline. */
   dispatch?: { radiusKm: number; startedAt: number; expiresAt: number };
   notifiedArtisanIds?: string[];
+  /** Artisans this request is never sent to: posted again after one of them cancelled the job. */
+  excludedArtisanIds?: string[];
   /** Set when the 30-minute window ran out: NO_OFFERS (none came) or EXPIRED (none accepted). */
   cancelReason?: 'NO_OFFERS' | 'EXPIRED' | 'TOO_MANY_OPEN';
   /** Why the customer or the artisan cancelled (lib/reasons), and their own words. */

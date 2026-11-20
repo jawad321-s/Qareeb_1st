@@ -18,7 +18,7 @@ import type { Reason } from '@/lib/reasons';
 import { MOCK_CUSTOMER } from '@/mock/data';
 import { servicesOf, toServiceId } from '@/constants/services';
 import { allCategories } from '@/constants/categories';
-import { ACTIVE_STATUSES, MAX_OPEN_REQUESTS, NEXT_STATUS, OPEN_STATUSES, OpenRequestLimitError, canCancelRequest, isOverdue } from '@/lib/requestRules';
+import { ACTIVE_STATUSES, MAX_OPEN_REQUESTS, NEXT_STATUS, OPEN_STATUSES, OpenRequestLimitError, RequestClosedError, canCancelRequest, isOverdue } from '@/lib/requestRules';
 import { completedRecord, rejectedRecord } from '@/lib/jobHistory';
 import { uploadRequestPhoto } from '@/services/media.service';
 
@@ -173,8 +173,9 @@ export const firebaseApi: typeof mockApi = {
     // policy locally (category, verified, radius growing over time).
     const me = useAuth.getState().user;
     if (!me) return [];
+    // The rules let an artisan read only the requests sent to them.
     const [snap, profile, self] = await Promise.all([
-      getDocs(query(collection(db(), 'requests'), where('status', '==', 'PENDING'), orderBy('createdAt', 'desc'))),
+      getDocs(query(collection(db(), 'requests'), where('notifiedArtisanIds', 'array-contains', me.uid))),
       getDoc(doc(db(), 'artisanProfiles', me.uid)),
       getDoc(doc(db(), 'users', me.uid)),
     ]);
@@ -189,7 +190,8 @@ export const firebaseApi: typeof mockApi = {
     const now = Date.now();
     return snap.docs
       .map((d) => mapRequest(d.id, d.data()))
-      .filter((r) => isVisibleToArtisan(r, { ...me, verified }, categoryIds, now, availability, featured));
+      .filter((r) => r.status === 'PENDING' && isVisibleToArtisan(r, { ...me, verified }, categoryIds, now, availability, featured))
+      .sort((a, b) => b.createdAt - a.createdAt);
   },
 
   async createRequest(input): Promise<ServiceRequest> {
@@ -241,6 +243,10 @@ export const firebaseApi: typeof mockApi = {
     const offSnap = await getDoc(doc(db(), 'offers', offerId));
     if (!offSnap.exists()) return;
     const offer = offSnap.data() as Offer;
+    // Taken only while the request still waits for offers (not once it was
+    // cancelled or expired, e.g. with the page left open); the rules agree.
+    const reqSnap = await getDoc(doc(db(), 'requests', offer.requestId));
+    if (!reqSnap.exists() || reqSnap.data().status !== 'PENDING' || offer.status !== 'PENDING') throw new RequestClosedError();
     const batch = writeBatch(db());
     // Accept this offer, reject the siblings.
     const siblings = await getDocs(

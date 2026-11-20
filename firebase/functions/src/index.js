@@ -14,6 +14,7 @@
 //  • deleteMyAccount    → a user deletes their own account from the app (callable);
 //                         kept and marked deleted (soft delete)
 //  • onAuthUserDeleted  → a login removed in the Firebase console: account marked deleted
+//  • dispatchTick also reminds artisans whose plan ends within 3 days, and when it ended
 //  • onBroadcastCreated → a system notification from the dashboard to everyone,
 //                         customers or artisans
 //  • onSupportMessageCreated → the team answered in the support chat: tell the user
@@ -38,6 +39,7 @@ import { removePlainChats } from './chatCleanup.js';
 import { deleteOwnAccount, onLoginDeleted, sweepDeletedLogins } from './accountDeletion.js';
 import { notifyVerificationDecision } from './verification.js';
 import { accountExists, resetPasswordWithPhone as resetPassword } from './passwordReset.js';
+import { remindEndingPlans } from './planReminders.js';
 
 initializeApp();
 const db = getFirestore();
@@ -60,6 +62,8 @@ export const dispatchTick = onSchedule({ schedule: 'every 1 minutes', timeZone: 
   await migrateSuspendedLogins(db, getAuth()).catch((e) => logger.error('Suspended-login migration failed', e));
   // Hourly: accounts whose login was removed in the console are marked deleted.
   await sweepDeletedLogins(db, getAuth()).catch((e) => logger.error('Deleted-login sweep failed', e));
+  // Hourly: artisans whose plan ends within 3 days, or has ended, are told (once each).
+  await remindEndingPlans(db).catch((e) => logger.error('Plan reminders failed', e));
   await runDispatchTick(db);
 });
 

@@ -176,3 +176,13 @@ test('a customer over the open-request limit: the request is cancelled before an
   assert.ok((await get('m_next')).dispatch);
   await db.doc('settings/platform').update({ maxOpenRequests: null });
 });
+
+test('posted again after the artisan cancelled: it never goes back to that artisan', async () => {
+  const t0 = 1_000_000;
+  await startDispatch(db, 'r_again', await newRequest('r_again', { excludedArtisanIds: ['a_1km'] }), t0);
+  const r = await get('r_again');
+  assert.deepEqual(r.notifiedArtisanIds, []);
+  // Nor when the search widens.
+  await runDispatchTick(db, t0 + 8 * MIN);
+  assert.ok(!(await get('r_again')).notifiedArtisanIds.includes('a_1km'));
+});

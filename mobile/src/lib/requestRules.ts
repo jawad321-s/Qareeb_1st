@@ -34,6 +34,13 @@ export class OpenRequestLimitError extends Error {
   }
 }
 
+/** An offer was taken on a request that no longer waits for offers (cancelled, expired or already taken). */
+export class RequestClosedError extends Error {
+  constructor() {
+    super('request-closed');
+  }
+}
+
 export function isActiveJob(status: RequestStatus): boolean {
   return ACTIVE_STATUSES.includes(status);
 }

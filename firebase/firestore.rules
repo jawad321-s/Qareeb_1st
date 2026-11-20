@@ -130,31 +130,86 @@ service cloud.firestore {
 
     // ── requests/{id} ────────────────────────────────────────────────────────
     match /requests/{requestId} {
-      // Owner and admins always read. Artisans can read PENDING requests (to make
-      // offers) and any request they have been accepted for.
+      // Owner and admins always read. An artisan reads a request only once it
+      // was sent to them (Cloud Functions list them in notifiedArtisanIds) or
+      // they were hired for it: not every open request in the area, with the
+      // customer's location.
       allow read: if isSignedIn() && (
                     existing().customerId == uid()
                     || isAdmin()
-                    || (isArtisan() && (existing().status == 'PENDING'
+                    || (isArtisan() && (uid() in existing().notifiedArtisanIds
                           || existing().acceptedArtisanId == uid())));
-      // Dispatch state (radius, who was notified) is owned by Cloud Functions.
-      function dispatchUntouched() {
-        return !incoming().diff(existing()).affectedKeys().hasAny(['dispatch', 'notifiedArtisanIds']);
+      // Only the steps of a request's life, by the person each belongs to.
+      // Everything else (dispatch, expiry with the functions running) is done
+      // by Cloud Functions, which the rules don't apply to.
+      function changed() {
+        return incoming().diff(existing()).affectedKeys();
+      }
+      function byCustomer() {
+        return existing().customerId == uid();
+      }
+      function byHired() {
+        return existing().get('acceptedArtisanId', '') == uid();
+      }
+      // The customer takes one of the offers on it, while it still waits for
+      // offers: not after it was cancelled or expired.
+      function acceptsOffer() {
+        let offer = get(/databases/$(database)/documents/offers/$(incoming().acceptedOfferId)).data;
+        return byCustomer()
+          && existing().status == 'PENDING' && incoming().status == 'ACCEPTED'
+          && changed().hasOnly(['status', 'acceptedOfferId', 'acceptedArtisanId', 'updatedAt'])
+          && offer.requestId == requestId
+          && offer.artisanId == incoming().acceptedArtisanId
+          && offer.status == 'PENDING';
+      }
+      // Called off before the work starts: by the customer, or by the hired
+      // artisan once hired; who did it is recorded.
+      function cancels() {
+        return (byCustomer() || (byHired() && existing().status != 'PENDING'))
+          && existing().status in ['PENDING', 'ACCEPTED', 'ON_THE_WAY']
+          && incoming().status == 'CANCELLED'
+          && incoming().cancelledBy == uid()
+          && changed().hasOnly(['status', 'cancelledBy', 'cancelChoice', 'cancelNote', 'updatedAt']);
+      }
+      // The hired artisan moves the job on, one step at a time.
+      function advances() {
+        return byHired()
+          && changed().hasOnly(['status', 'updatedAt', 'completedAt'])
+          && ((existing().status == 'ACCEPTED' && incoming().status == 'ON_THE_WAY')
+            || (existing().status == 'ON_THE_WAY' && incoming().status == 'WORKING')
+            || (existing().status == 'WORKING' && incoming().status == 'COMPLETED'));
+      }
+      // A job nobody finished is completed 48 hours after its last change,
+      // by whichever side opens the app first.
+      function autoCompletes() {
+        return (byCustomer() || byHired())
+          && existing().status in ['ACCEPTED', 'ON_THE_WAY', 'WORKING']
+          && incoming().status == 'COMPLETED' && incoming().autoCompleted == true
+          && request.time.toMillis() - existing().updatedAt >= 48 * 3600 * 1000
+          && changed().hasOnly(['status', 'completedAt', 'updatedAt', 'autoCompleted']);
+      }
+      // Without Cloud Functions (no dispatch on it): the customer's app closes
+      // a request nobody answered in time.
+      function expires() {
+        return byCustomer() && existing().status == 'PENDING' && !('dispatch' in existing())
+          && incoming().status == 'CANCELLED' && incoming().cancelReason in ['EXPIRED', 'NO_OFFERS']
+          && changed().hasOnly(['status', 'cancelReason', 'updatedAt']);
+      }
+      // An artisan who just quoted bumps the offer count by one.
+      function countsOffer() {
+        return isArtisan() && existing().status == 'PENDING'
+          && changed().hasOnly(['offerCount', 'updatedAt'])
+          && incoming().offerCount == existing().offerCount + 1;
       }
       allow create: if isSignedIn()
                     && incoming().customerId == uid()
                     && incoming().status == 'PENDING'
                     && incoming().offerCount == 0
-                    && !incoming().keys().hasAny(['dispatch', 'notifiedArtisanIds'])
+                    && !incoming().keys().hasAny(['dispatch', 'notifiedArtisanIds', 'acceptedArtisanId', 'acceptedOfferId'])
                     && isValidString(incoming().title, 120)
                     && isValidString(incoming().description, 2000);
-      allow update: if isAdmin() || (isSignedIn() && dispatchUntouched() && (
-                      existing().customerId == uid()   // cancel / accept an offer
-                      || (isArtisan() && existing().acceptedArtisanId == uid()) // status progression
-                      // Any artisan bumps the counter by one when sending an offer.
-                      || (isArtisan() && existing().status == 'PENDING'
-                          && incoming().diff(existing()).affectedKeys().hasOnly(['offerCount', 'updatedAt'])
-                          && incoming().offerCount == existing().offerCount + 1)));
+      allow update: if isAdmin() || (isSignedIn() && (
+                      acceptsOffer() || cancels() || advances() || autoCompletes() || expires() || countsOffer()));
       allow delete: if isAdmin();
 
       match /messages/{messageId} {
@@ -220,10 +275,22 @@ service cloud.firestore {
           && incoming().price is number && incoming().price > 0
           && get(/databases/$(database)/documents/requests/$(existing().requestId)).data.status == 'WORKING';
       }
+      // The customer accepts an offer (only while the request still waits for
+      // offers) or turns it down, and records a cancellation on it; the
+      // price and the rest stay as the artisan sent them.
+      function customerDecides() {
+        let accepting = incoming().status == 'ACCEPTED' && existing().status != 'ACCEPTED';
+        return existing().customerId == uid()
+          && incoming().diff(existing()).affectedKeys().hasOnly(['status', 'closedReason', 'rejectChoice', 'rejectNote', 'requestStatus', 'requestCancelChoice', 'requestCancelNote'])
+          && incoming().status in [existing().status, 'REJECTED', 'ACCEPTED']
+          && (!accepting || (existing().status == 'PENDING'
+                && get(/databases/$(database)/documents/requests/$(existing().requestId)).data.status == 'PENDING'));
+      }
       allow update: if isSignedIn() && (
-                      (existing().artisanId == uid() && incoming().status == 'WITHDRAWN')
+                      (existing().artisanId == uid() && existing().status == 'PENDING' && incoming().status == 'WITHDRAWN'
+                        && incoming().diff(existing()).affectedKeys().hasOnly(['status', 'updatedAt']))
                       || priceEditByArtisan()
-                      || existing().customerId == uid()
+                      || customerDecides()
                       || isAdmin());
       allow delete: if isAdmin();
     }

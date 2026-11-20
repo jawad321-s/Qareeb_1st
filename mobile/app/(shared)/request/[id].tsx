@@ -21,7 +21,7 @@ import { usePastArtisans } from '@/hooks/usePastArtisans';
 import { useToast } from '@/components/feedback/Toast';
 import { categoryById } from '@/constants/categories';
 import { formatMoney } from '@/lib/format';
-import { AUTO_COMPLETE_HOURS, OpenRequestLimitError, canCancelRequest } from '@/lib/requestRules';
+import { AUTO_COMPLETE_HOURS, OpenRequestLimitError, canCancelRequest, RequestClosedError } from '@/lib/requestRules';
 import { ReasonSheet } from '@/components/feedback/ReasonSheet';
 import { reasonText, type Reason } from '@/lib/reasons';
 import { shownPhotos } from '@/services/media.service';
@@ -67,14 +67,22 @@ export default function RequestDetail() {
 
   const onAccept = async (offerId: string) => {
     setAcceptingId(offerId);
-    await accept.mutateAsync(offerId);
-    setAcceptingId(null);
-    toast('success', t('offer.acceptedToast'));
+    try {
+      await accept.mutateAsync(offerId);
+      toast('success', t('offer.acceptedToast'));
+    } catch (e) {
+      // Cancelled or expired meanwhile (the page was left open): it can't be taken now.
+      toast('error', t(e instanceof RequestClosedError ? 'offer.requestClosed' : 'offer.acceptFailed'));
+    } finally {
+      setAcceptingId(null);
+    }
   };
 
   // The window ran out with no deal: post the same request again (same
   // service, title, description, photos and place) instead of typing it anew.
   const expired = isCancelled && (request.cancelReason === 'NO_OFFERS' || request.cancelReason === 'EXPIRED');
+  // The hired artisan called it off: the customer can post it again to the others.
+  const byArtisan = isCancelled && !!request.acceptedArtisanId && !!request.cancelledBy && request.cancelledBy !== request.customerId;
   const onRepost = async () => {
     try {
       const next = await repost.mutateAsync({
@@ -86,6 +94,8 @@ export default function RequestDetail() {
         images: request.images ?? [],
         location: request.location,
         preferredTime: Date.now(),
+        // Posted again because the artisan cancelled: it doesn't go back to them.
+        ...(byArtisan ? { excludedArtisanIds: [...(request.excludedArtisanIds ?? []), request.acceptedArtisanId!] } : {}),
       });
       toast('success', t('req.reposted'));
       router.replace(`/(shared)/request/${next.id}`);
@@ -211,6 +221,14 @@ export default function RequestDetail() {
             <Text variant="caption" tone="muted">
               {t('req.reason')} {reasonText(t, request.cancelChoice, request.cancelNote)}
             </Text>
+          )}
+          {byArtisan && uid === request.customerId && (
+            <View style={{ gap: 8, marginTop: 8 }}>
+              <Text variant="caption" tone="muted">
+                {t('req.repostAfterArtisan')}
+              </Text>
+              <Button label={t('req.repost')} iconLeft="send" size="sm" loading={repost.isPending} onPress={onRepost} />
+            </View>
           )}
         </Card>
       )}

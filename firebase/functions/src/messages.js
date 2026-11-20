@@ -117,6 +117,27 @@ export const MESSAGES = {
     ar: (p) => ({ title: 'رد من فريق قريب', body: clip(p.text ?? '') }),
     en: (p) => ({ title: 'Reply from the Qareeb team', body: clip(p.text ?? '') }),
   },
+  // The artisan's plan ends in a few days / has ended (planReminders.js).
+  planEndingSoon: {
+    ar: (p) => ({
+      title: p.trial ? 'تجربتك المجانية قاربت على الانتهاء' : 'اشتراكك قارب على الانتهاء',
+      body: `${p.days === 1 ? 'باقي يوم واحد' : p.days === 2 ? 'باقي يومان' : `باقي ${p.days} أيام`}. جدّد اشتراكك لتستمر في تقديم العروض على الطلبات.`,
+    }),
+    en: (p) => ({
+      title: p.trial ? 'Your free trial ends soon' : 'Your plan ends soon',
+      body: `${p.days === 1 ? '1 day' : `${p.days} days`} left. Renew to keep sending offers on requests.`,
+    }),
+  },
+  planEnded: {
+    ar: (p) => ({
+      title: p.trial ? 'انتهت تجربتك المجانية' : 'انتهى اشتراكك',
+      body: 'لا يمكنك تقديم عروض جديدة حتى تشترك. اختر خطة من صفحة الاشتراك.',
+    }),
+    en: (p) => ({
+      title: p.trial ? 'Your free trial has ended' : 'Your plan has ended',
+      body: "You can't send new offers until you subscribe. Pick a plan on the Subscription page.",
+    }),
+  },
   becameFeatured: {
     ar: (p) => ({ title: 'مبروك! صرت حرفياً مميزاً ⭐', body: `أكملت ${p.jobs} طلبات وتقييمك أعلى من ${p.rating ?? 4}، فصار عندك شارة "حرفي مميز" وتصلك الطلبات الجديدة قبل غيرك.` }),
     en: (p) => ({ title: "Congratulations, you're a featured artisan ⭐", body: `${p.jobs} jobs done and a rating above ${p.rating ?? 4}: you now carry the "Featured" badge and get new requests before others.` }),

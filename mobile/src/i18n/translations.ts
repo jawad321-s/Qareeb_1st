@@ -1087,7 +1087,7 @@ export const translations = {
     'settings.appearance': 'المظهر',
     'settings.language': 'اللغة',
     'settings.light': 'فاتح',
-    'settings.dark': 'غامق',
+    'settings.dark': 'داكن',
     'settings.system': 'النظام',
     'settings.arabic': 'العربية',
     'settings.english': 'English',

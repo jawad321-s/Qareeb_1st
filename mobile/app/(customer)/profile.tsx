@@ -23,7 +23,7 @@ export default function Profile() {
   const user = useAuth((s) => s.user);
   const signOut = useAuth((s) => s.signOut);
   const { mode, setMode } = useThemeStore();
-  const { t, locale, toggle } = useT();
+  const { t, locale, setLocale } = useT();
   // Every request this customer has posted, whatever its status.
   const requests = useMyRequests(user?.uid ?? '');
   const rating = useMyRating();
@@ -44,8 +44,22 @@ export default function Profile() {
     {
       title: t('profile.preferences'),
       items: [
-        { icon: isDark ? 'moon' : 'sun', label: `${t('profile.theme')}: ${t(`settings.${mode}` as any)}`, onPress: () => setMode(mode === 'dark' ? 'light' : mode === 'light' ? 'system' : 'dark') },
-        { icon: 'globe', label: `${t('profile.language')}: ${locale === 'ar' ? 'العربية' : 'English'}`, onPress: toggle },
+        {
+          icon: isDark ? 'moon' : 'sun',
+          label: `${t('profile.theme')}: ${t(`settings.${mode}` as any)}`,
+          // Tapped: the three choices open beside the row.
+          choices: (['system', 'dark', 'light'] as const).map((k) => ({ key: k, label: t(`settings.${k}`), icon: k === 'system' ? 'monitor' : k === 'dark' ? 'moon' : 'sun', selected: mode === k })),
+          onChoose: (k) => setMode(k as typeof mode),
+        },
+        {
+          icon: 'globe',
+          label: `${t('profile.language')}: ${locale === 'ar' ? 'العربية' : 'English'}`,
+          choices: [
+            { key: 'en', label: 'English', selected: locale === 'en' },
+            { key: 'ar', label: 'العربية', selected: locale === 'ar' },
+          ],
+          onChoose: (k) => setLocale(k as typeof locale),
+        },
         { icon: 'settings', label: t('profile.settings'), route: '/(shared)/settings' },
       ],
     },

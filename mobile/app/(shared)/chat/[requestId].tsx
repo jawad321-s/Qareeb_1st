@@ -1,11 +1,11 @@
 import React, { useMemo, useRef, useState } from 'react';
-import { ActivityIndicator, Alert, Linking, Modal, View, ScrollView, Pressable, KeyboardAvoidingView, Platform, useWindowDimensions, type ScrollViewInstance } from 'react-native';
+import { ActivityIndicator, Alert, Linking, View, ScrollView, Pressable, KeyboardAvoidingView, Platform, useWindowDimensions, type ScrollViewInstance } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { Image } from 'expo-image';
 import * as ImagePicker from 'expo-image-picker';
 import * as Haptics from 'expo-haptics';
-import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
-import Animated, { FadeInUp, ZoomIn } from 'react-native-reanimated';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import Animated, { FadeInUp } from 'react-native-reanimated';
 import { StatusBar } from 'expo-status-bar';
 import { Header } from '@/components/ui/Header';
 import { Text } from '@/components/ui/Text';
@@ -13,6 +13,7 @@ import { TextArea } from '@/components/ui/TextArea';
 import { Icon, type IconName } from '@/components/ui/Icon';
 import { Avatar } from '@/components/ui/Avatar';
 import { usePhotoViewer } from '@/components/ui/PhotoViewer';
+import { AnchoredMenu, measureAnchor, type AnchorRect, type Measurable } from '@/components/ui/AnchoredMenu';
 import { useDeleteMessage, useMarkChatRead, useMessages, useRequest, useSendMessage, useUser } from '@/hooks/queries';
 import { useToast } from '@/components/feedback/Toast';
 import { isChatOpen } from '@/lib/requestRules';
@@ -27,9 +28,6 @@ import { localizedTextAlign } from '@/i18n/rtl';
 import { useDeleteChat } from '@/components/domain/ConversationList';
 import { useNow } from '@/hooks/useNow';
 import type { ChatMessage } from '@/types';
-
-/** A view whose place on screen can be read (a message bubble). */
-type Measurable = { measureInWindow?: (cb: (x: number, y: number, width: number, height: number) => void) => void };
 
 /** Photos sent together in one message, at most. */
 const MAX_PHOTOS = 10;
@@ -49,7 +47,7 @@ export default function Chat() {
   useMarkChatRead(requestId!, me.uid, messages);
   const send = useSendMessage(requestId!);
   const remove = useDeleteMessage(requestId!);
-  const { t, isRTL, locale } = useT();
+  const { t, isRTL } = useT();
   const font = useFont();
   const [text, setText] = useState('');
   // Photos picked or taken, shown above the field until sent (or removed).
@@ -57,10 +55,9 @@ export default function Chat() {
   const [replyTo, setReplyTo] = useState<ChatMessage | null>(null);
   // The message whose long-press menu is open, and where its bubble sits on
   // screen: the menu opens right beside it.
-  const [menuFor, setMenuFor] = useState<{ m: ChatMessage; x: number; y: number; w: number; h: number } | null>(null);
-  const bubbles = useRef<Record<string, Measurable | null>>({});
+  const [menuFor, setMenuFor] = useState<{ m: ChatMessage; anchor: AnchorRect } | null>(null);
+  const bubbles = useRef<Record<string, Measurable>>({});
   const win = useWindowDimensions();
-  const insets = useSafeAreaInsets();
   const [sending, setSending] = useState(false);
   const [highlight, setHighlight] = useState<string | null>(null);
   const scrollRef = useRef<ScrollViewInstance>(null);
@@ -177,9 +174,7 @@ export default function Chat() {
   const openMenu = (m: ChatMessage) => {
     if (!menuActions(m).length) return;
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium).catch(() => {});
-    const node = bubbles.current[m.id];
-    if (node?.measureInWindow) node.measureInWindow((x, y, w, h) => setMenuFor({ m, x, y, w, h }));
-    else setMenuFor({ m, x: win.width / 2 - 100, y: win.height / 2, w: 200, h: 0 });
+    measureAnchor(bubbles.current[m.id], (anchor) => setMenuFor({ m, anchor }), { x: win.width / 2 - 100, y: win.height / 2, w: 200, h: 0 });
   };
 
   const deleteForAll = async (m: ChatMessage) => {
@@ -252,7 +247,7 @@ export default function Chat() {
                 {!mine && <Avatar uri={other?.photoUrl} name={other?.fullName} size={28} />}
                 <Pressable
                   ref={(node) => {
-                    bubbles.current[m.id] = node as Measurable | null;
+                    bubbles.current[m.id] = node as Measurable;
                   }}
                   onLongPress={() => openMenu(m)}
                   delayLongPress={300}
@@ -410,76 +405,14 @@ export default function Chat() {
         )}
       </KeyboardAvoidingView>
 
-      {/* Long-press menu, beside the message: below it, or above when there
-          is no room below; on the message's own side. */}
-      <Modal visible={!!menuFor} transparent animationType="fade" statusBarTranslucent onRequestClose={() => setMenuFor(null)}>
-        <Pressable onPress={() => setMenuFor(null)} style={{ flex: 1, backgroundColor: 'rgba(15,23,42,0.35)', direction: 'ltr' }}>
-          {menuFor && (() => {
-            const actions = menuActions(menuFor.m);
-            const W = 210;
-            const H = actions.length * 50 + 12;
-            const below = menuFor.y + menuFor.h + 8;
-            const top = below + H <= win.height - insets.bottom - 12 ? below : Math.max(insets.top + 8, menuFor.y - 8 - H);
-            const onLeft = menuFor.x + menuFor.w / 2 < win.width / 2;
-            const left = onLeft ? Math.max(12, menuFor.x) : Math.min(win.width - 12 - W, menuFor.x + menuFor.w - W);
-            return (
-              <>
-                {/* Which message: outlined where it is. */}
-                <View
-                  pointerEvents="none"
-                  style={{ position: 'absolute', left: menuFor.x - 3, top: menuFor.y - 3, width: menuFor.w + 6, height: menuFor.h + 6, borderRadius: 20, borderWidth: 2, borderColor: colors.tint }}
-                />
-                <Animated.View
-                  entering={ZoomIn.duration(140)}
-                  style={{
-                    position: 'absolute',
-                    top,
-                    left,
-                    width: W,
-                    paddingVertical: 6,
-                    borderRadius: 16,
-                    backgroundColor: colors.surface,
-                    borderWidth: 1,
-                    borderColor: colors.border,
-                    shadowColor: '#000',
-                    shadowOpacity: 0.18,
-                    shadowRadius: 16,
-                    shadowOffset: { width: 0, height: 6 },
-                    elevation: 8,
-                    direction: locale === 'ar' ? 'rtl' : 'ltr',
-                  }}
-                >
-                  {actions.map((a, i) => (
-                    <Pressable
-                      key={a.label}
-                      onPress={() => {
-                        setMenuFor(null);
-                        a.run();
-                      }}
-                      accessibilityRole="button"
-                      style={({ pressed }) => ({
-                        flexDirection: 'row',
-                        alignItems: 'center',
-                        gap: 12,
-                        height: 50,
-                        paddingHorizontal: 16,
-                        borderTopWidth: i === 0 ? 0 : 1,
-                        borderTopColor: colors.border,
-                        backgroundColor: pressed ? colors.surface2 : 'transparent',
-                      })}
-                    >
-                      <Icon name={a.icon} size={19} color={a.danger ? '#EF4444' : colors.fg} />
-                      <Text variant="bodyMedium" style={{ color: a.danger ? '#EF4444' : colors.fg }}>
-                        {a.label}
-                      </Text>
-                    </Pressable>
-                  ))}
-                </Animated.View>
-              </>
-            );
-          })()}
-        </Pressable>
-      </Modal>
+      {/* Long-press menu, beside the message (below it, or above when there
+          is no room below; on the message's side), the message outlined. */}
+      <AnchoredMenu
+        anchor={menuFor?.anchor ?? null}
+        outline
+        onClose={() => setMenuFor(null)}
+        options={menuFor ? menuActions(menuFor.m).map((a) => ({ key: a.label, label: a.label, icon: a.icon, danger: a.danger, onPress: a.run })) : []}
+      />
       {viewer.element}
     </SafeAreaView>
   );

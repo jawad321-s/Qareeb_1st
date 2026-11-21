@@ -116,6 +116,31 @@ async function chatKey(requestId: string, create: boolean): Promise<string | nul
   }
 }
 
+/**
+ * The open requests sent to an artisan. The rules let an artisan read only the
+ * requests sent to them; the rules before that let them read the open ones.
+ * Asking for both (open AND sent to me) passes either set of rules, so the
+ * list works while the app and the published rules are not the same version.
+ * If that query fails (a missing index), each half is tried on its own.
+ */
+async function requestsSentTo(uid: string) {
+  const requests = collection(db(), 'requests');
+  const attempts = [
+    () => getDocs(query(requests, where('status', '==', 'PENDING'), where('notifiedArtisanIds', 'array-contains', uid))),
+    () => getDocs(query(requests, where('notifiedArtisanIds', 'array-contains', uid))),
+    () => getDocs(query(requests, where('status', '==', 'PENDING'))),
+  ];
+  let failure: unknown;
+  for (const run of attempts) {
+    try {
+      return await run();
+    } catch (err) {
+      failure = err;
+    }
+  }
+  throw failure;
+}
+
 export const firebaseApi: typeof mockApi = {
   async getCurrentUser(): Promise<AppUser> {
     // Identity comes from the app session (Firebase Auth wiring is a later slice).
@@ -174,9 +199,8 @@ export const firebaseApi: typeof mockApi = {
     // policy locally (category, verified, radius growing over time).
     const me = useAuth.getState().user;
     if (!me) return [];
-    // The rules let an artisan read only the requests sent to them.
     const [snap, profile, self] = await Promise.all([
-      getDocs(query(collection(db(), 'requests'), where('notifiedArtisanIds', 'array-contains', me.uid))),
+      requestsSentTo(me.uid),
       getDoc(doc(db(), 'artisanProfiles', me.uid)),
       getDoc(doc(db(), 'users', me.uid)),
     ]);

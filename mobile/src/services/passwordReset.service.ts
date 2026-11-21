@@ -89,7 +89,7 @@ export async function confirmPhoneCode(verificationId: string, code: string): Pr
  */
 export function resetErrorMessage(err: unknown, t: (key: ReturnType<typeof resetErrorKey>) => string): string {
   const key = resetErrorKey(err);
-  if (key !== 'reset.err.generic') return t(key);
+  if (key !== 'reset.err.generic' && key !== 'reset.err.smsRefused') return t(key);
   const code = (err as { code?: string })?.code ?? (err as Error)?.message ?? '';
   return code ? `${t(key)} (${code})` : t(key);
 }
@@ -103,6 +103,7 @@ export function resetErrorKey(err: unknown):
   | 'reset.err.noAccount'
   | 'reset.err.robot'
   | 'reset.err.disabled'
+  | 'reset.err.smsRefused'
   | 'reset.err.generic' {
   const code = (err as { code?: string })?.code ?? (err as Error)?.message ?? '';
   if (code.includes('invalid-phone-number')) return 'reset.err.phone';
@@ -112,5 +113,8 @@ export function resetErrorKey(err: unknown):
   if (code.includes('functions/not-found')) return 'reset.err.noAccount';
   if (code.includes('captcha') || code.includes('recaptcha')) return 'reset.err.robot';
   if (code.includes('operation-not-allowed')) return 'reset.err.disabled';
+  // Firebase itself would not send the SMS (its anti-abuse checks, or limits
+  // on this number or region): not something the user typed wrong.
+  if (code.includes('error-code:-39')) return 'reset.err.smsRefused';
   return 'reset.err.generic';
 }

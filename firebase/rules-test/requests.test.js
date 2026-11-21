@@ -48,6 +48,8 @@ test('an artisan reads only the requests sent to them, or the ones they were hir
   await assertSucceeds(getDoc(doc(as('art'), 'requests', 'open')));
   await assertFails(getDoc(doc(as('art2'), 'requests', 'open')));
   await assertSucceeds(getDocs(query(collection(as('art'), 'requests'), where('notifiedArtisanIds', 'array-contains', 'art'))));
+  // The app's query (open AND sent to me): also passes the rules before these.
+  await assertSucceeds(getDocs(query(collection(as('art'), 'requests'), where('status', '==', 'PENDING'), where('notifiedArtisanIds', 'array-contains', 'art'))));
   await assertSucceeds(getDocs(query(collection(as('art'), 'requests'), where('acceptedArtisanId', '==', 'art'))));
   // Every open request in the area, with the customers' locations: no.
   await assertFails(getDocs(query(collection(as('art2'), 'requests'), where('status', '==', 'PENDING'))));

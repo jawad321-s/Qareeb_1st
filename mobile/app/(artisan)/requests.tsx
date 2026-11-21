@@ -21,7 +21,7 @@ export default function ArtisanRequests() {
   const user = useAuth((s) => s.user)!;
   const { t } = useT();
   const { colors } = useTheme();
-  const { data, isLoading, refetch, isRefetching } = useNearbyRequests(user.uid, user.location);
+  const { data, isLoading, isError, refetch, isRefetching } = useNearbyRequests(user.uid, user.location);
   // Jobs already assigned to this artisan — open them to move on or finish.
   const jobs = useArtisanJobs(user.uid);
   const profile = useArtisan(user.uid);
@@ -67,6 +67,17 @@ export default function ArtisanRequests() {
         )}
         {isLoading ? (
           [0, 1, 2].map((i) => <CardSkeleton key={i} />)
+        ) : isError && !data ? (
+          // A failed load is not "no requests": say so, with a way to retry.
+          <View style={{ marginTop: 60 }}>
+            <EmptyState
+              icon="alert-circle"
+              title={t('aJobs.loadError')}
+              description={t('aJobs.loadErrorDesc')}
+              actionLabel={t('common.retry')}
+              onAction={() => refetch()}
+            />
+          </View>
         ) : (data ?? []).length === 0 ? (
           <View style={{ marginTop: 60 }}>
             <EmptyState

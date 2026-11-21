@@ -361,6 +361,7 @@ export const translations = {
     'reset.err.robot': "The check didn't work. Try again.",
     'reset.err.disabled': 'SMS codes are not enabled yet. Contact support.',
     'reset.err.generic': 'Something went wrong. Try again.',
+    'reset.err.smsRefused': "The text message couldn't be sent to this number right now. Try again later, or contact support.",
 
     // request detail
     'req.title': 'Request details',
@@ -681,6 +682,8 @@ export const translations = {
     'aJobs.subtitle': 'Requests within your service radius',
     'aJobs.empty': 'No requests nearby',
     'aJobs.emptyDesc': 'New jobs in your area will appear here in real time.',
+    'aJobs.loadError': "Couldn't load the requests",
+    'aJobs.loadErrorDesc': 'Check your connection and try again. If it keeps happening, tell the support team.',
     'aJobs.notVerified': 'Your account is awaiting verification',
     'aJobs.notVerifiedDesc': 'Requests reach verified artisans only. You will start receiving them as soon as the Qareeb team approves your account.',
     'aJobs.noLocation': 'Turn on your location',
@@ -1217,6 +1220,7 @@ export const translations = {
     'reset.err.robot': 'لم ينجح التحقق. حاول مرة أخرى.',
     'reset.err.disabled': 'رسائل التحقق غير مفعّلة بعد. تواصل مع الدعم.',
     'reset.err.generic': 'حدث خطأ. حاول مرة أخرى.',
+    'reset.err.smsRefused': 'تعذّر إرسال رسالة الرمز لهذا الرقم حالياً. حاول لاحقاً أو تواصل مع الدعم.',
 
     // request detail
     'req.title': 'تفاصيل الطلب',
@@ -1537,6 +1541,8 @@ export const translations = {
     'aJobs.subtitle': 'طلبات ضمن نطاق خدمتك',
     'aJobs.empty': 'لا توجد طلبات قريبة',
     'aJobs.emptyDesc': 'ستظهر الأعمال الجديدة في منطقتك هنا فوراً.',
+    'aJobs.loadError': 'تعذّر تحميل الطلبات',
+    'aJobs.loadErrorDesc': 'تأكد من الاتصال وحاول مرة أخرى. إذا تكرر ذلك، أخبر فريق الدعم.',
     'aJobs.notVerified': 'حسابك بانتظار التوثيق',
     'aJobs.notVerifiedDesc': 'تصل الطلبات للحرفيين الموثّقين فقط. ستبدأ باستلامها فور موافقة فريق قريب على حسابك.',
     'aJobs.noLocation': 'فعّل موقعك',

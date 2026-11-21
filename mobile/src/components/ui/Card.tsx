@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Pressable, StyleSheet, View, type ViewProps, type ViewStyle } from 'react-native';
 import * as Haptics from 'expo-haptics';
 import Animated, {
@@ -43,6 +43,7 @@ export function Card({
   const { colors } = useTheme();
   const reduceMotion = useReducedMotion();
   const scale = useSharedValue(1);
+  const [pressed, setPressed] = useState(false);
   const animatedStyle = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }));
 
   // A crisp border + a soft resting shadow so cards read as raised surfaces.
@@ -95,11 +96,14 @@ export function Card({
         }
         onPressIn={() => {
           if (!reduceMotion) scale.value = withSpring(0.96, { damping: 18, stiffness: 320 });
+          else setPressed(true);
         }}
         onPressOut={() => {
           if (!reduceMotion) scale.value = withSpring(1, { damping: 13, stiffness: 200 });
+          else setPressed(false);
         }}
-        style={({ pressed }) => (reduceMotion && pressed ? { opacity: 0.85 } : undefined)}
+        // A plain style: phones drop a style given as a function (NativeWind).
+        style={pressed ? { opacity: 0.85 } : undefined}
       >
         <Animated.View style={animatedStyle}>{surface}</Animated.View>
       </Pressable>

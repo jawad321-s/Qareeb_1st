@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Modal, Pressable, View, useWindowDimensions } from 'react-native';
 import Animated, { ZoomIn } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -104,36 +104,56 @@ export function AnchoredMenu({
               }}
             >
               {options.map((o, i) => (
-                <Pressable
+                <MenuRow
                   key={o.key}
-                  onPress={() => {
+                  option={o}
+                  first={i === 0}
+                  onSelect={() => {
                     onClose();
                     o.onPress();
                   }}
-                  accessibilityRole="button"
-                  accessibilityState={{ selected: !!o.selected }}
-                  style={({ pressed }) => ({
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                    gap: 12,
-                    height: 50,
-                    paddingHorizontal: 16,
-                    borderTopWidth: i === 0 ? 0 : 1,
-                    borderTopColor: colors.border,
-                    backgroundColor: pressed ? colors.surface2 : 'transparent',
-                  })}
-                >
-                  {o.icon && <Icon name={o.icon} size={19} color={o.danger ? '#EF4444' : colors.fg} />}
-                  <Text variant="bodyMedium" style={{ flex: 1, color: o.danger ? '#EF4444' : o.selected ? colors.tint : colors.fg }}>
-                    {o.label}
-                  </Text>
-                  {o.selected && <Icon name="check" size={18} color={colors.tint} strokeWidth={2.5} />}
-                </Pressable>
+                />
               ))}
             </Animated.View>
           </>
         )}
       </Pressable>
     </Modal>
+  );
+}
+
+/**
+ * One choice: icon, label, and a check on the current one, side by side.
+ * Plain styles only: on phones the styling setup (NativeWind) drops a style
+ * given as a function of the pressed state, which stacked these rows' parts
+ * one under the other. The pressed shade comes from onPressIn/Out instead.
+ */
+function MenuRow({ option: o, first, onSelect }: { option: MenuOption; first: boolean; onSelect: () => void }) {
+  const { colors } = useTheme();
+  const [pressed, setPressed] = useState(false);
+  return (
+    <Pressable
+      onPress={onSelect}
+      onPressIn={() => setPressed(true)}
+      onPressOut={() => setPressed(false)}
+      accessibilityRole="button"
+      accessibilityState={{ selected: !!o.selected }}
+      style={{
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 12,
+        height: 50,
+        paddingHorizontal: 16,
+        borderTopWidth: first ? 0 : 1,
+        borderTopColor: colors.border,
+        backgroundColor: pressed ? colors.surface2 : 'transparent',
+      }}
+    >
+      {o.icon && <Icon name={o.icon} size={19} color={o.danger ? '#EF4444' : o.selected ? colors.tint : colors.fg} />}
+      <Text variant="bodyMedium" style={{ flex: 1, color: o.danger ? '#EF4444' : o.selected ? colors.tint : colors.fg }}>
+        {o.label}
+      </Text>
+      {o.selected && <Icon name="check" size={18} color={colors.tint} strokeWidth={2.5} />}
+    </Pressable>
   );
 }

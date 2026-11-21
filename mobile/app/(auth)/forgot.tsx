@@ -10,7 +10,7 @@ import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
 import { EmptyState } from '@/components/feedback/EmptyState';
 import { usePhoneVerifier } from '@/components/auth/PhoneVerifier';
-import { confirmReset, resetErrorMessage, sendResetCode } from '@/services/passwordReset.service';
+import { confirmReset, resetErrorMessage, sendCodeAnyRoute } from '@/services/passwordReset.service';
 import { accountExists } from '@/services/auth.service';
 import { useT } from '@/i18n';
 import { config } from '@/lib/config';
@@ -43,7 +43,7 @@ export default function Forgot() {
   const [error, setError] = useState<string | null>(null);
   const [fieldError, setFieldError] = useState<{ phone?: string; code?: string; password?: string; confirm?: string }>({});
   const [seconds, setSeconds] = useState(0);
-  // The country code the last code went to (see sendResetCode).
+  // The country code the last code went to (see sendCodeAnyRoute).
   const [via, setVia] = useState<'970' | '972'>('970');
 
   useEffect(() => {
@@ -67,8 +67,9 @@ export default function Forgot() {
         setError(t('reset.err.noAccount'));
         return;
       }
-      setVerificationId(config.useMock ? 'demo' : await sendResetCode(phone, verifier, code));
-      setVia(code);
+      const sent = config.useMock ? { verificationId: 'demo', via: code } : await sendCodeAnyRoute(phone, verifier, code);
+      setVerificationId(sent.verificationId);
+      setVia(sent.via);
       setStep('code');
       setSeconds(RESEND_AFTER_S);
     } catch (err) {

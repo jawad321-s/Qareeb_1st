@@ -61,6 +61,29 @@ export function sendResetCode(phone: string, verifier: ApplicationVerifier, via:
   return new PhoneAuthProvider(resetAuth()).verifyPhoneNumber(withCountryCode(phone, via), verifier);
 }
 
+/**
+ * Sends the code as +970 and, when Firebase refuses to text that form of the
+ * number (error-code:-39), straight away as +972: the same line, and Firebase
+ * may refuse one form and not the other. Says which one the code went to.
+ * When both are refused, the first refusal is what the user sees.
+ */
+export async function sendCodeAnyRoute(
+  phone: string,
+  verifier: ApplicationVerifier,
+  first: '970' | '972' = '970',
+): Promise<{ verificationId: string; via: '970' | '972' }> {
+  try {
+    return { verificationId: await sendResetCode(phone, verifier, first), via: first };
+  } catch (err) {
+    if (first !== '970' || resetErrorKey(err) !== 'reset.err.smsRefused') throw err;
+    try {
+      return { verificationId: await sendResetCode(phone, verifier, '972'), via: '972' };
+    } catch {
+      throw err;
+    }
+  }
+}
+
 /** Checks the code, then sets the new password on the account for this number and role. */
 export async function confirmReset(verificationId: string, code: string, role: UserRole, newPassword: string): Promise<void> {
   const a = resetAuth();

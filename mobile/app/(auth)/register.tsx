@@ -17,7 +17,7 @@ import { useVerification } from '@/store/verification';
 import { useAuth } from '@/store/auth';
 import { authErrorMessage } from '@/services/auth.service';
 import { usePhoneVerifier } from '@/components/auth/PhoneVerifier';
-import { confirmPhoneCode, resetErrorMessage, sendResetCode } from '@/services/passwordReset.service';
+import { confirmPhoneCode, resetErrorMessage, sendCodeAnyRoute } from '@/services/passwordReset.service';
 import { displayPhone, withCountryCode } from '@/lib/phone';
 import { config } from '@/lib/config';
 import { useCategories } from '@/constants/categories';
@@ -48,7 +48,7 @@ export default function Register() {
   const [code, setCode] = useState('');
   const [codeError, setCodeError] = useState<string | undefined>();
   const [seconds, setSeconds] = useState(0);
-  // The country code the last code went to (see sendResetCode).
+  // The country code the last code went to (see sendCodeAnyRoute).
   const [via, setVia] = useState<'970' | '972'>('970');
   const { verifier, modal } = usePhoneVerifier();
   useEffect(() => {
@@ -125,8 +125,9 @@ export default function Register() {
     setFormError(undefined);
     setCodeError(undefined);
     try {
-      setVerificationId(await sendResetCode(getValues('phone'), verifier, code));
-      setVia(code);
+      const sent = await sendCodeAnyRoute(getValues('phone'), verifier, code);
+      setVerificationId(sent.verificationId);
+      setVia(sent.via);
       setCode('');
       setStep('code');
       setSeconds(60);

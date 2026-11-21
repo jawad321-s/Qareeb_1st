@@ -7,7 +7,7 @@ import { Badge } from '../ui/Badge';
 import { Icon } from '../ui/Icon';
 import { PersonRow } from './PersonRow';
 import type { Offer } from '@/types';
-import { formatMoney, timeAgo } from '@/lib/format';
+import { formatMoney, timeAgo, formatEta } from '@/lib/format';
 import { useT } from '@/i18n';
 import { useTheme } from '@/theme/ThemeProvider';
 import { useNow } from '@/hooks/useNow';
@@ -48,7 +48,7 @@ export function OfferCard({ offer, best, onAccept, onReject, onPressArtisan, pas
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 3 }}>
             <Icon name="clock" size={12} color="#94A3B8" />
             <Text variant="caption" tone="muted">
-              ~{offer.etaMinutes} {t('offer.min')}
+              ~{formatEta(offer.etaMinutes)}
             </Text>
           </View>
         </View>

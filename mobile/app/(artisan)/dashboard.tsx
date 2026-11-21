@@ -193,7 +193,8 @@ export default function ArtisanDashboard() {
             ) : nearby.isLoading ? (
               [0, 1].map((i) => <CardSkeleton key={i} />)
             ) : (
-              (nearby.data ?? []).slice(0, 3).map((r) => (
+              // Every request waiting for an offer, as on the Jobs tab.
+              (nearby.data ?? []).map((r) => (
                 <RequestCard showCustomer key={r.id} request={r} distanceKm={r.distanceKm} onPress={() => router.push(`/(artisan)/job/${r.id}`)} />
               ))
             )}

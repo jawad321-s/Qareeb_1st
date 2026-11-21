@@ -40,7 +40,11 @@ export default function Home() {
   // The same threads the Messages tab lists (hidden and empty closed ones left out).
   const chats = (conversations.data ?? []).filter(isListed);
 
-  const recent = (requests.data ?? []).slice(0, 2);
+  // Every request still waiting for offers, then the latest others up to two
+  // cards (waiting ones were missing here once there were more than two).
+  const all = requests.data ?? [];
+  const waiting = all.filter((r) => r.status === 'PENDING');
+  const recent = [...waiting, ...all.filter((r) => r.status !== 'PENDING').slice(0, Math.max(0, 2 - waiting.length))];
   const unread = chats.filter(
     (c) => c.lastMessage && !c.lastMessage.read && c.lastMessage.senderId !== user?.uid,
   ).length;
@@ -124,7 +128,8 @@ export default function Home() {
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: tabBarSpace + 16, paddingTop: 20 }}>
         {/* Categories */}
         <View style={{ paddingHorizontal: 20 }}>
-          <SectionHeader title={t('home.categories')} />
+          {/* "All categories" with an arrow: the row scrolls, and the whole list opens. */}
+          <SectionHeader title={t('home.categories')} actionLabel={t('home.allCategories')} onAction={() => router.push('/(shared)/categories')} />
         </View>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingHorizontal: 16, gap: 8 }}>
           {categories.map((cat, i) => (

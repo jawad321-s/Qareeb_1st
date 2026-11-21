@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, TextInput } from 'react-native';
+import { View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { Screen } from '@/components/ui/Screen';
@@ -7,6 +7,8 @@ import { useTabBarSpace } from '@/components/ui/TabBar';
 import { Header } from '@/components/ui/Header';
 import { Text } from '@/components/ui/Text';
 import { PhotoStrip } from '@/components/ui/PhotoViewer';
+import { MoneyField } from '@/components/ui/MoneyField';
+import { DurationField } from '@/components/ui/DurationField';
 import { TextArea } from '@/components/ui/TextArea';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
@@ -32,7 +34,6 @@ import { TrackingTimeline } from '@/components/domain/TrackingTimeline';
 import { openDirections } from '@/lib/directions';
 import { useToast } from '@/components/feedback/Toast';
 import { categoryById } from '@/constants/categories';
-import { config } from '@/lib/config';
 import { formatDistance, formatMoney } from '@/lib/format';
 import { distanceKm } from '@/lib/geo';
 import { AUTO_COMPLETE_HOURS, NEXT_STATUS, canCancelRequest, isActiveJob } from '@/lib/requestRules';
@@ -82,7 +83,8 @@ function JobDetail() {
   const subscription = useMySubscription(user.uid);
 
   const [price, setPrice] = useState('');
-  const [eta, setEta] = useState('30');
+  // How soon they can arrive, in minutes (picked on hour and minute wheels).
+  const [eta, setEta] = useState(30);
   const [message, setMessage] = useState('');
   const [sent, setSent] = useState(false);
 
@@ -103,7 +105,7 @@ function JobDetail() {
       artisanId: user.uid,
       customerId: request.customerId,
       price: Number(price) * 100,
-      etaMinutes: Number(eta),
+      etaMinutes: eta,
       // Optional — a quotation may be price + ETA only.
       message: message.trim() || undefined,
       // Kept on the offer for the artisan's history (see JobRecord).
@@ -116,7 +118,7 @@ function JobDetail() {
     setTimeout(() => router.back(), 900);
   };
 
-  const canSend = Number(price) > 0 && Number(eta) > 0 && !sent;
+  const canSend = Number(price) > 0 && eta > 0 && !sent;
 
   // The price can change only while the work is in progress (WORKING), once
   // the artisan has seen the job; the customer is told in the chat as well.
@@ -264,15 +266,15 @@ function JobDetail() {
               <View style={{ flexDirection: 'row', gap: 12 }}>
                 <View style={{ flex: 1, gap: 6 }}>
                   <Text variant="caption" tone="muted">
-                    {t('job.price')} ({config.currency})
+                    {t('job.price')}
                   </Text>
-                  <TextInput value={price} onChangeText={setPrice} keyboardType="number-pad" placeholder="120" placeholderTextColor={colors.muted} style={inputStyle(colors, font, isRTL)} />
+                  <MoneyField value={price} onChangeText={setPrice} />
                 </View>
                 <View style={{ flex: 1, gap: 6 }}>
                   <Text variant="caption" tone="muted">
                     {t('job.eta')}
                   </Text>
-                  <TextInput value={eta} onChangeText={setEta} keyboardType="number-pad" placeholder="30" placeholderTextColor={colors.muted} style={inputStyle(colors, font, isRTL)} />
+                  <DurationField minutes={eta} onChange={setEta} />
                 </View>
               </View>
               <View style={{ gap: 6 }}>
@@ -426,9 +428,9 @@ function PriceRow({
     return (
       <View style={{ gap: 10 }}>
         <Text variant="caption" tone="muted">
-          {t('job.price')} ({config.currency})
+          {t('job.price')}
         </Text>
-        <TextInput value={value} onChangeText={setValue} keyboardType="number-pad" autoFocus style={inputStyle(colors, font, isRTL)} />
+        <MoneyField value={value} onChangeText={setValue} autoFocus />
         <View style={{ flexDirection: 'row', gap: 10 }}>
           <Button label={t('common.cancel')} variant="outline" onPress={() => setEditing(false)} style={{ flex: 1 }} />
           <Button

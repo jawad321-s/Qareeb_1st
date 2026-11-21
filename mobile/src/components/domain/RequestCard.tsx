@@ -29,7 +29,7 @@ export function RequestCard({
 }) {
   useNow(); // keeps the relative time moving
   const cat = categoryById(request.categoryId);
-  const { t } = useT();
+  const { t, locale } = useT();
   const { isDark, colors } = useTheme();
   const { data: customer } = useUser(showCustomer ? request.customerId : undefined);
   // The name copied onto the request covers customers without a public profile yet.
@@ -54,7 +54,14 @@ export function RequestCard({
             <Text variant="bodyMedium" numberOfLines={1}>
               {request.title}
             </Text>
-            <Text variant="caption" tone="muted">
+            {/* The service in words next to its icon, then how long ago. */}
+            <Text variant="caption" tone="muted" numberOfLines={1}>
+              {!!cat && (
+                <Text variant="caption" style={{ color: colors.fg, fontFamily: 'Inter_600SemiBold' }}>
+                  {cat.name[locale] ?? cat.name.ar}
+                </Text>
+              )}
+              {cat ? ' · ' : ''}
               {timeAgo(request.createdAt)}
             </Text>
           </View>

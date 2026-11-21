@@ -8,7 +8,7 @@ import { Badge } from '@/components/ui/Badge';
 import { Segmented } from '@/components/ui/Segmented';
 import { StatusBadge } from '@/components/domain/StatusBadge';
 import { Icon } from '@/components/ui/Icon';
-import { formatMoney, timeAgo } from '@/lib/format';
+import { formatMoney, timeAgo, formatEta } from '@/lib/format';
 import { CardSkeleton } from '@/components/feedback/Skeleton';
 import { EmptyState } from '@/components/feedback/EmptyState';
 import { categoryById } from '@/constants/categories';
@@ -107,7 +107,7 @@ export default function ArtisanOffers() {
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
                   <Icon name="clock" size={15} color="#94A3B8" />
                   <Text variant="caption" tone="muted">
-                    ~{o.etaMinutes} {t('offer.min')}
+                    ~{formatEta(o.etaMinutes)}
                   </Text>
                 </View>
                 <View style={{ flex: 1 }} />

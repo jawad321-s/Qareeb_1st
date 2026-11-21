@@ -48,3 +48,22 @@ export function initials(name: string): string {
     .map((p) => p[0]?.toUpperCase())
     .join('');
 }
+
+/**
+ * An arrival time in minutes, in words: "45 دقيقة", "1 ساعة و15 دقيقة" /
+ * "45 min", "1 h 15 min" (`short`: "1 س 15 د" / "1h 15m").
+ */
+export function formatEta(minutes: number, short = false): string {
+  const { useLocaleStore } = require('@/i18n') as typeof import('@/i18n');
+  const ar = useLocaleStore.getState().locale === 'ar';
+  const total = Math.max(0, Math.round(minutes));
+  const h = Math.floor(total / 60);
+  const m = total % 60;
+  // Short, for a narrow field: "1 س 15 د" / "1h 15m".
+  if (short && h && m) return ar ? `${h} س ${m} د` : `${h}h ${m}m`;
+  const hours = ar ? `${h} ساعة` : `${h} h`;
+  const mins = ar ? `${m} دقيقة` : `${m} min`;
+  if (!h) return mins;
+  if (!m) return hours;
+  return ar ? `${hours} و${mins}` : `${hours} ${mins}`;
+}

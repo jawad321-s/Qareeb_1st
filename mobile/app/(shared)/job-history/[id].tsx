@@ -16,7 +16,7 @@ import { EmptyState } from '@/components/feedback/EmptyState';
 import { StatusBadge } from '@/components/domain/StatusBadge';
 import { categoryById } from '@/constants/categories';
 import { useJobHistory, useUser } from '@/hooks/queries';
-import { formatDate, formatMoney } from '@/lib/format';
+import { formatDate, formatMoney, formatEta } from '@/lib/format';
 import { AUTO_COMPLETE_HOURS } from '@/lib/requestRules';
 import { useAuth } from '@/store/auth';
 import { useTheme } from '@/theme/ThemeProvider';
@@ -95,7 +95,7 @@ export default function JobRecordScreen() {
           <Text variant="h3">{t('hist.myOffer')}</Text>
           <Row label={t(done ? 'hist.completedOn' : 'hist.offeredOn')} value={formatDate(record.date)} />
           {record.price !== undefined && <Row label={t('hist.price')} value={formatMoney(record.price)} strong />}
-          {record.etaMinutes !== undefined && <Row label={t('hist.eta')} value={`~${record.etaMinutes} ${t('offer.min')}`} />}
+          {record.etaMinutes !== undefined && <Row label={t('hist.eta')} value={`~${formatEta(record.etaMinutes)}`} />}
           {!!record.message && (
             <View style={{ gap: 4 }}>
               <Text variant="caption" tone="muted">

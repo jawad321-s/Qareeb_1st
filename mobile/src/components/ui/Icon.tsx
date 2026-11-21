@@ -8,7 +8,7 @@ import { isLayoutRTL } from '@/i18n/rtl';
 // flip) — the layout engine flips positions but never the artwork itself.
 // Only in Arabic: English runs left-to-right even though the engine is RTL.
 const MIRRORED_IN_RTL: ReadonlySet<string> = new Set([
-  'chevron-right', 'chevron-left', 'arrow-left', 'arrow-right', 'send', 'log-out',
+  'chevron-right', 'chevron-left', 'arrow-left', 'arrow-right', 'send', 'log-out', 'reply',
 ]);
 
 // Curated Feather-style icon set (24×24 grid, stroke-based). Keys are referenced
@@ -24,7 +24,7 @@ export type IconName =
   | 'droplet' | 'zap' | 'hammer' | 'wind' | 'paintbrush' | 'sparkles'
   | 'wrench' | 'tools' | 'plug' | 'leaf' | 'satellite' | 'truck' | 'briefcase'
   | 'more-horizontal' | 'info' | 'alert-circle' | 'help-circle' | 'flag' | 'credit-card' | 'lightbulb'
-  | 'key' | 'monitor' | 'scissors' | 'car' | 'package' | 'megaphone' | 'headphones';
+  | 'key' | 'monitor' | 'scissors' | 'car' | 'package' | 'megaphone' | 'headphones' | 'reply';
 
 interface IconProps {
   name: IconName;
@@ -105,14 +105,17 @@ function renderPaths(name: IconName, c: string, p: object) {
     case 'zap': return <Polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" {...p} />;
     case 'hammer': return <><Path d="M15 12l-8.5 8.5a2.12 2.12 0 0 1-3-3L12 9" {...p} /><Path d="M17.64 15L22 10.64" {...p} /><Path d="M20.91 11.7l-1.25-1.25c-.6-.6-.93-1.4-.93-2.25v-.86L16.01 4.6a5.56 5.56 0 0 0-3.94-1.64H9l.92.82A6.18 6.18 0 0 1 12 8.4v1.56l2 2h.86c.85 0 1.65.33 2.25.93l1.25 1.25" {...p} /></>;
     case 'wind': return <Path d="M9.59 4.59A2 2 0 1 1 11 8H2m10.59 11.41A2 2 0 1 0 14 16H2m15.73-8.27A2.5 2.5 0 1 1 19.5 12H2" {...p} />;
-    case 'paintbrush': return <><Path d="M18.37 2.63L14 7l-1.87-1.87a2.12 2.12 0 0 1 0-3L14.13.63a2.12 2.12 0 0 1 3 0z" {...p} /><Path d="M9 8c-2 2-3 3.5-3 6 0 1-1 2-2 2-1.5 0-3-2-3-4 0-3 2.5-6 5-8" {...p} /><Path d="M14.5 17.5L4.5 27.5" {...p} /></>;
+    // Painting: a paint roller (the old brush drew partly outside the frame).
+    case 'paintbrush': return <><Rect x="2" y="2" width="16" height="6" rx="2" {...p} /><Path d="M10 16v-2a2 2 0 0 1 2-2h8a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2" {...p} /><Rect x="8" y="16" width="4" height="6" rx="1" {...p} /></>;
     case 'sparkles': return <><Path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9L12 3z" {...p} /><Path d="M19 15l.9 2.4L22 18l-2.1.6L19 21l-.9-2.4L16 18l2.1-.6L19 15z" {...p} /></>;
     case 'wrench': return <Path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" {...p} />;
     case 'tools': return <><Path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" {...p} /></>;
     case 'plug': return <><Path d="M12 22v-5" {...p} /><Path d="M9 8V2" {...p} /><Path d="M15 8V2" {...p} /><Path d="M18 8v5a4 4 0 0 1-4 4h-4a4 4 0 0 1-4-4V8z" {...p} /></>;
     case 'leaf': return <><Path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10z" {...p} /><Path d="M2 21c0-3 1.85-5.36 5.08-6" {...p} /></>;
-    case 'satellite': return <><Path d="M13 7L9 3 5 7l4 4" {...p} /><Path d="M17 11l4 4-4 4-4-4" {...p} /><Path d="M8 12l4 4" {...p} /><Path d="M16 8l-4-4" {...p} /><Circle cx="12" cy="12" r="1" {...p} /></>;
+    // Satellite: a satellite dish, as installers put up.
+    case 'satellite': return <><Path d="M4 10a7.31 7.31 0 0 0 10 10Z" {...p} /><Path d="M9 15l3-3" {...p} /><Path d="M17 13a6 6 0 0 0-6-6" {...p} /><Path d="M21 13A10 10 0 0 0 11 3" {...p} /></>;
     case 'truck': return <><Rect x="1" y="3" width="15" height="13" {...p} /><Polygon points="16 8 20 8 23 11 23 16 16 16 16 8" {...p} /><Circle cx="5.5" cy="18.5" r="2.5" {...p} /><Circle cx="18.5" cy="18.5" r="2.5" {...p} /></>;
+    case 'reply': return <><Polyline points="9 14 4 9 9 4" {...p} /><Path d="M20 20v-7a4 4 0 0 0-4-4H4" {...p} /></>;
     case 'briefcase': return <><Rect x="2" y="7" width="20" height="14" rx="2" ry="2" {...p} /><Path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" {...p} /></>;
     case 'more-horizontal': return <><Circle cx="12" cy="12" r="1" fill={c} {...p} /><Circle cx="19" cy="12" r="1" fill={c} {...p} /><Circle cx="5" cy="12" r="1" fill={c} {...p} /></>;
     case 'info': return <><Circle cx="12" cy="12" r="10" {...p} /><Line x1="12" y1="16" x2="12" y2="12" {...p} /><Line x1="12" y1="8" x2="12.01" y2="8" {...p} /></>;

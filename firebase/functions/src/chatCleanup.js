@@ -21,7 +21,10 @@ export async function removePlainChats(db, bucket) {
   let photos = 0;
   const all = await db.collectionGroup('messages').get();
   // Request chats only: the support chat with the team is not encrypted.
-  const plain = all.docs.filter((d) => d.ref.parent.parent?.parent?.id === 'requests' && typeof d.get('cipher') !== 'string');
+  // (A message deleted for everyone has no cipher either: it is kept.)
+  const plain = all.docs.filter(
+    (d) => d.ref.parent.parent?.parent?.id === 'requests' && typeof d.get('cipher') !== 'string' && d.get('deleted') !== true,
+  );
   for (let i = 0; i < plain.length; i += 400) {
     const batch = db.batch();
     plain.slice(i, i + 400).forEach((d) => batch.delete(d.ref));

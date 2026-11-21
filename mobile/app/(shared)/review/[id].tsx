@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { BackHandler, View, TextInput } from 'react-native';
+import { BackHandler, View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { Screen } from '@/components/ui/Screen';
 import { Header } from '@/components/ui/Header';
 import { Text } from '@/components/ui/Text';
+import { TextArea } from '@/components/ui/TextArea';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { Icon } from '@/components/ui/Icon';
@@ -166,12 +167,11 @@ export default function ReviewScreen() {
         })}
       </View>
 
-      <TextInput
+      <TextArea
         value={comment}
         onChangeText={setComment}
         placeholder={t('review.commentPlaceholder')}
         placeholderTextColor={colors.muted}
-        multiline
         style={{ minHeight: 120, borderRadius: 16, borderWidth: 1.5, borderColor: colors.border, backgroundColor: colors.surface, padding: 14, color: colors.fg, fontSize: 15, fontFamily: font('Inter_400Regular'), textAlign: localizedTextAlign(isRTL), textAlignVertical: 'top', marginBottom: 20 }}
       />
 

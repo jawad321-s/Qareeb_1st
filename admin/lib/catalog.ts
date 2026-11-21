@@ -7,7 +7,7 @@
 
 import {
   Briefcase, Camera, Car, Droplet, Drill, Hammer, House, Key, Leaf, Lightbulb, Lock, Monitor, Package,
-  Paintbrush, Plug, SatelliteDish, Scissors, Shield, Sparkles, Sun, Truck, Wind, Wrench, Zap, type LucideIcon,
+  PaintRoller, Plug, SatelliteDish, Scissors, Shield, Sparkles, Sun, Truck, Wind, Wrench, Zap, type LucideIcon,
 } from 'lucide-react';
 import { useCallback } from 'react';
 import { CATEGORY_NAMES, categoryName, useCollection, type LiveDoc } from './live-data';
@@ -15,7 +15,7 @@ import { useT } from './i18n';
 
 /** App icon key → the same picture in the dashboard. */
 export const ICONS: Record<string, LucideIcon> = {
-  droplet: Droplet, zap: Zap, hammer: Hammer, wind: Wind, paintbrush: Paintbrush, sparkles: Sparkles,
+  droplet: Droplet, zap: Zap, hammer: Hammer, wind: Wind, paintbrush: PaintRoller, sparkles: Sparkles,
   wrench: Wrench, tools: Drill, plug: Plug, leaf: Leaf, satellite: SatelliteDish, truck: Truck,
   home: House, camera: Camera, shield: Shield, sun: Sun, lightbulb: Lightbulb, lock: Lock, key: Key,
   monitor: Monitor, scissors: Scissors, car: Car, package: Package, briefcase: Briefcase,

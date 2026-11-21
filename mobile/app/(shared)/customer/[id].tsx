@@ -7,7 +7,7 @@ import { Text } from '@/components/ui/Text';
 import { Avatar } from '@/components/ui/Avatar';
 import { Rating } from '@/components/ui/Rating';
 import { CardSkeleton } from '@/components/feedback/Skeleton';
-import { useReviews, useUser } from '@/hooks/queries';
+import { useReviews, useSharedJob, useUser } from '@/hooks/queries';
 import { useAuth } from '@/store/auth';
 import { ReportLink } from '@/components/domain/ReportLink';
 import { config } from '@/lib/config';
@@ -22,6 +22,7 @@ export default function CustomerProfile() {
   const { data: user, isLoading } = useUser(id);
   const reviews = useReviews(id!);
   const viewer = useAuth((s) => s.user);
+  const sharedJob = useSharedJob(viewer, id);
 
   if (isLoading || !user) {
     return (
@@ -60,8 +61,9 @@ export default function CustomerProfile() {
           </Text>
         </View>
       </View>
-      {/* Artisans reach this page from a job: they can complain about the customer. */}
-      {viewer?.role === 'artisan' && viewer.uid !== id && <ReportLink targetId={id!} targetRole="customer" />}
+      {/* An artisan can complain about a customer who hired them (an accepted
+          offer), not about one whose request they only saw. */}
+      {viewer?.role === 'artisan' && viewer.uid !== id && !!sharedJob.data && <ReportLink targetId={id!} targetRole="customer" requestId={sharedJob.data} />}
     </Screen>
   );
 }

@@ -1,6 +1,5 @@
 import React from 'react';
 import { View, ScrollView, Pressable } from 'react-native';
-import { Image } from 'expo-image';
 import { router, useLocalSearchParams } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -8,12 +7,13 @@ import { StatusBar } from 'expo-status-bar';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { Header } from '@/components/ui/Header';
 import { Text } from '@/components/ui/Text';
+import { PhotoStrip } from '@/components/ui/PhotoViewer';
 import { Icon } from '@/components/ui/Icon';
 import { Avatar } from '@/components/ui/Avatar';
 import { Badge } from '@/components/ui/Badge';
 import { CardSkeleton } from '@/components/feedback/Skeleton';
 import { FloatingBlobs } from '@/components/ui/FloatingBlobs';
-import { useArtisan, useReviews } from '@/hooks/queries';
+import { useArtisan, useReviews, useSharedJob } from '@/hooks/queries';
 import { usePastArtisans } from '@/hooks/usePastArtisans';
 import { useAuth } from '@/store/auth';
 import { ReportLink } from '@/components/domain/ReportLink';
@@ -33,6 +33,7 @@ export default function ArtisanDetail() {
   // Set when the signed-in customer has worked with this artisan before.
   const past = usePastArtisans().byId.get(id!);
   const viewer = useAuth((s) => s.user);
+  const sharedJob = useSharedJob(viewer, id);
 
   if (isLoading || !data) {
     return (
@@ -133,16 +134,14 @@ export default function ArtisanDetail() {
               <Text variant="h3" style={{ marginBottom: 10 }}>
                 {t('ad.gallery')}
               </Text>
-              <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 10 }}>
-                {(profile.gallery ?? []).map((uri) => (
-                  <Image key={uri} source={{ uri }} style={{ width: 160, height: 120, borderRadius: 16 }} contentFit="cover" />
-                ))}
-              </ScrollView>
+              {/* Tap a photo to see it full screen and zoom in. */}
+              <PhotoStrip photos={profile.gallery ?? []} width={160} height={120} radius={16} />
             </View>
           )}
 
-          {/* Customers can complain about an artisan from their profile. */}
-          {viewer?.role === 'customer' && <ReportLink targetId={id!} targetRole="artisan" />}
+          {/* A customer can complain about an artisan they hired (an accepted
+              offer), not about one who only sent an offer. */}
+          {viewer?.role === 'customer' && !!sharedJob.data && <ReportLink targetId={id!} targetRole="artisan" requestId={sharedJob.data} />}
         </View>
       </ScrollView>
 

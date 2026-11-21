@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
-import { View, ScrollView, TextInput } from 'react-native';
-import { Image } from 'expo-image';
+import { View, TextInput } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { Screen } from '@/components/ui/Screen';
 import { useTabBarSpace } from '@/components/ui/TabBar';
 import { Header } from '@/components/ui/Header';
 import { Text } from '@/components/ui/Text';
+import { PhotoStrip } from '@/components/ui/PhotoViewer';
+import { TextArea } from '@/components/ui/TextArea';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Icon } from '@/components/ui/Icon';
@@ -202,13 +203,8 @@ function JobDetail() {
           <Text variant="body" tone="muted" style={{ lineHeight: 21 }}>
             {request.description}
           </Text>
-          {shownPhotos(request.images).length > 0 && (
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8 }}>
-              {shownPhotos(request.images).map((uri) => (
-                <Image key={uri} source={{ uri }} style={{ width: 110, height: 110, borderRadius: 14 }} />
-              ))}
-            </ScrollView>
-          )}
+          {/* Tap a photo to see it full screen and zoom in. */}
+          <PhotoStrip photos={shownPhotos(request.images)} width={110} />
           <View style={{ flexDirection: 'row', gap: 20, flexWrap: 'wrap' }}>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
               <Icon name="map-pin" size={16} color="#94A3B8" />
@@ -283,12 +279,11 @@ function JobDetail() {
                 <Text variant="caption" tone="muted">
                   {t('job.messageToCustomer')} · {t('vrf.optional')}
                 </Text>
-                <TextInput
+                <TextArea
                   value={message}
                   onChangeText={setMessage}
                   placeholder={t('job.messagePlaceholder')}
                   placeholderTextColor={colors.muted}
-                  multiline
                   style={{ ...inputStyle(colors, font, isRTL), minHeight: 100, height: undefined, textAlignVertical: 'top', paddingTop: 12 }}
                 />
               </View>

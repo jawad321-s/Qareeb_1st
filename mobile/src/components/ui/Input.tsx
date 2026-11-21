@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Pressable, TextInput, View, type TextInputProps } from 'react-native';
 import { Text } from './Text';
 import { Icon, type IconName } from './Icon';
+import { TextArea } from './TextArea';
 import { radius } from '@/theme/tokens';
 import { useTheme } from '@/theme/ThemeProvider';
 import { useFont, useT } from '@/i18n';
@@ -32,6 +33,8 @@ export function Input({
   const [hidden, setHidden] = useState(!!secure);
 
   const borderColor = error ? '#EF4444' : focused ? colors.tint : colors.border;
+  // Multi-line: the placeholder starts on the reading side on phones too.
+  const Field = (multiline ? TextArea : TextInput) as React.ComponentType<TextInputProps & { containerStyle?: object }>;
 
   return (
     <View style={{ gap: 6 }}>
@@ -56,8 +59,8 @@ export function Input({
         }}
       >
         {iconLeft && <Icon name={iconLeft} size={20} color={focused ? colors.tint : colors.muted} />}
-        <TextInput
-          multiline={multiline}
+        <Field
+          {...(multiline ? { containerStyle: { flex: 1, minWidth: 0 } } : {})}
           textAlignVertical={multiline ? 'top' : 'center'}
           style={[
             {
@@ -73,6 +76,8 @@ export function Input({
               ...({ outlineStyle: 'none' } as any),
             },
             style,
+            // A multi-line field fills its own box (TextArea) instead of the row.
+            multiline ? { flex: undefined } : null,
           ]}
           placeholderTextColor={colors.muted}
           secureTextEntry={hidden}

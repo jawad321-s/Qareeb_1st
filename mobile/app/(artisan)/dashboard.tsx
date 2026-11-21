@@ -49,12 +49,13 @@ export default function ArtisanDashboard() {
   const history = useJobHistory(user.uid);
   const rating = useMyRating();
   const tabBarSpace = useTabBarSpace();
-  // Featured artisan: completed jobs as counted by the server, against the
-  // number set in the dashboard.
+  // Featured artisan: completed jobs against the number set in the dashboard.
+  // The same count as the "Completed" card: the server's tally on the profile
+  // can lag behind (it showed 0 after a finished job), so the larger is shown.
   const platform = useSupportContacts().data;
   const featuredMin = platform?.featuredMinJobs ?? FEATURED_MIN_JOBS;
   const featuredRating = platform?.featuredMinRating ?? FEATURED_MIN_RATING;
-  const completedJobs = profile.data?.profile.completedJobs ?? history.data?.completed.length ?? 0;
+  const completedJobs = Math.max(profile.data?.profile.completedJobs ?? 0, history.data?.completed.length ?? 0);
 
   // Artisans are matched to jobs by distance, so ask for the device location
   // the first time the app opens (once per account; the chip below re-opens it).

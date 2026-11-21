@@ -1,10 +1,11 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, View, ScrollView, TextInput, Pressable, KeyboardAvoidingView, Platform, type ScrollViewInstance } from 'react-native';
+import { ActivityIndicator, View, ScrollView, Pressable, KeyboardAvoidingView, Platform, type ScrollViewInstance } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Animated, { FadeInUp } from 'react-native-reanimated';
 import { StatusBar } from 'expo-status-bar';
 import { Header } from '@/components/ui/Header';
 import { Text } from '@/components/ui/Text';
+import { TextArea } from '@/components/ui/TextArea';
 import { Icon } from '@/components/ui/Icon';
 import { useToast } from '@/components/feedback/Toast';
 import { useAuth } from '@/store/auth';
@@ -134,14 +135,14 @@ export default function Support() {
 
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 16, paddingVertical: 10, borderTopWidth: 1, borderTopColor: colors.border }}>
           <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center', backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border, borderRadius: 22, paddingHorizontal: 14 }}>
-            <TextInput
+            <TextArea
+              containerStyle={{ flex: 1 }}
               value={text}
               onChangeText={setText}
               placeholder={t('support.message')}
               placeholderTextColor={colors.muted}
-              multiline
               maxLength={SUPPORT_TEXT_MAX}
-              style={{ flex: 1, color: colors.fg, fontSize: 15, fontFamily: font('Inter_400Regular'), textAlign: localizedTextAlign(isRTL), maxHeight: 100, paddingVertical: 10 }}
+              style={{ color: colors.fg, fontSize: 15, fontFamily: font('Inter_400Regular'), textAlign: localizedTextAlign(isRTL), maxHeight: 100, paddingVertical: 10 }}
             />
           </View>
           <Pressable

@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
-import { View, TextInput, Pressable } from 'react-native';
+import { View, Pressable } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { Screen } from '@/components/ui/Screen';
 import { Header } from '@/components/ui/Header';
 import { Text } from '@/components/ui/Text';
+import { TextArea } from '@/components/ui/TextArea';
 import { Card } from '@/components/ui/Card';
 import { Avatar } from '@/components/ui/Avatar';
 import { Button } from '@/components/ui/Button';
@@ -122,13 +123,12 @@ export default function Report() {
       <Text variant="caption" tone="muted" style={{ marginBottom: 10, marginLeft: 4 }}>
         {t(reason === 'other' ? 'report.detailsRequired' : 'report.details')}
       </Text>
-      <TextInput
+      <TextArea
         value={details}
         onChangeText={setDetails}
         placeholder={t('report.detailsPlaceholder')}
         placeholderTextColor={colors.muted}
         maxLength={DETAILS_MAX}
-        multiline
         style={{ minHeight: 120, borderRadius: 16, borderWidth: 1.5, borderColor: colors.border, backgroundColor: colors.surface, padding: 14, color: colors.fg, fontSize: 15, fontFamily: font('Inter_400Regular'), textAlign: localizedTextAlign(isRTL), textAlignVertical: 'top', marginBottom: 20 }}
       />
 

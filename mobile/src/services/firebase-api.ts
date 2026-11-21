@@ -4,7 +4,7 @@
 // dashboard also uses, giving live mobile ↔ admin integration.
 import {
   addDoc, collection, doc, getCountFromServer, getDoc, getDocs, limit, orderBy, query,
-  setDoc, updateDoc, where, writeBatch,
+  deleteField, setDoc, updateDoc, where, writeBatch,
 } from 'firebase/firestore';
 import type {
   AppUser, ArtisanProfile, ChatMessage, Conversation, JobHistory, Offer, Review, Service, ServiceRequest, SupportContacts,
@@ -490,6 +490,10 @@ export const firebaseApi: typeof mockApi = {
     return snap.docs
       .map((d) => {
         const { cipher, text: _t, mediaUrl: _m, ...rest } = d.data();
+        // Deleted for everyone: its content is gone, only that it existed shows.
+        if (rest.deleted === true) {
+          return withId<ChatMessage>(d.id, { ...rest, deleted: true, locked: false, requestId, createdAt: ms(rest.createdAt) } as ChatMessage);
+        }
         const opened = typeof cipher === 'string' && key ? decryptChat(cipher, key) : null;
         return withId<ChatMessage>(d.id, {
           ...rest,
@@ -534,10 +538,44 @@ export const firebaseApi: typeof mockApi = {
   async sendMessage(requestId, msg): Promise<ChatMessage> {
     const now = Date.now();
     const key = await chatKey(requestId, true);
-    const { text, mediaUrl, ...meta } = msg;
-    const cipher = encryptChat({ text, mediaUrl }, key!);
-    const refDoc = await addDoc(messagesOf(requestId), { ...meta, cipher, v: 1, read: false, createdAt: now });
+    const { text, mediaUrl, mediaUrls, replyTo, ...meta } = msg;
+    // Several photos travel in one message; the first is also `mediaUrl`.
+    const cipher = encryptChat({ text, mediaUrl: mediaUrls?.[0] ?? mediaUrl, ...(mediaUrls?.length ? { mediaUrls } : {}) }, key!);
+    const refDoc = await addDoc(messagesOf(requestId), {
+      ...meta,
+      // Which message this answers: an id, nothing of its content.
+      ...(replyTo ? { replyTo } : {}),
+      cipher,
+      v: 1,
+      read: false,
+      createdAt: now,
+    });
     return { ...msg, read: false, createdAt: now, requestId, id: refDoc.id } as ChatMessage;
+  },
+
+  /**
+   * "Delete for everyone": its sender empties a message while the chat is
+   * open. The encrypted content is removed for good; the thread shows "This
+   * message was deleted" in its place, on both sides.
+   */
+  async deleteMessageForAll(requestId, messageId): Promise<void> {
+    await updateDoc(doc(db(), 'requests', requestId, 'messages', messageId), {
+      deleted: true,
+      deletedAt: Date.now(),
+      cipher: deleteField(),
+    });
+  },
+
+  /**
+   * A job on which this customer hired that artisan (or this artisan was
+   * hired by that customer), or null. Complaints are only offered once an
+   * offer was accepted: not about an artisan who merely sent an offer, nor
+   * about a customer whose request an artisan only looked at.
+   */
+  async getSharedJobId(uid, role, otherId): Promise<string | null> {
+    const [mine, theirs] = role === 'customer' ? ['customerId', 'acceptedArtisanId'] : ['acceptedArtisanId', 'customerId'];
+    const snap = await getDocs(query(collection(db(), 'requests'), where(mine, '==', uid), where(theirs, '==', otherId), limit(1)));
+    return snap.empty ? null : snap.docs[0].id;
   },
 
   async getConversations(userId, role): Promise<Conversation[]> {

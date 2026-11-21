@@ -18,6 +18,8 @@ nacl.setPRNG((x: Uint8Array, n: number) => {
 export interface ChatPayload {
   text?: string;
   mediaUrl?: string;
+  /** Several photos sent together (mediaUrl repeats the first, for older app versions). */
+  mediaUrls?: string[];
 }
 
 export const newChatKey = (): string => naclUtil.encodeBase64(nacl.randomBytes(nacl.secretbox.keyLength));
@@ -41,7 +43,12 @@ export function decryptChat(cipherB64: string, keyB64: string): ChatPayload | nu
     const opened = nacl.secretbox.open(all.slice(nacl.secretbox.nonceLength), nonce, key);
     if (!opened) return null;
     const v = JSON.parse(naclUtil.encodeUTF8(opened));
-    return { text: typeof v.text === 'string' ? v.text : undefined, mediaUrl: typeof v.mediaUrl === 'string' ? v.mediaUrl : undefined };
+    const urls = Array.isArray(v.mediaUrls) ? v.mediaUrls.filter((u: unknown): u is string => typeof u === 'string') : [];
+    return {
+      text: typeof v.text === 'string' ? v.text : undefined,
+      mediaUrl: typeof v.mediaUrl === 'string' ? v.mediaUrl : undefined,
+      ...(urls.length ? { mediaUrls: urls } : {}),
+    };
   } catch {
     return null;
   }

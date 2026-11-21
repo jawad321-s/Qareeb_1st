@@ -16,8 +16,8 @@
       "bundleIdentifier": "com.qareeb.app",
       "infoPlist": {
         "NSLocationWhenInUseUsageDescription": "Qareeb uses your location to match you with nearby artisans.",
-        "NSCameraUsageDescription": "Qareeb needs camera access to upload photos of your service request.",
-        "NSPhotoLibraryUsageDescription": "Qareeb needs photo access to attach images to your requests."
+        "NSCameraUsageDescription": "Qareeb uses the camera to take photos for your requests and your chats.",
+        "NSPhotoLibraryUsageDescription": "Qareeb uses your photos to attach them to your requests and your chats."
       }
     },
     "android": {

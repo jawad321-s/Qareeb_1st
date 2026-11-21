@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { Modal, Pressable, ScrollView, TextInput } from 'react-native';
+import { Modal, Pressable, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Text } from '@/components/ui/Text';
+import { TextArea } from '@/components/ui/TextArea';
 import { Button } from '@/components/ui/Button';
 import { Icon } from '@/components/ui/Icon';
 import { keyboardScrollProps } from '@/components/ui/Screen';
@@ -68,13 +69,12 @@ export function ReasonSheet({ visible, context, title, confirmLabel, loading, on
               </Pressable>
             );
           })}
-          <TextInput
+          <TextArea
             value={note}
             onChangeText={setNote}
             placeholder={needsNote ? t('reason.noteRequired') : t('reason.noteOptional')}
             placeholderTextColor={colors.muted}
             maxLength={300}
-            multiline
             style={{ minHeight: 70, borderRadius: 14, borderWidth: 1.5, borderColor: colors.border, backgroundColor: colors.surface, padding: 12, color: colors.fg, fontSize: 15, fontFamily: font('Inter_400Regular'), textAlign: localizedTextAlign(isRTL), textAlignVertical: 'top' }}
           />
           <Button label={confirmLabel} variant="danger" disabled={!ready} loading={loading} onPress={() => choice && onSubmit({ choice, note: note.trim() || undefined })} />

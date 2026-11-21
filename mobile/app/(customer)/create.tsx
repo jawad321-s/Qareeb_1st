@@ -7,6 +7,7 @@ import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
 import { Screen, keyboardScrollProps } from '@/components/ui/Screen';
 import { Header } from '@/components/ui/Header';
 import { Text } from '@/components/ui/Text';
+import { TextArea } from '@/components/ui/TextArea';
 import { Button } from '@/components/ui/Button';
 import { Icon } from '@/components/ui/Icon';
 import { Card } from '@/components/ui/Card';
@@ -194,12 +195,11 @@ export default function CreateRequest() {
               <Text variant="caption" tone="muted">
                 {t('create.describe')}
               </Text>
-              <TextInput
+              <TextArea
                 value={description}
                 onChangeText={setDescription}
                 placeholder={t('create.describePlaceholder')}
                 placeholderTextColor={colors.muted}
-                multiline
                 style={{ minHeight: 120, borderRadius: 16, borderWidth: 1.5, borderColor: colors.border, backgroundColor: colors.surface, padding: 14, color: colors.fg, fontSize: 15, fontFamily: font('Inter_400Regular'), textAlign: localizedTextAlign(isRTL), textAlignVertical: 'top' }}
               />
               <MinLengthHint value={description} min={DESC_MIN} />

@@ -196,7 +196,14 @@ export interface ChatMessage {
   senderId: string;
   type: MessageType;
   text?: string;
+  /** A photo message's first photo (what older app versions show). */
   mediaUrl?: string;
+  /** Every photo of a photo message (sent together, shown as one album). */
+  mediaUrls?: string[];
+  /** The message this one answers (its id in the same chat). */
+  replyTo?: string;
+  /** Deleted for everyone by its sender: nothing of it is kept. */
+  deleted?: boolean;
   durationMs?: number;
   read: boolean;
   createdAt: number;

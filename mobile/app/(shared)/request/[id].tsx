@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
-import { View, ScrollView } from 'react-native';
-import { Image } from 'expo-image';
+import { View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { Screen } from '@/components/ui/Screen';
 import { Header } from '@/components/ui/Header';
 import { Text } from '@/components/ui/Text';
+import { PhotoStrip } from '@/components/ui/PhotoViewer';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Icon } from '@/components/ui/Icon';
@@ -160,13 +160,8 @@ export default function RequestDetail() {
           <Text variant="body" tone="muted" style={{ lineHeight: 21 }}>
             {request.description}
           </Text>
-          {shownPhotos(request.images).length > 0 && (
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8 }}>
-              {shownPhotos(request.images).map((uri) => (
-                <Image key={uri} source={{ uri }} style={{ width: 120, height: 120, borderRadius: 14 }} />
-              ))}
-            </ScrollView>
-          )}
+          {/* Tap a photo to see it full screen and zoom in. */}
+          <PhotoStrip photos={shownPhotos(request.images)} width={120} />
           <View style={{ flexDirection: 'row', gap: 20, flexWrap: 'wrap' }}>
             <Info icon="map-pin" label={request.location?.address ?? '—'} />
           </View>

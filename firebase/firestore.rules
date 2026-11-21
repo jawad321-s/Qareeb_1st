@@ -221,15 +221,26 @@ service cloud.firestore {
         // The thread closes once the job is completed or cancelled. Messages
         // are stored encrypted only (`cipher`, see mobile/src/lib/chatCrypto):
         // a plain text or photo link is refused.
+        // A reply names the message it answers (`replyTo`, an id only).
         allow create: if isSignedIn()
                       && incoming().senderId == uid()
                       && (req().customerId == uid() || req().acceptedArtisanId == uid())
                       && req().status in ['ACCEPTED', 'ON_THE_WAY', 'WORKING']
                       && incoming().cipher is string && incoming().cipher.size() <= 20000
-                      && !incoming().keys().hasAny(['text', 'mediaUrl']);
-        // Only the read mark changes afterwards.
+                      && !incoming().keys().hasAny(['text', 'mediaUrl', 'deleted', 'deletedAt'])
+                      && (!('replyTo' in incoming()) || (incoming().replyTo is string && incoming().replyTo.size() <= 128));
+        // Afterwards: the read mark, by either side; and "delete for
+        // everyone", by its sender while the chat is open, which removes the
+        // encrypted content for good (and can't be undone).
         allow update: if isSignedIn() && (req().customerId == uid() || req().acceptedArtisanId == uid())
-                      && incoming().diff(existing()).affectedKeys().hasOnly(['read']);
+                      && (incoming().diff(existing()).affectedKeys().hasOnly(['read'])
+                          || (existing().senderId == uid()
+                              && existing().get('deleted', false) != true
+                              && req().status in ['ACCEPTED', 'ON_THE_WAY', 'WORKING']
+                              && incoming().deleted == true
+                              && incoming().deletedAt is number
+                              && !incoming().keys().hasAny(['cipher', 'text', 'mediaUrl'])
+                              && incoming().diff(existing()).affectedKeys().hasOnly(['deleted', 'deletedAt', 'cipher'])));
       }
 
       // The conversation's encryption key, readable by its two parties only.

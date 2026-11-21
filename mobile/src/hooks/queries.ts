@@ -98,6 +98,19 @@ export function useReviews(targetId: string) {
   return useQuery({ queryKey: qk.reviews(targetId), queryFn: () => api.getReviews(targetId), enabled: !!targetId });
 }
 
+/**
+ * The job the signed-in user and `otherId` were matched on (an accepted
+ * offer), or null. A complaint about someone is only offered with one.
+ */
+export function useSharedJob(me: Pick<AppUser, 'uid' | 'role'> | null | undefined, otherId: string | undefined) {
+  const role = me?.role === 'customer' || me?.role === 'artisan' ? me.role : undefined;
+  return useQuery({
+    queryKey: ['sharedJob', me?.uid ?? '', otherId ?? ''],
+    queryFn: () => api.getSharedJobId(me!.uid, role!, otherId!),
+    enabled: !!me && !!role && !!otherId && me.uid !== otherId,
+  });
+}
+
 export function useUser(uid: string | undefined) {
   // Unreadable or unknown users (e.g. a customer without a public profile yet) are null.
   return useQuery({ queryKey: qk.user(uid ?? ''), queryFn: async () => (await api.getUser(uid!)) ?? null, enabled: !!uid });
@@ -263,6 +276,18 @@ export function useSendMessage(requestId: string) {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (msg: Omit<ChatMessage, 'id' | 'read' | 'createdAt'>) => api.sendMessage(requestId, msg),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: qk.messages(requestId) });
+      qc.invalidateQueries({ queryKey: ['conversations'] });
+    },
+  });
+}
+
+/** "Delete for everyone" on one of the user's own messages. */
+export function useDeleteMessage(requestId: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (messageId: string) => api.deleteMessageForAll(requestId, messageId),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: qk.messages(requestId) });
       qc.invalidateQueries({ queryKey: ['conversations'] });

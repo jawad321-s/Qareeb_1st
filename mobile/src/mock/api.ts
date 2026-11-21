@@ -292,9 +292,19 @@ export const mockApi = {
     const req = requests.find((r) => r.id === requestId);
     // The thread closes when the job ends.
     if (!req || !isChatOpen(req.status)) throw new Error('chat-closed');
-    const m: ChatMessage = { ...msg, requestId, id: uid('m'), read: false, createdAt: Date.now() };
+    const m: ChatMessage = { ...msg, mediaUrl: msg.mediaUrls?.[0] ?? msg.mediaUrl, requestId, id: uid('m'), read: false, createdAt: Date.now() };
     messages = [...messages, m];
     return clone(m);
+  },
+
+  /** Deletes a message for everyone (its sender, while the chat is open; see firebase-api). */
+  async deleteMessageForAll(requestId: string, messageId: string): Promise<void> {
+    await delay(150);
+    const req = requests.find((r) => r.id === requestId);
+    if (!req || !isChatOpen(req.status)) throw new Error('chat-closed');
+    messages = messages.map((m) =>
+      m.id === messageId ? { id: m.id, requestId: m.requestId, senderId: m.senderId, type: m.type, read: m.read, createdAt: m.createdAt, replyTo: m.replyTo, deleted: true } : m,
+    );
   },
 
   /** Every chat the user is part of: one per request with an assigned artisan. */
@@ -384,5 +394,17 @@ export const mockApi = {
   async isPhoneRegistered(phone: string, role: 'customer' | 'artisan'): Promise<boolean> {
     await delay(300);
     return hasAccount(phone, role);
+  },
+
+  /**
+   * A job on which this customer hired that artisan (or this artisan was
+   * hired by that customer), or null: a complaint needs one (see firebase-api).
+   */
+  async getSharedJobId(uid: string, role: 'customer' | 'artisan', otherId: string): Promise<string | null> {
+    await delay(100);
+    const job = requests.find((r) =>
+      role === 'customer' ? r.customerId === uid && r.acceptedArtisanId === otherId : r.acceptedArtisanId === uid && r.customerId === otherId,
+    );
+    return job?.id ?? null;
   },
 };

@@ -1,11 +1,11 @@
 import React, { useMemo, useRef, useState } from 'react';
-import { ActivityIndicator, Alert, Linking, Modal, View, ScrollView, Pressable, KeyboardAvoidingView, Platform, type ScrollViewInstance } from 'react-native';
+import { ActivityIndicator, Alert, Linking, Modal, View, ScrollView, Pressable, KeyboardAvoidingView, Platform, useWindowDimensions, type ScrollViewInstance } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { Image } from 'expo-image';
 import * as ImagePicker from 'expo-image-picker';
 import * as Haptics from 'expo-haptics';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import Animated, { FadeInUp } from 'react-native-reanimated';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+import Animated, { FadeInUp, ZoomIn } from 'react-native-reanimated';
 import { StatusBar } from 'expo-status-bar';
 import { Header } from '@/components/ui/Header';
 import { Text } from '@/components/ui/Text';
@@ -23,10 +23,13 @@ import { useAuth } from '@/store/auth';
 import { useTheme } from '@/theme/ThemeProvider';
 import { useFont, useT } from '@/i18n';
 import { timeAgo } from '@/lib/format';
-import { directionStyle, localizedTextAlign } from '@/i18n/rtl';
+import { localizedTextAlign } from '@/i18n/rtl';
 import { useDeleteChat } from '@/components/domain/ConversationList';
 import { useNow } from '@/hooks/useNow';
 import type { ChatMessage } from '@/types';
+
+/** A view whose place on screen can be read (a message bubble). */
+type Measurable = { measureInWindow?: (cb: (x: number, y: number, width: number, height: number) => void) => void };
 
 /** Photos sent together in one message, at most. */
 const MAX_PHOTOS = 10;
@@ -52,8 +55,12 @@ export default function Chat() {
   // Photos picked or taken, shown above the field until sent (or removed).
   const [photos, setPhotos] = useState<string[]>([]);
   const [replyTo, setReplyTo] = useState<ChatMessage | null>(null);
-  // The message whose long-press menu is open.
-  const [menuFor, setMenuFor] = useState<ChatMessage | null>(null);
+  // The message whose long-press menu is open, and where its bubble sits on
+  // screen: the menu opens right beside it.
+  const [menuFor, setMenuFor] = useState<{ m: ChatMessage; x: number; y: number; w: number; h: number } | null>(null);
+  const bubbles = useRef<Record<string, Measurable | null>>({});
+  const win = useWindowDimensions();
+  const insets = useSafeAreaInsets();
   const [sending, setSending] = useState(false);
   const [highlight, setHighlight] = useState<string | null>(null);
   const scrollRef = useRef<ScrollViewInstance>(null);
@@ -170,7 +177,9 @@ export default function Chat() {
   const openMenu = (m: ChatMessage) => {
     if (!menuActions(m).length) return;
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium).catch(() => {});
-    setMenuFor(m);
+    const node = bubbles.current[m.id];
+    if (node?.measureInWindow) node.measureInWindow((x, y, w, h) => setMenuFor({ m, x, y, w, h }));
+    else setMenuFor({ m, x: win.width / 2 - 100, y: win.height / 2, w: 200, h: 0 });
   };
 
   const deleteForAll = async (m: ChatMessage) => {
@@ -242,6 +251,9 @@ export default function Chat() {
               >
                 {!mine && <Avatar uri={other?.photoUrl} name={other?.fullName} size={28} />}
                 <Pressable
+                  ref={(node) => {
+                    bubbles.current[m.id] = node as Measurable | null;
+                  }}
                   onLongPress={() => openMenu(m)}
                   delayLongPress={300}
                   style={{
@@ -398,33 +410,74 @@ export default function Chat() {
         )}
       </KeyboardAvoidingView>
 
-      {/* Long-press menu */}
-      <Modal visible={!!menuFor} transparent animationType="fade" onRequestClose={() => setMenuFor(null)}>
-        <Pressable onPress={() => setMenuFor(null)} style={[{ flex: 1, backgroundColor: 'rgba(15,23,42,0.45)', justifyContent: 'flex-end' }, directionStyle(locale === 'ar')]}>
-          <SafeAreaView edges={['bottom']} style={{ backgroundColor: colors.surface, borderTopLeftRadius: 22, borderTopRightRadius: 22, paddingHorizontal: 12, paddingTop: 10, paddingBottom: 6 }}>
-            {menuFor && (
-              <Text variant="caption" tone="muted" numberOfLines={2} style={{ paddingHorizontal: 12, paddingVertical: 8 }}>
-                {previewOf(menuFor)}
-              </Text>
-            )}
-            {menuFor &&
-              menuActions(menuFor).map((a) => (
-                <Pressable
-                  key={a.label}
-                  onPress={() => {
-                    setMenuFor(null);
-                    a.run();
+      {/* Long-press menu, beside the message: below it, or above when there
+          is no room below; on the message's own side. */}
+      <Modal visible={!!menuFor} transparent animationType="fade" statusBarTranslucent onRequestClose={() => setMenuFor(null)}>
+        <Pressable onPress={() => setMenuFor(null)} style={{ flex: 1, backgroundColor: 'rgba(15,23,42,0.35)', direction: 'ltr' }}>
+          {menuFor && (() => {
+            const actions = menuActions(menuFor.m);
+            const W = 210;
+            const H = actions.length * 50 + 12;
+            const below = menuFor.y + menuFor.h + 8;
+            const top = below + H <= win.height - insets.bottom - 12 ? below : Math.max(insets.top + 8, menuFor.y - 8 - H);
+            const onLeft = menuFor.x + menuFor.w / 2 < win.width / 2;
+            const left = onLeft ? Math.max(12, menuFor.x) : Math.min(win.width - 12 - W, menuFor.x + menuFor.w - W);
+            return (
+              <>
+                {/* Which message: outlined where it is. */}
+                <View
+                  pointerEvents="none"
+                  style={{ position: 'absolute', left: menuFor.x - 3, top: menuFor.y - 3, width: menuFor.w + 6, height: menuFor.h + 6, borderRadius: 20, borderWidth: 2, borderColor: colors.tint }}
+                />
+                <Animated.View
+                  entering={ZoomIn.duration(140)}
+                  style={{
+                    position: 'absolute',
+                    top,
+                    left,
+                    width: W,
+                    paddingVertical: 6,
+                    borderRadius: 16,
+                    backgroundColor: colors.surface,
+                    borderWidth: 1,
+                    borderColor: colors.border,
+                    shadowColor: '#000',
+                    shadowOpacity: 0.18,
+                    shadowRadius: 16,
+                    shadowOffset: { width: 0, height: 6 },
+                    elevation: 8,
+                    direction: locale === 'ar' ? 'rtl' : 'ltr',
                   }}
-                  accessibilityRole="button"
-                  style={({ pressed }) => ({ flexDirection: 'row', alignItems: 'center', gap: 12, paddingHorizontal: 12, paddingVertical: 14, borderRadius: 14, backgroundColor: pressed ? colors.surface2 : 'transparent' })}
                 >
-                  <Icon name={a.icon} size={20} color={a.danger ? '#EF4444' : colors.fg} />
-                  <Text variant="bodyMedium" style={{ color: a.danger ? '#EF4444' : colors.fg }}>
-                    {a.label}
-                  </Text>
-                </Pressable>
-              ))}
-          </SafeAreaView>
+                  {actions.map((a, i) => (
+                    <Pressable
+                      key={a.label}
+                      onPress={() => {
+                        setMenuFor(null);
+                        a.run();
+                      }}
+                      accessibilityRole="button"
+                      style={({ pressed }) => ({
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                        gap: 12,
+                        height: 50,
+                        paddingHorizontal: 16,
+                        borderTopWidth: i === 0 ? 0 : 1,
+                        borderTopColor: colors.border,
+                        backgroundColor: pressed ? colors.surface2 : 'transparent',
+                      })}
+                    >
+                      <Icon name={a.icon} size={19} color={a.danger ? '#EF4444' : colors.fg} />
+                      <Text variant="bodyMedium" style={{ color: a.danger ? '#EF4444' : colors.fg }}>
+                        {a.label}
+                      </Text>
+                    </Pressable>
+                  ))}
+                </Animated.View>
+              </>
+            );
+          })()}
         </Pressable>
       </Modal>
       {viewer.element}

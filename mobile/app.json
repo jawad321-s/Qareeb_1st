@@ -8,6 +8,11 @@
     "icon": "./assets/icon.png",
     "scheme": "qareeb",
     "userInterfaceStyle": "automatic",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#031746"
+    },
     "assetBundlePatterns": [
       "**/*"
     ],

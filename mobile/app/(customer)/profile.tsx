@@ -1,13 +1,10 @@
 import React from 'react';
-import { View, ScrollView, Pressable } from 'react-native';
-import { router } from 'expo-router';
+import { View, ScrollView } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import { Text } from '@/components/ui/Text';
 import { Avatar } from '@/components/ui/Avatar';
-import { Icon, type IconName } from '@/components/ui/Icon';
-import { Card } from '@/components/ui/Card';
 import { FloatingBlobs } from '@/components/ui/FloatingBlobs';
 import { displayPhone } from '@/lib/phone';
 import { useMyRequests } from '@/hooks/queries';
@@ -18,14 +15,7 @@ import { useThemeStore } from '@/theme/ThemeProvider';
 import { useTheme } from '@/theme/ThemeProvider';
 import { useT } from '@/i18n';
 import { useTabBarSpace } from '@/components/ui/TabBar';
-
-interface Item {
-  icon: IconName;
-  label: string;
-  route?: string;
-  danger?: boolean;
-  onPress?: () => void;
-}
+import { ProfileMenu, type ProfileMenuItem } from '@/components/domain/ProfileMenu';
 
 export default function Profile() {
   const tabBarSpace = useTabBarSpace(); // keeps the last item clear of the floating tab bar
@@ -42,7 +32,7 @@ export default function Profile() {
   // too so this screen never dereferences a null user during that transition.
   if (!user) return null;
 
-  const sections: { title: string; items: Item[] }[] = [
+  const sections: { title: string; items: ProfileMenuItem[] }[] = [
     {
       title: t('profile.account'),
       items: [
@@ -99,30 +89,7 @@ export default function Profile() {
         </LinearGradient>
 
         <View style={{ paddingHorizontal: 20, marginTop: 20, gap: 22 }}>
-          {sections.map((section) => (
-            <View key={section.title} style={{ gap: 10 }}>
-              <Text variant="caption" tone="muted" style={{ marginLeft: 4 }}>
-                {section.title.toUpperCase()}
-              </Text>
-              <Card padded={false}>
-                {section.items.map((item, i) => (
-                  <Pressable
-                    key={item.label}
-                    onPress={item.onPress ?? (item.route ? () => router.push(item.route as any) : undefined)}
-                    style={{ flexDirection: 'row', alignItems: 'center', gap: 14, padding: 16, borderTopWidth: i === 0 ? 0 : 1, borderTopColor: colors.border }}
-                  >
-                    <View style={{ width: 36, height: 36, borderRadius: 10, backgroundColor: item.danger ? '#EF444418' : colors.surface2, alignItems: 'center', justifyContent: 'center' }}>
-                      <Icon name={item.icon} size={18} color={item.danger ? '#EF4444' : colors.tint} />
-                    </View>
-                    <Text variant="bodyMedium" style={{ flex: 1 }} tone={item.danger ? 'danger' : 'default'}>
-                      {item.label}
-                    </Text>
-                    {!item.danger && <Icon name="chevron-right" size={18} color={colors.muted} />}
-                  </Pressable>
-                ))}
-              </Card>
-            </View>
-          ))}
+          <ProfileMenu sections={sections} />
           <Text variant="caption" tone="muted" center style={{ marginTop: 8 }}>
             Qareeb v1.0.0
           </Text>

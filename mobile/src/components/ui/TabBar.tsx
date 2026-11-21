@@ -77,7 +77,8 @@ export function TabBar({ state, emitter, navigateToTab, meta }: BottomTabBarProp
         shadowRadius: shadows.lg.shadowRadius,
       }}
     >
-      <GlassView radius={28} style={{ elevation: shadows.lg.elevation }}>
+      {/* No bright line along the top: it showed as a thin white stroke. */}
+      <GlassView radius={28} topLine={false} style={{ elevation: shadows.lg.elevation }}>
         <View style={{ flexDirection: 'row', paddingVertical: 10, paddingHorizontal: 8 }}>
           {items.map((x) => {
             const focused = x.index === state.index;

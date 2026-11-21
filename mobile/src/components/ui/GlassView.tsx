@@ -17,6 +17,8 @@ interface GlassViewProps {
    *             background color shows through instead of a milky white box.
    */
   tone?: 'auto' | 'onColor';
+  /** The bright line along the top edge (default true). */
+  topLine?: boolean;
 }
 
 /**
@@ -31,6 +33,7 @@ export function GlassView({
   style,
   sheen = true,
   tone = 'auto',
+  topLine = true,
 }: GlassViewProps) {
   const { isDark } = useTheme();
   const onColor = tone === 'onColor';
@@ -88,11 +91,13 @@ export function GlassView({
         ]}
       />
       {/* Bright top edge */}
-      <LinearGradient
-        colors={[topEdge, 'rgba(255,255,255,0)']}
-        style={{ position: 'absolute', top: 0, left: radius, right: radius, height: 1 }}
-        pointerEvents="none"
-      />
+      {topLine && (
+        <LinearGradient
+          colors={[topEdge, 'rgba(255,255,255,0)']}
+          style={{ position: 'absolute', top: 0, left: radius, right: radius, height: 1 }}
+          pointerEvents="none"
+        />
+      )}
       {children}
     </View>
   );

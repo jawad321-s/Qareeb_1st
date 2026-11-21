@@ -183,6 +183,7 @@ export const translations = {
 
     // profile
     'profile.account': 'Account',
+    'profile.work': 'My work',
     'profile.editProfile': 'Edit profile',
     'profile.pastArtisans': 'Artisans you worked with',
     'profile.notifications': 'Notifications',
@@ -1066,6 +1067,7 @@ export const translations = {
 
     // profile
     'profile.account': 'الحساب',
+    'profile.work': 'عملي',
     'profile.editProfile': 'تعديل الملف الشخصي',
     'profile.pastArtisans': 'حرفيون تعاملت معهم',
     'profile.notifications': 'الإشعارات',

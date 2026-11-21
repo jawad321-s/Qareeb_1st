@@ -1,13 +1,10 @@
 import React from 'react';
-import { View, ScrollView, Pressable } from 'react-native';
-import { router } from 'expo-router';
+import { View, ScrollView } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import { Text } from '@/components/ui/Text';
 import { Avatar } from '@/components/ui/Avatar';
-import { Icon, type IconName } from '@/components/ui/Icon';
-import { Card } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
 import { FloatingBlobs } from '@/components/ui/FloatingBlobs';
 import { useAuth } from '@/store/auth';
@@ -20,6 +17,7 @@ import { ratingValue } from '@/lib/rating';
 import { useMySubscription } from '@/store/subscription';
 import { planById } from '@/lib/plans';
 import { useTabBarSpace } from '@/components/ui/TabBar';
+import { ProfileMenu, type ProfileMenuItem } from '@/components/domain/ProfileMenu';
 
 export default function ArtisanProfile() {
   const tabBarSpace = useTabBarSpace(); // keeps the last item clear of the floating tab bar
@@ -39,19 +37,44 @@ export default function ArtisanProfile() {
   // See customer profile: guard against a null user during the sign-out redirect.
   if (!user) return null;
 
-  const items: { icon: IconName; label: string; danger?: boolean; onPress?: () => void; route?: string }[] = [
-    { icon: 'user', label: t('profile.editProfile'), route: '/(shared)/edit-profile' },
-    { icon: 'shield', label: t('ap.verification'), route: '/(shared)/verification' },
-    { icon: 'image', label: t('ap.gallery'), route: '/(shared)/gallery' },
-    { icon: 'message', label: t('ap.conversations'), route: '/(shared)/conversations' },
-    { icon: 'sliders', label: t('ap.services'), route: '/(shared)/my-services' },
-    { icon: 'calendar', label: t('ap.availability'), route: '/(shared)/availability' },
-    { icon: 'award', label: t('ap.subscription'), route: '/(shared)/subscription' },
-    { icon: 'globe', label: `${t('profile.language')}: ${locale === 'ar' ? 'العربية' : 'English'}`, onPress: toggle },
-    { icon: isDark ? 'moon' : 'sun', label: `${t('profile.theme')}: ${t(`settings.${mode}` as any)}`, onPress: () => setMode(mode === 'dark' ? 'light' : mode === 'light' ? 'system' : 'dark') },
-    { icon: 'lightbulb', label: t('profile.suggest'), route: '/(shared)/suggest' },
-    { icon: 'flag', label: t('profile.report'), route: '/(shared)/report' },
-    { icon: 'log-out', label: t('profile.signOut'), danger: true, onPress: signOut },
+  // Grouped like the customer's account screen: who I am, my work, how the
+  // app looks, and help.
+  const sections: { title: string; items: ProfileMenuItem[] }[] = [
+    {
+      title: t('profile.account'),
+      items: [
+        { icon: 'user', label: t('profile.editProfile'), route: '/(shared)/edit-profile' },
+        { icon: 'shield', label: t('ap.verification'), route: '/(shared)/verification' },
+        { icon: 'award', label: t('ap.subscription'), route: '/(shared)/subscription' },
+        { icon: 'bell', label: t('profile.notifications'), route: '/(shared)/notifications' },
+      ],
+    },
+    {
+      title: t('profile.work'),
+      items: [
+        { icon: 'sliders', label: t('ap.services'), route: '/(shared)/my-services' },
+        { icon: 'calendar', label: t('ap.availability'), route: '/(shared)/availability' },
+        { icon: 'image', label: t('ap.gallery'), route: '/(shared)/gallery' },
+        { icon: 'message', label: t('ap.conversations'), route: '/(shared)/conversations' },
+      ],
+    },
+    {
+      title: t('profile.preferences'),
+      items: [
+        { icon: isDark ? 'moon' : 'sun', label: `${t('profile.theme')}: ${t(`settings.${mode}` as any)}`, onPress: () => setMode(mode === 'dark' ? 'light' : mode === 'light' ? 'system' : 'dark') },
+        { icon: 'globe', label: `${t('profile.language')}: ${locale === 'ar' ? 'العربية' : 'English'}`, onPress: toggle },
+        { icon: 'settings', label: t('profile.settings'), route: '/(shared)/settings' },
+      ],
+    },
+    {
+      title: t('profile.support'),
+      items: [
+        { icon: 'help-circle', label: t('profile.help'), route: '/(shared)/help' },
+        { icon: 'lightbulb', label: t('profile.suggest'), route: '/(shared)/suggest' },
+        { icon: 'flag', label: t('profile.report'), route: '/(shared)/report' },
+        { icon: 'log-out', label: t('profile.signOut'), danger: true, onPress: signOut },
+      ],
+    },
   ];
 
   return (
@@ -84,24 +107,11 @@ export default function ArtisanProfile() {
           </SafeAreaView>
         </LinearGradient>
 
-        <View style={{ paddingHorizontal: 20, marginTop: 20 }}>
-          <Card padded={false}>
-            {items.map((item, i) => (
-              <Pressable
-                key={item.label}
-                onPress={item.onPress ?? (item.route ? () => router.push(item.route as any) : undefined)}
-                style={{ flexDirection: 'row', alignItems: 'center', gap: 14, padding: 16, borderTopWidth: i === 0 ? 0 : 1, borderTopColor: colors.border }}
-              >
-                <View style={{ width: 36, height: 36, borderRadius: 10, backgroundColor: item.danger ? '#EF444418' : colors.surface2, alignItems: 'center', justifyContent: 'center' }}>
-                  <Icon name={item.icon} size={18} color={item.danger ? '#EF4444' : colors.tint} />
-                </View>
-                <Text variant="bodyMedium" style={{ flex: 1 }} tone={item.danger ? 'danger' : 'default'}>
-                  {item.label}
-                </Text>
-                {!item.danger && <Icon name="chevron-right" size={18} color={colors.muted} />}
-              </Pressable>
-            ))}
-          </Card>
+        <View style={{ paddingHorizontal: 20, marginTop: 20, gap: 22 }}>
+          <ProfileMenu sections={sections} />
+          <Text variant="caption" tone="muted" center style={{ marginTop: 8 }}>
+            Qareeb v1.0.0
+          </Text>
         </View>
       </ScrollView>
     </View>

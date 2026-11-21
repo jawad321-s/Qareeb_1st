@@ -1,3 +1,4 @@
+import { Platform } from 'react-native';
 import { create } from 'zustand';
 import { storage } from '@/lib/mmkv';
 import { config } from '@/lib/config';
@@ -34,10 +35,10 @@ const initialLocale: Locale = (storage.getString(LOCALE_KEY) as Locale) ?? confi
 // RTL (expo-localization `forcesRTL`, also in `extra`): the app is Arabic first,
 // and the layout must be right-to-left even on a phone set to English.
 //
-// So the flag is set and the app simply renders. Text still aligns correctly
-// for the locale through `localizedTextAlign`, and the native flip applies on
-// the next full launch. Only an explicit language switch by the user restarts
-// the app (see `applyLocale`).
+// So the flag is set and the app simply renders. On phones it is always
+// right-to-left (see syncNativeRTL); English is turned left-to-right from the
+// root view. A language switch never restarts the app on a phone (see
+// `applyLocale`).
 syncNativeRTL(initialLocale === 'ar');
 
 interface LocaleState {
@@ -48,9 +49,12 @@ interface LocaleState {
 
 function applyLocale(locale: Locale) {
   storage.set(LOCALE_KEY, locale);
-  // Direction changes require a restart for the layout engine to flip.
-  // Remember where the user is so the boot redirect brings them straight back
-  // to this screen instead of dumping them on home.
+  // Phones: nothing restarts. The layout engine stays right-to-left (app.json
+  // forces it) and English is laid out left-to-right from the root view (see
+  // directionStyle), so the new language shows at once. The restart this used
+  // to do closed the app in Expo Go, back to the phone's home screen.
+  if (Platform.OS !== 'web') return;
+  // Browser: reload with the page's direction set, back on the same screen.
   const path = getCurrentPathname();
   if (path && path !== '/') storage.set(RESTORE_ROUTE_KEY, path);
   storage.set(LANG_RELOAD_KEY, '1');

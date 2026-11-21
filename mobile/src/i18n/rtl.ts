@@ -6,7 +6,7 @@ import { DevSettings, I18nManager, Platform } from 'react-native';
  * through I18nManager, but changes only apply after a reload.
  */
 
-/** Align the layout engine with the language. Returns true if a reload is needed. */
+/** Set the layout engine's direction (browser: the language's; phones: always right-to-left). Returns true if a reload is needed. */
 export function syncNativeRTL(isArabic: boolean): boolean {
   if (Platform.OS === 'web') {
     // On web, flexbox follows the document direction — flip it directly.
@@ -22,9 +22,14 @@ export function syncNativeRTL(isArabic: boolean): boolean {
     }
     return false;
   }
-  if (I18nManager.isRTL !== isArabic) {
-    I18nManager.allowRTL(isArabic);
-    I18nManager.forceRTL(isArabic);
+  // Phones: the engine always runs right-to-left, whatever the language, as
+  // app.json forces it at launch. Turning it off for English would leave the
+  // next launch left-to-right (Arabic would then need a restart to look
+  // right); English is flipped from the root view instead (directionStyle).
+  void isArabic;
+  if (!I18nManager.isRTL) {
+    I18nManager.allowRTL(true);
+    I18nManager.forceRTL(true);
     return true;
   }
   return false;

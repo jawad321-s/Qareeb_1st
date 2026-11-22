@@ -8,7 +8,7 @@ import { Platform } from 'react-native';
 import Constants, { ExecutionEnvironment } from 'expo-constants';
 import * as Device from 'expo-device';
 import * as Notifications from 'expo-notifications';
-import { deleteDoc, doc, getDoc, setDoc } from 'firebase/firestore';
+import { deleteDoc, doc, setDoc } from 'firebase/firestore';
 import { getDb } from './firebase';
 import { kv } from './mmkv';
 
@@ -30,26 +30,19 @@ const projectId = (Constants.expoConfig?.extra?.eas as { projectId?: string } | 
 /** Firestore doc ids can't contain "/" — Expo tokens don't, but keep it safe. */
 const tokenDocId = (token: string) => token.replace(/[^A-Za-z0-9_-]/g, '_');
 
-/** How registering this device for push went (shown by the notification check screen). */
+/** How registering this device for push went. */
 export type PushRegistration =
   | { ok: true; token: string }
   | { ok: false; reason: 'unsupported' | 'android-expo-go' | 'no-project' | 'permission' | 'error'; message?: string };
-
-const STATUS_KEY = 'qareeb.pushStatus';
-
-/** The result of the last registration on this device, if any. */
-export const lastPushRegistration = () => kv.get<PushRegistration & { at: number }>(STATUS_KEY);
 
 /**
  * Gets this device's Expo push token and stores it under the user, so Cloud
  * Functions can reach the phone. Returns why not when it can't.
  */
 export async function registerForPush(uid: string): Promise<PushRegistration> {
-  const result = await register(uid).catch(
+  return register(uid).catch(
     (err): PushRegistration => ({ ok: false, reason: 'error', message: (err as Error)?.message ?? String(err) }),
   );
-  kv.set(STATUS_KEY, { ...result, at: Date.now() });
-  return result;
 }
 
 async function register(uid: string): Promise<PushRegistration> {
@@ -81,29 +74,6 @@ async function register(uid: string): Promise<PushRegistration> {
   });
   kv.set(TOKEN_KEY, token);
   return { ok: true, token };
-}
-
-/** Whether the user's account holds this device's token (what the server sends to). */
-export async function isTokenSaved(uid: string, token: string): Promise<boolean> {
-  const db = getDb();
-  if (!db) return false;
-  return (await getDoc(doc(db, 'users', uid, 'fcmTokens', tokenDocId(token)))).exists();
-}
-
-/**
- * Sends a notification straight to this device through Expo's push service,
- * as the Cloud Functions do. Returns Expo's error, if it reports one.
- */
-export async function sendTestPush(token: string, title: string, body: string): Promise<{ ok: boolean; error?: string }> {
-  const res = await fetch('https://exp.host/--/api/v2/push/send', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-    body: JSON.stringify({ to: token, title, body, sound: 'default', channelId: 'default', priority: 'high' }),
-  });
-  const json = (await res.json().catch(() => ({}))) as { data?: { status?: string; message?: string; details?: { error?: string } }; errors?: { message?: string }[] };
-  const ticket = json.data;
-  if (ticket?.status === 'ok') return { ok: true };
-  return { ok: false, error: ticket?.details?.error ?? ticket?.message ?? json.errors?.[0]?.message ?? `HTTP ${res.status}` };
 }
 
 /** Stop pushes to this device for the signed-out account. */

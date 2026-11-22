@@ -17,7 +17,6 @@ import { confirmAction } from '@/lib/confirm';
 import { timeAgo } from '@/lib/format';
 import { useTheme } from '@/theme/ThemeProvider';
 import { useT } from '@/i18n';
-import { config } from '@/lib/config';
 import { useNow } from '@/hooks/useNow';
 
 type Tab = 'all' | 'unread';
@@ -103,13 +102,6 @@ export default function Notifications() {
         </>
       )}
 
-      {!config.useMock && (
-        <Pressable onPress={() => router.push('/(shared)/push-check')} hitSlop={8} style={{ alignSelf: 'center', marginTop: 28, marginBottom: 8 }}>
-          <Text variant="caption" tone="primary">
-            {t('push.link')}
-          </Text>
-        </Pressable>
-      )}
     </Screen>
   );
 }

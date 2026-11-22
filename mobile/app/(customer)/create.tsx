@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, ScrollView, Pressable, TextInput } from 'react-native';
+import { Alert, Linking, Platform, View, ScrollView, Pressable, TextInput } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
 import { Image } from 'expo-image';
@@ -9,7 +9,8 @@ import { Header } from '@/components/ui/Header';
 import { Text } from '@/components/ui/Text';
 import { TextArea } from '@/components/ui/TextArea';
 import { Button } from '@/components/ui/Button';
-import { Icon } from '@/components/ui/Icon';
+import { Icon, type IconName } from '@/components/ui/Icon';
+import { usePhotoViewer } from '@/components/ui/PhotoViewer';
 import { Card } from '@/components/ui/Card';
 import { useTabBarSpace } from '@/components/ui/TabBar';
 import { useToast } from '@/components/feedback/Toast';
@@ -31,6 +32,9 @@ import { MIN_MOVE_KM } from '@/hooks/useRefreshLocation';
 // they are shorter, so a disabled Continue button is never a mystery.
 const TITLE_MIN = 4;
 const DESC_MIN = 10;
+
+/** Photos a request can carry. */
+const MAX_REQUEST_PHOTOS = 4;
 
 export default function CreateRequest() {
   const { colors, isDark } = useTheme();
@@ -68,9 +72,43 @@ export default function CreateRequest() {
   // The services to pick from: the shown ones, in catalog order.
   const services = useCategories();
 
+  // Photos of the problem: from the gallery (several at once) or taken now
+  // with the camera (one shot at a time, as many as fit). They wait here, to
+  // look at full screen or remove, until the request is posted.
+  const viewer = usePhotoViewer();
+  const room = MAX_REQUEST_PHOTOS - images.length;
+  const addImages = (uris: string[]) => setImages((prev) => [...prev, ...uris].slice(0, MAX_REQUEST_PHOTOS));
+
+  /** Permission refused: say why, with a way to the phone's settings. */
+  const askForSettings = (message: string) => {
+    if (Platform.OS === 'web') return toast('info', message);
+    Alert.alert(message, undefined, [
+      { text: t('common.cancel'), style: 'cancel' },
+      { text: t('chat.openSettings'), onPress: () => Linking.openSettings().catch(() => {}) },
+    ]);
+  };
+
   const pickImage = async () => {
-    const res = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ImagePicker.MediaTypeOptions.Images, quality: 0.7, allowsMultipleSelection: true });
-    if (!res.canceled) setImages((prev) => [...prev, ...res.assets.map((a) => a.uri)].slice(0, 4));
+    if (room <= 0) return;
+    try {
+      const res = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ['images'], quality: 1, allowsMultipleSelection: true, selectionLimit: room, orderedSelection: true });
+      if (!res.canceled) addImages(res.assets.map((a) => a.uri));
+    } catch {
+      askForSettings(t('chat.photosDenied'));
+    }
+  };
+
+  const takeImage = async () => {
+    if (room <= 0) return;
+    // The first time, the phone asks whether Qareeb may use the camera.
+    const perm = await ImagePicker.requestCameraPermissionsAsync().catch(() => null);
+    if (!perm?.granted) return askForSettings(t('chat.cameraDenied'));
+    try {
+      const res = await ImagePicker.launchCameraAsync({ mediaTypes: ['images'], quality: 1 });
+      if (!res.canceled) addImages(res.assets.map((a) => a.uri));
+    } catch {
+      askForSettings(t('chat.cameraDenied'));
+    }
   };
 
   const canNext = () => {
@@ -206,23 +244,31 @@ export default function CreateRequest() {
             </View>
             <View style={{ gap: 8 }}>
               <Text variant="caption" tone="muted">
-                {t('create.photos')}
+                {t('create.photos')} · {images.length}/{MAX_REQUEST_PHOTOS}
               </Text>
-              <View style={{ flexDirection: 'row', gap: 10, flexWrap: 'wrap' }}>
-                {images.map((uri) => (
-                  <View key={uri}>
-                    <Image source={{ uri }} style={{ width: 76, height: 76, borderRadius: 14 }} />
-                    <Pressable onPress={() => setImages((p) => p.filter((u) => u !== uri))} hitSlop={14} accessibilityRole="button" accessibilityLabel={t('a11y.removePhoto')} style={{ position: 'absolute', top: -6, right: -6, backgroundColor: '#EF4444', borderRadius: 999, padding: 3 }}>
-                      <Icon name="x" size={12} color="#FFF" strokeWidth={3} />
-                    </Pressable>
-                  </View>
-                ))}
-                {images.length < 4 && (
-                  <Pressable onPress={pickImage} accessibilityRole="button" accessibilityLabel={t('a11y.addPhoto')} style={{ width: 76, height: 76, borderRadius: 14, borderWidth: 1.5, borderStyle: 'dashed', borderColor: colors.border, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.surface }}>
-                    <Icon name="camera" size={22} color={colors.muted} />
-                  </Pressable>
-                )}
-              </View>
+              {/* Two ways to add: take a photo now, or pick from the gallery. */}
+              {room > 0 && (
+                <View style={{ flexDirection: 'row', gap: 10 }}>
+                  <PhotoSource icon="camera" label={t('create.takePhoto')} onPress={takeImage} />
+                  <PhotoSource icon="image" label={t('create.fromGallery')} onPress={pickImage} />
+                </View>
+              )}
+              {images.length > 0 && (
+                <View style={{ flexDirection: 'row', gap: 10, flexWrap: 'wrap', paddingTop: 6 }}>
+                  {images.map((uri, i) => (
+                    <View key={`${i}:${uri}`}>
+                      {/* Tap to look at it full screen before posting. */}
+                      <Pressable onPress={() => viewer.open(images, i)} accessibilityRole="imagebutton" accessibilityLabel={t('a11y.openPhoto')}>
+                        <Image source={{ uri }} style={{ width: 76, height: 76, borderRadius: 14 }} contentFit="cover" />
+                      </Pressable>
+                      <Pressable onPress={() => setImages((p) => p.filter((_, j) => j !== i))} hitSlop={14} accessibilityRole="button" accessibilityLabel={t('a11y.removePhoto')} style={{ position: 'absolute', top: -6, right: -6, backgroundColor: '#EF4444', borderRadius: 999, padding: 3 }}>
+                        <Icon name="x" size={12} color="#FFF" strokeWidth={3} />
+                      </Pressable>
+                    </View>
+                  ))}
+                </View>
+              )}
+              {viewer.element}
             </View>
           </Animated.View>
         )}
@@ -295,5 +341,23 @@ function MinLengthHint({ value, min }: { value: string; min: number }) {
     <Text variant="caption" style={{ color: '#D97706' }}>
       {t('create.minChars').split('{min}').join(String(min)).replace('{n}', String(n))}
     </Text>
+  );
+}
+
+/** "Take photo" / "From gallery": an icon over its label. */
+function PhotoSource({ icon, label, onPress }: { icon: IconName; label: string; onPress: () => void }) {
+  const { colors } = useTheme();
+  return (
+    <Pressable
+      onPress={onPress}
+      accessibilityRole="button"
+      accessibilityLabel={label}
+      style={{ flex: 1, height: 76, borderRadius: 14, borderWidth: 1.5, borderStyle: 'dashed', borderColor: colors.border, alignItems: 'center', justifyContent: 'center', gap: 6, backgroundColor: colors.surface }}
+    >
+      <Icon name={icon} size={22} color={colors.tint} />
+      <Text variant="caption" style={{ color: colors.fg, fontFamily: 'Inter_500Medium' }}>
+        {label}
+      </Text>
+    </Pressable>
   );
 }

@@ -93,7 +93,11 @@ export const mockApi = {
     await delay();
     autoCompleteOverdue();
     if (!demoAvailable) return [];
-    return clone(requests.filter((r) => r.status === 'PENDING'));
+    // A request whose customer turned down this artisan's offer is gone from
+    // their list (the offer is under My offers, cancelled).
+    const me = currentUid();
+    const turnedDown = new Set(offers.filter((o) => o.artisanId === me && o.status === 'REJECTED').map((o) => o.requestId));
+    return clone(requests.filter((r) => r.status === 'PENDING' && !turnedDown.has(r.id)));
   },
 
   async createRequest(input: Omit<ServiceRequest, 'id' | 'status' | 'offerCount' | 'createdAt' | 'updatedAt'>): Promise<ServiceRequest> {

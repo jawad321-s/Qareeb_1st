@@ -53,9 +53,13 @@ export default function EditProfile() {
   const nameOk = fullName.trim().length >= NAME_MIN;
   const bioOk = !isArtisan || (bio ?? savedBio).trim().length >= BIO_MIN;
 
+  // Opens the photos straight away. No crop step: on iPhone it switched to the
+  // older picker, slow to open as it loads the whole library first (the photo
+  // shows in a circle anyway), and no re-compression here (it's shrunk once,
+  // when uploaded).
   const pick = async () => {
-    const res = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ImagePicker.MediaTypeOptions.Images, quality: 0.7, allowsEditing: true, aspect: [1, 1] });
-    if (!res.canceled) setPhoto(res.assets[0].uri);
+    const res = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ['images'], quality: 1 });
+    if (!res.canceled && res.assets[0]) setPhoto(res.assets[0].uri);
   };
 
   const save = async () => {

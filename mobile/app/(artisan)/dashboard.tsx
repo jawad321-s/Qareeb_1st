@@ -86,7 +86,10 @@ export default function ArtisanDashboard() {
         <SafeAreaView edges={['top']}>
           <View style={{ paddingHorizontal: 20, paddingTop: 8, gap: 16 }}>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
-              <Avatar uri={user.photoUrl} name={user.fullName} size={46} verified={user.verified} />
+              {/* Tap the photo to edit the profile. */}
+              <Pressable onPress={() => router.push('/(shared)/edit-profile')} hitSlop={6} accessibilityRole="button" accessibilityLabel={t('profile.editProfile')}>
+                <Avatar uri={user.photoUrl} name={user.fullName} size={46} verified={user.verified} />
+              </Pressable>
               <View style={{ flex: 1 }}>
                 <Text variant="caption" tone="muted">
                   {t('artisan.welcome')}

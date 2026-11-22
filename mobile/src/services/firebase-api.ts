@@ -199,11 +199,15 @@ export const firebaseApi: typeof mockApi = {
     // policy locally (category, verified, radius growing over time).
     const me = useAuth.getState().user;
     if (!me) return [];
-    const [snap, profile, self] = await Promise.all([
+    const [snap, profile, self, rejected] = await Promise.all([
       requestsSentTo(me.uid),
       getDoc(doc(db(), 'artisanProfiles', me.uid)),
       getDoc(doc(db(), 'users', me.uid)),
+      // Offers the customer turned down: those requests leave this list (the
+      // offer shows under My offers, cancelled).
+      getDocs(query(collection(db(), 'offers'), where('artisanId', '==', me.uid), where('status', '==', 'REJECTED'))).catch(() => null),
     ]);
+    const turnedDown = new Set((rejected?.docs ?? []).map((d) => d.get('requestId') as string));
     // Switched to unavailable on the dashboard: no new requests.
     if (profile.exists() && profile.data().available === false) return [];
     const categoryIds: string[] = profile.exists() ? (profile.data().categoryIds ?? []) : [];
@@ -215,7 +219,7 @@ export const firebaseApi: typeof mockApi = {
     const now = Date.now();
     return snap.docs
       .map((d) => mapRequest(d.id, d.data()))
-      .filter((r) => r.status === 'PENDING' && isVisibleToArtisan(r, { ...me, verified }, categoryIds, now, availability, featured))
+      .filter((r) => r.status === 'PENDING' && !turnedDown.has(r.id) && isVisibleToArtisan(r, { ...me, verified }, categoryIds, now, availability, featured))
       .sort((a, b) => b.createdAt - a.createdAt);
   },
 

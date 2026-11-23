@@ -8,7 +8,8 @@
     "set-role": "node scripts/set-role.mjs",
     "create-admin": "node scripts/create-admin.mjs",
     "deploy": "firebase deploy --only firestore:rules,firestore:indexes,storage",
-    "emulate": "firebase emulators:start"
+    "emulate": "firebase emulators:start",
+    "sms-defense": "node scripts/sms-defense.mjs"
   },
   "dependencies": {
     "firebase-admin": "^13.0.0"

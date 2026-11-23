@@ -194,6 +194,24 @@ Google بتحتفظ بالنسخ (مش على الجهاز)، والتكلفة �
 
 ---
 
+## رسائل SMS للأرقام الفلسطينية (reCAPTCHA SMS Defense)
+
+Google ما بتبعت رمز SMS لشبكات معيّنة (منها جوال وأوريدو) إلا إذا كان مفعّل
+بالمشروع **reCAPTCHA SMS Defense** على وضع **Enforce**. بدونه بيرجع خطأ
+`auth/error-code:-39` (رد دعم Firebase، نوفمبر 2026). التطبيق جاهز لهاد الوضع
+(بيبعت رمز reCAPTCHA Enterprise لحاله، من غير أي شي يضغطه المستخدم).
+
+1. Google Cloud console ← مشروع Qareeb ← **reCAPTCHA Enterprise API** ← **Enable**.
+   (أول 10,000 فحص بالشهر مجاناً؛ كل رسالة رمز = فحص.)
+2. Firebase console ← Authentication ← Settings ← **Fraud Defense**: فعّلوا SMS
+   defense على **Audit** أولاً، جرّبوا رمز واحد، وبعدين حوّلوه لـ **Enforce**.
+   إذا الصفحة ما عرضت هالخيارات: داخل `firebase/` على الجهاز اللي فيه
+   `seed/service-account.json`:
+   `npm run sms-defense` (يعرض الحالة) · `npm run sms-defense -- audit` ·
+   `npm run sms-defense -- enforce` · `npm run sms-defense -- off`
+3. بعد ما يشتغل: رجّعوا "رمز SMS عند إنشاء حساب" بلوحة التحكم، وراقبوا
+   Authentication ← Usage ← SMS Usage.
+
 ## ما زال ناقصاً أو تجريبياً على Firebase
 
 - **الإشعارات والتوزيع من السيرفر:** المشروع على **Blaze**، والـ Cloud Functions منشورة

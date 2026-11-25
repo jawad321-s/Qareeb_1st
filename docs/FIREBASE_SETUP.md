@@ -210,10 +210,15 @@ Google ما بتبعت رمز SMS لشبكات معيّنة (منها جوال �
    gcloud beta services identity create --service=identitytoolkit.googleapis.com --project=qareeb-b9a54
    gcloud projects add-iam-policy-binding qareeb-b9a54 --member="serviceAccount:service-274723476834@gcp-sa-identitytoolkit.iam.gserviceaccount.com" --role="roles/identitytoolkit.serviceAgent" --condition=None --format=none
    ```
-3. SMS defense على **AUDIT** مع حد خطر 0.8، وفايربيس عمل لحاله مفاتيح Web وiOS
+3. SMS defense (بلّش AUDIT وصار ENFORCE) مع حد خطر 0.8، وفايربيس عمل لحاله مفاتيح Web وiOS
    وAndroid. ما تعدّلوا ولا تحذفوا المفاتيح اللي اسمها
    "Key for Identity Platform integration with reCAPTCHA"، ولا تعملوا مفتاح
    باليد من صفحة Fraud Defense.
+
+4. مفتاح التطبيق (APIs & Services ← Credentials ← **Browser key (auto created by
+   Firebase)** ← API restrictions) لازم يكون فيه **reCAPTCHA Enterprise API**.
+   فايربيس بيفحص رمز reCAPTCHA باسم هاد المفتاح، وبدونه كل طلب رمز بيرجع
+   `auth/invalid-recaptcha-token` مع إن الرمز سليم.
 
 **الأوامر** (Google Cloud ← زر **Cloud Shell** `>_` فوق؛ إذا قال ما في حساب:
 `gcloud auth login` مرة وحدة):

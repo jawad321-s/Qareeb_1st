@@ -59,8 +59,12 @@ function resetFunctions(): Functions {
  * and the account is found by the number without its code either way).
  */
 export function sendResetCode(phone: string, verifier: ApplicationVerifier, via: '970' | '972' = '970'): Promise<string> {
-  return new PhoneAuthProvider(resetAuth()).verifyPhoneNumber(withCountryCode(phone, via), verifier);
+  lastNumber = withCountryCode(phone, via);
+  return new PhoneAuthProvider(resetAuth()).verifyPhoneNumber(lastNumber, verifier);
 }
+
+/** The number the last code was asked for (for the reCAPTCHA diagnosis). */
+let lastNumber: string | undefined;
 
 /**
  * Sends the code as +970 and, when Firebase refuses to text that form of the
@@ -117,7 +121,7 @@ export function resetErrorMessage(err: unknown, t: (key: ReturnType<typeof reset
   // The whole error in the start-app window: Firebase's message says more than
   // its code (e.g. which reCAPTCHA check failed).
   console.log(`[SMS] ${code} | ${(err as Error)?.message ?? String(err)}`);
-  if (code.includes('invalid-recaptcha-token')) void explainRecaptchaFailure();
+  if (code.includes('invalid-recaptcha-token')) void explainRecaptchaFailure(lastNumber);
   // A failed robot check can be several things (no token, a token Google
   // rejected, a blocked number), so its code is shown too.
   if (key !== 'reset.err.generic' && key !== 'reset.err.smsRefused' && key !== 'reset.err.robot') return t(key);

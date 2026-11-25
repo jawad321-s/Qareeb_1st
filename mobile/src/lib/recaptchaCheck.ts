@@ -3,14 +3,16 @@
 // no more than that. This takes a fresh token the same way (the hidden page on
 // phones, Google's own script on the web) and asks reCAPTCHA itself what it
 // thinks of it — valid or not, why not, which site it came from, its score —
-// and prints the answer in the start-app window.
+// and prints the answer in the start-app window. With the number the code was
+// for, reCAPTCHA also gives its SMS toll-fraud risk for it: SMS defense blocks
+// numbers whose risk is at or above the threshold set on the project.
 import { config } from '@/lib/config';
 
 const ACTION = 'sendVerificationCode';
 
 type Enterprise = { execute: (siteKey: string, o: { action: string }) => Promise<string> };
 
-export async function explainRecaptchaFailure(): Promise<void> {
+export async function explainRecaptchaFailure(phoneNumber?: string): Promise<void> {
   const { apiKey, projectId } = config.firebase;
   try {
     const cfg = await fetch(
@@ -26,12 +28,15 @@ export async function explainRecaptchaFailure(): Promise<void> {
     const res = await fetch(`https://recaptchaenterprise.googleapis.com/v1/projects/${projectId}/assessments?key=${apiKey}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ event: { token, siteKey, expectedAction: ACTION } }),
+      body: JSON.stringify({
+        event: { token, siteKey, expectedAction: ACTION, ...(phoneNumber ? { userInfo: { userIds: [{ phoneNumber }] } } : {}) },
+      }),
     }).then((r) => r.json());
     const tp = res?.tokenProperties ?? {};
     console.log(
       `[reCAPTCHA] diagnosis: valid=${tp.valid} reason=${tp.invalidReason ?? '-'} host=${tp.hostname ?? '-'} action=${tp.action ?? '-'} ` +
-        `score=${res?.riskAnalysis?.score ?? '-'} ${res?.error ? `error=${JSON.stringify(res.error).slice(0, 300)}` : ''}`,
+        `score=${res?.riskAnalysis?.score ?? '-'} smsTollFraud=${JSON.stringify(res?.phoneFraudAssessment ?? '-')} ` +
+        `${res?.error ? `error=${JSON.stringify(res.error).slice(0, 300)}` : ''}`,
     );
   } catch (e) {
     console.log(`[reCAPTCHA] diagnosis failed: ${(e as Error)?.message ?? String(e)}`);

@@ -17,6 +17,7 @@ import {
 import { connectFunctionsEmulator, getFunctions, httpsCallable, type Functions } from 'firebase/functions';
 import { config } from '@/lib/config';
 import { withCountryCode } from '@/lib/phone';
+import { explainRecaptchaFailure } from '@/lib/recaptchaCheck';
 import type { UserRole } from '@/types';
 
 const APP_NAME = 'password-reset';
@@ -116,6 +117,7 @@ export function resetErrorMessage(err: unknown, t: (key: ReturnType<typeof reset
   // The whole error in the start-app window: Firebase's message says more than
   // its code (e.g. which reCAPTCHA check failed).
   console.log(`[SMS] ${code} | ${(err as Error)?.message ?? String(err)}`);
+  if (code.includes('invalid-recaptcha-token')) void explainRecaptchaFailure();
   // A failed robot check can be several things (no token, a token Google
   // rejected, a blocked number), so its code is shown too.
   if (key !== 'reset.err.generic' && key !== 'reset.err.smsRefused' && key !== 'reset.err.robot') return t(key);

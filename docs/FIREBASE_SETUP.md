@@ -209,6 +209,13 @@ Google ما بتبعت رمز SMS لشبكات معيّنة (منها جوال �
    `seed/service-account.json`:
    `npm run sms-defense` (يعرض الحالة) · `npm run sms-defense -- audit` ·
    `npm run sms-defense -- enforce` · `npm run sms-defense -- off`
+   أو بدون أي ملف: Google Cloud console ← زر **Cloud Shell** (`>_` فوق) ← الصقوا
+   (بدّلوا `AUDIT` بـ `ENFORCE` أو `OFF` حسب المطلوب):
+   ```
+   curl -s -X PATCH -H "Authorization: Bearer $(gcloud auth print-access-token)" -H "X-Goog-User-Project: qareeb-b9a54" -H "Content-Type: application/json" "https://identitytoolkit.googleapis.com/v2/projects/qareeb-b9a54/config?updateMask=recaptchaConfig.phoneEnforcementState,recaptchaConfig.useSmsTollFraudProtection,recaptchaConfig.useSmsBotScore,recaptchaConfig.tollFraudManagedRules" -d '{"recaptchaConfig":{"phoneEnforcementState":"AUDIT","useSmsTollFraudProtection":true,"useSmsBotScore":false,"tollFraudManagedRules":[{"startScore":0.8,"action":"BLOCK"}]}}' | jq '.recaptchaConfig // .error'
+   ```
+   أول مرة بتنعمل مفاتيح reCAPTCHA الخاصة بتسجيل الدخول لحالها (ما تعملوا
+   مفتاح باليد من صفحة Fraud Defense بـ Google Cloud).
 3. بعد ما يشتغل: رجّعوا "رمز SMS عند إنشاء حساب" بلوحة التحكم، وراقبوا
    Authentication ← Usage ← SMS Usage.
 

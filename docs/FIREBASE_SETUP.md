@@ -201,23 +201,42 @@ Google ما بتبعت رمز SMS لشبكات معيّنة (منها جوال �
 `auth/error-code:-39` (رد دعم Firebase، نوفمبر 2026). التطبيق جاهز لهاد الوضع
 (بيبعت رمز reCAPTCHA Enterprise لحاله، من غير أي شي يضغطه المستخدم).
 
-1. Google Cloud console ← مشروع Qareeb ← **reCAPTCHA Enterprise API** ← **Enable**.
-   (أول 10,000 فحص بالشهر مجاناً؛ كل رسالة رمز = فحص.)
-2. Firebase console ← Authentication ← Settings ← **Fraud Defense**: فعّلوا SMS
-   defense على **Audit** أولاً، جرّبوا رمز واحد، وبعدين حوّلوه لـ **Enforce**.
-   إذا الصفحة ما عرضت هالخيارات: داخل `firebase/` على الجهاز اللي فيه
-   `seed/service-account.json`:
-   `npm run sms-defense` (يعرض الحالة) · `npm run sms-defense -- audit` ·
-   `npm run sms-defense -- enforce` · `npm run sms-defense -- off`
-   أو بدون أي ملف: Google Cloud console ← زر **Cloud Shell** (`>_` فوق) ← الصقوا
-   (بدّلوا `AUDIT` بـ `ENFORCE` أو `OFF` حسب المطلوب):
+**اللي انعمل (25 نوفمبر 2026):**
+1. Google Cloud ← **reCAPTCHA Enterprise API** ← Enable.
+   (أول 10,000 فحص بالشهر مجاناً؛ كل طلب رمز = فحص.)
+2. حساب خدمة Identity Platform مع صلاحيته، وبدونه فايربيس ما بيقدر يعمل
+   مفاتيح reCAPTCHA:
    ```
-   curl -s -X PATCH -H "Authorization: Bearer $(gcloud auth print-access-token)" -H "X-Goog-User-Project: qareeb-b9a54" -H "Content-Type: application/json" "https://identitytoolkit.googleapis.com/v2/projects/qareeb-b9a54/config?updateMask=recaptchaConfig.phoneEnforcementState,recaptchaConfig.useSmsTollFraudProtection,recaptchaConfig.useSmsBotScore,recaptchaConfig.tollFraudManagedRules" -d '{"recaptchaConfig":{"phoneEnforcementState":"AUDIT","useSmsTollFraudProtection":true,"useSmsBotScore":false,"tollFraudManagedRules":[{"startScore":0.8,"action":"BLOCK"}]}}' | jq '.recaptchaConfig // .error'
+   gcloud beta services identity create --service=identitytoolkit.googleapis.com --project=qareeb-b9a54
+   gcloud projects add-iam-policy-binding qareeb-b9a54 --member="serviceAccount:service-274723476834@gcp-sa-identitytoolkit.iam.gserviceaccount.com" --role="roles/identitytoolkit.serviceAgent" --condition=None --format=none
    ```
-   أول مرة بتنعمل مفاتيح reCAPTCHA الخاصة بتسجيل الدخول لحالها (ما تعملوا
-   مفتاح باليد من صفحة Fraud Defense بـ Google Cloud).
-3. بعد ما يشتغل: رجّعوا "رمز SMS عند إنشاء حساب" بلوحة التحكم، وراقبوا
-   Authentication ← Usage ← SMS Usage.
+3. SMS defense على **AUDIT** مع حد خطر 0.8، وفايربيس عمل لحاله مفاتيح Web وiOS
+   وAndroid. ما تعدّلوا ولا تحذفوا المفاتيح اللي اسمها
+   "Key for Identity Platform integration with reCAPTCHA"، ولا تعملوا مفتاح
+   باليد من صفحة Fraud Defense.
+
+**الأوامر** (Google Cloud ← زر **Cloud Shell** `>_` فوق؛ إذا قال ما في حساب:
+`gcloud auth login` مرة وحدة):
+- عرض الحالة:
+  ```
+  curl -s -H "Authorization: Bearer $(gcloud auth print-access-token)" -H "X-Goog-User-Project: qareeb-b9a54" -H "Content-Type: application/json" "https://identitytoolkit.googleapis.com/v2/projects/qareeb-b9a54/config" | jq .recaptchaConfig
+  ```
+- **Enforce** (اللي بيخلي جوال وأوريدو يوصلهم الرمز):
+  ```
+  curl -s -H "Authorization: Bearer $(gcloud auth print-access-token)" -H "X-Goog-User-Project: qareeb-b9a54" -H "Content-Type: application/json" -X PATCH "https://identitytoolkit.googleapis.com/v2/projects/qareeb-b9a54/config?updateMask=recaptchaConfig.phoneEnforcementState" -d '{"recaptchaConfig":{"phoneEnforcementState":"ENFORCE"}}' | jq '.recaptchaConfig // .error'
+  ```
+- رجوع لـ **Audit**: نفس الأمر مع `AUDIT` بدل `ENFORCE`.
+- إطفاء كامل (لازم الاتنين مع بعض، وإلا بيرفض):
+  ```
+  curl -s -H "Authorization: Bearer $(gcloud auth print-access-token)" -H "X-Goog-User-Project: qareeb-b9a54" -H "Content-Type: application/json" -X PATCH "https://identitytoolkit.googleapis.com/v2/projects/qareeb-b9a54/config?updateMask=recaptchaConfig.phoneEnforcementState,recaptchaConfig.useSmsTollFraudProtection" -d '{"recaptchaConfig":{"phoneEnforcementState":"OFF","useSmsTollFraudProtection":false}}' | jq '.recaptchaConfig // .error'
+  ```
+- أو من جهاز فيه `firebase/seed/service-account.json`، داخل `firebase/`:
+  `npm run sms-defense -- audit|enforce|off`.
+
+**التأكد إنه شغال:** بعد طلب رمز من التطبيق، Google Cloud ← Security ←
+**Fraud Defense** ← Dashboard: عدد **Assessments** لازم يزيد عن 0. وراقبوا
+Authentication ← Usage ← SMS Usage. بعد ما يشتغل رجّعوا "رمز SMS عند إنشاء
+حساب" بلوحة التحكم.
 
 ## ما زال ناقصاً أو تجريبياً على Firebase
 

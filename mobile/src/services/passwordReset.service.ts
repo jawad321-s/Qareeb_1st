@@ -112,8 +112,13 @@ export async function confirmPhoneCode(verificationId: string, code: string): Pr
  */
 export function resetErrorMessage(err: unknown, t: (key: ReturnType<typeof resetErrorKey>) => string): string {
   const key = resetErrorKey(err);
-  if (key !== 'reset.err.generic' && key !== 'reset.err.smsRefused') return t(key);
   const code = (err as { code?: string })?.code ?? (err as Error)?.message ?? '';
+  // The whole error in the start-app window: Firebase's message says more than
+  // its code (e.g. which reCAPTCHA check failed).
+  console.log(`[SMS] ${code} | ${(err as Error)?.message ?? String(err)}`);
+  // A failed robot check can be several things (no token, a token Google
+  // rejected, a blocked number), so its code is shown too.
+  if (key !== 'reset.err.generic' && key !== 'reset.err.smsRefused' && key !== 'reset.err.robot') return t(key);
   return code ? `${t(key)} (${code})` : t(key);
 }
 

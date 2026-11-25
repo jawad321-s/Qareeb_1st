@@ -81,6 +81,8 @@ export function usePhoneVerifier(): { verifier: ApplicationVerifier; modal: Reac
     enterprisePending.current = null;
     if (p) clearTimeout(p.timer);
     setEnterprise(null);
+    // Shown in the start-app window: whether the hidden check got a token.
+    console.log(result.token ? `[reCAPTCHA] Enterprise token received (${result.token.length} chars)` : `[reCAPTCHA] Enterprise check failed: ${result.error?.message ?? '?'}`);
     if (result.token) p?.resolve(result.token);
     else p?.reject(result.error ?? new Error('recaptcha-enterprise-failed'));
   };
@@ -91,6 +93,7 @@ export function usePhoneVerifier(): { verifier: ApplicationVerifier; modal: Reac
       enterprisePending.current?.reject(new Error('recaptcha-enterprise-replaced'));
       const timer = setTimeout(() => finishEnterprise({ error: new Error('recaptcha-enterprise-timeout') }), ENTERPRISE_TIMEOUT_MS);
       enterprisePending.current = { resolve, reject, timer };
+      console.log(`[reCAPTCHA] Enterprise check started (${action}, key ${siteKey.slice(0, 8)}…)`);
       setEnterprise({ siteKey, action });
     });
 
@@ -144,6 +147,7 @@ export function usePhoneVerifier(): { verifier: ApplicationVerifier; modal: Reac
         type: 'recaptcha',
         verify: () =>
           new Promise<string>((resolve, reject) => {
+            console.log('[reCAPTCHA] "I\'m not a robot" check opened');
             pending.current = { resolve, reject };
             setVisible(true);
           }),

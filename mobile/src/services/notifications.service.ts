@@ -2,7 +2,19 @@
 import { useEffect, useState } from 'react';
 import { collection, deleteDoc, doc, getDocs, limit, onSnapshot, orderBy, query, updateDoc, writeBatch } from 'firebase/firestore';
 import { getDb } from '@/lib/firebase';
+import { queryClient } from '@/lib/queryClient';
 import type { AppNotification } from '@/types';
+
+// A new notification usually means something changed: another artisan's offer
+// was chosen, a request was cancelled, an offer came in. What's on screen is
+// refreshed at once, as when a push arrives (usePushNotifications), instead
+// of at the lists' next poll: a request taken by someone else leaves an
+// artisan's list right away. Once for several listeners or notifications.
+let refreshTimer: ReturnType<typeof setTimeout> | undefined;
+function refreshSoon() {
+  clearTimeout(refreshTimer);
+  refreshTimer = setTimeout(() => queryClient.invalidateQueries(), 300);
+}
 
 /** Live list of the user's latest notifications (null while loading). */
 export function useLiveNotifications(uid: string | undefined): AppNotification[] | null {
@@ -11,9 +23,15 @@ export function useLiveNotifications(uid: string | undefined): AppNotification[]
     const db = getDb();
     if (!db || !uid) return;
     const q = query(collection(db, 'users', uid, 'notifications'), orderBy('createdAt', 'desc'), limit(50));
+    let first = true;
     return onSnapshot(
       q,
-      (snap) => setItems(snap.docs.map((d) => ({ ...(d.data() as AppNotification), id: d.id }))),
+      (snap) => {
+        // The first answer is what was already there; later additions are new.
+        if (!first && snap.docChanges().some((c) => c.type === 'added')) refreshSoon();
+        first = false;
+        setItems(snap.docs.map((d) => ({ ...(d.data() as AppNotification), id: d.id })));
+      },
       () => setItems([]),
     );
   }, [uid]);

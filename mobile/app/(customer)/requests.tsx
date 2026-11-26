@@ -12,9 +12,10 @@ import { useMyRequests } from '@/hooks/queries';
 import { useAuth } from '@/store/auth';
 import { useT } from '@/i18n';
 import type { RequestStatus } from '@/types';
+import { nobodyTook } from '@/lib/requestRules';
 import { useTabBarSpace } from '@/components/ui/TabBar';
 
-type Tab = 'active' | 'completed' | 'cancelled' | 'all';
+type Tab = 'active' | 'completed' | 'rejected' | 'cancelled' | 'all';
 const ACTIVE: RequestStatus[] = ['PENDING', 'ACCEPTED', 'ON_THE_WAY', 'WORKING'];
 
 export default function Requests() {
@@ -29,7 +30,10 @@ export default function Requests() {
     const list = data ?? [];
     if (tab === 'active') return list.filter((r) => ACTIVE.includes(r.status));
     if (tab === 'completed') return list.filter((r) => r.status === 'COMPLETED');
-    if (tab === 'cancelled') return list.filter((r) => r.status === 'CANCELLED');
+    // Rejected: closed with nobody taking it. Cancelled: called off by the
+    // customer or the artisan (or over the open-requests limit).
+    if (tab === 'rejected') return list.filter((r) => nobodyTook(r));
+    if (tab === 'cancelled') return list.filter((r) => r.status === 'CANCELLED' && !nobodyTook(r));
     return list;
   }, [data, tab]);
 
@@ -49,6 +53,7 @@ export default function Requests() {
           options={[
             { key: 'active', label: t('orders.active') },
             { key: 'completed', label: t('orders.completed') },
+            { key: 'rejected', label: t('orders.rejected') },
             { key: 'cancelled', label: t('orders.cancelled') },
             { key: 'all', label: t('orders.all') },
           ]}

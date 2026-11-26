@@ -54,6 +54,7 @@ export default function ArtisanOffers() {
           options={[
             { key: 'active', label: t('orders.active') },
             { key: 'completed', label: t('orders.completed') },
+            { key: 'rejected', label: t('orders.rejected') },
             { key: 'cancelled', label: t('orders.cancelled') },
             { key: 'all', label: t('orders.all') },
           ]}
@@ -81,7 +82,7 @@ export default function ArtisanOffers() {
               onPress={() =>
                 // Turned-down offers open their history record; the rest open the job.
                 o.status === 'REJECTED'
-                  ? router.push({ pathname: '/(shared)/job-history/[id]', params: { id: o.requestId, kind: 'rejected' } })
+                  ? router.push({ pathname: '/(shared)/job-history/[id]', params: { id: o.requestId, kind: state.kind === 'offer' ? 'rejected' : 'cancelled' } })
                   : router.push(`/(artisan)/job/${o.requestId}`)
               }
               style={{ gap: 12 }}

@@ -42,6 +42,7 @@ export default function Income() {
   const BREAKDOWN = [
     { icon: 'check-circle' as const, label: t('inc.completedJobs'), value: count(history.data?.completed.length), color: '#10B981', tab: 'completed' },
     { icon: 'x-circle' as const, label: t('inc.rejectedJobs'), value: count(history.data?.rejected.length), color: '#EF4444', tab: 'rejected' },
+    { icon: 'slash' as const, label: t('inc.cancelledJobs'), value: count(history.data?.cancelled.length), color: '#94A3B8', tab: 'cancelled' },
     { icon: 'wallet' as const, label: t('inc.avgJob'), value: loading ? '…' : formatMoney(income.average), color: '#F59E0B' },
     // Average of the customers' ratings, with how many there are.
     { icon: 'star' as const, label: t('inc.avgRating'), value: ratingValue(rating), color: colors.tint },
@@ -84,10 +85,11 @@ export default function Income() {
       </Card>
 
       <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 12, marginTop: 20 }}>
-        {BREAKDOWN.map((b) => (
+        {BREAKDOWN.map((b, i) => (
           // Width sits on a wrapper: a pressable Card nests its surface inside a
-          // Pressable, so a percentage width on the Card itself collapses.
-          <View key={b.label} style={{ width: '47%' }}>
+          // Pressable, so a percentage width on the Card itself collapses. Two
+          // per row; an odd last one takes the whole row.
+          <View key={b.label} style={{ width: i === BREAKDOWN.length - 1 && BREAKDOWN.length % 2 ? '100%' : '47%' }}>
             <Card
               onPress={b.tab ? () => router.push({ pathname: '/(shared)/job-history', params: { tab: b.tab } }) : undefined}
               style={{ gap: 8, paddingVertical: 16 }}

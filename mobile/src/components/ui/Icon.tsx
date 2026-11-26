@@ -17,7 +17,7 @@ export type IconName =
   | 'home' | 'search' | 'plus' | 'minus' | 'user' | 'bell' | 'message' | 'settings'
   | 'chevron-right' | 'chevron-left' | 'chevron-down' | 'arrow-left' | 'arrow-right'
   | 'star' | 'star-filled' | 'heart' | 'heart-filled' | 'map-pin' | 'clock'
-  | 'check' | 'check-circle' | 'x' | 'x-circle' | 'filter' | 'sliders'
+  | 'check' | 'check-circle' | 'x' | 'x-circle' | 'slash' | 'filter' | 'sliders'
   | 'camera' | 'image' | 'mic' | 'send' | 'phone' | 'navigation' | 'wallet'
   | 'shield' | 'award' | 'trending-up' | 'trending-down' | 'calendar' | 'eye' | 'eye-off'
   | 'lock' | 'edit' | 'trash' | 'log-out' | 'moon' | 'sun' | 'globe'
@@ -78,6 +78,8 @@ function renderPaths(name: IconName, c: string, p: object) {
     case 'check-circle': return <><Path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" {...p} /><Polyline points="22 4 12 14.01 9 11.01" {...p} /></>;
     case 'x': return <><Line x1="18" y1="6" x2="6" y2="18" {...p} /><Line x1="6" y1="6" x2="18" y2="18" {...p} /></>;
     case 'x-circle': return <><Circle cx="12" cy="12" r="10" {...p} /><Line x1="15" y1="9" x2="9" y2="15" {...p} /><Line x1="9" y1="9" x2="15" y2="15" {...p} /></>;
+    // Called off (a cancelled job): a circle crossed once.
+    case 'slash': return <><Circle cx="12" cy="12" r="10" {...p} /><Line x1="4.93" y1="4.93" x2="19.07" y2="19.07" {...p} /></>;
     case 'filter': return <Polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" {...p} />;
     case 'sliders': return <><Line x1="4" y1="21" x2="4" y2="14" {...p} /><Line x1="4" y1="10" x2="4" y2="3" {...p} /><Line x1="12" y1="21" x2="12" y2="12" {...p} /><Line x1="12" y1="8" x2="12" y2="3" {...p} /><Line x1="20" y1="21" x2="20" y2="16" {...p} /><Line x1="20" y1="12" x2="20" y2="3" {...p} /><Line x1="1" y1="14" x2="7" y2="14" {...p} /><Line x1="9" y1="8" x2="15" y2="8" {...p} /><Line x1="17" y1="16" x2="23" y2="16" {...p} /></>;
     case 'camera': return <><Path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" {...p} /><Circle cx="12" cy="13" r="4" {...p} /></>;

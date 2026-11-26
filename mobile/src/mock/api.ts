@@ -12,7 +12,7 @@ import {
 } from './data';
 import { NEXT_STATUS, RequestClosedError, canCancelRequest, isChatOpen, isOverdue } from '@/lib/requestRules';
 import { sortOffers } from '@/lib/dispatch';
-import { completedRecord, rejectedRecord } from '@/lib/jobHistory';
+import { completedRecord, historyLists, rejectedRecord } from '@/lib/jobHistory';
 import { kv } from '@/lib/mmkv';
 import { hasAccount, useAuth } from '@/store/auth';
 import type { Reason } from '@/lib/reasons';
@@ -388,10 +388,7 @@ export const mockApi = {
         return o.status === 'ACCEPTED' && requests.find((r) => r.id === o.requestId)?.status === 'CANCELLED';
       })
       .map((o) => rejectedRecord(o, requests.find((r) => r.id === o.requestId)));
-    return clone({
-      completed: completed.sort((a, b) => b.date - a.date),
-      rejected: rejected.sort((a, b) => b.date - a.date),
-    });
+    return clone(historyLists(completed, rejected));
   },
 
   /** Whether a number already has an account of this type (one customer and one artisan account per number). */

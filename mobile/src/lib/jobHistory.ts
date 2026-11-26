@@ -1,4 +1,5 @@
-import type { JobRecord, Offer, Review, ServiceRequest } from '@/types';
+import type { JobHistory, JobRecord, Offer, Review, ServiceRequest } from '@/types';
+import { turnedDown } from './offerStatus';
 
 /** A finished job, with the artisan's offer and the customer's rating if known. */
 export function completedRecord(r: ServiceRequest, offer?: Offer, review?: Review): JobRecord {
@@ -31,19 +32,23 @@ export function rejectedRecord(o: Offer, r?: ServiceRequest): JobRecord {
   let reason: JobRecord['reason'];
   let reasonChoice: string | undefined;
   let reasonNote: string | undefined;
-  if (o.closedReason === 'EXPIRED' || r?.cancelReason === 'EXPIRED') reason = 'expired';
-  else if (cancelled) {
+  // A turned-down offer stays a rejection, whatever became of the request
+  // after (as in the offers list, lib/offerStatus).
+  const declined = turnedDown(o);
+  if (o.closedReason === 'EXPIRED' || (!declined && r?.cancelReason === 'EXPIRED')) reason = 'expired';
+  else if (o.closedReason === 'OTHER_ACCEPTED' || (r?.acceptedArtisanId && r.acceptedArtisanId !== o.artisanId)) reason = 'otherChosen';
+  else if (cancelled && !declined) {
     reason = r?.cancelledBy && r.cancelledBy === o.artisanId ? 'cancelledByMe' : 'cancelled';
     reasonChoice = r?.cancelChoice ?? o.requestCancelChoice;
     reasonNote = r?.cancelNote ?? o.requestCancelNote;
-  } else if (o.closedReason === 'OTHER_ACCEPTED' || (r?.acceptedArtisanId && r.acceptedArtisanId !== o.artisanId)) reason = 'otherChosen';
-  else {
+  } else {
     reason = 'declined';
     reasonChoice = o.rejectChoice;
     reasonNote = o.rejectNote;
   }
   return {
-    kind: 'rejected',
+    // A cancelled job is kept apart from an offer that wasn't taken.
+    kind: reason === 'cancelled' || reason === 'cancelledByMe' ? 'cancelled' : 'rejected',
     requestId: o.requestId,
     title: r?.title ?? o.requestTitle ?? '',
     categoryId: r?.categoryId ?? o.categoryId,
@@ -57,5 +62,15 @@ export function rejectedRecord(o: Offer, r?: ServiceRequest): JobRecord {
     reason,
     reasonChoice: reasonChoice || undefined,
     reasonNote: reasonNote || undefined,
+  };
+}
+
+/** The history lists, newest first: completed jobs, offers not taken, and cancelled jobs. */
+export function historyLists(completed: JobRecord[], closed: JobRecord[]): JobHistory {
+  const newest = (list: JobRecord[]) => list.sort((a, b) => b.date - a.date);
+  return {
+    completed: newest(completed),
+    rejected: newest(closed.filter((r) => r.kind === 'rejected')),
+    cancelled: newest(closed.filter((r) => r.kind === 'cancelled')),
   };
 }

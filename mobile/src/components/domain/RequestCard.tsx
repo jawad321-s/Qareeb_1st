@@ -5,11 +5,13 @@ import { Text } from '../ui/Text';
 import { Icon } from '../ui/Icon';
 import { Avatar } from '../ui/Avatar';
 import { Rating } from '../ui/Rating';
+import { Badge } from '../ui/Badge';
 import { StatusBadge } from './StatusBadge';
 import { useUser } from '@/hooks/queries';
 import type { ServiceRequest } from '@/types';
 import { categoryById } from '@/constants/categories';
 import { formatDistance, timeAgo } from '@/lib/format';
+import { nobodyTook } from '@/lib/requestRules';
 import { useT } from '@/i18n';
 import { useTheme } from '@/theme/ThemeProvider';
 import { useNow } from '@/hooks/useNow';
@@ -66,7 +68,8 @@ export function RequestCard({
             </Text>
           </View>
         </View>
-        <StatusBadge status={request.status} />
+        {/* Closed with nobody taking it: "rejected", as on the orders tab. */}
+        {nobodyTook(request) ? <Badge label={t('orders.rejectedBadge')} variant="neutral" icon="x-circle" /> : <StatusBadge status={request.status} />}
       </View>
 
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 16 }}>

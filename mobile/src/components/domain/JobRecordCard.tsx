@@ -51,7 +51,11 @@ export function JobRecordCard({ record, onPress }: { record: JobRecord; onPress?
         {record.kind === 'completed' ? (
           <Badge label={t('hist.done')} variant="success" icon="check-circle" />
         ) : (
-          <Badge label={t(`hist.reason.${record.reason ?? 'declined'}` as any)} variant="danger" icon="x-circle" />
+          <Badge
+            label={t(`hist.reason.${record.reason ?? 'declined'}` as any)}
+            variant={record.kind === 'cancelled' ? 'neutral' : 'danger'}
+            icon={record.kind === 'cancelled' ? 'slash' : 'x-circle'}
+          />
         )}
       </View>
     </Card>

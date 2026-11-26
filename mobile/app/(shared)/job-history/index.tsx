@@ -15,10 +15,18 @@ import { useT } from '@/i18n';
 import type { JobRecord } from '@/types';
 
 type Tab = JobRecord['kind'];
+const TABS: Tab[] = ['completed', 'rejected', 'cancelled'];
+
+const EMPTY: Record<Tab, { icon: 'check-circle' | 'x-circle' | 'slash'; title: string; desc: string }> = {
+  completed: { icon: 'check-circle', title: 'hist.emptyCompleted', desc: 'hist.emptyCompletedDesc' },
+  rejected: { icon: 'x-circle', title: 'hist.emptyRejected', desc: 'hist.emptyRejectedDesc' },
+  cancelled: { icon: 'slash', title: 'hist.emptyCancelled', desc: 'hist.emptyCancelledDesc' },
+};
 
 /**
- * The artisan's work history, opened from the income cards: finished jobs and
- * the offers customers turned down, newest first. Each opens its full record.
+ * The artisan's work history, opened from the income cards: finished jobs,
+ * offers that weren't taken, and cancelled jobs, newest first. Each opens its
+ * full record.
  */
 export default function JobHistoryScreen() {
   const { colors } = useTheme();
@@ -26,7 +34,7 @@ export default function JobHistoryScreen() {
   const params = useLocalSearchParams<{ tab?: string }>();
   const uid = useAuth((s) => s.user?.uid ?? '');
   const { data, isLoading } = useJobHistory(uid);
-  const [tab, setTab] = useState<Tab>(params.tab === 'rejected' ? 'rejected' : 'completed');
+  const [tab, setTab] = useState<Tab>(TABS.includes(params.tab as Tab) ? (params.tab as Tab) : 'completed');
   const list = data?.[tab] ?? [];
 
   return (
@@ -35,7 +43,7 @@ export default function JobHistoryScreen() {
 
       {/* Segmented control */}
       <View style={{ flexDirection: 'row', backgroundColor: colors.surface2, borderRadius: 14, padding: 4, marginBottom: 16 }}>
-        {(['completed', 'rejected'] as Tab[]).map((key) => {
+        {TABS.map((key) => {
           const active = tab === key;
           const count = data?.[key].length;
           return (
@@ -46,7 +54,7 @@ export default function JobHistoryScreen() {
               onPress={() => setTab(key)}
               style={{ flex: 1, paddingVertical: 10, borderRadius: 10, backgroundColor: active ? colors.surface : 'transparent', alignItems: 'center', ...(active ? { shadowColor: '#0F172A', shadowOpacity: 0.06, shadowRadius: 6, shadowOffset: { width: 0, height: 2 }, elevation: 2 } : {}) }}
             >
-              <Text variant="caption" tone={active ? 'default' : 'muted'} style={{ fontFamily: active ? 'Inter_600SemiBold' : 'Inter_400Regular' }}>
+              <Text variant="caption" tone={active ? 'default' : 'muted'} numberOfLines={1} style={{ fontFamily: active ? 'Inter_600SemiBold' : 'Inter_400Regular' }}>
                 {t(`hist.${key}` as const)}
                 {count !== undefined ? ` (${count})` : ''}
               </Text>
@@ -59,11 +67,7 @@ export default function JobHistoryScreen() {
         <View style={{ gap: 12 }}>{[0, 1, 2].map((i) => <CardSkeleton key={i} />)}</View>
       ) : list.length === 0 ? (
         <View style={{ marginTop: 40 }}>
-          <EmptyState
-            icon={tab === 'completed' ? 'check-circle' : 'x-circle'}
-            title={t(tab === 'completed' ? 'hist.emptyCompleted' : 'hist.emptyRejected')}
-            description={t(tab === 'completed' ? 'hist.emptyCompletedDesc' : 'hist.emptyRejectedDesc')}
-          />
+          <EmptyState icon={EMPTY[tab].icon} title={t(EMPTY[tab].title as any)} description={t(EMPTY[tab].desc as any)} />
         </View>
       ) : (
         <View style={{ gap: 12 }}>

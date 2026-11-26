@@ -31,7 +31,8 @@ export default function JobRecordScreen() {
   const { id, kind } = useLocalSearchParams<{ id: string; kind?: string }>();
   const uid = useAuth((s) => s.user?.uid ?? '');
   const { data, isLoading } = useJobHistory(uid);
-  const record = (kind === 'rejected' ? data?.rejected : data?.completed)?.find((r) => r.requestId === id);
+  const list = kind === 'rejected' || kind === 'cancelled' ? data?.[kind] : data?.completed;
+  const record = list?.find((r) => r.requestId === id);
   const { data: customer } = useUser(record?.customerId);
 
   if (isLoading || !record) {

@@ -221,7 +221,8 @@ export interface Conversation {
 
 /** One entry in the artisan's work history (income → completed / rejected). */
 export interface JobRecord {
-  kind: 'completed' | 'rejected';
+  /** Completed; rejected (declined, another chosen, none chosen in time); or cancelled (by either side). */
+  kind: 'completed' | 'rejected' | 'cancelled';
   requestId: string;
   title: string;
   categoryId?: string;
@@ -234,7 +235,7 @@ export interface JobRecord {
   price?: number;
   etaMinutes?: number;
   message?: string;
-  /** Rejected only: why the offer or the job didn't go through. */
+  /** Rejected or cancelled: why the offer or the job didn't go through. */
   reason?: 'otherChosen' | 'cancelled' | 'cancelledByMe' | 'declined' | 'expired';
   /** The reason given for that (lib/reasons) and the person's own words. */
   reasonChoice?: string;
@@ -248,6 +249,7 @@ export interface JobRecord {
 export interface JobHistory {
   completed: JobRecord[];
   rejected: JobRecord[];
+  cancelled: JobRecord[];
 }
 
 export interface Review {

@@ -39,6 +39,12 @@ const TYPE_STYLE: Record<string, { icon: IconName; color?: string }> = {
   working: { icon: 'tools' },
   completed: { icon: 'star', color: '#F59E0B' },
   cancelledByOther: { icon: 'x-circle', color: '#EF4444' },
+  // Offers that didn't go through (lib/offerStatus), and requests that closed.
+  offerNotChosen: { icon: 'x-circle', color: '#EF4444' },
+  offerRejected: { icon: 'x-circle', color: '#EF4444' },
+  offerExpired: { icon: 'clock', color: '#D97706' },
+  requestExpired: { icon: 'clock', color: '#D97706' },
+  requestCancelledPending: { icon: 'slash', color: '#EF4444' },
   noOffers: { icon: 'alert-circle', color: '#EF4444' },
   newMessage: { icon: 'message' },
   // From the Qareeb team (admin dashboard), and the featured-artisan badge.

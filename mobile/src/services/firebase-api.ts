@@ -20,7 +20,7 @@ import { accountExists } from '@/services/auth.service';
 import { servicesOf, toServiceId } from '@/constants/services';
 import { allCategories } from '@/constants/categories';
 import { ACTIVE_STATUSES, MAX_OPEN_REQUESTS, NEXT_STATUS, OPEN_STATUSES, OpenRequestLimitError, RequestClosedError, canCancelRequest, isOverdue } from '@/lib/requestRules';
-import { completedRecord, rejectedRecord } from '@/lib/jobHistory';
+import { completedRecord, historyLists, rejectedRecord } from '@/lib/jobHistory';
 import { uploadRequestPhoto } from '@/services/media.service';
 
 function db() {
@@ -677,10 +677,7 @@ export const firebaseApi: typeof mockApi = {
           }),
       )
     ).filter((x): x is NonNullable<typeof x> => !!x);
-    return {
-      completed: completed.sort((a, b) => b.date - a.date),
-      rejected: rejected.sort((a, b) => b.date - a.date),
-    };
+    return historyLists(completed, rejected);
   },
 
   async isPhoneRegistered(phone, role): Promise<boolean> {

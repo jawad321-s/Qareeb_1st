@@ -1,4 +1,13 @@
-import type { RequestStatus } from '@/types';
+import type { RequestStatus, ServiceRequest } from '@/types';
+
+/**
+ * Closed with nobody taking it (the customer's "rejected" requests): no offer
+ * came in time (NO_OFFERS), or offers came and none was accepted in time
+ * (EXPIRED). Anything else that ends as CANCELLED was called off by someone.
+ */
+export function nobodyTook(r: Pick<ServiceRequest, 'status' | 'cancelReason'>): boolean {
+  return r.status === 'CANCELLED' && (r.cancelReason === 'NO_OFFERS' || r.cancelReason === 'EXPIRED');
+}
 
 /**
  * Statuses a request can still be cancelled from — by either side.

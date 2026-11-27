@@ -19,10 +19,16 @@ const LOGO_UNI = path.join(REPO, 'assets/hebron-university.png');
 const LOGO_APP = path.join(REPO, 'assets/logo-proposal.jpg');
 
 const front = require('./ar/front.cjs');
-const chapters = (process.env.AR_CH || 'ch1,ch2,ch3,ch4,ch5,ch6,ch7').split(',').filter(Boolean).map((c) => require(`./ar/${c}.cjs`));
+const ALL = ['ch1', 'ch2', 'ch3', 'ch4', 'ch5', 'ch6', 'ch7'];
+const allChapters = Object.fromEntries(ALL.map((c) => [c, require(`./ar/${c}.cjs`)]));
+const selected = (process.env.AR_CH || ALL.join(',')).split(',').filter(Boolean);
+for (const c of selected) if (!allChapters[c]) throw new Error('unknown chapter ' + c);
+const chapters = selected.map((c) => allChapters[c]);
 const { refs, appendices } = require('./ar/back.cjs');
 // AR_BODY_ONLY=1 builds only the chosen chapters (AR_CH), without the cover, preliminary pages, references or appendices.
+// Figures, tables and cross-references are always numbered over the whole report, so a chapter built alone keeps its numbers.
 const BODY_ONLY = !!process.env.AR_BODY_ONLY;
+const numbered = [...ALL.flatMap((c) => allChapters[c]), ...refs, ...appendices];
 const blocks = BODY_ONLY ? chapters.flat() : [...chapters.flat(), ...refs, ...appendices];
 
 const FONT = 'Times New Roman';
@@ -37,7 +43,7 @@ const BODY = 28; // 14 pt, as in the previous report
 const refsMap = {};
 {
   let chap = '0', f = 0, t = 0;
-  for (const b of blocks) {
+  for (const b of numbered) {
     if (b.t === 'h1' && b.chap) { chap = b.chap; f = 0; t = 0; }
     if (b.t === 'fig' || b.t === 'shots') { b.num = `${chap}-${++f}`; if (b.key) refsMap[b.key] = `الشكل (${b.num})`; }
     if (b.t === 'table') { b.num = `${chap}-${++t}`; if (b.key) refsMap[b.key] = `الجدول (${b.num})`; }

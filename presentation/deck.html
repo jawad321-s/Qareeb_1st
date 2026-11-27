@@ -1,0 +1,1317 @@
+<title>Qareeb Presentation</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<style>
+/* Layout: a fixed 1600×900 stage scaled to the window, chrome (top bar, nav) around it, RTL throughout.
+   Identity: Qareeb's navy + customer blue + artisan orange; radar rings for "nearby". */
+:root {
+  --bg: #F2F5FB; --bg2: #E6ECF8; --surface: #FFFFFF; --glass: rgba(255,255,255,.78); --line: #D7E0F0;
+  --ink: #0A1A3F; --muted: #56658A; --faint: #8A97B5;
+  --navy: #031746; --blue: #2563EB; --blue-soft: #E1EAFF; --orange: #E2701A; --orange-ink: #B9460B; --orange-soft: #FFEBDB;
+  --teal: #0E8F80; --teal-soft: #D6F3EE; --violet: #6A46D9; --violet-soft: #ECE6FF; --red: #D02B2B; --red-soft: #FDE4E4; --green: #15803D; --green-soft: #DDF5E5;
+  --title: linear-gradient(100deg, #031746 0%, #1D4ED8 55%, #2563EB 100%);
+  --brand: linear-gradient(120deg, #1D4ED8, #2563EB 55%, #0369A1);
+  --shadow: 0 22px 60px -30px rgba(3,23,70,.38);
+  --ring: rgba(37,99,235,.16);
+  --f-ar: "Cairo", "Segoe UI", Tahoma, sans-serif;
+  --f-lat: "Inter", "Segoe UI", system-ui, sans-serif;
+  --f-mono: "IBM Plex Mono", ui-monospace, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #060D24; --bg2: #0B1633; --surface: #0F1C3F; --glass: rgba(17,30,66,.8); --line: #22335F;
+  --ink: #EAF0FF; --muted: #A3B3D8; --faint: #6F80A8;
+  --navy: #C7D5FF; --blue: #76A4FF; --blue-soft: #15295A; --orange: #FB9A4B; --orange-ink: #FDBA74; --orange-soft: #3A240F;
+  --teal: #34D3BE; --teal-soft: #0C3431; --violet: #AE96FF; --violet-soft: #251C4F; --red: #F87171; --red-soft: #3A1518; --green: #4ADE80; --green-soft: #0F3020;
+  --title: linear-gradient(100deg, #E3EBFF 0%, #93B4FF 55%, #60A5FA 100%);
+  --brand: linear-gradient(120deg, #1E40AF, #2563EB 55%, #0369A1);
+  --shadow: 0 22px 60px -30px rgba(0,0,0,.7); --ring: rgba(118,164,255,.18); color-scheme: dark;
+} }
+:root[data-theme="dark"] {
+  --bg: #060D24; --bg2: #0B1633; --surface: #0F1C3F; --glass: rgba(17,30,66,.8); --line: #22335F;
+  --ink: #EAF0FF; --muted: #A3B3D8; --faint: #6F80A8;
+  --navy: #C7D5FF; --blue: #76A4FF; --blue-soft: #15295A; --orange: #FB9A4B; --orange-ink: #FDBA74; --orange-soft: #3A240F;
+  --teal: #34D3BE; --teal-soft: #0C3431; --violet: #AE96FF; --violet-soft: #251C4F; --red: #F87171; --red-soft: #3A1518; --green: #4ADE80; --green-soft: #0F3020;
+  --title: linear-gradient(100deg, #E3EBFF 0%, #93B4FF 55%, #60A5FA 100%);
+  --brand: linear-gradient(120deg, #1E40AF, #2563EB 55%, #0369A1);
+  --shadow: 0 22px 60px -30px rgba(0,0,0,.7); --ring: rgba(118,164,255,.18); color-scheme: dark;
+}
+html, body { height: 100%; }
+[hidden] { display: none !important; }
+body { background: var(--bg); color: var(--ink); font-family: var(--f-ar); direction: rtl; overflow: hidden; margin: 0; }
+* { box-sizing: border-box; }
+button { font: inherit; color: inherit; }
+:focus-visible { outline: 3px solid var(--blue); outline-offset: 3px; border-radius: 10px; }
+.lat { font-family: var(--f-lat); direction: ltr; unicode-bidi: isolate; }
+.mono { font-family: var(--f-mono); direction: ltr; unicode-bidi: isolate; }
+
+/* ── Backdrop: radar rings around a pin, a grid, artisans as dots ── */
+.backdrop { position: fixed; inset: 0; overflow: hidden; pointer-events: none; }
+.backdrop::before { content: ""; position: absolute; inset: 0; background-image: linear-gradient(var(--line) 1px, transparent 1px), linear-gradient(90deg, var(--line) 1px, transparent 1px); background-size: 46px 46px; opacity: .35; mask-image: radial-gradient(ellipse at 70% 40%, #000 20%, transparent 75%); }
+.radar { position: absolute; width: 1100px; height: 1100px; left: -330px; bottom: -520px; }
+.radar i { position: absolute; inset: 0; margin: auto; border-radius: 50%; border: 1.5px solid var(--ring); }
+.radar i:nth-child(1) { width: 18%; height: 18%; } .radar i:nth-child(2) { width: 36%; height: 36%; } .radar i:nth-child(3) { width: 54%; height: 54%; }
+.radar i:nth-child(4) { width: 72%; height: 72%; } .radar i:nth-child(5) { width: 90%; height: 90%; }
+.radar b { position: absolute; inset: 5%; border-radius: 50%; background: conic-gradient(from 0deg, transparent 0 82%, var(--ring) 96%, transparent 100%); animation: sweep 14s linear infinite; }
+.radar.two { width: 760px; height: 760px; left: auto; right: -300px; top: -380px; bottom: auto; opacity: .7; }
+.radar.two b { animation-duration: 20s; animation-direction: reverse; }
+@keyframes sweep { to { transform: rotate(360deg); } }
+.dots span { position: absolute; width: 7px; height: 7px; border-radius: 50%; background: var(--orange); opacity: .5; animation: blip 4.5s ease-in-out infinite; }
+@keyframes blip { 0%,100% { transform: scale(.7); opacity: .25; } 50% { transform: scale(1.25); opacity: .7; } }
+
+/* ── Chrome ── */
+.topbar { position: fixed; top: 0; inset-inline: 0; z-index: 30; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: calc(10px + env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-left, 0px)) 10px max(16px, env(safe-area-inset-right, 0px)); }
+.bar-group { display: flex; align-items: center; gap: 8px; }
+.pill { display: inline-flex; align-items: center; gap: 8px; background: var(--glass); border: 1px solid var(--line); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); border-radius: 999px; padding: 7px 14px; font-weight: 700; font-size: 13px; }
+.pill img { width: 20px; height: 20px; }
+.icon-btn { width: 38px; height: 38px; border-radius: 50%; display: grid; place-items: center; background: var(--glass); border: 1px solid var(--line); backdrop-filter: blur(14px); cursor: pointer; transition: transform .2s; }
+.icon-btn:hover { transform: scale(1.08); }
+.icon-btn svg { width: 18px; height: 18px; }
+.counter { font-family: var(--f-lat); font-variant-numeric: tabular-nums; }
+.viewport { position: fixed; inset: 0; overflow: hidden; }
+.stage { width: 1600px; height: 900px; position: absolute; left: 50%; top: 50%; transform-origin: center center; transform: translate(-50%, -50%) scale(.5); }
+.navbar { position: fixed; bottom: 0; inset-inline: 0; z-index: 30; padding: 6px max(16px, env(safe-area-inset-left, 0px)) calc(10px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-right, 0px)); }
+.navbar .inner { max-width: 980px; margin: 0 auto; }
+.progress { height: 4px; border-radius: 99px; background: var(--bg2); overflow: hidden; margin-bottom: 8px; }
+.progress i { display: block; height: 100%; width: 0; background: var(--brand); transition: width .5s cubic-bezier(.4,0,.2,1); }
+.nav-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.nav-btn { display: inline-flex; align-items: center; gap: 6px; border-radius: 999px; padding: 8px 16px; font-weight: 700; font-size: 14px; cursor: pointer; border: 1px solid var(--line); background: var(--glass); }
+.nav-btn.primary { background: var(--brand); color: #fff; border-color: transparent; box-shadow: 0 10px 26px -12px #2563EB; }
+.nav-btn:disabled { opacity: .35; cursor: default; }
+.nav-btn svg { width: 16px; height: 16px; }
+.dots-nav { display: flex; gap: 5px; flex-wrap: wrap; justify-content: center; min-width: 0; }
+.dots-nav button { width: 8px; height: 8px; border-radius: 99px; border: 0; padding: 0; background: var(--line); cursor: pointer; transition: width .3s, background .3s; }
+.dots-nav button.on { width: 26px; background: var(--blue); }
+@media (max-width: 760px) { .dots-nav { display: none; } .pill .brand-name { display: none; } .rotate-hint { display: flex !important; } }
+.rotate-hint { display: none; position: fixed; inset-inline: 0; bottom: calc(72px + env(safe-area-inset-bottom, 0px)); justify-content: center; z-index: 25; pointer-events: none; }
+@media (orientation: landscape) { .rotate-hint { display: none !important; } }
+
+/* ── Slides ── */
+.slide { position: absolute; inset: 0; padding: 70px 96px 40px; display: flex; flex-direction: column; opacity: 0; visibility: hidden; transform: translateX(var(--from, 80px)) scale(.97); filter: blur(10px); transition: opacity .6s cubic-bezier(.4,0,.2,1), transform .8s cubic-bezier(.4,0,.2,1), filter .6s, visibility 0s .8s; }
+.slide.active { opacity: 1; visibility: visible; transform: none; filter: none; transition: opacity .6s cubic-bezier(.4,0,.2,1), transform .8s cubic-bezier(.4,0,.2,1), filter .6s, visibility 0s; }
+.slide.leaving { opacity: 0; visibility: visible; transform: translateX(var(--to, -60px)) scale(.97); filter: blur(8px); }
+.marks { position: absolute; top: 26px; inset-inline: 40px; display: flex; justify-content: space-between; pointer-events: none; }
+.mark { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.mark .disc { width: 58px; height: 58px; border-radius: 50%; background: var(--surface); border: 1.5px solid var(--line); display: grid; place-items: center; box-shadow: var(--shadow); overflow: hidden; }
+.mark .disc img { width: 70%; }
+.mark small { font: 700 9px/1 var(--f-lat); letter-spacing: .16em; text-transform: uppercase; color: var(--blue); }
+.uni-ph { font: 700 10px/1.2 var(--f-ar); color: var(--faint); text-align: center; padding: 6px; }
+.head { margin-bottom: 22px; padding-inline: 90px; }
+.eyebrow { display: inline-flex; align-items: center; gap: 10px; font: 700 13px/1 var(--f-lat); letter-spacing: .2em; text-transform: uppercase; color: var(--blue); margin-bottom: 10px; }
+.eyebrow b { width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; background: var(--brand); color: #fff; letter-spacing: 0; font-size: 13px; }
+h2 { margin: 0; font-size: 50px; line-height: 1.25; font-weight: 900; text-wrap: balance; }
+h2 .g, .g { background: var(--title); -webkit-background-clip: text; background-clip: text; color: transparent; }
+h2 small { font: 700 22px/1 var(--f-lat); color: var(--faint); margin-inline-start: 12px; -webkit-text-fill-color: var(--faint); }
+.lede { font-size: 20px; color: var(--muted); margin: 8px 0 0; max-width: 1100px; line-height: 1.7; }
+.body { flex: 1; min-height: 0; display: flex; flex-direction: column; justify-content: center; }
+.card { background: var(--glass); border: 1px solid var(--line); border-radius: 26px; box-shadow: var(--shadow); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); }
+.grid { display: grid; gap: 18px; }
+.c2 { grid-template-columns: repeat(2, 1fr); } .c3 { grid-template-columns: repeat(3, 1fr); } .c4 { grid-template-columns: repeat(4, 1fr); }
+.ico { width: 52px; height: 52px; border-radius: 16px; display: grid; place-items: center; flex: none; }
+.ico svg { width: 26px; height: 26px; }
+.t-blue { color: var(--blue); } .t-orange { color: var(--orange-ink); } .t-teal { color: var(--teal); } .t-violet { color: var(--violet); } .t-red { color: var(--red); } .t-green { color: var(--green); } .t-muted { color: var(--muted); }
+.b-blue { background: var(--blue-soft); color: var(--blue); } .b-orange { background: var(--orange-soft); color: var(--orange-ink); } .b-teal { background: var(--teal-soft); color: var(--teal); } .b-violet { background: var(--violet-soft); color: var(--violet); } .b-red { background: var(--red-soft); color: var(--red); } .b-green { background: var(--green-soft); color: var(--green); }
+.tag { display: inline-flex; align-items: center; gap: 6px; border-radius: 999px; padding: 4px 12px; font-size: 14px; font-weight: 700; }
+h3 { margin: 0; font-size: 24px; font-weight: 800; line-height: 1.35; }
+p { margin: 0; }
+.muted { color: var(--muted); }
+ul.ticks { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+ul.ticks li { display: flex; gap: 10px; align-items: flex-start; font-size: 17px; line-height: 1.6; color: var(--muted); }
+ul.ticks li::before { content: ""; width: 8px; height: 8px; border-radius: 50%; margin-top: 10px; flex: none; background: currentColor; box-shadow: 0 0 0 4px color-mix(in srgb, currentColor 18%, transparent); color: var(--dot, var(--blue)); }
+.ph { outline: 2px dashed color-mix(in srgb, var(--orange) 65%, transparent); outline-offset: 4px; border-radius: 6px; }
+
+/* entrance: each .rv rises in once its slide is shown (visible at rest; nothing waits on scrolling) */
+.slide.active .rv { animation: rise .75s cubic-bezier(.2,.7,.2,1) both; animation-delay: calc(180ms + var(--i, 0) * 110ms); }
+@keyframes rise { from { opacity: 0; transform: translateY(22px); filter: blur(6px); } }
+@media (prefers-reduced-motion: reduce) {
+  .slide, .slide.active, .slide.leaving { transition: opacity .2s; transform: none !important; filter: none !important; }
+  .slide.active .rv { animation: none; } .radar b, .dots span, .ring-anim { animation: none !important; }
+}
+
+/* ── Cover ── */
+.cover { padding: 56px 90px 44px; align-items: center; text-align: center; }
+.cover-top { width: 100%; display: flex; justify-content: space-between; align-items: flex-start; }
+.cover-top .mark .disc { width: 112px; height: 112px; }
+.cover-top .faculty { margin-top: 26px; padding: 12px 28px; border-radius: 18px; font-weight: 800; font-size: 20px; color: var(--blue); }
+.cover-logo { width: 150px; height: 150px; margin: 6px auto 0; filter: drop-shadow(0 20px 40px rgba(3,23,70,.25)); }
+.cover h1 { margin: 6px 0 0; font-size: 92px; line-height: 1.1; font-weight: 900; }
+.cover .sub { font-size: 30px; font-weight: 800; margin-top: 6px; }
+.cover .tagline { font-size: 21px; color: var(--muted); margin-top: 10px; }
+.cover-foot { margin-top: auto; width: 100%; display: grid; gap: 14px; justify-items: center; }
+.cover-foot .label { font: 800 15px/1 var(--f-ar); letter-spacing: .08em; color: var(--blue); }
+.cover-foot .sup { font-size: 28px; font-weight: 900; }
+.team { display: flex; flex-wrap: wrap; gap: 10px 34px; justify-content: center; }
+.team span { display: inline-flex; align-items: center; gap: 10px; font-size: 22px; font-weight: 700; }
+.team span::before { content: ""; width: 10px; height: 10px; border-radius: 50%; background: var(--orange); }
+.year { font: 700 16px/1 var(--f-lat); color: var(--muted); }
+.hr { width: 70%; height: 1px; background: var(--line); }
+
+/* agenda */
+.agenda { grid-template-columns: repeat(4, 1fr); gap: 18px; }
+.agenda button { text-align: start; cursor: pointer; padding: 24px; border-radius: 24px; display: grid; gap: 10px; align-content: start; transition: transform .25s, border-color .25s; }
+.agenda button:hover { transform: translateY(-4px); border-color: var(--blue); }
+.agenda .num { font: 800 15px/1 var(--f-lat); color: var(--blue); }
+.agenda h3 { font-size: 23px; }
+.agenda p { font-size: 15px; color: var(--muted); line-height: 1.6; }
+
+/* intro */
+.intro-wrap { display: grid; grid-template-columns: 1.35fr 1fr; gap: 26px; align-items: stretch; }
+.quote { padding: 42px 46px; font-size: 25px; line-height: 1.95; position: relative; overflow: hidden; }
+.quote strong { color: var(--blue); }
+.quote .o { color: var(--orange-ink); }
+.facts { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
+.fact { padding: 22px 24px; display: grid; gap: 4px; align-content: center; }
+.fact .n { font: 800 46px/1 var(--f-lat); }
+.fact span { font-size: 16px; color: var(--muted); }
+
+/* problem / goals */
+.prob { padding: 28px; display: grid; gap: 12px; align-content: start; }
+.prob p { font-size: 18px; line-height: 1.75; color: var(--muted); }
+.prob .ans { font-size: 16px; padding-top: 12px; border-top: 1px dashed var(--line); color: var(--ink); display: flex; gap: 8px; }
+.goals { display: grid; grid-template-columns: 1.25fr 1fr; gap: 24px; }
+.goal { display: grid; grid-template-columns: 48px 1fr; gap: 16px; align-items: start; padding: 16px 20px; }
+.goal .k { width: 44px; height: 44px; border-radius: 14px; display: grid; place-items: center; font: 800 18px/1 var(--f-lat); background: var(--brand); color: #fff; }
+.goal h3 { font-size: 20px; } .goal p { font-size: 15.5px; color: var(--muted); line-height: 1.6; margin-top: 2px; }
+.imp { padding: 26px; display: grid; gap: 18px; align-content: start; }
+.imp .row { display: grid; grid-template-columns: 52px 1fr; gap: 14px; align-items: start; }
+.imp p { font-size: 16px; color: var(--muted); line-height: 1.6; }
+
+/* solution timeline */
+.flow { display: grid; grid-template-columns: repeat(7, 1fr); gap: 12px; position: relative; }
+.flow::before { content: ""; position: absolute; top: 46px; inset-inline: 7%; height: 3px; background: repeating-linear-gradient(to left, var(--line) 0 12px, transparent 12px 20px); }
+.fstep { display: grid; justify-items: center; text-align: center; gap: 10px; position: relative; }
+.fstep .ico { width: 92px; height: 92px; border-radius: 28px; border: 4px solid var(--bg); box-shadow: var(--shadow); }
+.fstep .ico svg { width: 40px; height: 40px; }
+.fstep h3 { font-size: 19px; } .fstep p { font-size: 14.5px; color: var(--muted); line-height: 1.55; }
+.who { font-size: 12.5px; font-weight: 800; border-radius: 99px; padding: 3px 10px; }
+.sol-note { margin-top: 30px; padding: 20px 28px; display: flex; gap: 18px; align-items: center; font-size: 18px; }
+
+/* features */
+.feat { padding: 20px 22px; display: grid; grid-template-columns: 52px 1fr; gap: 14px; align-items: start; }
+.feat h3 { font-size: 18.5px; } .feat p { font-size: 14.5px; color: var(--muted); line-height: 1.55; margin-top: 3px; }
+
+/* roles + matrix */
+.roles { display: grid; grid-template-columns: 1fr 1.45fr; gap: 22px; }
+.role-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.role { padding: 20px; display: grid; gap: 10px; align-content: start; }
+.role .top { display: flex; align-items: center; gap: 12px; }
+.role p { font-size: 14.5px; color: var(--muted); line-height: 1.6; }
+table.matrix { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 15px; }
+.matrix th, .matrix td { padding: 9px 12px; border-bottom: 1px solid var(--line); text-align: center; }
+.matrix th:first-child, .matrix td:first-child { text-align: start; font-weight: 600; }
+.matrix thead th { font-size: 15px; font-weight: 800; }
+.yes { color: var(--green); font-weight: 900; } .no { color: var(--faint); } .part { color: var(--orange-ink); font-weight: 800; font-size: 13px; }
+.mx { padding: 8px 16px 10px; }
+
+/* use case */
+.uc { display: grid; grid-template-columns: 1fr 340px; gap: 22px; height: 100%; }
+.uc-fig { padding: 10px 14px; display: grid; }
+.uc-side { display: grid; gap: 14px; align-content: start; }
+.tabs { display: grid; gap: 8px; }
+.tabs button { cursor: pointer; display: flex; align-items: center; gap: 12px; padding: 14px 16px; border-radius: 18px; border: 1px solid var(--line); background: var(--glass); text-align: start; font-weight: 800; font-size: 18px; transition: transform .2s; }
+.tabs button:hover { transform: translateX(-4px); }
+.tabs button.on { border-color: transparent; color: #fff; }
+.tabs button.on[data-k="customer"] { background: #2563EB; } .tabs button.on[data-k="artisan"] { background: #C2410C; } .tabs button.on[data-k="admin"] { background: #6A46D9; } .tabs button.on[data-k="system"] { background: #0E8F80; }
+.tabs button .cnt { margin-inline-start: auto; font: 700 14px/1 var(--f-lat); opacity: .8; }
+.uc-note { padding: 18px; font-size: 15px; color: var(--muted); line-height: 1.7; }
+svg text { font-family: var(--f-ar); }
+
+/* dispatch */
+.disp { display: grid; grid-template-columns: 1.05fr 1fr; gap: 26px; align-items: center; }
+.radar-fig { padding: 10px; display: grid; place-items: center; }
+.rules { display: grid; gap: 12px; }
+.rule { display: grid; grid-template-columns: 52px 1fr; gap: 14px; padding: 15px 18px; align-items: center; }
+.rule h3 { font-size: 18.5px; } .rule p { font-size: 14.5px; color: var(--muted); line-height: 1.55; }
+.ring-anim { transform-box: fill-box; transform-origin: center; animation: ring-in 1.1s cubic-bezier(.2,.7,.2,1) both; }
+.slide:not(.active) .ring-anim { animation: none; }
+@keyframes ring-in { from { opacity: 0; transform: scale(.6); } }
+
+/* journey stepper */
+.journey { display: grid; grid-template-columns: 360px 1fr 300px; gap: 20px; height: 100%; min-height: 0; }
+.steps { padding: 10px; overflow-y: auto; display: grid; gap: 4px; align-content: start; }
+.steps button { cursor: pointer; display: grid; grid-template-columns: 32px 1fr; gap: 10px; align-items: center; text-align: start; border: 0; background: transparent; padding: 8px 10px; border-radius: 14px; transition: background .2s; }
+.steps button:hover { background: var(--bg2); }
+.steps button.on { background: var(--brand); color: #fff; }
+.steps .n { width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; font: 700 13px/1 var(--f-lat); background: var(--bg2); }
+.steps button.on .n { background: rgba(255,255,255,.25); }
+.steps .t { font-size: 15px; font-weight: 700; line-height: 1.3; }
+.steps .a { font-size: 12px; opacity: .75; }
+.detail { padding: 34px 36px; display: grid; align-content: start; gap: 16px; position: relative; overflow: hidden; }
+.detail .actor { display: flex; align-items: center; gap: 14px; }
+.detail .big { width: 78px; height: 78px; border-radius: 24px; display: grid; place-items: center; color: #fff; }
+.detail .big svg { width: 38px; height: 38px; }
+.detail .stepno { font: 700 13px/1 var(--f-lat); letter-spacing: .2em; color: var(--faint); }
+.detail h3 { font-size: 36px; font-weight: 900; }
+.detail p { font-size: 21px; line-height: 1.85; color: var(--muted); }
+.detail .facts-line { display: flex; flex-wrap: wrap; gap: 8px; }
+.detail.swap { animation: swap .45s cubic-bezier(.2,.7,.2,1); }
+@keyframes swap { from { opacity: 0; transform: translateX(-26px); } }
+.ctrls { display: flex; gap: 8px; align-items: center; margin-top: 6px; }
+.jphone { display: grid; place-items: center; }
+
+/* phones + browser frames */
+.phone { width: 236px; aspect-ratio: 390/844; border-radius: 34px; padding: 9px; background: #0B1330; box-shadow: 0 30px 60px -28px rgba(3,23,70,.6), inset 0 0 0 2px #24305A; position: relative; flex: none; cursor: zoom-in; }
+.phone img { width: 100%; height: 100%; object-fit: cover; object-position: top; border-radius: 26px; display: block; background: #fff; }
+.phone::after { content: ""; position: absolute; top: 15px; left: 50%; translate: -50% 0; width: 70px; height: 16px; border-radius: 99px; background: #0B1330; }
+.phones { display: flex; gap: 26px; justify-content: center; align-items: flex-end; }
+.cap { text-align: center; margin-top: 12px; font-size: 16px; font-weight: 800; }
+.cap small { display: block; font-size: 13px; font-weight: 600; color: var(--muted); margin-top: 2px; }
+.browser { border-radius: 18px; overflow: hidden; border: 1px solid var(--line); background: var(--surface); box-shadow: var(--shadow); cursor: zoom-in; }
+.browser .bar { height: 30px; display: flex; align-items: center; gap: 6px; padding: 0 12px; background: var(--bg2); direction: ltr; }
+.browser .bar i { width: 10px; height: 10px; border-radius: 50%; background: var(--line); }
+.browser .bar span { margin-inline-start: 10px; font: 500 12px/1 var(--f-lat); color: var(--muted); }
+.browser img { display: block; width: 100%; }
+
+/* comms */
+.comms { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+.comm { padding: 22px; display: grid; grid-template-rows: auto auto 1fr; gap: 12px; }
+.comm .head2 { display: flex; align-items: center; gap: 12px; }
+.comm ul.ticks li { font-size: 15.5px; }
+.comm .shot { display: flex; justify-content: center; align-items: flex-end; }
+.comm .phone { width: 178px; }
+
+/* admin */
+.admin { display: grid; grid-template-columns: 1fr 330px; gap: 22px; align-items: start; }
+.atabs { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.atabs button { cursor: pointer; padding: 10px 12px; border-radius: 14px; border: 1px solid var(--line); background: var(--glass); font-size: 15px; font-weight: 700; text-align: start; display: flex; gap: 8px; align-items: center; }
+.atabs button.on { background: var(--violet); color: #fff; border-color: transparent; }
+.atabs button[disabled] { cursor: default; opacity: .75; }
+.atabs button i { width: 7px; height: 7px; border-radius: 50%; background: currentColor; opacity: .6; }
+.admin-note { padding: 16px 18px; margin-top: 12px; font-size: 14.5px; color: var(--muted); line-height: 1.7; }
+
+/* trust */
+.trust { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+.tcol { padding: 22px; display: grid; gap: 14px; align-content: start; }
+.chain { display: grid; gap: 8px; }
+.chain div { display: grid; grid-template-columns: 26px 1fr; gap: 10px; align-items: start; font-size: 15.5px; line-height: 1.55; color: var(--muted); }
+.chain b { width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center; font: 700 12px/1 var(--f-lat); color: #fff; }
+.tcol .browser { margin-top: 4px; }
+
+/* erd / arch / states */
+.figure { padding: 14px; display: grid; place-items: center; cursor: zoom-in; }
+.figure svg { width: 100%; height: auto; display: block; }
+#erdFig svg { height: 690px; width: auto; max-width: 100%; }
+.arch { display: grid; grid-template-rows: auto auto auto; gap: 14px; }
+.tier { display: grid; grid-template-columns: 170px 1fr; gap: 14px; align-items: stretch; }
+.tier > .lbl { border-radius: 20px; display: grid; place-items: center; text-align: center; font-weight: 900; font-size: 18px; padding: 10px; }
+.tier .boxes { display: grid; gap: 12px; }
+.box { padding: 14px 16px; border-radius: 18px; display: grid; gap: 6px; align-content: start; }
+.box h3 { font-size: 18px; display: flex; gap: 8px; align-items: center; }
+.box p { font-size: 13.5px; color: var(--muted); line-height: 1.55; }
+.box .chips { display: flex; flex-wrap: wrap; gap: 5px; }
+.chip { font: 600 12px/1 var(--f-lat); padding: 5px 8px; border-radius: 8px; background: var(--bg2); color: var(--muted); direction: ltr; }
+.flowline { height: 26px; display: grid; grid-template-columns: 170px 1fr; gap: 14px; }
+.flowline div { display: flex; justify-content: space-around; align-items: center; color: var(--faint); font-size: 13px; font-weight: 700; }
+
+/* security, tech */
+.sec { padding: 20px 22px; display: grid; grid-template-columns: 52px 1fr; gap: 14px; align-items: start; }
+.sec h3 { font-size: 18.5px; } .sec p { font-size: 14.5px; color: var(--muted); line-height: 1.6; margin-top: 3px; }
+.tech { padding: 20px; display: grid; gap: 8px; align-content: start; }
+.tech .mono-badge { width: 52px; height: 52px; border-radius: 16px; display: grid; place-items: center; font: 800 17px/1 var(--f-lat); color: #fff; }
+.tech h3 { font-family: var(--f-lat); font-size: 20px; direction: ltr; text-align: start; unicode-bidi: plaintext; }
+.tech .role-l { font-size: 14.5px; font-weight: 800; }
+.tech p { font-size: 13.5px; color: var(--muted); line-height: 1.55; }
+
+/* tests */
+.tests { display: grid; grid-template-columns: 1.15fr 1fr; gap: 22px; }
+.tstat { padding: 20px 22px; display: grid; grid-template-columns: auto 1fr; gap: 16px; align-items: center; }
+.tstat .n { font: 800 44px/1 var(--f-lat); direction: ltr; }
+.tstat h3 { font-size: 19px; } .tstat p { font-size: 14px; color: var(--muted); line-height: 1.55; }
+.scen { padding: 20px 22px; }
+.scen ul.ticks li { font-size: 15px; }
+
+/* challenges */
+.chal { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+.ch { padding: 18px 20px; display: grid; gap: 8px; align-content: start; }
+.ch .q { display: flex; gap: 10px; align-items: flex-start; font-weight: 800; font-size: 17px; line-height: 1.45; }
+.ch .a { font-size: 14.5px; color: var(--muted); line-height: 1.65; border-top: 1px dashed var(--line); padding-top: 8px; }
+
+/* method */
+.cycle { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; align-items: center; }
+.method-list { display: grid; gap: 10px; }
+
+/* future + thanks */
+.road { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+.road .card { padding: 18px 20px; display: grid; gap: 8px; align-content: start; }
+.road p { font-size: 14.5px; color: var(--muted); line-height: 1.6; }
+.concl { padding: 22px 26px; margin-bottom: 20px; font-size: 18px; line-height: 1.9; }
+.thanks { align-items: center; justify-content: center; text-align: center; }
+.thanks h2 { font-size: 96px; }
+.thanks .lead2 { font-size: 26px; color: var(--muted); margin-top: 12px; }
+
+/* lightbox, toc */
+.scrim { position: fixed; inset: 0; z-index: 40; background: rgba(4,10,30,.55); backdrop-filter: blur(4px); }
+.toc { position: fixed; top: 0; bottom: 0; right: 0; z-index: 50; width: min(380px, 88vw); padding: calc(20px + env(safe-area-inset-top, 0px)) 20px 20px; background: var(--surface); border-inline-start: 1px solid var(--line); overflow-y: auto; transform: translateX(100%); transition: transform .35s cubic-bezier(.4,0,.2,1); }
+.toc.open { transform: none; }
+.toc h2 { font-size: 24px; margin-bottom: 14px; }
+.toc nav { display: grid; gap: 4px; }
+.toc nav button { cursor: pointer; display: grid; grid-template-columns: 34px 1fr; gap: 10px; align-items: center; text-align: start; padding: 8px 10px; border-radius: 14px; border: 0; background: transparent; font-weight: 700; font-size: 15px; }
+.toc nav button:hover { background: var(--bg2); }
+.toc nav button.on { background: var(--brand); color: #fff; }
+.toc nav button span { width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; background: var(--bg2); font: 700 12px/1 var(--f-lat); }
+.toc nav button.on span { background: rgba(255,255,255,.25); }
+.toc .keys { margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--line); font-size: 13px; color: var(--muted); line-height: 1.9; }
+.lightbox { position: fixed; inset: 0; z-index: 60; display: grid; place-items: center; padding: 30px max(16px, env(safe-area-inset-left, 0px)); cursor: zoom-out; }
+.lightbox .lb-inner { max-width: 94vw; max-height: 88vh; overflow: auto; background: var(--surface); border-radius: 20px; padding: 14px; box-shadow: var(--shadow); }
+.lightbox img { max-height: 84vh; max-width: 90vw; display: block; margin: auto; }
+.lightbox svg { width: min(90vw, 1500px); height: auto; display: block; }
+</style>
+
+<div class="backdrop" aria-hidden="true">
+  <div class="radar"><i></i><i></i><i></i><i></i><i></i><b></b></div>
+  <div class="radar two"><i></i><i></i><i></i><i></i><i></i><b></b></div>
+  <div class="dots" id="dots"></div>
+</div>
+
+<header class="topbar">
+  <div class="bar-group">
+    <button class="icon-btn" id="tocBtn" aria-label="المحتويات" title="المحتويات (T)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg></button>
+    <span class="pill"><img src="assets/brand/mark-navy.webp" alt="" id="pillMark"><span class="brand-name">قريب · نظام إلكتروني لإدارة الخدمات القريبة</span></span>
+  </div>
+  <div class="bar-group">
+    <span class="pill counter" id="counter">1 / 1</span>
+    <button class="icon-btn" id="themeBtn" aria-label="تبديل الوضع الليلي" title="الوضع الليلي"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg></button>
+    <button class="icon-btn" id="fsBtn" aria-label="ملء الشاشة" title="ملء الشاشة (F)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg></button>
+  </div>
+</header>
+
+<main class="viewport"><div class="stage" id="stage">
+
+<!-- 1 ─ Cover -->
+<section class="slide cover" id="cover" data-title="الغلاف">
+  <div class="cover-top rv" style="--i:0">
+    <div class="mark"><div class="disc" id="uniDisc"><span class="uni-ph">شعار<br>الجامعة</span></div><small data-deck="universityEn">University</small></div>
+    <div class="card faculty" data-deck="faculty">[الكلية / القسم]</div>
+    <div class="mark"><div class="disc"><img src="assets/brand/logo-navy.webp" alt="شعار قريب" class="logo-swap"></div><small>Qareeb</small></div>
+  </div>
+  <img class="cover-logo rv logo-swap" style="--i:1" src="assets/brand/mark-navy.webp" alt="">
+  <h1 class="rv" style="--i:2"><span class="g">قريب</span> <span class="lat t-muted" style="font-size:44px;font-weight:700">Qareeb</span></h1>
+  <div class="sub rv" style="--i:3">نظام إلكتروني لإدارة الخدمات القريبة</div>
+  <p class="tagline rv" style="--i:4">يربط الزبون بأقرب حرفي موثّق، لحظياً: طلب، عروض أسعار، تنفيذ، وتقييم متبادل</p>
+  <div class="cover-foot rv" style="--i:5">
+    <div class="label">إشراف</div>
+    <div class="sup" data-deck="supervisor">[د. اسم المشرف]</div>
+    <div class="hr"></div>
+    <div class="label">فريق العمل</div>
+    <div class="team" id="team"></div>
+    <div class="year" data-deck="year">[السنة الدراسية]</div>
+  </div>
+</section>
+
+<!-- 2 ─ Agenda -->
+<section class="slide" id="agenda" data-title="المحتويات">
+  <div class="head"><div class="eyebrow rv">Agenda</div><h2 class="rv" style="--i:1"><span class="g">محتويات العرض</span></h2></div>
+  <div class="body"><div class="grid agenda" id="agendaGrid"></div></div>
+</section>
+
+<!-- 3 ─ Intro -->
+<section class="slide" id="intro" data-title="مقدمة المشروع">
+  <div class="head"><div class="eyebrow rv">Introduction</div><h2 class="rv" style="--i:1"><span class="g">مقدمة المشروع</span></h2></div>
+  <div class="body"><div class="intro-wrap">
+    <div class="card quote rv" style="--i:2">
+      <p><strong>قريب</strong> منصة رقمية لخدمات البيوت: الزبون بيطلب الخدمة اللي بحتاجها (سباكة، كهرباء، نجارة، تكييف…)، والنظام بيوصّل طلبه <strong>لأقرب الحرفيين الموثّقين</strong> المتاحين بنفس التخصص. الحرفيين بيقدّموا عروض أسعار، والزبون بيقارن ويختار، وبعدها بيتابع الشغل لحظياً لحد ما يخلص، وبيقيّم الطرفين بعض.</p>
+      <p style="margin-top:14px">المنصة مكوّنة من <span class="o">تطبيق موبايل واحد</span> بيشتغل للزبون والحرفي حسب نوع الحساب، و<span class="o">لوحة تحكم ويب</span> للإدارة، على خدمات <span class="lat">Firebase</span> السحابية.</p>
+    </div>
+    <div class="facts">
+      <div class="card fact rv" style="--i:3"><div class="n g">11</div><span>خدمة منزلية، والإدارة بتضيف وبتعدّل</span></div>
+      <div class="card fact rv" style="--i:4"><div class="n g">3</div><span>أنواع مستخدمين: زبون، حرفي، إدارة</span></div>
+      <div class="card fact rv" style="--i:5"><div class="n g">12</div><span>صفحة بلوحة تحكم الإدارة</span></div>
+      <div class="card fact rv" style="--i:6"><div class="n g">16</div><span>دالة سحابية (Cloud Functions) بتشغّل النظام تلقائياً</span></div>
+      <div class="card fact rv" style="--i:7"><div class="n g">22</div><span>نوع إشعار، بالعربي والإنجليزي</span></div>
+      <div class="card fact rv" style="--i:8"><div class="n g">2</div><span>لغتين، ووضع فاتح وليلي</span></div>
+    </div>
+  </div></div>
+</section>
+
+<!-- 4 ─ Problem -->
+<section class="slide" id="problem" data-title="المشكلة">
+  <div class="head"><div class="eyebrow rv">Problem Statement</div><h2 class="rv" style="--i:1"><span class="g">المشكلة</span></h2>
+    <p class="lede rv" style="--i:2">إيجاد حرفي مناسب لشغل بالبيت بيعتمد غالباً على المعارف والاتصالات، وبيصير أصعب لما تكون الحاجة مستعجلة.</p></div>
+  <div class="body"><div class="grid c4" id="problems"></div></div>
+</section>
+
+<!-- 5 ─ Goals -->
+<section class="slide" id="goals" data-title="الأهداف والأهمية">
+  <div class="head"><div class="eyebrow rv">Objectives</div><h2 class="rv" style="--i:1"><span class="g">الأهداف والأهمية</span></h2></div>
+  <div class="body"><div class="goals">
+    <div class="grid" id="goalsList" style="gap:10px"></div>
+    <div class="card imp rv" style="--i:4">
+      <h3>أهمية المشروع</h3>
+      <div class="row"><div class="ico b-blue"><svg data-i="user"/></div><div><h3 style="font-size:19px">للزبون</h3><p>بيوصل لحرفيين قريبين بدون ما يدوّر، وبيقارن أكتر من عرض قبل ما يقرر، وبيعرف وين وصل الشغل بأي لحظة.</p></div></div>
+      <div class="row"><div class="ico b-orange"><svg data-i="tool"/></div><div><h3 style="font-size:19px">للحرفي</h3><p>بتوصله طلبات من محيطه وبتخصصه وبساعات عمله، وبيبني سمعته بالتقييمات وشارة "حرفي مميز".</p></div></div>
+      <div class="row"><div class="ico b-violet"><svg data-i="shield"/></div><div><h3 style="font-size:19px">للإدارة</h3><p>رقابة على الجودة: توثيق الحرفيين، الشكاوى، إيقاف الحسابات، والتحليلات من لوحة وحدة.</p></div></div>
+    </div>
+  </div></div>
+</section>
+
+<!-- 6 ─ Solution -->
+<section class="slide" id="solution" data-title="الحل المقترح">
+  <div class="head"><div class="eyebrow rv">Proposed Solution</div><h2 class="rv" style="--i:1"><span class="g">الحل المقترح: دورة حياة الطلب</span></h2></div>
+  <div class="body">
+    <div class="flow" id="flow"></div>
+    <div class="card sol-note rv" style="--i:9"><div class="ico b-teal"><svg data-i="clock"/></div><div>كل طلب إله <b>مهلة 30 دقيقة</b>: إذا ما إجا عرض، أو ما انقبل عرض بالوقت، النظام بيسكّره لحاله وببلّغ الطرفين، والزبون بيقدر يعيد نشره بنفس التفاصيل.</div></div>
+  </div>
+</section>
+
+<!-- 7 ─ Features -->
+<section class="slide" id="features" data-title="الميزات الرئيسية">
+  <div class="head"><div class="eyebrow rv">Key Features</div><h2 class="rv" style="--i:1"><span class="g">الميزات الرئيسية</span></h2></div>
+  <div class="body"><div class="grid c4" id="featGrid" style="gap:14px"></div></div>
+</section>
+
+<!-- 8 ─ Roles -->
+<section class="slide" id="roles" data-title="المستخدمون والصلاحيات">
+  <div class="head"><div class="eyebrow rv">Users &amp; Permissions</div><h2 class="rv" style="--i:1"><span class="g">المستخدمون والصلاحيات</span></h2></div>
+  <div class="body"><div class="roles">
+    <div class="role-cards" id="roleCards"></div>
+    <div class="card mx rv" style="--i:5"><table class="matrix" id="matrix"></table>
+      <p class="muted" style="font-size:13px;margin-top:8px">الصلاحيات مفروضة بقواعد أمان قاعدة البيانات (Firestore Security Rules)، مش بس بواجهة التطبيق.</p></div>
+  </div></div>
+</section>
+
+<!-- 9 ─ Use case -->
+<section class="slide" id="usecase" data-title="مخطط حالات الاستخدام">
+  <div class="head"><div class="eyebrow rv">UML</div><h2 class="rv" style="--i:1"><span class="g">مخطط حالات الاستخدام</span><small>Use Case Diagram</small></h2></div>
+  <div class="body" style="justify-content:flex-start"><div class="uc">
+    <div class="card uc-fig rv" style="--i:2" id="ucFig" data-zoom></div>
+    <div class="uc-side">
+      <div class="tabs rv" style="--i:3" id="ucTabs"></div>
+      <div class="card uc-note rv" style="--i:4" id="ucNote"></div>
+    </div>
+  </div></div>
+</section>
+
+<!-- 10 ─ Dispatch -->
+<section class="slide" id="dispatch" data-title="توزيع الطلبات على أقرب الحرفيين">
+  <div class="head"><div class="eyebrow rv">Dispatch</div><h2 class="rv" style="--i:1"><span class="g">توزيع الطلب على أقرب الحرفيين</span></h2></div>
+  <div class="body"><div class="disp">
+    <div class="card radar-fig rv" style="--i:2" id="radarFig"></div>
+    <div class="rules" id="dispRules"></div>
+  </div></div>
+</section>
+
+<!-- 11 ─ Workflow (swimlanes) -->
+<section class="slide" id="workflow" data-title="مخطط سير العمل">
+  <div class="head"><div class="eyebrow rv">Workflow</div><h2 class="rv" style="--i:1"><span class="g">سير العمل: رحلة الطلب بين الأطراف</span></h2></div>
+  <div class="body"><div class="card figure rv" style="--i:2" id="wfFig" data-zoom></div></div>
+</section>
+
+<!-- 12 ─ Journey (interactive) -->
+<section class="slide" id="journey" data-title="سيناريو تفاعلي">
+  <div class="head" style="margin-bottom:14px"><div class="eyebrow rv">Scenario</div><h2 class="rv" style="--i:1"><span class="g">سيناريو الطلب خطوة بخطوة</span></h2></div>
+  <div class="body" style="min-height:0"><div class="journey">
+    <div class="card steps rv" style="--i:2" id="jSteps"></div>
+    <div class="card detail rv" style="--i:3" id="jDetail"></div>
+    <div class="jphone rv" style="--i:4" id="jPhone"></div>
+  </div></div>
+</section>
+
+<!-- 13 ─ States -->
+<section class="slide" id="states" data-title="حالات الطلب">
+  <div class="head"><div class="eyebrow rv">State Diagram</div><h2 class="rv" style="--i:1"><span class="g">حالات الطلب والانتقالات</span></h2>
+    <p class="lede rv" style="--i:2">كل انتقال مسموح بس للشخص المعني، والقواعد بترفض أي قفزة عن الترتيب (مثلاً من "مقبول" لـ "مكتمل" مباشرة).</p></div>
+  <div class="body"><div class="card figure rv" style="--i:3" id="stFig" data-zoom></div></div>
+</section>
+
+<!-- 14 ─ Chat / notifications / ratings -->
+<section class="slide" id="comms" data-title="المحادثات والإشعارات والتقييمات">
+  <div class="head"><div class="eyebrow rv">Communication &amp; Trust</div><h2 class="rv" style="--i:1"><span class="g">المحادثات والإشعارات والتقييمات</span></h2></div>
+  <div class="body"><div class="comms">
+    <div class="card comm rv" style="--i:2">
+      <div class="head2"><div class="ico b-blue"><svg data-i="chat"/></div><h3>المحادثة</h3></div>
+      <ul class="ticks" style="--dot:var(--blue)">
+        <li>بتنفتح بين الزبون والحرفي اللي انقبل عرضه بس</li>
+        <li>نص، وأكثر من صورة، وكاميرا مع معاينة قبل الإرسال</li>
+        <li>رد على رسالة محددة، وحذف للجميع بضغطة مطوّلة</li>
+        <li>مشفّرة: كل محادثة إلها مفتاح خاص (<span class="lat">XSalsa20-Poly1305</span>)، وقاعدة البيانات ما بتشوف النص</li>
+      </ul>
+      <div class="shot"><div class="phone" data-zoom><img src="assets/screens/c-chat.webp" alt="شاشة المحادثة"></div></div>
+    </div>
+    <div class="card comm rv" style="--i:3">
+      <div class="head2"><div class="ico b-teal"><svg data-i="bell"/></div><h3>الإشعارات</h3></div>
+      <ul class="ticks" style="--dot:var(--teal)">
+        <li>22 نوع: طلب جديد، عرض جديد، قبول، في الطريق، اكتمل، إلغاء مع السبب، انتهاء مهلة، توثيق، دعم، اشتراك…</li>
+        <li>إشعار للجوال (<span class="lat">Push</span>) وقائمة داخل التطبيق، مع "غير المقروءة"</li>
+        <li>وصول إشعار بيحدّث الشاشة فوراً، مثلاً الطلب اللي انقبل لغيرك بيختفي من قائمتك</li>
+      </ul>
+      <div class="shot"><div class="phone" data-zoom><img src="assets/screens/c-notifs.webp" alt="شاشة الإشعارات"></div></div>
+    </div>
+    <div class="card comm rv" style="--i:4">
+      <div class="head2"><div class="ico b-orange"><svg data-i="star"/></div><h3>التقييمات</h3></div>
+      <ul class="ticks" style="--dot:var(--orange)">
+        <li>تقييم متبادل: الزبون بيقيّم الحرفي، والحرفي بيقيّم الزبون</li>
+        <li>إلزامي بعد انتهاء الشغل قبل المتابعة، ومتاح كمان بعد طلب انلغى</li>
+        <li>نجوم، ووسوم بتتغيّر حسب عدد النجوم، وتعليق</li>
+        <li>بيبني "حرفي مميز": 10 أعمال مكتملة وتقييم فوق 4 (الإدارة بتعدّل الأرقام)</li>
+      </ul>
+      <div class="shot"><div class="phone" data-zoom><img src="assets/screens/a-home.webp" alt="لوحة الحرفي وشارة المميز"></div></div>
+    </div>
+  </div></div>
+</section>
+
+<!-- 15 ─ Admin -->
+<section class="slide" id="admin" data-title="لوحة تحكم الإدارة">
+  <div class="head"><div class="eyebrow rv">Admin Dashboard</div><h2 class="rv" style="--i:1"><span class="g">لوحة تحكم الإدارة</span></h2></div>
+  <div class="body" style="justify-content:flex-start"><div class="admin">
+    <div class="browser rv" style="--i:2" data-zoom><div class="bar"><i></i><i></i><i></i><span id="adminUrl">qareeb-b9a54.web.app</span></div><img id="adminImg" src="assets/screens/admin-overview.webp" alt="لوحة التحكم"></div>
+    <div>
+      <div class="atabs rv" style="--i:3" id="adminTabs"></div>
+      <div class="card admin-note rv" style="--i:4">موقع ويب منفصل بـ <span class="lat">Next.js</span>، منشور على <span class="lat">Firebase Hosting</span>، بالعربي والإنجليزي. الدخول للأدمن بس (صلاحية <span class="mono">role: admin</span> بالحساب)، وإيقاف أي حساب بيطلب كلمة مرور الأدمن من جديد.</div>
+    </div>
+  </div></div>
+</section>
+
+<!-- 16 ─ Verification, complaints, services -->
+<section class="slide" id="trust" data-title="التوثيق والشكاوى وإدارة الخدمات">
+  <div class="head"><div class="eyebrow rv">Quality Control</div><h2 class="rv" style="--i:1"><span class="g">التوثيق والشكاوى وإدارة الخدمات</span></h2></div>
+  <div class="body"><div class="trust">
+    <div class="card tcol rv" style="--i:2">
+      <div class="head2" style="display:flex;gap:12px;align-items:center"><div class="ico b-green"><svg data-i="badge"/></div><h3>توثيق الحرفيين</h3></div>
+      <div class="chain">
+        <div><b style="background:#C2410C">1</b>الحرفي بيرفع صورة الهوية وصورة شخصية وشهاداته</div>
+        <div><b style="background:#6A46D9">2</b>الطلب بيوصل لطابور التوثيق بلوحة التحكم</div>
+        <div><b style="background:#6A46D9">3</b>الأدمن بيقبل، أو بيرفض مع ذكر السبب</div>
+        <div><b style="background:#0E8F80">4</b>إشعار للحرفي بالقرار، والطلبات ما بتوصل إلا للموثّقين</div>
+      </div>
+      <div class="browser" data-zoom><img src="assets/screens/admin-artisans.webp" alt="طابور التوثيق"></div>
+    </div>
+    <div class="card tcol rv" style="--i:3">
+      <div class="head2" style="display:flex;gap:12px;align-items:center"><div class="ico b-red"><svg data-i="flag"/></div><h3>الشكاوى والدعم</h3></div>
+      <div class="chain">
+        <div><b style="background:#2563EB">1</b>شكوى على شخص محدد (زبون أو حرفي) وعلى طلب معيّن، مع السبب والتفاصيل</div>
+        <div><b style="background:#6A46D9">2</b>الأدمن بيشوف الطرفين وأرقامهم وبيكتب ملاحظة الفريق، وبيحلّها أو بيرفضها</div>
+        <div><b style="background:#0E8F80">3</b>محادثة دعم مباشرة مع فريق قريب، والحساب الموقوف بيوصل للدعم بس</div>
+      </div>
+      <div class="browser" data-zoom><img src="assets/screens/admin-complaints.webp" alt="الشكاوى"></div>
+    </div>
+    <div class="card tcol rv" style="--i:4">
+      <div class="head2" style="display:flex;gap:12px;align-items:center"><div class="ico b-violet"><svg data-i="grid"/></div><h3>إدارة الخدمات</h3></div>
+      <div class="chain">
+        <div><b style="background:#6A46D9">1</b>الفئات والخدمات محفوظة بقاعدة البيانات: إضافة، تعديل، إخفاء</div>
+        <div><b style="background:#0E8F80">2</b>التطبيق بيلتزم فوراً بدون نسخة جديدة</div>
+        <div><b style="background:#2563EB">3</b>المستخدمين بيقترحوا خدمات جديدة، والأدمن بيراجعها</div>
+        <div><b style="background:#6A46D9">4</b>أسعار الاشتراكات وأرقام "الحرفي المميز" من الإعدادات</div>
+      </div>
+      <div class="browser" data-zoom><img src="assets/screens/admin-categories.webp" alt="الفئات"></div>
+    </div>
+  </div></div>
+</section>
+
+<!-- 17 ─ ERD -->
+<section class="slide" id="erd" data-title="مخطط قاعدة البيانات">
+  <div class="head" style="margin-bottom:10px"><div class="eyebrow rv">Database · Cloud Firestore</div><h2 class="rv" style="--i:1"><span class="g">مخطط علاقات الكيانات</span><small>ERD</small></h2></div>
+  <div class="body" style="justify-content:flex-start"><div class="card figure rv" style="--i:2" id="erdFig" data-zoom></div></div>
+</section>
+
+<!-- 18 ─ Architecture -->
+<section class="slide" id="architecture" data-title="معمارية النظام">
+  <div class="head"><div class="eyebrow rv">System Architecture</div><h2 class="rv" style="--i:1"><span class="g">معمارية النظام</span></h2></div>
+  <div class="body"><div class="arch" id="arch"></div></div>
+</section>
+
+<!-- 19 ─ Security -->
+<section class="slide" id="security" data-title="الأمان والخصوصية">
+  <div class="head"><div class="eyebrow rv">Security &amp; Privacy</div><h2 class="rv" style="--i:1"><span class="g">الأمان والخصوصية</span></h2></div>
+  <div class="body"><div class="grid c3" id="secGrid"></div></div>
+</section>
+
+<!-- 20 ─ Tech -->
+<section class="slide" id="tech" data-title="التقنيات المستخدمة">
+  <div class="head"><div class="eyebrow rv">Technologies</div><h2 class="rv" style="--i:1"><span class="g">التقنيات المستخدمة</span></h2></div>
+  <div class="body"><div class="grid c4" id="techGrid" style="gap:14px"></div></div>
+</section>
+
+<!-- 21 ─ Customer screens -->
+<section class="slide" id="screens-customer" data-title="واجهات الزبون">
+  <div class="head"><div class="eyebrow rv">Customer App</div><h2 class="rv" style="--i:1"><span class="g">واجهات تطبيق الزبون</span></h2></div>
+  <div class="body"><div class="phones" id="custPhones"></div></div>
+</section>
+
+<!-- 22 ─ Artisan screens -->
+<section class="slide" id="screens-artisan" data-title="واجهات الحرفي">
+  <div class="head"><div class="eyebrow rv" style="color:var(--orange-ink)">Artisan App</div><h2 class="rv" style="--i:1"><span class="g">واجهات تطبيق الحرفي</span></h2></div>
+  <div class="body"><div class="phones" id="artPhones"></div></div>
+</section>
+
+<!-- 23 ─ Testing -->
+<section class="slide" id="testing" data-title="الاختبارات والنتائج">
+  <div class="head"><div class="eyebrow rv">Testing</div><h2 class="rv" style="--i:1"><span class="g">الاختبارات والنتائج</span></h2></div>
+  <div class="body"><div class="tests">
+    <div class="grid" style="gap:12px">
+      <div class="card tstat rv" style="--i:2"><div class="n t-green">14/14</div><div><h3>اختبارات قواعد الأمان</h3><p>على محاكي Firestore: الحرفي ما بيقرأ إلا طلباته، ما في قبول عرض على طلب منتهي، الزبون ما بيقدر يزوّر عمل مكتمل، ترتيب مراحل التنفيذ، حذف الرسائل…</p></div></div>
+      <div class="card tstat rv" style="--i:3"><div class="n t-green">52/52</div><div><h3>اختبارات الدوال السحابية</h3><p>10 ملفات: التوزيع والمهلة، الإلغاء والإشعارات، إدارة المستخدمين، الحذف، الحرفي المميز، استعادة كلمة المرور، التوثيق، تذكير الاشتراك…</p></div></div>
+      <div class="card tstat rv" style="--i:4"><div class="n t-blue">0</div><div><h3>أخطاء فحص الأنواع (TypeScript)</h3><p>فحص كامل لكود التطبيق قبل كل رفع.</p></div></div>
+      <div class="card tstat rv" style="--i:5"><div class="n t-orange" style="font-size:30px">iPhone</div><div><h3>تجربة على أجهزة حقيقية</h3><p>الفريق جرّب كل دفعة تعديلات على التلفونات، ووصلت رسالة SMS حقيقية لرقم فلسطيني (أوريدو) بعد حل مشكلة الشبكات المقيّدة.</p></div></div>
+    </div>
+    <div class="card scen rv" style="--i:6">
+      <h3 style="margin-bottom:12px">سيناريوهات كاملة على المتصفح (<span class="lat">Playwright</span> + محاكيات <span class="lat">Firebase</span>)</h3>
+      <ul class="ticks" style="--dot:var(--green)">
+        <li>حرفيين بيقدّموا عروض، والزبون بيقبل واحد: عرض التاني بصير مرفوض، وبيوصله تنبيه، والطلب بيختفي من قائمته خلال نص ثانية</li>
+        <li>تبويبات السجل: طلب بدون عروض، منتهي، ملغي، مكتمل، كل واحد بمكانه عند الطرفين</li>
+        <li>محادثة: صور متعددة، كاميرا، رد، وحذف للجميع</li>
+        <li>طلب جديد بصور من الكاميرا والمعرض مع معاينة وحذف قبل الرفع</li>
+        <li>الطلب اللي رفض الزبون عرضه بيطلع من "طلبات قريبة" عند الحرفي</li>
+        <li>تبديل اللغة والمظهر بدون إعادة تشغيل التطبيق</li>
+      </ul>
+      <p class="muted" style="font-size:13px;margin-top:12px">كل الأرقام هون من تشغيل الاختبارات فعلياً. ما في نسب رضا أو أوقات استخدام، لأنه ما انعملت تجربة مستخدمين رسمية.</p>
+    </div>
+  </div></div>
+</section>
+
+<!-- 24 ─ Challenges -->
+<section class="slide" id="challenges" data-title="التحديات والحلول">
+  <div class="head"><div class="eyebrow rv">Challenges</div><h2 class="rv" style="--i:1"><span class="g">التحديات والحلول</span></h2></div>
+  <div class="body"><div class="chal" id="chalGrid"></div></div>
+</section>
+
+<!-- 25 ─ Methodology -->
+<section class="slide" id="method" data-title="منهجية التطوير">
+  <div class="head"><div class="eyebrow rv">Methodology</div><h2 class="rv" style="--i:1"><span class="g">منهجية التطوير</span></h2>
+    <p class="lede rv" style="--i:2">تطوير تكراري تزايدي: النظام انبنى على دفعات، كل دفعة بتبلّش من ملاحظات الفريق بعد ما يجرّب على التلفونات، وبتنتهي بنسخة مختبرة ومنشورة.</p></div>
+  <div class="body"><div class="cycle">
+    <div class="card figure rv" style="--i:3" id="cycleFig"></div>
+    <div class="method-list" id="methodList"></div>
+  </div></div>
+</section>
+
+<!-- 26 ─ Conclusion + future -->
+<section class="slide" id="future" data-title="الخاتمة والتطوير المستقبلي">
+  <div class="head"><div class="eyebrow rv">Conclusion &amp; Future Work</div><h2 class="rv" style="--i:1"><span class="g">الخاتمة والتطوير المستقبلي</span></h2></div>
+  <div class="body">
+    <div class="card concl rv" style="--i:2">قريب بيغطي رحلة الطلب كاملة: من نشر الطلب وتوزيعه على أقرب الحرفيين الموثّقين، للعروض والمحادثة الآمنة ومتابعة التنفيذ، للتقييم المتبادل. ومعه لوحة إدارة بتضبط الجودة والخدمات. النظام شغال على <span class="lat">Firebase</span>، ومختبر بقواعد أمان ودوال سحابية واختبارات كاملة على المتصفح.</div>
+    <div class="road" id="road"></div>
+  </div>
+</section>
+
+<!-- 27 ─ Thanks -->
+<section class="slide thanks" id="thanks" data-title="شكراً لكم">
+  <img class="rv logo-swap" style="--i:0;width:140px" src="assets/brand/mark-navy.webp" alt="">
+  <h2 class="rv" style="--i:1"><span class="g">شكراً لحسن استماعكم</span></h2>
+  <p class="lead2 rv" style="--i:2">نرحّب بأسئلتكم واستفساراتكم</p>
+  <div class="team rv" style="--i:3;margin-top:34px" id="team2"></div>
+  <div class="year rv" style="--i:4;margin-top:16px" data-deck="supervisorLine"></div>
+</section>
+
+</div></main>
+
+<div class="rotate-hint"><span class="pill">دوّر الجهاز بالعرض لقراءة أوضح</span></div>
+
+<footer class="navbar"><div class="inner">
+  <div class="progress"><i id="prog"></i></div>
+  <div class="nav-row">
+    <button class="nav-btn" id="prevBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>السابق</button>
+    <div class="dots-nav" id="dotsNav"></div>
+    <button class="nav-btn primary" id="nextBtn">التالي<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg></button>
+  </div>
+</div></footer>
+
+<div class="scrim" id="scrim" hidden></div>
+<aside class="toc" id="toc" aria-label="المحتويات">
+  <h2><span class="g">المحتويات</span></h2>
+  <nav id="tocNav"></nav>
+  <div class="keys">← / → : التنقل بين الشرائح · Space : التالي<br>F : ملء الشاشة · T : المحتويات · Esc : إغلاق</div>
+</aside>
+<div class="lightbox" id="lightbox" hidden><div class="lb-inner" id="lbInner"></div></div>
+
+<script>
+// ─────────────────────────────────────────────────────────────────────────────
+// Edit here: the cover and the closing slide read these. Anything in [brackets]
+// is waiting for the team's details.
+const DECK = {
+  university: '[اسم الجامعة]',
+  universityEn: 'University',
+  universityLogo: '',            // e.g. 'assets/brand/university.webp'
+  faculty: '[الكلية / القسم]',
+  supervisor: '[د. اسم المشرف]',
+  team: ['[اسم عضو الفريق 1]', '[اسم عضو الفريق 2]', '[اسم عضو الفريق 3]', '[اسم عضو الفريق 4]'],
+  year: '[السنة الدراسية]',
+};
+// ─────────────────────────────────────────────────────────────────────────────
+
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+const ph = (s) => /^\[.*\]$/.test(s);
+
+// Icons (stroke, 24 grid)
+const IC = {
+  user: '<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>',
+  tool: '<path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.6 2.6-2.4-.6-.6-2.4z"/>',
+  shield: '<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>',
+  clock: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+  pin: '<path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/>',
+  send: '<path d="m22 2-7 20-4-9-9-4z"/><path d="M22 2 11 13"/>',
+  tag: '<path d="M20.6 13.4 13.4 20.6a2 2 0 0 1-2.8 0L3 13V3h10l7.6 7.6a2 2 0 0 1 0 2.8z"/><circle cx="7.5" cy="7.5" r="1.5"/>',
+  check: '<circle cx="12" cy="12" r="9"/><path d="m8 12 3 3 5-6"/>',
+  chat: '<path d="M21 12a8 8 0 0 1-11.6 7.1L4 21l1.9-5.4A8 8 0 1 1 21 12z"/>',
+  truck: '<path d="M3 7h11v9H3zM14 10h4l3 3v3h-7"/><circle cx="7" cy="18" r="2"/><circle cx="17" cy="18" r="2"/>',
+  star: '<path d="m12 3 2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z"/>',
+  bell: '<path d="M6 8a6 6 0 1 1 12 0c0 7 3 8 3 8H3s3-1 3-8"/><path d="M10 21a2 2 0 0 0 4 0"/>',
+  badge: '<circle cx="12" cy="9" r="6"/><path d="m9 14-2 7 5-3 5 3-2-7"/><path d="m9.5 9 1.8 1.8L14.5 7.5"/>',
+  flag: '<path d="M4 22V4M4 4h13l-2 4 2 4H4"/>',
+  grid: '<rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/>',
+  lock: '<rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/>',
+  sms: '<rect x="6" y="2" width="12" height="20" rx="3"/><path d="M10 6h4M11 18h2"/>',
+  globe: '<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/>',
+  wallet: '<rect x="3" y="6" width="18" height="14" rx="2"/><path d="M16 13h2M3 10h18"/>',
+  headset: '<path d="M4 15v-3a8 8 0 0 1 16 0v3"/><rect x="3" y="14" width="4" height="6" rx="1.5"/><rect x="17" y="14" width="4" height="6" rx="1.5"/>',
+  x: '<circle cx="12" cy="12" r="9"/><path d="m9 9 6 6M15 9l-6 6"/>',
+  eye: '<path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>',
+  trash: '<path d="M3 6h18M8 6V4h8v2M6 6l1 15h10l1-15"/>',
+  db: '<ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v14c0 1.7 3.6 3 8 3s8-1.3 8-3V5M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3"/>',
+  zap: '<path d="M13 2 4 14h7l-1 8 9-12h-7z"/>',
+  layers: '<path d="m12 2 10 5-10 5L2 7z"/><path d="m2 12 10 5 10-5M2 17l10 5 10-5"/>',
+  card: '<rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/>',
+  calendar: '<rect x="3" y="4" width="18" height="17" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>',
+  edit: '<path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/>',
+  radius: '<circle cx="12" cy="12" r="3"/><circle cx="12" cy="12" r="9" stroke-dasharray="3 3"/>',
+  refresh: '<path d="M21 12a9 9 0 0 1-15.5 6.2L3 16M3 12a9 9 0 0 1 15.5-6.2L21 8"/><path d="M21 3v5h-5M3 21v-5h5"/>',
+  phone: '<path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.5 2.1L8 9.8a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2z"/>',
+  play: '<path d="M7 4v16l13-8z"/>', pause: '<path d="M7 4h3v16H7zM14 4h3v16h-3z"/>',
+};
+const icon = (n, extra = '') => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" ${extra}>${IC[n] || ''}</svg>`;
+const ROLE = {
+  customer: { ar: 'الزبون', cls: 'b-blue', solid: '#2563EB' },
+  artisan: { ar: 'الحرفي', cls: 'b-orange', solid: '#C2410C' },
+  admin: { ar: 'الإدارة', cls: 'b-violet', solid: '#6A46D9' },
+  system: { ar: 'النظام', cls: 'b-teal', solid: '#0E8F80' },
+  both: { ar: 'الزبون والحرفي', cls: 'b-blue', solid: '#1D4ED8' },
+};
+
+// ── Deck details (cover + thanks) ──
+function fillDeck() {
+  $$('[data-deck]').forEach((el) => {
+    const k = el.dataset.deck;
+    const v = k === 'supervisorLine' ? `إشراف: ${DECK.supervisor} · ${DECK.year}` : DECK[k];
+    if (v === undefined) return;
+    el.textContent = v;
+    el.classList.toggle('ph', ph(v) || (k === 'supervisorLine' && (ph(DECK.supervisor) || ph(DECK.year))));
+  });
+  const team = DECK.team.map((n) => `<span class="${ph(n) ? 'ph' : ''}">${n}</span>`).join('');
+  $('#team').innerHTML = team; $('#team2').innerHTML = team;
+  if (DECK.universityLogo) $('#uniDisc').innerHTML = `<img src="${DECK.universityLogo}" alt="${DECK.university}">`;
+  else $('#uniDisc').title = DECK.university;
+}
+
+// ── Content builders ──
+const PROBLEMS = [
+  ['pin', 'blue', 'الوصول لحرفي قريب ومتاح', 'ما في طريقة مباشرة تعرف مين من الحرفيين قريب منك، وبتخصصك، وفاضي هلق.', 'قريب بيوزّع الطلب تلقائياً على الحرفيين القريبين المتاحين بنفس الخدمة.'],
+  ['tag', 'orange', 'مقارنة الأسعار', 'الزبون غالباً بيسأل حرفي واحد، وما بيعرف إذا السعر معقول قبل ما يتفق.', 'أكتر من عرض على نفس الطلب، بالسعر ووقت الوصول والتقييم، جنب بعض.'],
+  ['shield', 'violet', 'الثقة بالحرفي', 'صعب تتأكد من هوية الحرفي وخبرته، أو تعرف تجربة غيرك معه.', 'توثيق هوية من الإدارة، وتقييم متبادل إلزامي، وشكاوى.'],
+  ['chat', 'teal', 'المتابعة والتواصل', 'بعد الاتفاق، المتابعة بتصير بالاتصالات، وما في مكان واحد للتفاصيل والصور والحالة.', 'حالات طلب واضحة، وإشعارات، ومحادثة مشفّرة بالصور.'],
+];
+const GOALS = [
+  ['توصيل الطلب لأقرب حرفي مناسب', 'توزيع تلقائي حسب المسافة والتخصص والتوثيق وساعات العمل، بمهلة محددة.'],
+  ['منافسة شفافة بالعروض', 'الزبون بيستقبل أكتر من عرض (سعر، وقت وصول، تقييم) وبيختار، والباقي بيتسكّر تلقائياً.'],
+  ['بناء الثقة', 'توثيق الحرفيين، وتقييم متبادل، وشكاوى، وشارة "حرفي مميز".'],
+  ['متابعة لحظية للشغل', 'حالات واضحة للطلب، وإشعارات لكل تغيير، ومحادثة آمنة.'],
+  ['إدارة مركزية', 'لوحة تحكم للمستخدمين والطلبات والخدمات والشكاوى والدعم والتحليلات.'],
+  ['حماية الخصوصية', 'قواعد أمان على البيانات، ورقم الزبون وموقع بيته ما بيطّلع عليهم غيره.'],
+];
+const FLOW = [
+  ['edit', 'customer', 'نشر الطلب', 'الخدمة، الوصف، الصور، والموقع'],
+  ['radius', 'system', 'التوزيع', 'لأقرب الحرفيين المناسبين، وبيتوسّع مع الوقت'],
+  ['tag', 'artisan', 'العروض', 'سعر، وقت وصول، ورسالة'],
+  ['check', 'customer', 'الاختيار', 'مقارنة وقبول عرض واحد'],
+  ['chat', 'both', 'التواصل', 'محادثة مشفّرة بالصور'],
+  ['truck', 'artisan', 'التنفيذ', 'في الطريق ← قيد التنفيذ ← مكتمل'],
+  ['star', 'both', 'التقييم', 'متبادل وإلزامي'],
+];
+const FEATURES = [
+  ['radius', 'blue', 'توزيع حسب المسافة', 'من 2 كم ولحد 12 كم، والمميزين أول.'],
+  ['tag', 'orange', 'عروض أسعار ومقارنة', 'سعر ووقت وصول، والمميز أول القائمة.'],
+  ['chat', 'blue', 'محادثة مشفّرة', 'صور، كاميرا، رد، وحذف للجميع.'],
+  ['bell', 'teal', 'إشعارات لحظية', '22 نوع، Push وداخل التطبيق.'],
+  ['star', 'orange', 'تقييم متبادل إلزامي', 'نجوم ووسوم وتعليق.'],
+  ['badge', 'green', 'توثيق الحرفيين', 'هوية وصورة وشهادات، وقرار الأدمن.'],
+  ['award', 'orange', 'حرفي مميز', '10 أعمال وتقييم فوق 4.'],
+  ['card', 'violet', 'اشتراكات الحرفيين', 'تجربة 7 أيام، و3 أو 6 أو 12 شهر.'],
+  ['x', 'red', 'أسباب الإلغاء والرفض', 'بتوصل للطرف التاني مع الإشعار.'],
+  ['headset', 'teal', 'دعم مباشر وشكاوى', 'محادثة مع فريق قريب، وشكوى على شخص.'],
+  ['sms', 'blue', 'التحقق برمز SMS', 'عند التسجيل وعند نسيان كلمة المرور.'],
+  ['globe', 'violet', 'عربي وإنجليزي', 'ووضع فاتح وليلي، بدون إعادة تشغيل.'],
+];
+IC.award = IC.badge;
+const ROLES = [
+  ['customer', 'user', 'الزبون', 'بينشر طلبات، بيقارن العروض ويقبل أو يرفض، بيتابع ويحادث ويقيّم، وبيشتكي ويقترح خدمات.'],
+  ['artisan', 'tool', 'الحرفي', 'بيستقبل الطلبات القريبة، بيقدّم عروض (باشتراك فعّال)، بينفّذ ويحدّث المراحل، وبيطلب التوثيق.'],
+  ['admin', 'shield', 'الإدارة', 'بتوثّق الحرفيين، بتدير الحسابات والخدمات والأسعار، وبتعالج الشكاوى والدعم وبتبعت إشعارات.'],
+  ['system', 'zap', 'النظام', 'دوال سحابية بتوزّع الطلبات، بتنهي المهلة، بتبعت الإشعارات، وبتمنح شارة المميز.'],
+];
+// ✓ yes · ◐ partial (with a note) · – no
+const MATRIX = [
+  ['نشر طلب خدمة', 'y', '-', '-', '-'],
+  ['رؤية الطلبات القريبة', '-', 'المرسلة إله', 'y', 'يوزّع'],
+  ['تقديم عرض سعر', '-', 'باشتراك فعّال', '-', '-'],
+  ['قبول أو رفض عرض', 'y', '-', '-', 'يسكّر الباقي'],
+  ['إلغاء قبل بدء العمل', 'y', 'بعد قبوله', '-', 'بعد المهلة'],
+  ['تحديث مراحل التنفيذ', '-', 'الحرفي المقبول', '-', 'إنجاز تلقائي'],
+  ['المحادثة', 'y', 'الحرفي المقبول', '-', '-'],
+  ['التقييم والشكوى', 'y', 'y', 'يعالج الشكاوى', '-'],
+  ['التوثيق وإيقاف الحسابات', '-', 'يطلب التوثيق', 'y', '-'],
+  ['الخدمات والأسعار والإعدادات', '-', '-', 'y', '-'],
+];
+
+function build() {
+  // agenda + toc
+  const AG = [
+    ['intro', 'الفكرة', 'المقدمة، المشكلة، الأهداف'],
+    ['solution', 'الحل', 'دورة الطلب، الميزات، الصلاحيات'],
+    ['usecase', 'التحليل', 'حالات الاستخدام، التوزيع، سير العمل'],
+    ['states', 'آلية العمل', 'الحالات، المحادثة والإشعارات والتقييم'],
+    ['admin', 'الإدارة', 'لوحة التحكم، التوثيق والشكاوى'],
+    ['erd', 'التصميم', 'قاعدة البيانات، المعمارية، الأمان'],
+    ['tech', 'التنفيذ', 'التقنيات، واجهات الزبون والحرفي'],
+    ['testing', 'الجودة والختام', 'الاختبارات، التحديات، المنهجية، المستقبل'],
+  ];
+  $('#agendaGrid').innerHTML = AG.map(([id, t, d], i) => `<button class="card rv" style="--i:${i + 2}" data-go="${id}"><span class="num">0${i + 1}</span><h3>${t}</h3><p>${d}</p></button>`).join('');
+
+  $('#problems').innerHTML = PROBLEMS.map(([ic, c, t, p, a], i) => `<div class="card prob rv" style="--i:${i + 3}"><div class="ico b-${c}">${icon(ic)}</div><h3>${t}</h3><p>${p}</p><div class="ans"><span class="t-${c}">${icon('check', 'width="20" height="20" style="flex:none;margin-top:3px"')}</span><span>${a}</span></div></div>`).join('');
+  $('#goalsList').innerHTML = GOALS.map(([t, p], i) => `<div class="card goal rv" style="--i:${i + 2}"><span class="k">${i + 1}</span><div><h3>${t}</h3><p>${p}</p></div></div>`).join('');
+  $('#flow').innerHTML = FLOW.map(([ic, r, t, p], i) => `<div class="fstep rv" style="--i:${i + 2}"><div class="ico ${ROLE[r].cls}">${icon(ic)}</div><span class="who ${ROLE[r].cls}">${ROLE[r].ar}</span><h3>${t}</h3><p>${p}</p></div>`).join('');
+  $('#featGrid').innerHTML = FEATURES.map(([ic, c, t, p], i) => `<div class="card feat rv" style="--i:${2 + (i % 4) + Math.floor(i / 4)}"><div class="ico b-${c}">${icon(ic)}</div><div><h3>${t}</h3><p>${p}</p></div></div>`).join('');
+  $('#roleCards').innerHTML = ROLES.map(([k, ic, t, p], i) => `<div class="card role rv" style="--i:${i + 2}"><div class="top"><div class="ico ${ROLE[k].cls}">${icon(ic)}</div><h3>${t}</h3></div><p>${p}</p></div>`).join('');
+  const cell = (v) => (v === 'y' ? '<span class="yes">✓</span>' : v === '-' ? '<span class="no">—</span>' : `<span class="part">${v}</span>`);
+  $('#matrix').innerHTML = `<thead><tr><th>الصلاحية</th><th class="t-blue">الزبون</th><th class="t-orange">الحرفي</th><th class="t-violet">الإدارة</th><th class="t-teal">النظام</th></tr></thead><tbody>${MATRIX.map((r) => `<tr><td>${r[0]}</td>${r.slice(1).map((v) => `<td>${cell(v)}</td>`).join('')}</tr>`).join('')}</tbody>`;
+
+  $('#dispRules').innerHTML = [
+    ['radius', 'blue', 'يبدأ قريب ويتوسّع', 'أول دائرة 2 كم، وكل دقيقتين بتزيد 2 كم، لحد 12 كم.'],
+    ['badge', 'green', 'بس الحرفيين المناسبين', 'موثّق من الإدارة، بنفس الخدمة، مفعّل "متاح"، وضمن أيام وساعات عمله.'],
+    ['star', 'orange', 'الحرفي المميز أولاً', 'بيوصله الطلب قبل غيره بدرجة (+2 كم)، وعرضه بيطلع أول القائمة عند الزبون.'],
+    ['clock', 'teal', 'مهلة 30 دقيقة', 'بدون عروض أو بدون قبول بالوقت: الطلب بيتسكّر، والطرفين بيوصلهم إشعار.'],
+    ['eye', 'violet', 'الخصوصية بالتوزيع', 'الحرفي بيقرأ بس الطلبات اللي انبعتت إله، مش كل طلبات المنطقة.'],
+  ].map(([ic, c, t, p], i) => `<div class="card rule rv" style="--i:${i + 3}"><div class="ico b-${c}">${icon(ic)}</div><div><h3>${t}</h3><p>${p}</p></div></div>`).join('');
+
+  $('#secGrid').innerHTML = [
+    ['lock', 'blue', 'قواعد أمان على كل مستند', 'Firestore Security Rules بتحدد مين بيقرأ وبيكتب، وكل مرحلة بالطلب مسموحة بس لصاحبها وبالترتيب.'],
+    ['eye', 'violet', 'خصوصية الزبون', 'رقمه وموقع بيته بمستند ما بيقرأه غيره والإدارة، والحرفي بيشوف ملف عام (اسم، صورة، تقييم).'],
+    ['chat', 'teal', 'تشفير المحادثات', 'مفتاح عشوائي 256-bit لكل محادثة، بيقرأه الطرفين بس، والرسائل محفوظة مشفّرة.'],
+    ['sms', 'orange', 'حماية الرسائل من الاحتيال', 'reCAPTCHA SMS Defense على وضع Enforce، وفحص بالخلفية قبل كل رمز.'],
+    ['shield', 'red', 'إيقاف بصلاحية مؤكدة', 'إيقاف أي حساب بيطلب كلمة مرور الأدمن خلال آخر 5 دقائق، والموقوف بيوصل للدعم بس.'],
+    ['trash', 'green', 'حذف آمن ونسخ احتياطي', 'حذف الحساب مؤقت (Soft delete) بيحرّر الرقم، ونسخة احتياطية يومية وأسبوعية لقاعدة البيانات.'],
+  ].map(([ic, c, t, p], i) => `<div class="card sec rv" style="--i:${i + 2}"><div class="ico b-${c}">${icon(ic)}</div><div><h3>${t}</h3><p>${p}</p></div></div>`).join('');
+
+  const TECH = [
+    ['RN', '#0EA5E9', 'React Native + Expo', 'تطبيق الموبايل', 'تطبيق واحد لـ iOS وAndroid، الزبون والحرفي حسب نوع الحساب (Expo Router).'],
+    ['TS', '#2563EB', 'TypeScript', 'لغة البرمجة', 'بالتطبيق ولوحة التحكم، مع فحص الأنواع قبل كل رفع.'],
+    ['N', '#111827', 'Next.js', 'لوحة التحكم', 'موقع ويب للإدارة، منشور على Firebase Hosting، مع Recharts للرسوم وTanStack Table للجداول.'],
+    ['FB', '#F59E0B', 'Firebase', 'الخادم وقاعدة البيانات', 'Authentication، Cloud Firestore، Storage، Hosting.'],
+    ['ƒ', '#EA580C', 'Cloud Functions', 'منطق السيرفر', '16 دالة بأوروبا: التوزيع، المهلة، الإشعارات، الحسابات، الحرفي المميز…'],
+    ['RQ', '#E11D48', 'React Query + Zustand', 'إدارة البيانات', 'بيانات السيرفر بتتحدّث تلقائياً، وحالة الواجهة محلياً.'],
+    ['TW', '#06B6D4', 'NativeWind / Tailwind', 'التصميم', 'نظام تصميم واحد، عربي من اليمين، ووضع ليلي.'],
+    ['rC', '#1A73E8', 'reCAPTCHA Enterprise', 'حماية SMS', 'SMS Defense لتوصيل الرموز لشبكات فلسطين بأمان.'],
+    ['EP', '#4F46E5', 'Expo Notifications', 'الإشعارات', 'إشعارات للجوال عبر خدمة Expo Push.'],
+    ['NaCl', '#0F766E', 'TweetNaCl', 'التشفير', 'تشفير رسائل المحادثة (secretbox).'],
+    ['PW', '#16A34A', 'Playwright + Emulators', 'الاختبار', 'سيناريوهات كاملة على محاكيات Firebase، واختبارات node:test.'],
+    ['GH', '#334155', 'GitHub', 'إدارة الكود', 'فروع وتحديث تلقائي للفريق بضغطة (start-app، deploy…).'],
+  ];
+  $('#techGrid').innerHTML = TECH.map(([m, col, n, r, p], i) => `<div class="card tech rv" style="--i:${2 + (i % 4) + Math.floor(i / 4)}"><div class="mono-badge" style="background:${col}">${m}</div><h3>${n}</h3><div class="role-l t-blue">${r}</div><p>${p}</p></div>`).join('');
+
+  const phone = (src, t, s, i) => `<div class="rv" style="--i:${i}"><div class="phone" data-zoom><img src="assets/screens/${src}.webp" alt="${t}"></div><div class="cap">${t}<small>${s}</small></div></div>`;
+  $('#custPhones').innerHTML = [
+    ['c-home', 'الرئيسية', 'الخدمات وآخر الطلبات'], ['c-create', 'طلب جديد', 'اختيار الخدمة أولاً'], ['c-offers', 'العروض', 'مقارنة وقبول أو رفض'],
+    ['c-status', 'تتبّع الطلب', 'المراحل لحظة بلحظة'], ['c-orders', 'طلباتي', 'حالية، مكتملة، مرفوضة، ملغية'],
+  ].map(([s, t, d], i) => phone(s, t, d, i + 2)).join('');
+  $('#artPhones').innerHTML = [
+    ['a-home', 'الرئيسية', 'متاح، إحصائيات، طلبات قريبة'], ['a-offer', 'تقديم عرض', 'سعر ووقت وصول ورسالة'], ['a-offers', 'عروضي', 'حالية، مكتملة، مرفوضة، ملغية'],
+    ['a-income', 'الدخل', 'المجموع والأشهر والسجل'], ['a-notifs', 'الإشعارات', 'طلب جديد قريب منك'],
+  ].map(([s, t, d], i) => phone(s, t, d, i + 2)).join('');
+
+  $('#chalGrid').innerHTML = [
+    ['sms', 'رسائل SMS ما بتوصل لأرقام جوال وأوريدو (خطأ ‎-39)', 'حسب رد دعم Firebase لازم reCAPTCHA SMS Defense على Enforce. فعّلنا API، وعملنا حساب خدمة وصلاحيته، وسمحنا لمفتاح التطبيق، وفعّلنا SMS defense، وزدنا صفحة مخفية بالتطبيق بتجيب رمز Enterprise. الرسالة وصلت.'],
+    ['globe', 'الاتجاه من اليمين لليسار على الآيفون، وتبديل اللغة', 'محرك العرض على التلفون دايماً RTL، والإنجليزي بينقلب من جذر الواجهة. تبديل اللغة والمظهر صار فوري بدون إغلاق التطبيق.'],
+    ['eye', 'خصوصية الزبون وطلبات المنطقة', 'الحرفي بيقرأ بس الطلبات المرسلة إله أو اللي انقبل فيها، ومستند الزبون (رقم وموقع) خاص فيه، مع ملف عام منفصل.'],
+    ['refresh', 'قبول عرض واحد من بين عدة عروض', 'عملية مجمّعة وحدة (Batch): قبول العرض، رفض الباقي، تحديث الطلب. القواعد بترفض القبول إذا الطلب مش بالانتظار، والباقين بيوصلهم تنبيه.'],
+    ['bell', 'حدود Expo Go بإشعارات أندرويد', 'إشعارات داخل التطبيق لحظية (onSnapshot)، ووصول إشعار بيحدّث القوائم فوراً، والنسخة الحقيقية (Dev build) من التطوير المستقبلي.'],
+    ['layers', 'فريق بيشغّل وبينشر بدون ما يعدّل كود', 'ملفات تشغيل بضغطة: start-app، start-admin، deploy-firebase، deploy-admin، backup-setup. كل وحدة بتسحب آخر نسخة من GitHub لحالها.'],
+  ].map(([ic, q, a], i) => `<div class="card ch rv" style="--i:${i + 2}"><div class="q"><span class="ico b-red" style="width:40px;height:40px;border-radius:12px">${icon(ic, 'width="20" height="20"')}</span><span>${q}</span></div><div class="a">${a}</div></div>`).join('');
+
+  $('#methodList').innerHTML = [
+    ['user', 'blue', 'ملاحظات من التجربة', 'الفريق بيجرّب على التلفونات وبيبعت ملاحظات مرقّمة مع صور شاشة.'],
+    ['edit', 'violet', 'تحليل وتنفيذ', 'كل ملاحظة بتتحوّل لمهمة، وبتنتفّذ على فرع Git منفصل.'],
+    ['check', 'green', 'اختبار قبل النشر', 'قواعد الأمان، الدوال السحابية، فحص الأنواع، وسيناريوهات على المحاكيات.'],
+    ['send', 'orange', 'نشر وتجربة جديدة', 'نشر بضغطة، ثم تجربة على الأجهزة، وبتبلّش دفعة جديدة.'],
+  ].map(([ic, c, t, p], i) => `<div class="card rule rv" style="--i:${i + 4}"><div class="ico b-${c}">${icon(ic)}</div><div><h3>${t}</h3><p>${p}</p></div></div>`).join('');
+
+  $('#road').innerHTML = [
+    ['card', 'violet', 'دفع إلكتروني حقيقي', 'الاشتراكات هلق بمحاكاة دفع، والخطوة الجاية بوابة دفع تشتغل بفلسطين.'],
+    ['phone', 'blue', 'النشر على المتاجر', 'نسخة كاملة (Dev/Store build) لـ Google Play وApp Store، مع إشعارات أندرويد كاملة وApp Check.'],
+    ['calendar', 'teal', 'حجز لوقت لاحق', 'هلق كل طلب فوري بمهلة 30 دقيقة، وبدنا نسمح بموعد محدد.'],
+    ['edit', 'orange', 'مرونة أكتر', 'تعديل الطلب بعد نشره، ونطاق عمل يحدده الحرفي، ومراقبة التقييمات من الإدارة.'],
+  ].map(([ic, c, t, p], i) => `<div class="card rv" style="--i:${i + 3}"><div class="ico b-${c}">${icon(ic)}</div><h3>${t}</h3><p>${p}</p></div>`).join('');
+
+  // inline <svg data-i> placeholders
+  $$('svg[data-i]').forEach((s) => { s.outerHTML = icon(s.dataset.i); });
+}
+
+// ── Use case diagrams (one per actor; no line crosses another) ──
+const UC = {
+  customer: { note: 'الزبون بيتعامل مع الطلب من نشره لتقييمه. حالات مشتركة مع الحرفي: الحساب، المحادثة، الإلغاء، التقييم، الشكوى.', cases: ['إنشاء حساب وتأكيد الرقم برمز SMS', 'تسجيل الدخول واستعادة كلمة المرور', 'نشر طلب خدمة بالصور والموقع', 'مقارنة العروض وقبول عرض', 'رفض عرض مع ذكر السبب', 'متابعة حالة الطلب لحظياً', 'المحادثة مع الحرفي', 'إلغاء الطلب أو إعادة نشره', 'تقييم الحرفي', 'تقديم شكوى أو اقتراح خدمة'] },
+  artisan: { note: 'الحرفي بيستقبل الطلبات من محيطه، وبيقدّم عروض طول ما اشتراكه فعّال، وبينفّذ الشغل ويحدّث مراحله.', cases: ['إنشاء حساب وتأكيد الرقم برمز SMS', 'طلب توثيق الهوية', 'ضبط الخدمات وساعات العمل والتوفّر', 'استقبال الطلبات القريبة', 'تقديم عرض سعر ووقت وصول', 'تحديث مراحل التنفيذ', 'المحادثة مع الزبون', 'الاشتراك وتجديده', 'تقييم الزبون', 'متابعة الدخل وسجل الأعمال'] },
+  admin: { note: 'الإدارة بتشتغل من لوحة تحكم الويب، وكل صفحة بتغطي حالة أو أكتر.', cases: ['تسجيل الدخول بصلاحية أدمن', 'مراجعة طلبات التوثيق وقبولها أو رفضها', 'إدارة المستخدمين: إيقاف، حذف، توثيق', 'إدارة الفئات والخدمات', 'معالجة الشكاوى', 'الرد على محادثات الدعم', 'إرسال إشعارات النظام', 'ضبط أسعار الاشتراكات والإعدادات', 'متابعة التحليلات والطلبات'] },
+  system: { note: 'النظام فاعل ثانوي: دوال سحابية بتشتغل لحالها عند كل تغيير بالبيانات أو كل دقيقة.', cases: ['توزيع الطلب على أقرب الحرفيين', 'توسيع دائرة البحث مع الوقت', 'إنهاء الطلب بعد مهلة 30 دقيقة', 'إغلاق باقي العروض عند قبول عرض', 'إرسال الإشعارات (Push وداخل التطبيق)', 'منح شارة "حرفي مميز"', 'تذكير بانتهاء الاشتراك'] },
+};
+function actorSVG(x, y, color, label) {
+  return `<g stroke="${color}" stroke-width="3.2" fill="none" stroke-linecap="round"><circle cx="${x}" cy="${y - 52}" r="15" fill="var(--surface)"/><path d="M${x} ${y - 37}v40M${x - 26} ${y - 22}h52M${x} ${y + 3}l-20 30M${x} ${y + 3}l20 30"/></g><text x="${x}" y="${y + 64}" text-anchor="middle" font-size="22" font-weight="800" fill="${color}">${label}</text>`;
+}
+function useCaseSVG(k) {
+  const d = UC[k], n = d.cases.length, color = ROLE[k].solid;
+  const W = 1100, H = 640, top = 70, gap = (H - top - 26) / n, ew = 440, eh = Math.min(48, gap - 8);
+  const ex = 470, ax = 990, ay = H / 2 + 10;
+  let s = `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Use case: ${ROLE[k].ar}">`;
+  s += `<rect x="20" y="20" width="${ex + ew / 2 + 60 - 20}" height="${H - 34}" rx="26" fill="none" stroke="var(--line)" stroke-width="2.5" stroke-dasharray="10 7"/>`;
+  s += `<text x="${(20 + ex + ew / 2 + 60) / 2}" y="54" text-anchor="middle" font-size="20" font-weight="800" fill="var(--muted)">نظام قريب</text>`;
+  d.cases.forEach((c, i) => {
+    const cy = top + gap * i + gap / 2;
+    s += `<line x1="${ax - 34}" y1="${ay - 22}" x2="${ex + ew / 2}" y2="${cy}" stroke="${color}" stroke-opacity=".55" stroke-width="2"/>`;
+  });
+  d.cases.forEach((c, i) => {
+    const cy = top + gap * i + gap / 2;
+    s += `<ellipse cx="${ex}" cy="${cy}" rx="${ew / 2}" ry="${eh / 2}" fill="var(--surface)" stroke="${color}" stroke-width="2.4"/>`;
+    s += `<text x="${ex}" y="${cy + 7}" text-anchor="middle" font-size="19" font-weight="700" fill="var(--ink)">${c}</text>`;
+  });
+  s += actorSVG(ax, ay, color, ROLE[k].ar === 'الإدارة' ? 'مدير النظام' : ROLE[k].ar === 'النظام' ? 'النظام (Cloud Functions)' : ROLE[k].ar);
+  return s + '</svg>';
+}
+function showUC(k) {
+  $('#ucFig').innerHTML = useCaseSVG(k);
+  $('#ucNote').innerHTML = `<b style="color:${ROLE[k].solid}">${UC[k].cases.length} حالة استخدام.</b> ${UC[k].note}`;
+  $$('#ucTabs button').forEach((b) => b.classList.toggle('on', b.dataset.k === k));
+}
+
+// ── Dispatch radar ──
+function radarSVG() {
+  const C = 330, R = (km) => 22 + km * 24.5;
+  let s = `<svg viewBox="0 0 660 660" width="600" height="600" role="img" aria-label="دوائر التوزيع">`;
+  [12, 10, 8, 6, 4, 2].forEach((km, i) => {
+    const t = (km - 2) / 2 * 2;
+    s += `<g class="ring-anim" style="animation-delay:${(5 - i) * 0.16 + 0.3}s"><circle cx="${C}" cy="${C}" r="${R(km)}" fill="${km === 2 ? 'var(--blue-soft)' : 'none'}" stroke="var(--blue)" stroke-opacity="${0.25 + (12 - km) * 0.05}" stroke-width="2" ${km > 2 ? 'stroke-dasharray="6 6"' : ''}/>`;
+    s += `<text x="${C + R(km) * 0.72}" y="${C - R(km) * 0.7}" font-size="15" font-weight="800" fill="var(--blue)" text-anchor="middle" paint-order="stroke" stroke="var(--surface)" stroke-width="5">${km} كم</text>`;
+    s += `<text x="${C + R(km) * 0.72}" y="${C - R(km) * 0.7 + 17}" font-size="12" font-weight="700" fill="var(--muted)" text-anchor="middle" paint-order="stroke" stroke="var(--surface)" stroke-width="5">${t === 0 ? 'البداية' : `بعد ${t} د`}</text></g>`;
+  });
+  const dots = [
+    [70, 40, 'ok'], [-90, 70, 'ok'], [140, -120, 'ok'], [-170, -60, 'off'], [200, 150, 'ok'], [-60, 200, 'unv'], [250, -30, 'star'], [-240, 160, 'ok'], [30, -230, 'unv'], [-200, -210, 'off'], [110, 260, 'ok'], [280, 210, 'star'],
+  ];
+  dots.forEach(([dx, dy, k]) => {
+    const x = C + dx, y = C + dy;
+    if (k === 'star') s += `<g transform="translate(${x - 12} ${y - 12})"><path d="m12 2 2.9 6 6.6.9-4.8 4.6 1.2 6.5L12 16.9 6.1 20l1.2-6.5L2.5 8.9 9.1 8z" fill="#F59E0B" stroke="#B45309" stroke-width="1.2"/></g>`;
+    else s += `<circle cx="${x}" cy="${y}" r="9" fill="${k === 'ok' ? 'var(--orange)' : 'var(--surface)'}" stroke="${k === 'ok' ? '#9A3412' : 'var(--faint)'}" stroke-width="2"/>${k !== 'ok' ? `<path d="M${x - 5} ${y - 5}l10 10M${x + 5} ${y - 5}l-10 10" stroke="var(--faint)" stroke-width="2"/>` : ''}`;
+  });
+  s += `<g transform="translate(${C - 16} ${C - 40})"><path d="M16 40s-14-12-14-23a14 14 0 0 1 28 0c0 11-14 23-14 23z" fill="#2563EB" stroke="#fff" stroke-width="2.5"/><circle cx="16" cy="17" r="5.5" fill="#fff"/></g>`;
+  // legend, right to left: mark, then its label to its left
+  s += `<g font-size="14" font-weight="700" fill="var(--muted)">
+    <path transform="translate(624 596)" d="M12 28s-10-8.4-10-16a10 10 0 0 1 20 0c0 7.6-10 16-10 16z" fill="#2563EB"/><text x="616" y="616" text-anchor="start">الزبون</text>
+    <circle cx="540" cy="610" r="8" fill="var(--orange)" stroke="#9A3412" stroke-width="2"/><text x="526" y="616" text-anchor="start">حرفي مناسب</text>
+    <path transform="translate(400 598)" d="m12 2 2.9 6 6.6.9-4.8 4.6 1.2 6.5L12 16.9 6.1 20l1.2-6.5L2.5 8.9 9.1 8z" fill="#F59E0B"/><text x="394" y="616" text-anchor="start">مميز (+2 كم)</text>
+    <circle cx="276" cy="610" r="8" fill="var(--surface)" stroke="var(--faint)" stroke-width="2"/><text x="262" y="616" text-anchor="start">غير موثّق أو غير متاح</text></g>`;
+  return s + '</svg>';
+}
+
+// ── Workflow swimlanes (arrows drawn point by point so none crosses a box) ──
+function workflowSVG() {
+  const W = 1500, LH = 186, top = 10, lanes = [['customer', 'الزبون'], ['system', 'النظام'], ['artisan', 'الحرفي']];
+  const yc = top + (LH - 8) / 2, ys = top + LH + (LH - 8) / 2, ya = top + 2 * LH + (LH - 8) / 2, bw = 200, bh = 96, hh = bh / 2;
+  let s = `<svg viewBox="0 0 ${W} ${top + LH * 3 + 64}" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Workflow">
+  <defs><marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 10 5 0 10z" fill="var(--muted)"/></marker></defs>`;
+  lanes.forEach(([k, l], i) => {
+    const y = top + i * LH;
+    s += `<rect x="10" y="${y}" width="${W - 20}" height="${LH - 8}" rx="20" fill="${ROLE[k].solid}" fill-opacity=".06" stroke="${ROLE[k].solid}" stroke-opacity=".25"/>`;
+    s += `<rect x="${W - 74}" y="${y}" width="64" height="${LH - 8}" rx="20" fill="${ROLE[k].solid}"/><text x="${W - 42}" y="${y + (LH - 8) / 2}" fill="#fff" font-size="22" font-weight="800" text-anchor="middle" dominant-baseline="middle" transform="rotate(90 ${W - 42} ${y + (LH - 8) / 2})">${l}</text>`;
+  });
+  const N = [
+    [1320, yc, 'customer', 'نشر طلب', 'خدمة، وصف، صور، موقع'],
+    [1110, ys, 'system', 'توزيع حسب المسافة', '2 كم ← 12 كم كل دقيقتين'],
+    [900, ya, 'artisan', 'تقديم عرض سعر', 'سعر + وقت وصول'],
+    [900, yc, 'customer', 'مقارنة العروض', 'رفض مع سبب أو قبول'],
+    [650, ys, 'system', 'تسكير باقي العروض', 'وإشعار أصحابها فوراً'],
+    [650, ya, 'artisan', 'في الطريق', 'إشعار + اتجاهات'],
+    [400, ya, 'artisan', 'قيد التنفيذ', 'محادثة · تعديل سعر'],
+    [170, ya, 'artisan', 'تم الإنجاز', 'أو تلقائي بعد 48 ساعة'],
+    [170, yc, 'customer', 'تقييم متبادل', 'إلزامي للطرفين'],
+  ];
+  const A = [
+    [[1220, yc], [1110, yc], [1110, ys - hh]],
+    [[1010, ys], [940, ys], [940, ya - hh]],
+    [[860, ya - hh], [860, yc + hh]],
+    [[800, yc], [650, yc], [650, ys - hh]],
+    [[650, ys + hh], [650, ya - hh]],
+    [[550, ya], [500, ya]],
+    [[300, ya], [270, ya]],
+    [[170, ya - hh], [170, yc + hh]],
+  ];
+  A.forEach((pts) => { s += `<path d="M${pts.map((p) => p.join(' ')).join(' L')}" fill="none" stroke="var(--muted)" stroke-width="2.4" marker-end="url(#ar)"/>`; });
+  s += `<text x="850" y="${ys - 60}" font-size="15" font-weight="800" fill="var(--muted)" text-anchor="start">إشعار لكل عرض</text>`;
+  s += `<text x="725" y="${yc - 12}" font-size="15" font-weight="800" fill="var(--green)" text-anchor="middle">قبول عرض</text>`;
+  s += `<text x="1050" y="${ys + 72}" font-size="15" font-weight="800" fill="var(--muted)" text-anchor="middle">إشعار "طلب جديد قريب منك"</text>`;
+  N.forEach(([x, y, k, t, sub]) => {
+    s += `<rect x="${x - bw / 2}" y="${y - hh}" width="${bw}" height="${bh}" rx="18" fill="var(--surface)" stroke="${ROLE[k].solid}" stroke-width="2.6"/>`;
+    s += `<text x="${x}" y="${y - 6}" font-size="21" font-weight="800" text-anchor="middle" fill="var(--ink)">${t}</text><text x="${x}" y="${y + 24}" font-size="14.5" font-weight="600" text-anchor="middle" fill="var(--muted)">${sub}</text>`;
+  });
+  const by = top + LH * 3 + 6;
+  [[20, 470, 'var(--blue-soft)', 'var(--blue)', 'محادثة مشفّرة من القبول للإنجاز'], [485, 940, 'var(--red-soft)', 'var(--red)', 'قبل بدء العمل: إلغاء من أي طرف مع السبب'], [955, 1490, 'var(--orange-soft)', 'var(--orange-ink)', '30 دقيقة بدون عروض أو قبول: إلغاء تلقائي وإعادة نشر']].forEach(([x1, x2, bg, fg, t]) => {
+    s += `<rect x="${x1}" y="${by}" width="${x2 - x1}" height="46" rx="23" fill="${bg}"/><text x="${(x1 + x2) / 2}" y="${by + 30}" font-size="16" font-weight="800" text-anchor="middle" fill="${fg}">${t}</text>`;
+  });
+  return s + '</svg>';
+}
+
+// ── Request states ──
+function statesSVG() {
+  const W = 1500, H = 480, y = 160, xs = [1300, 1020, 740, 460, 180];
+  const S = [['PENDING', 'بانتظار العروض', '#D97706'], ['ACCEPTED', 'مقبول', '#2563EB'], ['ON_THE_WAY', 'في الطريق', '#2563EB'], ['WORKING', 'قيد التنفيذ', '#6A46D9'], ['COMPLETED', 'مكتمل', '#15803D']];
+  const T = ['قبول عرض · الزبون', 'في الطريق · الحرفي', 'بدء العمل · الحرفي', 'إنهاء · الحرفي'];
+  let s = `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="حالات الطلب"><defs><marker id="ar2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 10 5 0 10z" fill="var(--muted)"/></marker></defs>`;
+  s += `<circle cx="1460" cy="${y}" r="13" fill="var(--ink)"/><path d="M1446 ${y} L${xs[0] + 110} ${y}" stroke="var(--muted)" stroke-width="2.4" marker-end="url(#ar2)"/>`;
+  xs.forEach((x, i) => {
+    if (i < xs.length - 1) {
+      const [what, who] = T[i].split(' · ');
+      s += `<path d="M${x - 108} ${y} L${xs[i + 1] + 110} ${y}" stroke="var(--muted)" stroke-width="2.4" marker-end="url(#ar2)"/><text x="${(x + xs[i + 1]) / 2}" y="${y - 84}" font-size="17" font-weight="800" fill="var(--ink)" text-anchor="middle">${what}</text><text x="${(x + xs[i + 1]) / 2}" y="${y - 62}" font-size="14.5" font-weight="700" fill="var(--muted)" text-anchor="middle">${who}</text><path d="M${(x + xs[i + 1]) / 2} ${y - 54} V${y - 6}" stroke="var(--line)" stroke-width="1.5" stroke-dasharray="3 4"/>`;
+    }
+  });
+  xs.forEach((x, i) => {
+    const [k, ar, col] = S[i];
+    s += `<rect x="${x - 106}" y="${y - 44}" width="212" height="88" rx="24" fill="var(--surface)" stroke="${col}" stroke-width="3"/><text x="${x}" y="${y - 6}" class="mono" font-family="IBM Plex Mono, monospace" font-size="17" font-weight="600" fill="${col}" text-anchor="middle">${k}</text><text x="${x}" y="${y + 24}" font-size="20" font-weight="800" fill="var(--ink)" text-anchor="middle">${ar}</text>`;
+  });
+  s += `<path d="M${xs[4] - 106} ${y} h-40" stroke="var(--muted)" stroke-width="2.4" marker-end="url(#ar2)"/><circle cx="20" cy="${y}" r="14" fill="none" stroke="var(--ink)" stroke-width="3"/><circle cx="20" cy="${y}" r="8" fill="var(--ink)"/>`;
+  s += `<text x="${xs[4]}" y="${y + 70}" font-size="14.5" font-weight="700" fill="var(--green)" text-anchor="middle">أو تلقائياً بعد 48 ساعة</text>`;
+  // cancelled
+  const cx = 880, cy = 390;
+  s += `<rect x="${cx - 120}" y="${cy - 44}" width="240" height="88" rx="24" fill="var(--red-soft)" stroke="var(--red)" stroke-width="3"/><text x="${cx}" y="${cy - 6}" font-family="IBM Plex Mono, monospace" font-size="17" font-weight="600" fill="var(--red)" text-anchor="middle">CANCELLED</text><text x="${cx}" y="${cy + 24}" font-size="20" font-weight="800" fill="var(--ink)" text-anchor="middle">ملغي</text>`;
+  [[xs[0], 'لا عروض · انتهت المهلة · إلغاء الزبون · تجاوز حد الطلبات'], [xs[1], 'إلغاء أي طرف مع السبب'], [xs[2], 'إلغاء أي طرف مع السبب']].forEach(([x, lab], i) => {
+    s += `<path d="M${x} ${y + 44} C ${x} ${cy - 10}, ${x} ${cy}, ${x > cx ? cx + 122 : cx - 122} ${cy}" fill="none" stroke="var(--red)" stroke-opacity=".75" stroke-width="2.2" stroke-dasharray="7 6" marker-end="url(#ar2)"/>`;
+    if (i === 0) s += `<text x="${x - 10}" y="${y + 92}" font-size="14.5" font-weight="700" fill="var(--red)" text-anchor="middle">${lab}</text>`;
+    if (i === 1) s += `<text x="${x + 110}" y="${y + 150}" font-size="14.5" font-weight="700" fill="var(--red)" text-anchor="middle">${lab}</text>`;
+  });
+  s += `<text x="${xs[3]}" y="${cy + 8}" font-size="15" font-weight="700" fill="var(--muted)" text-anchor="middle">بعد "قيد التنفيذ" ما في إلغاء من التطبيق</text>`;
+  s += `<text x="${cx + 340}" y="${cy + 70}" font-size="15" font-weight="700" fill="var(--blue)" text-anchor="middle">الزبون بيقدر يعيد نشر الطلب الملغي بنفس التفاصيل</text>`;
+  return s + '</svg>';
+}
+
+// ── ERD (positions by hand so no line crosses a table) ──
+const ENT = {
+  notifications: { x: 10, y: 36, f: [['id', 'PK'], ['uid', 'FK'], ['type'], ['title · body'], ['read']] },
+  publicProfiles: { x: 290, y: 36, f: [['uid', 'PK·FK'], ['fullName'], ['photoUrl'], ['rating']] },
+  users: { x: 570, y: 36, f: [['uid', 'PK'], ['role'], ['fullName'], ['phone'], ['status'], ['verified'], ['location']] },
+  artisanProfiles: { x: 850, y: 36, f: [['uid', 'PK·FK'], ['categoryIds'], ['available'], ['availability'], ['featured'], ['completedJobs']] },
+  subscriptions: { x: 1130, y: 36, f: [['id', 'PK'], ['artisanId', 'FK'], ['planId'], ['activatedAt'], ['expiresAt'], ['status']] },
+  supportThreads: { x: 10, y: 236, f: [['uid', 'PK·FK'], ['lastMessage'], ['unreadForAdmin'], ['messages[ ]']] },
+  categories: { x: 290, y: 228, f: [['id', 'PK'], ['name'], ['icon'], ['active']] },
+  requests: { x: 570, y: 262, f: [['id', 'PK'], ['customerId', 'FK'], ['acceptedArtisanId', 'FK'], ['acceptedOfferId', 'FK'], ['categoryId', 'FK'], ['status'], ['location'], ['notifiedArtisanIds'], ['dispatch'], ['cancelReason']] },
+  offers: { x: 850, y: 262, f: [['id', 'PK'], ['requestId', 'FK'], ['artisanId', 'FK'], ['customerId', 'FK'], ['price'], ['etaMinutes'], ['status'], ['closedReason']] },
+  verificationRequests: { x: 1130, y: 236, f: [['artisanId', 'PK·FK'], ['categoryIds'], ['status'], ['files[ ]']] },
+  messages: { x: 290, y: 392, f: [['id', 'PK'], ['requestId', 'FK'], ['senderId', 'FK'], ['cipher'], ['replyTo'], ['deleted']] },
+  settings: { x: 1130, y: 400, f: [['platform', 'PK'], ['planPrices'], ['featuredMinJobs'], ['maxOpenRequests']] },
+  complaints: { x: 850, y: 506, f: [['id', 'PK'], ['reporterId', 'FK'], ['targetId', 'FK'], ['requestId', 'FK'], ['reason'], ['status']] },
+  reviews: { x: 570, y: 548, f: [['id', 'PK'], ['requestId', 'FK'], ['authorId', 'FK'], ['targetId', 'FK'], ['rating'], ['comment']] },
+};
+const EW = 250, HH = 34, RH = 21;
+const eh = (e) => HH + 8 + e.f.length * RH;
+const RELS = [
+  // [points, cardinality at the end ('1' | 'N'), label, label position]
+  [[[570, 90], [540, 90]], '1'],
+  [[[820, 90], [850, 90]], '1'],
+  [[[1100, 90], [1130, 90]], 'N'],
+  [[[1100, 170], [1115, 170], [1115, 290], [1130, 290]], '1'],
+  [[[695, 225], [695, 262]], 'N', 'الزبون', [740, 249]],
+  [[[975, 204], [975, 262]], 'N', 'الحرفي', [1020, 238]],
+  [[[820, 330], [850, 330]], 'N'],
+  [[[540, 290], [570, 290]], 'N'],
+  [[[570, 450], [540, 450]], 'N'],
+  [[[695, 514], [695, 548]], 'N', '0..2', [730, 536]],
+  [[[820, 490], [835, 490], [835, 560], [850, 560]], 'N'],
+  [[[620, 36], [620, 16], [135, 16], [135, 36]], 'N'],
+  [[[570, 212], [275, 212], [275, 290], [260, 290]], '1'],
+];
+function erdSVG() {
+  let s = `<svg viewBox="0 0 1390 748" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="ERD">`;
+  const unit = (p, q) => { const dx = q[0] - p[0], dy = q[1] - p[1], L = Math.hypot(dx, dy) || 1; return [dx / L, dy / L]; };
+  const bar = (x, y, [dx, dy]) => `<path d="M${x - dx * 9 - dy * 8} ${y - dy * 9 + dx * 8} L${x - dx * 9 + dy * 8} ${y - dy * 9 - dx * 8}" stroke="var(--muted)" stroke-width="2.2"/>`;
+  const crow = (x, y, [dx, dy]) => { const bx = x - dx * 15, by = y - dy * 15; return `<path d="M${bx} ${by} L${x - dy * 9} ${y + dx * 9} M${bx} ${by} L${x} ${y} M${bx} ${by} L${x + dy * 9} ${y - dx * 9}" stroke="var(--muted)" stroke-width="2" fill="none"/>${bar(bx + dx * 9, by + dy * 9, [dx, dy]).replace('stroke-width="2.2"', 'stroke-width="2"')}`; };
+  RELS.forEach(([pts, card, label, at]) => {
+    s += `<path d="M${pts.map((p) => p.join(' ')).join(' L')}" fill="none" stroke="var(--muted)" stroke-opacity=".85" stroke-width="2"/>`;
+    s += bar(pts[0][0], pts[0][1], unit(pts[1], pts[0]));
+    const end = pts[pts.length - 1], d = unit(pts[pts.length - 2], end);
+    s += card === 'N' ? crow(end[0], end[1], d) : bar(end[0], end[1], d);
+    if (label) s += `<text x="${at[0]}" y="${at[1]}" font-size="13" font-weight="800" fill="var(--faint)" text-anchor="middle">${label}</text>`;
+  });
+  Object.entries(ENT).forEach(([n, e]) => {
+    const h = eh(e), core = ['users', 'requests', 'offers'].includes(n);
+    s += `<g><rect x="${e.x}" y="${e.y}" width="${EW}" height="${h}" rx="13" fill="var(--surface)" stroke="${core ? '#2563EB' : 'var(--line)'}" stroke-width="${core ? 2.6 : 2}"/>`;
+    s += `<path d="M${e.x} ${e.y + 13}a13 13 0 0 1 13-13h${EW - 26}a13 13 0 0 1 13 13v${HH - 13}h-${EW}z" fill="${core ? '#2563EB' : 'var(--bg2)'}"/>`;
+    s += `<text x="${e.x + EW / 2}" y="${e.y + 23}" font-family="IBM Plex Mono, monospace" font-size="15" font-weight="600" text-anchor="middle" fill="${core ? '#fff' : 'var(--ink)'}">${n}</text>`;
+    e.f.forEach(([f, k], i) => {
+      const yy = e.y + HH + 18 + i * RH;
+      s += `<text x="${e.x + 14}" y="${yy}" font-family="IBM Plex Mono, monospace" font-size="13.5" fill="var(--ink)" text-anchor="start" direction="ltr">${f}</text>`;
+      if (k) s += `<text x="${e.x + EW - 12}" y="${yy}" font-family="IBM Plex Mono, monospace" font-size="11.5" font-weight="600" fill="${k.startsWith('PK') ? '#D97706' : 'var(--blue)'}" text-anchor="end" direction="ltr">${k}</text>`;
+    });
+    s += `</g>`;
+  });
+  s += `<text x="1380" y="740" font-size="13" font-weight="700" fill="var(--muted)" text-anchor="start">PK مفتاح أساسي · FK مفتاح أجنبي · خط عرضي = واحد · ثلاث شُعب = متعدد · الرسائل والإشعارات مجموعات فرعية</text>`;
+  return s + '</svg>';
+}
+
+// ── Architecture ──
+function buildArch() {
+  const tier = (lbl, cls, boxes, cols) => `<div class="tier rv"><div class="lbl ${cls}">${lbl}</div><div class="boxes" style="grid-template-columns:repeat(${cols},1fr)">${boxes}</div></div>`;
+  const box = (ic, cls, t, p, chips) => `<div class="card box"><h3><span class="ico ${cls}" style="width:34px;height:34px;border-radius:10px">${icon(ic, 'width="18" height="18"')}</span>${t}</h3><p>${p}</p><div class="chips">${chips.map((c) => `<span class="chip">${c}</span>`).join('')}</div></div>`;
+  $('#arch').innerHTML =
+    tier('الواجهات', 'b-blue', box('user', 'b-blue', 'تطبيق الزبون', 'نفس التطبيق، حسب نوع الحساب', ['React Native', 'Expo Router', 'iOS · Android']) + box('tool', 'b-orange', 'تطبيق الحرفي', 'شاشات الحرفي بلونه البرتقالي', ['React Query', 'Zustand', 'NativeWind']) + box('grid', 'b-violet', 'لوحة تحكم الإدارة', 'موقع ويب للأدمن فقط', ['Next.js', 'Recharts', 'Firebase Hosting']), 3) +
+    `<div class="flowline"><span></span><div><span>Firebase SDK · قواعد الأمان على كل طلب</span><span>⇅</span><span>تحديث لحظي (onSnapshot)</span></div></div>` +
+    tier('Firebase', 'b-orange', box('lock', 'b-blue', 'Authentication', 'حسابات بالرقم وكلمة المرور، ورموز SMS', ['Phone Auth', 'Custom claims']) + box('db', 'b-teal', 'Cloud Firestore', 'قاعدة بيانات NoSQL + قواعد أمان', ['Security Rules', 'eur3']) + box('layers', 'b-violet', 'Storage', 'صور الطلبات والمعرض والمحادثة', ['JPEG ≤ 1600px']) + box('zap', 'b-orange', 'Cloud Functions', '16 دالة: محفّزات + جدولة كل دقيقة', ['europe-west1', 'Node.js']), 4) +
+    `<div class="flowline"><span></span><div><span>⇅</span><span>خدمات خارجية</span><span>⇅</span></div></div>` +
+    tier('خدمات', 'b-teal', box('bell', 'b-teal', 'Expo Push', 'توصيل الإشعارات للجوالات', ['APNs', 'FCM']) + box('shield', 'b-red', 'reCAPTCHA Enterprise', 'حماية رسائل SMS (Fraud Defense)', ['SMS Defense']) + box('pin', 'b-blue', 'الموقع والخرائط', 'GPS من الجهاز، والعنوان من الجهاز أو OpenStreetMap، والاتجاهات بتطبيق الخرائط', ['expo-location', 'Nominatim']) + box('db', 'b-green', 'نسخ احتياطي', 'يومي (7 أيام) وأسبوعي (14 أسبوع)', ['Firestore backups']), 4);
+}
+
+// ── Development cycle ──
+function cycleSVG() {
+  const C = 260, R = 175, items = [['ملاحظات', '#2563EB'], ['تحليل', '#6A46D9'], ['تنفيذ', '#C2410C'], ['اختبار', '#15803D'], ['نشر', '#0E8F80'], ['تجربة', '#D97706']];
+  let s = `<svg viewBox="0 0 520 520" width="460" height="460" role="img" aria-label="دورة التطوير"><defs><marker id="ar3" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0 10 5 0 10z" fill="var(--muted)"/></marker></defs>`;
+  s += `<circle cx="${C}" cy="${C}" r="${R}" fill="none" stroke="var(--line)" stroke-width="3" stroke-dasharray="8 8"/>`;
+  items.forEach(([t, col], i) => {
+    const a = -Math.PI / 2 + (i * 2 * Math.PI) / items.length, x = C + R * Math.cos(a), y = C + R * Math.sin(a);
+    const a2 = a + (2 * Math.PI) / items.length * 0.5, ax = C + R * Math.cos(a2), ay = C + R * Math.sin(a2);
+    s += `<path d="M${ax} ${ay} l${-Math.sin(a2) * 0.01} ${Math.cos(a2) * 0.01}" stroke="var(--muted)" marker-end="url(#ar3)"/>`;
+    s += `<circle cx="${x}" cy="${y}" r="50" fill="${col}"/><text x="${x}" y="${y + 7}" fill="#fff" font-size="20" font-weight="800" text-anchor="middle">${t}</text>`;
+  });
+  s += `<text x="${C}" y="${C - 6}" font-size="26" font-weight="900" text-anchor="middle" fill="var(--ink)">دفعة</text><text x="${C}" y="${C + 24}" font-size="16" font-weight="700" text-anchor="middle" fill="var(--muted)">تكرار مستمر</text>`;
+  return s + '</svg>';
+}
+
+// ── Journey stepper ──
+const JOURNEY = [
+  ['customer', 'edit', 'نشر طلب جديد', 'الزبون بيختار الخدمة، وبيكتب وصف المشكلة، وبيرفق صور من الكاميرا أو المعرض (لحد 4) مع معاينة وحذف قبل الرفع، وبيحدد موقعه.', ['كاميرا + معرض', 'حد 10 طلبات مفتوحة'], 'c-create'],
+  ['system', 'radius', 'توزيع على أقرب الحرفيين', 'دالة سحابية بتختار الحرفيين الموثّقين بنفس الخدمة، المتاحين ضمن ساعات عملهم، داخل 2 كم. كل دقيقتين بتوسّع الدائرة 2 كم لحد 12 كم، والمميزين بيوصلهم قبل بدرجة.', ['2 ← 12 كم', 'كل دقيقتين'], 'a-notifs'],
+  ['artisan', 'tag', 'تقديم عرض سعر', 'الحرفي بيفتح الطلب من "طلبات قريبة"، وبيحط السعر (₪) ووقت الوصول من عجلة ساعات ودقائق، ورسالة اختيارية. لازم اشتراكه يكون فعّال.', ['سعر + وقت وصول', 'اشتراك فعّال'], 'a-offer'],
+  ['customer', 'check', 'مقارنة العروض', 'كل عرض بيوصل للزبون بإشعار. العروض بتظهر بالسعر ووقت الوصول وتقييم الحرفي، والحرفي المميز أول القائمة. الزبون بيرفض مع ذكر السبب، أو بيقبل.', ['المميز أولاً', 'رفض مع سبب'], 'c-offers'],
+  ['system', 'refresh', 'قبول عرض وتسكير الباقي', 'بعملية وحدة: العرض المختار بيصير مقبول، وباقي العروض بتتسكّر "اختار الزبون عرضاً آخر". أصحابها بيوصلهم تنبيه، والطلب بيختفي من قوائمهم فوراً.', ['Batch واحد', 'إشعار للباقي'], 'a-offers'],
+  ['system', 'clock', 'ولو ما انقبل شي بالوقت؟', 'بعد 30 دقيقة بدون عروض (NO_OFFERS) أو بدون قبول (EXPIRED)، النظام بيلغي الطلب وببلّغ الزبون والحرفيين، والزبون بيقدر يعيد نشره بنفس التفاصيل.', ['مهلة 30 د', 'إعادة نشر'], 'c-orders'],
+  ['both', 'chat', 'المحادثة', 'بتنفتح بين الزبون والحرفي المقبول: نص، أكتر من صورة، كاميرا، رد على رسالة، وحذف للجميع. الرسائل محفوظة مشفّرة.', ['مشفّرة', 'صور + رد + حذف'], 'c-chat'],
+  ['artisan', 'truck', 'في الطريق ثم التنفيذ', 'الحرفي بيحدّث المرحلة: "في الطريق" (وزر الاتجاهات على الخريطة)، ثم "قيد التنفيذ". كل مرحلة بتوصل للزبون بإشعار، والحرفي بيقدر يعدّل السعر أثناء التنفيذ.', ['خطوة خطوة', 'إشعار للزبون'], 'c-status'],
+  ['both', 'x', 'الإلغاء قبل بدء العمل', 'قبل "قيد التنفيذ" أي طرف بيقدر يلغي مع اختيار السبب وملاحظة، والطرف التاني بيوصله إشعار فيه السبب. إذا ألغى الحرفي، الزبون بيعيد النشر بدونه.', ['سبب + ملاحظة', 'إعادة نشر'], 'c-orders'],
+  ['artisan', 'check', 'تم الإنجاز', 'الحرفي بينهي الشغل، أو النظام بينهيه تلقائياً إذا ضل معلّق 48 ساعة. الطرفين بيوصلهم إشعار، والعمل بينحسب بدخل الحرفي.', ['إنجاز تلقائي 48 س', 'الدخل'], 'a-income'],
+  ['both', 'star', 'التقييم المتبادل', 'تقييم إلزامي قبل المتابعة: نجوم، ووسوم بتتغيّر حسب النجوم، وتعليق. بعد 10 أعمال وتقييم فوق 4 الحرفي بياخد شارة "حرفي مميز".', ['إلزامي', 'حرفي مميز'], 'a-home'],
+  ['admin', 'shield', 'رقابة الإدارة', 'أي طرف بيقدر يشتكي على التاني، والإدارة بتعالج من لوحة التحكم، وبتقدر توقف الحساب (بكلمة مرور الأدمن). والدعم المباشر متاح دايماً.', ['شكاوى', 'إيقاف مؤكد'], null],
+];
+let jIdx = 0, jTimer = null;
+function renderJourney() {
+  $('#jSteps').innerHTML = JOURNEY.map(([r, , t], i) => `<button data-j="${i}" class="${i === jIdx ? 'on' : ''}"><span class="n">${i + 1}</span><span><span class="t">${t}</span><br><span class="a">${ROLE[r].ar}</span></span></button>`).join('');
+  const [r, ic, t, p, tags, shot] = JOURNEY[jIdx];
+  const d = $('#jDetail');
+  d.innerHTML = `<div class="actor"><div class="big" style="background:${ROLE[r].solid}">${icon(ic)}</div><div><span class="tag ${ROLE[r].cls}">${ROLE[r].ar}</span><div class="stepno" style="margin-top:8px">STEP ${String(jIdx + 1).padStart(2, '0')} / ${JOURNEY.length}</div></div></div>
+    <h3><span class="g">${t}</span></h3><p>${p}</p><div class="facts-line">${tags.map((x) => `<span class="tag ${ROLE[r].cls}">${x}</span>`).join('')}</div>
+    <div class="ctrls"><button class="nav-btn" id="jPrev">السابق</button><button class="nav-btn primary" id="jNext">الخطوة التالية</button><button class="icon-btn" id="jPlay" aria-label="تشغيل تلقائي">${icon(jTimer ? 'pause' : 'play', 'width="16" height="16"')}</button></div>`;
+  d.classList.remove('swap'); void d.offsetWidth; d.classList.add('swap');
+  $('#jPhone').innerHTML = shot ? `<div class="phone" data-zoom style="width:250px"><img src="assets/screens/${shot}.webp" alt="${t}"></div>` : `<div class="browser" data-zoom style="width:300px"><img src="assets/screens/admin-complaints.webp" alt="${t}"></div>`;
+  $('#jPrev').onclick = () => jGo(jIdx - 1); $('#jNext').onclick = () => jGo(jIdx + 1); $('#jPlay').onclick = jToggle;
+  const on = $(`#jSteps button[data-j="${jIdx}"]`); if (on) on.scrollIntoView({ block: 'nearest' });
+}
+function jGo(i) { jIdx = (i + JOURNEY.length) % JOURNEY.length; renderJourney(); }
+function jToggle() { if (jTimer) { clearInterval(jTimer); jTimer = null; } else jTimer = setInterval(() => jGo(jIdx + 1), 4200); renderJourney(); }
+
+// ── Admin tabs ──
+const ADMIN = [
+  ['overview', 'نظرة عامة'], ['users', 'المستخدمون'], ['artisans', 'طلبات التوثيق'], ['requests', 'الطلبات'], ['analytics', 'التحليلات'], ['categories', 'الفئات'], ['complaints', 'الشكاوى'],
+  [null, 'الدعم'], [null, 'الاقتراحات'], [null, 'الاشتراكات'], [null, 'إشعارات النظام'], [null, 'الإعدادات'],
+];
+function buildAdmin() {
+  $('#adminTabs').innerHTML = ADMIN.map(([k, t]) => `<button ${k ? `data-a="${k}"` : 'disabled'} class="${k === 'overview' ? 'on' : ''}"><i></i>${t}</button>`).join('');
+  $('#adminTabs').addEventListener('click', (e) => {
+    const b = e.target.closest('button[data-a]'); if (!b) return;
+    $$('#adminTabs button').forEach((x) => x.classList.toggle('on', x === b));
+    $('#adminImg').src = `assets/screens/admin-${b.dataset.a}.webp`;
+    $('#adminUrl').textContent = `qareeb-b9a54.web.app/${b.dataset.a === 'overview' ? '' : b.dataset.a}`;
+  });
+}
+
+// ── Navigation ──
+let slides = [], cur = 0;
+function setTheme(t) {
+  if (t) document.documentElement.dataset.theme = t; else delete document.documentElement.dataset.theme;
+  const dark = t ? t === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
+  $$('.logo-swap').forEach((im) => { im.src = im.src.replace(dark ? '-navy' : '-white', dark ? '-white' : '-navy'); });
+  $('#pillMark').src = `assets/brand/mark-${dark ? 'white' : 'navy'}.webp`;
+}
+function fit() {
+  const vw = innerWidth, vh = innerHeight;
+  const top = $('.topbar').offsetHeight, bot = $('.navbar').offsetHeight;
+  const scale = Math.min((vw - 24) / 1600, (vh - top - bot - 8) / 900);
+  const st = $('#stage');
+  st.style.top = `${top + (vh - top - bot) / 2}px`;
+  st.style.transform = `translate(-50%, -50%) scale(${Math.max(scale, 0.1)})`;
+}
+function go(i, fromHash) {
+  i = Math.max(0, Math.min(slides.length - 1, i));
+  if (i === cur && slides[cur].classList.contains('active')) return;
+  const dir = i >= cur ? 1 : -1, prev = slides[cur];
+  slides.forEach((s) => s.classList.remove('leaving'));
+  if (prev !== slides[i]) { prev.style.setProperty('--to', `${dir * 60}px`); prev.classList.remove('active'); prev.classList.add('leaving'); setTimeout(() => prev.classList.remove('leaving'), 700); }
+  // RTL: the next slide comes in from the left
+  slides[i].style.setProperty('--from', `${-dir * 90}px`);
+  void slides[i].offsetWidth;
+  slides[i].classList.add('active');
+  cur = i;
+  $('#counter').textContent = `${i + 1} / ${slides.length}`;
+  $('#prog').style.width = `${((i + 1) / slides.length) * 100}%`;
+  $$('#dotsNav button').forEach((b, k) => b.classList.toggle('on', k === i));
+  $$('#tocNav button').forEach((b, k) => b.classList.toggle('on', k === i));
+  $('#prevBtn').disabled = i === 0; $('#nextBtn').disabled = i === slides.length - 1;
+  if (!fromHash) { try { history.replaceState(null, '', `#${slides[i].id}`); } catch (e) {} }
+  if (slides[i].id !== 'journey' && jTimer) { clearInterval(jTimer); jTimer = null; renderJourney(); }
+}
+const next = () => go(cur + 1), prev = () => go(cur - 1);
+function openToc(o) { $('#toc').classList.toggle('open', o); $('#scrim').hidden = !o; }
+function zoom(el) {
+  const img = el.querySelector('img');
+  $('#lbInner').innerHTML = img ? `<img src="${img.src}" alt="${img.alt}">` : el.innerHTML;
+  $('#lightbox').hidden = false;
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  fillDeck(); build(); buildArch(); buildAdmin();
+  $('#ucTabs').innerHTML = Object.keys(UC).map((k) => `<button data-k="${k}"><span class="ico ${ROLE[k].cls}" style="width:36px;height:36px;border-radius:11px">${icon({ customer: 'user', artisan: 'tool', admin: 'shield', system: 'zap' }[k], 'width="18" height="18"')}</span>${k === 'system' ? 'النظام' : k === 'admin' ? 'الإدارة' : ROLE[k].ar}<span class="cnt">${UC[k].cases.length}</span></button>`).join('');
+  $('#ucTabs').addEventListener('click', (e) => { const b = e.target.closest('button'); if (b) showUC(b.dataset.k); });
+  showUC('customer');
+  $('#radarFig').innerHTML = radarSVG();
+  $('#wfFig').innerHTML = workflowSVG();
+  $('#stFig').innerHTML = statesSVG();
+  $('#erdFig').innerHTML = erdSVG();
+  $('#cycleFig').innerHTML = cycleSVG();
+  renderJourney();
+  $('#jSteps').addEventListener('click', (e) => { const b = e.target.closest('button[data-j]'); if (b) jGo(+b.dataset.j); });
+
+  // backdrop dots
+  $('#dots').innerHTML = Array.from({ length: 16 }, (_, i) => `<span style="left:${(i * 37 + 11) % 100}%;top:${(i * 53 + 17) % 100}%;animation-delay:${(i % 7) * 0.6}s"></span>`).join('');
+
+  slides = $$('.slide');
+  $('#dotsNav').innerHTML = slides.map((s, i) => `<button aria-label="${s.dataset.title}" title="${i + 1}. ${s.dataset.title}"></button>`).join('');
+  $('#tocNav').innerHTML = slides.map((s, i) => `<button><span>${i + 1}</span>${s.dataset.title}</button>`).join('');
+  $$('#dotsNav button').forEach((b, i) => b.onclick = () => go(i));
+  $$('#tocNav button').forEach((b, i) => b.onclick = () => { go(i); openToc(false); });
+  $('#agendaGrid').addEventListener('click', (e) => { const b = e.target.closest('[data-go]'); if (b) go(slides.findIndex((s) => s.id === b.dataset.go)); });
+  $('#nextBtn').onclick = next; $('#prevBtn').onclick = prev;
+  $('#tocBtn').onclick = () => openToc(true); $('#scrim').onclick = () => openToc(false);
+  $('#themeBtn').onclick = () => { const dark = document.documentElement.dataset.theme ? document.documentElement.dataset.theme === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches; const t = dark ? 'light' : 'dark'; setTheme(t); try { localStorage.setItem('qareeb-deck-theme', t); } catch (e) {} };
+  $('#fsBtn').onclick = () => { try { document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen().catch(() => {}); } catch (e) {} };
+  document.addEventListener('click', (e) => { const z = e.target.closest('[data-zoom]'); if (z && !e.target.closest('#lightbox')) zoom(z); });
+  $('#lightbox').onclick = () => { $('#lightbox').hidden = true; };
+  addEventListener('keydown', (e) => {
+    if (!$('#lightbox').hidden && e.key === 'Escape') { $('#lightbox').hidden = true; return; }
+    if (e.key === 'Escape') return openToc(false);
+    if (e.target.closest('input,textarea')) return;
+    if (e.key === 'ArrowLeft' || e.key === 'PageDown' || e.key === ' ') { e.preventDefault(); next(); }
+    else if (e.key === 'ArrowRight' || e.key === 'PageUp') { e.preventDefault(); prev(); }
+    else if (e.key === 'Home') go(0); else if (e.key === 'End') go(slides.length - 1);
+    else if (e.key.toLowerCase() === 'f') $('#fsBtn').click();
+    else if (e.key.toLowerCase() === 't') openToc(!$('#toc').classList.contains('open'));
+  });
+  let tx = null;
+  addEventListener('touchstart', (e) => { tx = e.touches[0].clientX; }, { passive: true });
+  addEventListener('touchend', (e) => { if (tx === null) return; const dx = e.changedTouches[0].clientX - tx; if (Math.abs(dx) > 60) (dx > 0 ? next : prev)(); tx = null; });
+  let saved = null; try { saved = localStorage.getItem('qareeb-deck-theme'); } catch (e) {}
+  setTheme(saved);
+  matchMedia('(prefers-color-scheme: dark)').addEventListener?.('change', () => setTheme(document.documentElement.dataset.theme));
+  addEventListener('resize', fit); fit();
+  const start = slides.findIndex((s) => '#' + s.id === location.hash);
+  cur = start > 0 ? start : 0; go(cur, true); slides[cur].classList.add('active');
+  addEventListener('hashchange', () => { const k = slides.findIndex((s) => '#' + s.id === location.hash); if (k >= 0) go(k, true); });
+});
+</script>

@@ -3,35 +3,41 @@
 ## الملفات
 | الملف | المحتوى |
 |---|---|
-| `Qareeb_Graduation_Report.docx` | التقرير الكامل بالإنجليزي (95 صفحة)، قابل للتعديل بـ Word. الفهرس وقائمة الأشكال وقائمة الجداول جاهزين. |
-| `Qareeb_Graduation_Report.pdf` | نفس التقرير PDF. |
-| `Qareeb_Documentation_Review_AR.docx` | مذكرة المراجعة بالعربي، فيها البنود الستة: فهم المشروع، آخر التحديثات، التعديلات على التقرير القديم، مقارنة أقسام التمبليت، الفهرس، والمعلومات الناقصة. |
+| `Qareeb_Graduation_Report_AR.docx` | **التقرير الرئيسي بالعربي** (113 صفحة، سبع فصول)، قابل للتعديل بـ Word. الفهرس وفهرس الأشكال وفهرس الجداول جاهزين. الأماكن اللي بدها معلومات من الفريق معلّمة بالأصفر. |
+| `Qareeb_Graduation_Report_AR.pdf` | نفس التقرير العربي PDF. |
+| `Qareeb_Report_Notes_AR.docx` | ملاحظات للفريق: شو لازم تضيفوا ووين، وشو بده تأكيد، وشو تغيّر عن التقرير القديم. |
+| `Qareeb_Graduation_Report.docx` و`.pdf` | النسخة الإنجليزية من التقرير (95 صفحة). |
+| `Qareeb_Documentation_Review_AR.docx` | مذكرة المراجعة الأولى (البنود الستة). |
 | `diagrams/` | مصادر المخططات القابلة للتعديل، وجنب كل وحدة صورتها PNG: `.mmd` (Mermaid) و`.puml` (PlantUML). |
 | `screens/` | صور حقيقية من التطبيق ولوحة التحكم (على المحاكيات ببيانات تجريبية). |
-| `build/` | السكربتات اللي ولّدت التقرير. |
+| `survey/` | رسومات نتائج الاستبيانين وجدول الجدوى الاقتصادية، مأخوذة من التقرير القديم. |
+| `build/` | السكربتات اللي ولّدت التقارير. |
 
 ## تعديل التقرير
 **الطريقة الأسهل:** افتح ملف Word وعدّل عليه مباشرة.
-- إذا Word سألك عن تحديث الحقول (Update fields)، اضغط **Yes** عشان تتحدّث أرقام الصفحات بالفهرس.
-- بعد أي تعديل كبير: كليك يمين على الفهرس، بعدين **Update Field**، بعدين **Update entire table**.
+- النص الأصفر بين قوسين، مثل [يكمله الفريق]، امسحه واكتب مكانه المعلومة، وبعدين شيل اللون الأصفر.
+- إذا Word سألك عن تحديث الحقول (Update fields)، اضغط **Yes**.
+- بعد أي تعديل كبير: كليك يمين على الفهرس، بعدين **Update Field**، بعدين **Update entire table**. كرّرها لفهرس الأشكال وفهرس الجداول.
 
 ## إعادة التوليد من المصدر (اختياري)
-1. المحتوى موجود بملفات `build/ch1.cjs` لحد `build/ch7.cjs`.
-2. الغلاف والإهداء والشكر موجودين بـ `build/front.cjs`. أي قيمة بدها تأكيد (الأسماء والعنوان) بتتعدّل هناك.
-3. شغّل التوليد:
+بيحتاج مكتبة `docx` من npm، وLibreOffice لحساب أرقام صفحات الفهارس.
+
+**التقرير العربي:**
+1. المحتوى بمجلد `build/ar/`: `front.cjs` (الغلاف والإهداء والشكر والملخص)، `ch1.cjs` لحد `ch7.cjs`، و`back.cjs` (المراجع والملاحق).
+2. شغّل:
    ```
    cd docs/report/build
-   node build.cjs ../out.docx
+   node build_ar.cjs ../out.docx
+   python3 update_indexes.py ../out.docx ../out-lo.docx ../out-lo.pdf
+   python3 fill_toc_ar.py ../out-lo.docx ../out.docx ../Qareeb_Graduation_Report_AR.docx
    ```
-   بيحتاج مكتبة `docx` من npm.
-4. حدّث الفهارس وثبّتها داخل الملف (بيحتاج LibreOffice):
-   ```
-   python3 update_indexes.py ../out.docx ../out-lo.docx ../out.pdf
-   python3 fill_toc.py ../out-lo.docx ../out.docx ../Qareeb_Graduation_Report.docx
-   ```
-5. المخططات:
-   - **Mermaid:** `node render.cjs ../diagrams`، وبيحتاج `mermaid@11.4.1` و`playwright` بنفس المجلد.
-   - **PlantUML:** `java -jar plantuml.jar -tpng -Sdpi=200 ../diagrams/*.puml`، وبيحتاج Graphviz.
+3. ملف الملاحظات: `node notes_ar.cjs ../Qareeb_Report_Notes_AR.docx`
+
+**التقرير الإنجليزي:** المحتوى بملفات `build/front.cjs` و`build/ch1.cjs` لحد `build/ch7.cjs`، والتوليد بـ `build.cjs` ثم `update_indexes.py` ثم `fill_toc.py` بنفس الطريقة.
+
+**المخططات:**
+- **Mermaid:** `node render.cjs ../diagrams`، وبيحتاج `mermaid@11.4.1` و`playwright` بنفس المجلد.
+- **PlantUML:** `java -jar plantuml.jar -tpng -Sdpi=200 ../diagrams/*.puml`، وبيحتاج Graphviz.
 
 ## مصدر المعلومات
 كل المعلومات مأخوذة من الكود الحالي ومن تاريخ Git (190 تعديل، 16 تموز لحد 27 تشرين الثاني 2026).

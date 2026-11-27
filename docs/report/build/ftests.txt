@@ -1,0 +1,52 @@
+1|needs a signed-in user who just entered their password
+2|refused while a job is in progress
+3|a customer is kept, marked deleted; the login is off and the number free again
+4|an artisan leaves the lists and the dispatch; open offers withdrawn
+5|a login removed in the console marks the account deleted
+6|the hourly sweep marks accounts whose login is gone (demo accounts left alone)
+7|only admins may call it, and never on themselves
+8|suspend restricts the login (claim), marks the account and withdraws open offers; reactivate undoes it
+9|verify / unverify an artisan (not a customer)
+10|passwords cannot be set from the dashboard
+11|accounts cannot be deleted from the dashboard
+12|accounts suspended the old way (login disabled) get the claim once
+13|an account its owner deleted is kept for the records: no actions on it
+14|audiences: everyone, customers or artisans — never suspended accounts or admins
+15|artisans-only broadcast lands in each artisan inbox with its link, and is marked sent
+16|a broadcast is delivered once even if the trigger runs again
+17|customer cancels before accepting: every artisan who offered hears it, with the reason
+18|the customer cancels an accepted job: the artisan hears it with the reason
+19|the artisan cancels: the customer hears it with the reason
+20|an offer declined by the customer: the artisan hears it with the reason
+21|another offer accepted: the other artisans hear it; cancelled/expired offers are not told twice
+22|an artisan who adds a service is offered its open requests within reach
+23|photo links map to their storage path
+24|removes plain messages, their photos and the notifications quoting them — once
+25|new-message notifications never contain the text
+26|first wave: verified same-category artisans within 2 km only
+27|radius grows 2 km every 2 minutes and only new artisans are notified
+28|no offers after 30 minutes → cancelled with NO_OFFERS
+29|a request with an offer stops expanding, and expires after 30 minutes if none is accepted
+30|an old request made before dispatch expires from its creation time
+31|with verification off, unverified artisans are included
+32|an artisan switched to unavailable gets no requests
+33|working hours: requests reach artisans only inside their days and hours (Palestine time)
+34|a customer over the open-request limit: the request is cancelled before anyone is told
+35|posted again after the artisan cancelled: it never goes back to that artisan
+36|criteria default to 10 jobs and a rating above 4, and follow the dashboard
+37|only completed jobs count; 10 makes an artisan featured, 9 does not
+38|the 10th completed job brings the badge and a congratulation, once
+39|backfill runs once per threshold and re-runs when the admin changes it
+40|featured artisans are reached one step (2 km) further out, and listed first
+41|10 jobs are not enough with a rating of 4 or less; a better rating brings the badge
+42|reviews of customers change nothing
+43|a verified number sets a new password on its own account
+44|+972 and 05… forms of the number reach the same account
+45|no artisan account on this number → not-found, and the phone sign-in is removed
+46|without a verified number nothing happens
+47|too-short password and unknown role are refused
+48|checkAccount: an account of that type for the number, or none (a deleted or other-type one counts as none)
+49|ending within 3 days or ended: told once each; later, renewed or cancelled plans are left alone
+50|approved: the artisan is told they now receive requests
+51|rejected: the reason is in the notification
+52|no notification when nothing was decided

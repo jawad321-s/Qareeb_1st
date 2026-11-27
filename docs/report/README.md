@@ -6,7 +6,7 @@
 | `Qareeb_Graduation_Report_AR.docx` | **التقرير الرئيسي بالعربي** (112 صفحة، سبع فصول)، قابل للتعديل بـ Word. الفهرس وفهرس الأشكال وفهرس الجداول جاهزين. الأماكن اللي بدها معلومات من الفريق معلّمة بالأصفر. |
 | `Qareeb_Graduation_Report_AR.pdf` | نفس التقرير العربي PDF. |
 | `feasibility/Qareeb_Feasibility_AR.xlsx` | حاسبة دراسة الجدوى الاقتصادية: عبّوا الخلايا الصفرا بورقة «المدخلات»، والنتائج بتطلع بورقة «جدول الجدوى» (NPV وROI وفترة الاسترداد ونقطة التعادل). |
-| `Qareeb_Chapter1_AR.docx` و`Qareeb_Chapter2_AR.docx` | الفصل الأول والثاني معدّلين، كل واحد لحاله. |
+| `Qareeb_Chapter1_AR.docx` و`Qareeb_Chapter2_AR.docx` و`Qareeb_Chapter3_AR.docx` | الفصول الأول والثاني والثالث معدّلة، كل واحد لحاله. |
 | `Qareeb_Report_Notes_AR.docx` | ملاحظات للفريق: شو لازم تضيفوا ووين، وشو بده تأكيد، وشو تغيّر عن التقرير القديم. |
 | `Qareeb_Graduation_Report.docx` و`.pdf` | النسخة الإنجليزية من التقرير (95 صفحة). |
 | `Qareeb_Documentation_Review_AR.docx` | مذكرة المراجعة الأولى (البنود الستة). |

@@ -21,7 +21,9 @@ const LOGO_APP = path.join(REPO, 'assets/logo-proposal.jpg');
 const front = require('./ar/front.cjs');
 const chapters = (process.env.AR_CH || 'ch1,ch2,ch3,ch4,ch5,ch6,ch7').split(',').filter(Boolean).map((c) => require(`./ar/${c}.cjs`));
 const { refs, appendices } = require('./ar/back.cjs');
-const blocks = [...chapters.flat(), ...refs, ...appendices];
+// AR_BODY_ONLY=1 builds only the chosen chapters (AR_CH), without the cover, preliminary pages, references or appendices.
+const BODY_ONLY = !!process.env.AR_BODY_ONLY;
+const blocks = BODY_ONLY ? chapters.flat() : [...chapters.flat(), ...refs, ...appendices];
 
 const FONT = 'Times New Roman';
 const F = { ascii: FONT, hAnsi: FONT, cs: FONT, eastAsia: FONT };
@@ -349,7 +351,7 @@ const doc = new Document({
       { reference: 'nums', levels: [{ level: 0, format: LevelFormat.DECIMAL, text: '%1.', alignment: AlignmentType.LEFT, style: { paragraph: { indent: { left: 560, hanging: 380 } } } }] },
     ],
   },
-  sections: [
+  sections: BODY_ONLY ? [{ properties: { ...pageProps({ pageNumbers: { start: 1, formatType: NumberFormat.DECIMAL } }) }, footers: { default: footer }, children: mainChildren }] : [
     { properties: pageProps({ borders: { pageBorderTop: pb(BorderStyle.THIN_THICK_SMALL_GAP), pageBorderLeft: pb(BorderStyle.THIN_THICK_SMALL_GAP), pageBorderBottom: pb(BorderStyle.THICK_THIN_SMALL_GAP), pageBorderRight: pb(BorderStyle.THICK_THIN_SMALL_GAP), pageBorders: { display: PageBorderDisplay.ALL_PAGES, offsetFrom: PageBorderOffsetFrom.PAGE } } }), children: cover },
     { properties: { ...pageProps({ pageNumbers: { start: 1, formatType: NumberFormat.UPPER_ROMAN } }) }, footers: { default: footer }, children: process.env.AR_NOFRONT ? [body('-')] : [...dedication, ...ack, ...logoPage, ...abstractAr, ...abstractEn, ...tocs, ...abbrev] },
     { properties: { ...pageProps({ pageNumbers: { start: 1, formatType: NumberFormat.DECIMAL } }) }, footers: { default: footer }, children: mainChildren },

@@ -1,0 +1,48 @@
+classDiagram
+  direction TB
+  class User {
+    +uid : string
+    +role : UserRole
+    +status : UserStatus
+    +verified : boolean
+  }
+  class Subscription {
+    +artisanId : string
+    +planId : PlanId
+    +amount : number
+    +activatedAt : number
+    +expiresAt : number
+    +status : active or cancelled
+    +simulated : boolean
+  }
+  class VerificationRequest {
+    +artisanId : string
+    +categoryIds : List~string~
+    +status : pending, approved, rejected
+    +rejectReason : string
+    +reviewedAt : timestamp
+  }
+  class VerificationFile {
+    +dataUrl : string
+  }
+  class PlatformSettings {
+    +planPrices : map
+    +featuredMinJobs : number
+    +featuredMinRating : number
+    +maxOpenRequests : number
+    +smsSignUp : boolean
+    +supportPhone : string
+    +supportEmail : string
+  }
+  class PlanId {
+    <<enumeration>>
+    trial
+    quarter
+    half
+    year
+  }
+  User "1" --> "0..*" Subscription : artisan buys
+  User "1" -- "0..1" VerificationRequest : artisan submits
+  VerificationRequest "1" *-- "1..*" VerificationFile : documents
+  Subscription ..> PlanId
+  Subscription ..> PlatformSettings : prices from

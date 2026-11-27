@@ -1,0 +1,35 @@
+@startuml
+!include _style.iuml
+|User|
+start
+:Tap "Forgot password",
+enter the number and
+the account type;
+|Mobile app|
+if (Account of this type
+for the number?) then (no)
+  :Show "no account
+on this number";
+  stop
+else (yes)
+endif
+:Invisible reCAPTCHA Enterprise check;
+|Firebase|
+repeat
+  :Send the SMS code;
+  backward:Retry with +972, or
+  show the visible
+  robot check;
+repeat while (Sent?) is (refused) not (sent)
+|User|
+repeat
+  :Enter the 6-digit code;
+repeat while (Code correct?) is (no) not (yes)
+:Enter a new password;
+|Firebase|
+:resetPasswordWithPhone
+sets the new password;
+|User|
+:Sign in with the new password;
+stop
+@enduml

@@ -1,0 +1,38 @@
+@startuml
+!include _style.iuml
+|Artisan|
+start
+:Register as an artisan
+(SMS-verified number);
+:Choose services, working
+days and hours, location;
+repeat
+  :Submit verification
+  documents (ID photo,
+  personal photo,
+  certificates);
+  |Administrator|
+  :Review the
+  documents;
+  |Artisan|
+repeat while (Approved?) is (no: read the\nreason, resubmit) not (yes)
+|System|
+:Mark verified and
+notify the artisan;
+|Artisan|
+if (Active plan?) then (no)
+  :Start the 7-day trial
+  or buy a 3, 6 or
+  12-month plan;
+else (yes)
+endif
+:Turn availability on;
+|System|
+:Include the artisan in
+dispatch inside the
+working hours;
+|Artisan|
+:Receive nearby requests
+and send offers;
+stop
+@enduml

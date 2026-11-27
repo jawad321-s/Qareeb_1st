@@ -1,0 +1,38 @@
+@startuml
+!include _style.iuml
+|Artisan|
+start
+:Offer accepted;
+if (Either side cancels
+before work starts?) then (yes)
+  |System|
+  :Request CANCELLED
+  with the reason,
+  other party notified;
+  |Customer|
+  :Optionally repost
+  without that artisan;
+  stop
+else (no)
+endif
+|Artisan|
+:Mark ON_THE_WAY
+(directions in the
+maps app);
+:Mark WORKING
+(price may change);
+:Mark COMPLETED
+(automatic after 48 h);
+fork
+  |Customer|
+  :Rate the artisan;
+fork again
+  |Artisan|
+  :Rate the customer;
+end fork
+|System|
+:Recount the artisan's
+rating and jobs; award
+the featured badge;
+stop
+@enduml

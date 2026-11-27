@@ -1,0 +1,22 @@
+sequenceDiagram
+  autonumber
+  actor A as Artisan
+  participant AA as Artisan app
+  participant FS as Cloud Firestore
+  participant AD as Admin dashboard
+  actor M as Administrator
+  participant CF as Cloud Functions
+  A->>AA: Add an ID photo, a personal photo and certificates
+  AA->>FS: verificationRequests/uid status pending, files as compressed images
+  M->>AD: Open the verification queue
+  AD->>FS: Read pending requests and their files
+  alt approve
+    M->>AD: Approve
+    AD->>FS: status approved, users.verified true, artisanProfiles.verificationStatus approved
+  else reject
+    M->>AD: Reject with a reason
+    AD->>FS: status rejected with rejectReason
+  end
+  FS-)CF: onVerificationUpdated
+  CF->>FS: verificationApproved or verificationRejected notification, push sent
+  Note over FS,CF: Only verified artisans are included in dispatch

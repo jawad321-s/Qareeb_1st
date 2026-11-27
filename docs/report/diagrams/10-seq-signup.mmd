@@ -1,0 +1,23 @@
+sequenceDiagram
+  autonumber
+  actor U as User
+  participant App as Mobile app
+  participant RC as reCAPTCHA Enterprise
+  participant PA as Firebase Auth (Phone)
+  participant EA as Firebase Auth (Email/Password)
+  participant FS as Cloud Firestore
+  U->>App: Choose customer or artisan, enter name, phone and password
+  App->>FS: Read settings/platform (smsSignUp switch)
+  alt SMS verification is on
+    App->>RC: Invisible robot check (hidden WebView)
+    RC-->>App: Enterprise token
+    App->>PA: Send verification code (phone number, token)
+    PA-->>U: SMS with a 6-digit code
+    U->>App: Enter the code
+    App->>PA: Confirm the code
+    PA-->>App: Number verified
+  end
+  App->>EA: Create the login for this role and number
+  EA-->>App: New uid
+  App->>FS: Create users/uid and publicProfiles/uid
+  App-->>U: Open the home screen of the chosen role

@@ -1,0 +1,26 @@
+sequenceDiagram
+  autonumber
+  actor A as Artisan
+  participant AA as Artisan app
+  participant FS as Cloud Firestore
+  participant CF as Cloud Functions
+  participant CA as Customer app
+  actor C as Customer
+  A->>AA: Open the request, enter price, arrival time and an optional message
+  AA->>FS: Create offers/id (PENDING) and add one to request.offerCount
+  FS-)CF: onOfferCreated
+  CF->>FS: newOffer notification for the customer, push sent
+  CA-->>C: Offers listed with price, arrival time and rating, featured first
+  alt the customer declines an offer
+    C->>CA: Decline with a reason
+    CA->>FS: Offer REJECTED with REJECTED_BY_CUSTOMER and the reason
+    FS-)CF: onOfferUpdated
+    CF->>FS: offerRejected notification for that artisan
+  else the customer accepts an offer
+    C->>CA: Accept
+    CA->>FS: One batch: offer ACCEPTED, other offers REJECTED (OTHER_ACCEPTED), request ACCEPTED with the hired artisan
+    FS-)CF: onRequestUpdated and onOfferUpdated
+    CF->>FS: offerAccepted notification for the hired artisan
+    CF->>FS: offerNotChosen notifications for the other artisans
+    Note over AA: The request leaves the other artisans' lists when their notification arrives
+  end

@@ -1,0 +1,50 @@
+@startuml
+!include _style.iuml
+|Customer|
+start
+:Choose a service,
+describe the problem,
+add photos, confirm
+the location;
+:Post the request;
+|System|
+if (Over the
+open-request limit?) then (yes)
+  :Cancel
+  (TOO_MANY_OPEN);
+  stop
+else (no)
+endif
+:Send it to suitable
+artisans within 2 km;
+note right
+  No offer yet: the radius
+  grows by 2 km every
+  2 minutes, up to 12 km.
+end note
+|Artisan|
+:Submit an offer
+(price, arrival time,
+message);
+|System|
+:Notify the customer;
+|Customer|
+:Compare offers
+(featured first);
+if (Offer accepted
+within 30 minutes?) then (yes)
+  |System|
+  :Request ACCEPTED,
+  other offers closed,
+  their artisans notified;
+  stop
+else (no)
+  |System|
+  :Request CANCELLED
+  (NO_OFFERS or EXPIRED);
+  |Customer|
+  :Optionally repost
+  with the same details;
+  stop
+endif
+@enduml

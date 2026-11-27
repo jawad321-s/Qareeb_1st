@@ -1,0 +1,52 @@
+skinparam defaultFontName Arial
+skinparam defaultFontSize 15
+skinparam shadowing false
+skinparam roundCorner 14
+skinparam ArrowColor #374151
+skinparam ArrowFontSize 13
+skinparam usecase {
+  BackgroundColor #EEF3FC
+  BorderColor #2B4C9B
+  BorderThickness 1.4
+}
+skinparam actor {
+  BorderColor #2B4C9B
+  BackgroundColor #EEF3FC
+  FontStyle bold
+}
+skinparam rectangle {
+  BorderColor #64748B
+  BackgroundColor #FBFCFE
+  FontStyle bold
+}
+skinparam activity {
+  BackgroundColor #EEF3FC
+  BorderColor #2B4C9B
+  DiamondBackgroundColor #FFF4E8
+  DiamondBorderColor #B45309
+}
+skinparam swimlane {
+  BorderColor #94A3B8
+  TitleFontStyle bold
+  TitleFontSize 16
+}
+skinparam note {
+  BackgroundColor #FFF8DB
+  BorderColor #C9A227
+}
+skinparam component {
+  BackgroundColor #EEF3FC
+  BorderColor #2B4C9B
+}
+skinparam database {
+  BackgroundColor #EEF3FC
+  BorderColor #2B4C9B
+}
+skinparam package {
+  BorderColor #64748B
+  BackgroundColor #FBFCFE
+}
+skinparam cloud {
+  BorderColor #64748B
+  BackgroundColor #FBFCFE
+}

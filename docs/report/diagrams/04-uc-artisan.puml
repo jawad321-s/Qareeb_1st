@@ -1,0 +1,28 @@
+@startuml
+!include _style.iuml
+left to right direction
+actor Artisan as A
+rectangle "Qareeb System" {
+  note "Shared use cases UC-01 to UC-04\nand UC-10 to UC-14 are shown\nin the customer diagram." as N1
+  usecase "UC-15 Set services, working hours\nand availability" as U15
+  usecase "UC-16 Request identity verification" as U16
+  usecase "UC-17 Subscribe to a plan" as U17
+  usecase "UC-18 Receive nearby requests" as U18
+  usecase "UC-19 Submit or withdraw\na price offer" as U19
+  usecase "UC-20 Update the job status" as U20
+  usecase "Open directions\nin the maps app" as U20a
+  usecase "Adjust the price\nwhile working" as U20b
+  usecase "UC-21 Cancel an accepted job\nwith a reason" as U21
+  usecase "UC-22 View income\nand work history" as U22
+}
+A -- U15
+A -- U16
+A -- U17
+A -- U18
+A -- U19
+A -- U20
+A -- U21
+A -- U22
+U20a ..> U20 : <<extend>>
+U20b ..> U20 : <<extend>>
+@enduml

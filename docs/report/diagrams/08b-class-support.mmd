@@ -1,0 +1,53 @@
+classDiagram
+  direction TB
+  class User {
+    +uid : string
+    +role : UserRole
+    +status : UserStatus
+    +suspendReason : string
+  }
+  class Complaint {
+    +reporterId : string
+    +targetId : string
+    +requestId : string
+    +reason : string
+    +details : string
+    +status : open, resolved, dismissed
+    +adminNote : string
+  }
+  class Suggestion {
+    +authorId : string
+    +name : string
+    +details : string
+    +status : new or reviewed
+  }
+  class SupportThread {
+    +uid : string
+    +lastMessage : string
+    +lastFrom : user or admin
+    +unreadForAdmin : boolean
+    +unreadForUser : boolean
+  }
+  class SupportMessage {
+    +senderId : string
+    +from : user or admin
+    +text : string
+  }
+  class Broadcast {
+    +audience : all, customers, artisans
+    +title : string
+    +body : string
+    +status : pending, sending, sent, failed
+  }
+  class AdminLog {
+    +action : string
+    +uid : string
+    +by : string
+    +reason : string
+  }
+  User "1" --> "0..*" Complaint : reports
+  User "1" --> "0..*" Suggestion : proposes
+  User "1" -- "0..1" SupportThread : one per account
+  SupportThread "1" *-- "0..*" SupportMessage : messages
+  AdminLog "0..*" --> "1" User : action on
+  Broadcast ..> User : delivered to audience

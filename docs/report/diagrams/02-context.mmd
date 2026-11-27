@@ -1,0 +1,20 @@
+flowchart LR
+  C["Customer"]
+  A["Artisan"]
+  AD["System<br/>Administrator"]
+  Q(("<b>Qareeb</b><br/>Nearby Services<br/>Management<br/>System"))
+  SMS["Firebase Phone Auth<br/>+ reCAPTCHA"]
+  EP["Expo Push<br/>Service"]
+  OSM["OpenStreetMap<br/>Nominatim"]
+  MAP["Device<br/>maps app"]
+  C -->|"requests, decisions,<br/>messages, ratings"| Q
+  Q -->|"offers, statuses,<br/>notifications"| C
+  A -->|"profile, documents,<br/>offers, job status"| Q
+  Q -->|"nearby requests,<br/>decisions, income"| A
+  AD -->|"decisions, catalog,<br/>settings, broadcasts"| Q
+  Q -->|"users, requests,<br/>complaints, analytics"| AD
+  Q -->|"number, token"| SMS
+  SMS -->|"SMS code"| C
+  Q -->|"push messages"| EP
+  Q <-->|"coordinates / address"| OSM
+  Q -->|"destination"| MAP

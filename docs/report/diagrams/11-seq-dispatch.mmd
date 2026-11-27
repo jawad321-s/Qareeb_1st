@@ -1,0 +1,28 @@
+sequenceDiagram
+  autonumber
+  actor C as Customer
+  participant App as Customer app
+  participant ST as Cloud Storage
+  participant FS as Cloud Firestore
+  participant CF as Cloud Functions
+  participant EP as Expo Push
+  actor A as Artisan
+  C->>App: Choose a service, describe the problem, add photos, confirm location
+  App->>ST: Upload compressed photos
+  App->>FS: Create requests/id with status PENDING
+  FS-)CF: onRequestCreated
+  CF->>FS: Count the customer's open requests
+  alt more than the limit (default 10)
+    CF->>FS: Cancel with TOO_MANY_OPEN
+  else within the limit
+    CF->>FS: Query artisan profiles of the category and their users
+    CF->>CF: Keep verified, available, inside working hours, within 2 km
+    CF->>FS: Save dispatch radius and deadline, add notifiedArtisanIds
+    CF->>FS: Write a newJob notification for each artisan
+    CF->>EP: Push "new request near you"
+    EP-->>A: Notification
+  end
+  loop every minute (dispatchTick)
+    CF->>FS: No offer yet: widen the radius by 2 km every 2 minutes, up to 12 km
+    CF->>FS: Still PENDING after 30 minutes: CANCELLED with NO_OFFERS or EXPIRED
+  end

@@ -1,0 +1,45 @@
+erDiagram
+  artisanProfiles |o--|| users : "artisan details of"
+  publicProfiles ||--|| users : "public view of"
+  users ||--o{ notifications : inbox
+  categories ||--o{ services : contains
+  artisanProfiles }o--|{ categories : offers
+  artisanProfiles {
+    string uid PK,FK
+    array categoryIds
+    map availability
+    boolean available
+    string verificationStatus
+    number completedJobs
+    boolean featured
+  }
+  publicProfiles {
+    string uid PK,FK
+    string fullName
+    string photoUrl
+    number rating
+  }
+  users {
+    string uid PK
+    string role
+    string fullName
+    string phone
+    map location
+    string status
+    boolean verified
+  }
+  notifications {
+    string id PK
+    string type
+    boolean read
+  }
+  categories {
+    string id PK
+    map name
+    boolean active
+  }
+  services {
+    string id PK
+    string categoryId FK
+    map name
+  }

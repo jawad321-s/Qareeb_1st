@@ -1,0 +1,40 @@
+@startuml
+!include _style.iuml
+skinparam defaultFontSize 15
+skinparam nodesep 30
+skinparam ranksep 45
+top to bottom direction
+package "Client layer" {
+  component "Qareeb mobile app\n--\nReact Native 0.88 + Expo SDK 58\nCustomer and Artisan interfaces" as MA
+  component "Admin dashboard\n--\nNext.js 15 static web app\nFirebase Hosting" as AD
+}
+cloud "Firebase backend (qareeb-b9a54)" as FB {
+  component "Authentication\n--\nphone-based logins\nSMS codes, custom claims" as AUTH
+  database "Cloud Firestore\n(eur3) + Security Rules" as FS
+  component "Cloud Storage\n+ Storage Rules" as ST
+  component "Cloud Functions v2\n--\n16 functions, europe-west1" as CF
+}
+package "External services" {
+  component "reCAPTCHA Enterprise\n(SMS defense)" as REC
+  component "Expo Push Service\n(APNs / FCM)" as PUSH
+  component "OpenStreetMap\nNominatim" as OSM
+  component "Device maps app" as MAPS
+}
+MA -[hidden]right- AD
+AUTH -[hidden]right- FS
+ST -[hidden]right- CF
+AUTH -[hidden]down- ST
+FS -[hidden]down- CF
+REC -[hidden]right- PUSH
+OSM -[hidden]right- MAPS
+REC -[hidden]down- OSM
+PUSH -[hidden]down- MAPS
+MA -down-> FB : Firebase SDK
+AD -down-> FB : Firebase SDK
+FS -down-> CF : triggers
+CF -down-> PUSH : push
+PUSH .up.> MA : notifications
+MA ..> REC
+MA ..> OSM
+MA ..> MAPS
+@enduml

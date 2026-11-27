@@ -1,0 +1,21 @@
+sequenceDiagram
+  autonumber
+  actor M as Administrator
+  participant AD as Admin dashboard
+  participant AU as Firebase Auth
+  participant CF as adminManageUser (callable)
+  participant FS as Cloud Firestore
+  actor U as Suspended user
+  M->>AD: Suspend an account and give a reason
+  AD->>M: Ask for the admin password again
+  M->>AD: Password
+  AD->>AU: Re-authenticate
+  AU-->>AD: Fresh token
+  AD->>CF: suspend (uid, reason)
+  CF->>CF: Check role=admin claim, recent sign-in, not own account, not deleted
+  CF->>AU: Set the suspended custom claim
+  CF->>FS: users.status suspended with the reason, open offers withdrawn
+  CF->>FS: Write adminLog entry
+  CF-->>AD: ok
+  U->>AU: Next token refresh carries suspended=true
+  Note over U,FS: Security rules allow only the user's own profile and the support chat

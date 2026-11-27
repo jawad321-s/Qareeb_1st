@@ -1,0 +1,32 @@
+sequenceDiagram
+  autonumber
+  actor A as Artisan
+  participant AA as Artisan app
+  participant FS as Cloud Firestore
+  participant CF as Cloud Functions
+  participant CA as Customer app
+  actor C as Customer
+  A->>AA: Mark "On the way"
+  AA->>FS: request status ON_THE_WAY
+  FS-)CF: onRequestUpdated
+  CF->>FS: onTheWay notification and push for the customer
+  opt directions
+    A->>AA: Open directions
+    AA-->>A: Device maps app opens at the customer's location
+  end
+  A->>AA: Mark "Start work"
+  AA->>FS: request status WORKING
+  CF->>FS: working notification for the customer
+  A->>AA: Mark "Finish"
+  AA->>FS: request status COMPLETED with completedAt
+  CF->>FS: completed notification for the customer
+  Note over CA,AA: An active job not finished within 48 hours is completed by the app with autoCompleted
+  par mandatory rating
+    C->>CA: Rate the artisan
+    CA->>FS: reviews/requestId_customerId
+  and
+    A->>AA: Rate the customer
+    AA->>FS: reviews/requestId_artisanId
+  end
+  FS-)CF: onReviewCreated
+  CF->>FS: Recount rating and completed jobs, award the featured badge when due

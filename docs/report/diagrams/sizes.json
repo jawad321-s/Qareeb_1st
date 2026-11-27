@@ -1,0 +1,98 @@
+{
+ "22a-erd-core": [
+  1222,
+  1086
+ ],
+ "22b-erd-admin": [
+  1147,
+  834
+ ],
+ "02-context": [
+  825,
+  664
+ ],
+ "07-class-domain": [
+  1266,
+  1712
+ ],
+ "08-class-admin": [
+  1579,
+  1266
+ ],
+ "09-class-app": [
+  658,
+  811
+ ],
+ "10-seq-signup": [
+  1016,
+  774
+ ],
+ "11-seq-dispatch": [
+  1177,
+  1255
+ ],
+ "12-seq-offer": [
+  1035,
+  1175
+ ],
+ "13-seq-job": [
+  1036,
+  1239
+ ],
+ "14-seq-chat": [
+  1030,
+  807
+ ],
+ "15-seq-verification": [
+  1037,
+  811
+ ],
+ "16-seq-suspend": [
+  1027,
+  875
+ ],
+ "21-state-request": [
+  601,
+  711
+ ],
+ "23-gantt": [
+  1136,
+  411
+ ],
+ "07a-class-accounts": [
+  1113,
+  1175
+ ],
+ "07b-class-requests": [
+  1023,
+  1242
+ ],
+ "08a-class-artisan-admin": [
+  799,
+  811
+ ],
+ "08b-class-support": [
+  891,
+  950
+ ],
+ "22a-erd-accounts": [
+  606,
+  770
+ ],
+ "22b-erd-requests": [
+  972,
+  770
+ ],
+ "22c-erd-admin": [
+  1312,
+  897
+ ],
+ "22c-erd-artisan-admin": [
+  546,
+  698
+ ],
+ "22d-erd-support": [
+  782,
+  897
+ ]
+}

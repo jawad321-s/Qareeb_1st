@@ -1,0 +1,36 @@
+@startuml
+!include _style.iuml
+|Customer or Artisan|
+start
+:Open "Report" on a
+request (after an offer
+was accepted);
+:Choose a reason and
+write the details;
+|System|
+:Save the complaint
+as open (the reporter
+stays anonymous);
+|Administrator|
+:Open the complaint in the dashboard;
+:Review both parties
+and the request;
+:Write a team note;
+if (Decision) then (resolve)
+  :Mark resolved;
+  if (Account action needed?) then (yes)
+    :Re-enter the admin password;
+    :Suspend the account
+    with a reason;
+    |System|
+    :Restrict the account
+    to the suspended screen
+    and support chat;
+  else (no)
+  endif
+else (dismiss)
+  |Administrator|
+  :Mark dismissed;
+endif
+stop
+@enduml

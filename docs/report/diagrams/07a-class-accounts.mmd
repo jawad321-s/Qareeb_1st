@@ -1,0 +1,69 @@
+classDiagram
+  direction TB
+  class User {
+    +uid : string
+    +role : UserRole
+    +fullName : string
+    +phone : string
+    +photoUrl : string
+    +location : GeoLocation
+    +locale : Locale
+    +status : UserStatus
+    +verified : boolean
+    +rating : number
+  }
+  class ArtisanProfile {
+    +uid : string
+    +bio : string
+    +categoryIds : List~string~
+    +serviceIds : List~string~
+    +availability : Availability
+    +available : boolean
+    +gallery : List~string~
+    +verificationStatus : VerificationStatus
+    +completedJobs : number
+    +featured : boolean
+  }
+  class PublicProfile {
+    +uid : string
+    +fullName : string
+    +photoUrl : string
+    +rating : number
+  }
+  class Notification {
+    +type : string
+    +title : string
+    +body : string
+    +read : boolean
+  }
+  class Category {
+    +id : string
+    +name : LocalizedText
+    +icon : string
+    +active : boolean
+  }
+  class Service {
+    +id : string
+    +categoryId : string
+    +name : LocalizedText
+    +active : boolean
+  }
+  class UserRole {
+    <<enumeration>>
+    customer
+    artisan
+    admin
+  }
+  class UserStatus {
+    <<enumeration>>
+    active
+    suspended
+    deleted
+  }
+  User "1" -- "0..1" ArtisanProfile : artisan details
+  User "1" -- "1" PublicProfile : what others see
+  User "1" *-- "0..*" Notification : inbox
+  Category "1" -- "1..*" Service : contains
+  ArtisanProfile "0..*" --> "1..*" Category : offers
+  User ..> UserRole
+  User ..> UserStatus

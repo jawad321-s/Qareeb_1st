@@ -1,0 +1,18 @@
+sequenceDiagram
+  autonumber
+  actor S as Sender
+  participant SA as Sender app
+  participant FS as Cloud Firestore
+  participant CF as Cloud Functions
+  participant RA as Receiver app
+  actor R as Receiver
+  S->>SA: Type a message or pick photos
+  SA->>FS: Read requests/id/private/chatKey (create it on first use)
+  FS-->>SA: 256-bit key (readable only by the customer and the hired artisan)
+  SA->>SA: Encrypt text and photo links (XSalsa20-Poly1305)
+  SA->>FS: Create requests/id/messages/mid with cipher only
+  FS-)CF: onMessageCreated
+  CF->>FS: newMessage notification without the text, push sent
+  FS-->>RA: Live update (onSnapshot)
+  RA->>RA: Decrypt with the same key
+  RA-->>R: Show the message

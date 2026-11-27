@@ -1,0 +1,76 @@
+classDiagram
+  direction TB
+  class User {
+    +uid : string
+    +role : UserRole
+  }
+  class ServiceRequest {
+    +id : string
+    +customerId : string
+    +categoryId : string
+    +title : string
+    +description : string
+    +images : List~string~
+    +location : GeoLocation
+    +status : RequestStatus
+    +acceptedOfferId : string
+    +acceptedArtisanId : string
+    +dispatch : Dispatch
+    +notifiedArtisanIds : List~string~
+    +excludedArtisanIds : List~string~
+    +cancelReason : string
+    +cancelledBy : string
+    +offerCount : number
+    +autoCompleted : boolean
+  }
+  class Offer {
+    +id : string
+    +requestId : string
+    +artisanId : string
+    +price : number
+    +etaMinutes : number
+    +message : string
+    +status : OfferStatus
+    +closedReason : string
+  }
+  class ChatMessage {
+    +senderId : string
+    +cipher : string
+    +replyTo : string
+    +deleted : boolean
+    +read : boolean
+  }
+  class ChatKey {
+    +key : string
+  }
+  class Review {
+    +requestId : string
+    +authorId : string
+    +targetId : string
+    +rating : 1..5
+    +comment : string
+  }
+  class RequestStatus {
+    <<enumeration>>
+    PENDING
+    ACCEPTED
+    ON_THE_WAY
+    WORKING
+    COMPLETED
+    CANCELLED
+  }
+  class OfferStatus {
+    <<enumeration>>
+    PENDING
+    ACCEPTED
+    REJECTED
+    WITHDRAWN
+  }
+  User "1" --> "0..*" ServiceRequest : customer posts
+  User "1" --> "0..*" Offer : artisan submits
+  ServiceRequest "1" *-- "0..*" Offer : receives
+  ServiceRequest "1" *-- "0..*" ChatMessage : chat
+  ServiceRequest "1" *-- "0..1" ChatKey : private key
+  ServiceRequest "1" -- "0..2" Review : rated by both
+  ServiceRequest ..> RequestStatus
+  Offer ..> OfferStatus

@@ -1,0 +1,39 @@
+classDiagram
+  direction TB
+  class Api {
+    <<facade>>
+    +createRequest(input)
+    +getNearbyRequests()
+    +getOffers(requestId)
+    +submitOffer(input)
+    +acceptOffer(offerId)
+    +rejectOffer(offerId, reason)
+    +updateOfferPrice(offerId, price)
+    +cancelRequest(requestId, reason)
+    +updateRequestStatus(requestId, status)
+    +sendMessage(requestId, msg)
+    +deleteMessageForAll(requestId, messageId)
+    +submitReview(input)
+    +recordSubscription(record)
+    +getJobHistory(artisanId)
+  }
+  class firebaseApi {
+    <<Firestore implementation>>
+  }
+  class mockApi {
+    <<offline demo implementation>>
+  }
+  class ChatCrypto {
+    +newChatKey()
+    +encryptChat(payload, key)
+    +decryptChat(cipher, key)
+  }
+  class MediaService {
+    +uploadRequestPhoto()
+    +uploadChatPhoto()
+    +uploadAvatar()
+  }
+  Api <|.. firebaseApi
+  Api <|.. mockApi
+  firebaseApi ..> ChatCrypto : encrypts chat
+  firebaseApi ..> MediaService : photos

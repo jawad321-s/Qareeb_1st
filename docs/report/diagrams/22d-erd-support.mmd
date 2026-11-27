@@ -1,0 +1,48 @@
+erDiagram
+  users ||--o{ complaints : reports
+  users ||--o{ suggestions : proposes
+  users ||--o| supportThreads : "support chat"
+  supportThreads ||--o{ supportMessages : messages
+  adminLog }o--|| users : "action on"
+  broadcasts }o..o{ users : "delivered to"
+  users {
+    string uid PK
+    string role
+    string status
+    string suspendReason
+  }
+  complaints {
+    string id PK
+    string reporterId FK
+    string targetId FK
+    string requestId FK
+    string status
+    string adminNote
+  }
+  suggestions {
+    string id PK
+    string authorId FK
+    string name
+    string status
+  }
+  supportThreads {
+    string uid PK,FK
+    string lastMessage
+    boolean unreadForAdmin
+  }
+  supportMessages {
+    string id PK
+    string from
+    string text
+  }
+  adminLog {
+    string id PK
+    string action
+    string uid FK
+    string by FK
+  }
+  broadcasts {
+    string id PK
+    string audience
+    string status
+  }

@@ -1,0 +1,29 @@
+@startuml
+!include _style.iuml
+left to right direction
+actor "System\nAdministrator" as M
+rectangle "Qareeb Admin Dashboard" {
+  usecase "UC-23 Sign in with\nan admin account" as U23
+  usecase "UC-24 Review verification requests" as U24
+  usecase "UC-25 Manage users\n(suspend, reactivate,\nverify, unverify)" as U25
+  usecase "Re-enter the\nadmin password" as U25a
+  usecase "UC-26 Manage categories\nand services" as U26
+  usecase "UC-27 Review service suggestions" as U27
+  usecase "UC-28 Handle complaints" as U28
+  usecase "UC-29 Answer support conversations" as U29
+  usecase "UC-30 Send system notifications" as U30
+  usecase "UC-31 Set plan prices and\nplatform settings" as U31
+  usecase "UC-32 Monitor requests,\nsubscriptions and analytics" as U32
+}
+M -- U23
+M -- U24
+M -- U25
+M -- U26
+M -- U27
+M -- U28
+M -- U29
+M -- U30
+M -- U31
+M -- U32
+U25 ..> U25a : <<include>>\n(suspend)
+@enduml

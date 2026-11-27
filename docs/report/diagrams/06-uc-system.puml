@@ -1,0 +1,28 @@
+@startuml
+!include _style.iuml
+left to right direction
+actor "System\n(Cloud Functions\nand scheduler)" as S
+actor "Expo Push\nService" as P
+rectangle "Qareeb Backend" {
+  usecase "UC-33 Dispatch a request to the\nnearest suitable artisans" as U33
+  usecase "UC-34 Expire requests left\nunanswered for 30 minutes" as U34
+  usecase "UC-35 Enforce the\nopen-request limit" as U35
+  usecase "UC-36 Notify users\n(in-app and push)" as U36
+  usecase "UC-37 Award the featured badge" as U37
+  usecase "UC-38 Remind artisans\nbefore their plan ends" as U38
+  usecase "UC-39 Deliver system notifications" as U39
+  usecase "UC-40 Handle account deletion\n(soft delete)" as U40
+}
+S -- U33
+S -- U34
+S -- U35
+S -- U37
+S -- U38
+S -- U39
+S -- U40
+U36 -- P
+U33 ..> U36 : <<include>>
+U34 ..> U36 : <<include>>
+U38 ..> U36 : <<include>>
+U39 ..> U36 : <<include>>
+@enduml

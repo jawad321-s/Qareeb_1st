@@ -1,0 +1,18 @@
+stateDiagram-v2
+  direction TB
+  state "PENDING<br/>waiting for offers" as PENDING
+  state "ACCEPTED" as ACCEPTED
+  state "ON_THE_WAY" as ON_THE_WAY
+  state "WORKING" as WORKING
+  state "COMPLETED" as COMPLETED
+  state "CANCELLED" as CANCELLED
+  [*] --> PENDING : customer posts
+  PENDING --> ACCEPTED : customer accepts an offer
+  ACCEPTED --> ON_THE_WAY : artisan
+  ON_THE_WAY --> WORKING : artisan
+  WORKING --> COMPLETED : artisan, or after 48 h
+  PENDING --> CANCELLED : no offers / expired / customer / over limit
+  ACCEPTED --> CANCELLED : either side, with a reason
+  ON_THE_WAY --> CANCELLED : either side, with a reason
+  COMPLETED --> [*]
+  CANCELLED --> [*]

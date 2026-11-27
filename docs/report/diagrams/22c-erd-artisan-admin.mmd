@@ -1,0 +1,34 @@
+erDiagram
+  users ||--o{ subscriptions : "buys (artisan)"
+  users ||--o| verificationRequests : "submits (artisan)"
+  verificationRequests ||--|{ files : documents
+  subscriptions }o..|| settings : "prices from"
+  users {
+    string uid PK
+    string role
+    string status
+    string suspendReason
+  }
+  subscriptions {
+    string id PK
+    string artisanId FK
+    string planId
+    number amount
+    number expiresAt
+    string status
+  }
+  verificationRequests {
+    string id PK
+    string status
+    string rejectReason
+  }
+  files {
+    string id PK
+    string dataUrl
+  }
+  settings {
+    string id PK
+    map planPrices
+    number maxOpenRequests
+    boolean smsSignUp
+  }

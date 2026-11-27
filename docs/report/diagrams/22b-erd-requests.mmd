@@ -1,0 +1,49 @@
+erDiagram
+  users ||--o{ requests : "posts (customer)"
+  categories ||--o{ requests : classifies
+  requests ||--o{ offers : receives
+  users ||--o{ offers : "submits (artisan)"
+  requests ||--o{ messages : chat
+  requests ||--o| chatKey : "private key"
+  requests ||--o{ reviews : "rated (0..2)"
+  users {
+    string uid PK
+    string role
+  }
+  categories {
+    string id PK
+  }
+  requests {
+    string id PK
+    string customerId FK
+    string categoryId FK
+    string acceptedArtisanId FK
+    string status
+    map dispatch
+    array notifiedArtisanIds
+    string cancelReason
+  }
+  offers {
+    string id PK
+    string requestId FK
+    string artisanId FK
+    number price
+    number etaMinutes
+    string status
+    string closedReason
+  }
+  messages {
+    string id PK
+    string senderId FK
+    string cipher
+    boolean deleted
+  }
+  chatKey {
+    string key
+  }
+  reviews {
+    string id PK
+    string authorId FK
+    string targetId FK
+    number rating
+  }

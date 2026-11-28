@@ -7,6 +7,7 @@
 | `Qareeb_Graduation_Report_AR.pdf` | نفس التقرير العربي PDF. |
 | `feasibility/Qareeb_Feasibility_AR.xlsx` | حاسبة دراسة الجدوى الاقتصادية: عبّوا الخلايا الصفرا بورقة «المدخلات»، والنتائج بتطلع بورقة «جدول الجدوى» (NPV وROI وفترة الاسترداد ونقطة التعادل). |
 | `Qareeb_Chapter1_AR.docx` و`Qareeb_Chapter2_AR.docx` و`Qareeb_Chapter3_AR.docx` | الفصول الأول والثاني والثالث معدّلة، كل واحد لحاله. |
+| `Qareeb_Project_Prompt_AR.md` | برومت جاهز فيه كل معلومات المشروع المؤكدة وهيكل التقرير وقواعد عدم الاختراع، لتعطيه لأي أداة ذكاء اصطناعي تكتب توثيق. |
 | `Qareeb_Report_Notes_AR.docx` | ملاحظات للفريق: شو لازم تضيفوا ووين، وشو بده تأكيد، وشو تغيّر عن التقرير القديم. |
 | `Qareeb_Graduation_Report.docx` و`.pdf` | النسخة الإنجليزية من التقرير (95 صفحة). |
 | `Qareeb_Documentation_Review_AR.docx` | مذكرة المراجعة الأولى (البنود الستة). |

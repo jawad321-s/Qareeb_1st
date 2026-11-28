@@ -28,7 +28,7 @@ import { FeaturedCard } from '@/components/domain/FeaturedCard';
 import { FEATURED_MIN_JOBS, FEATURED_MIN_RATING } from '@/lib/dispatch';
 import { formatMoney } from '@/lib/format';
 import { incomeSummary } from '@/lib/income';
-import { daysLabel, planById } from '@/lib/plans';
+import { daysLabel, planNameOf } from '@/lib/plans';
 import { useMySubscription } from '@/store/subscription';
 import { storage } from '@/lib/mmkv';
 
@@ -44,7 +44,8 @@ export default function ArtisanDashboard() {
   const online = setAvailable.isPending ? setAvailable.variables === true : profile.data?.profile.available !== false;
   const toggleOnline = () => setAvailable.mutate(!online, { onError: () => toast('error', t('artisan.availFailed')) });
   const subscription = useMySubscription(user.uid);
-  const currentPlan = subscription.isActive && subscription.record ? planById(subscription.record.planId) : undefined;
+  // Name of the running plan (kept on the purchase, so a plan the admin removed later still shows).
+  const currentPlan = subscription.isActive && subscription.record ? planNameOf(subscription.record, locale) || t('ad.premium') : undefined;
   const nearby = useNearbyRequests(user.uid, user.location);
   const history = useJobHistory(user.uid);
   const rating = useMyRating();
@@ -216,7 +217,7 @@ export default function ArtisanDashboard() {
             <Icon name={currentPlan ? 'award' : 'alert-circle'} size={32} color="#FFF" />
             <View style={{ flex: 1 }}>
               <Text variant="bodyMedium" tone="inverse">
-                {currentPlan ? `${t('sub.yourPlan')}: ${currentPlan.name[locale]}` : t('sub.expired')}
+                {currentPlan ? `${t('sub.yourPlan')}: ${currentPlan}` : t('sub.expired')}
               </Text>
               <Text variant="caption" style={{ color: 'rgba(255,255,255,0.95)' }}>
                 {currentPlan

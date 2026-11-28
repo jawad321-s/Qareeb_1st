@@ -12,7 +12,7 @@ import { Icon } from '@/components/ui/Icon';
 import { Input } from '@/components/ui/Input';
 import { useAuth } from '@/store/auth';
 import { useSubscriptionStore, type SubscriptionRecord } from '@/store/subscription';
-import { usePlans } from '@/lib/plans';
+import { durationLabel, isAvailable, useAllPlans } from '@/lib/plans';
 import { formatMoney } from '@/lib/format';
 import {
   TEST_CARDS, cardBrand, digitsOnly, formatCardNumber, formatExpiry, processPayment, validateCard,
@@ -34,8 +34,9 @@ export default function Checkout() {
   const { colors, gradient } = useTheme();
   const { t, locale } = useT();
   const { plan: planId } = useLocalSearchParams<{ plan: string }>();
-  // The current price, as set in the admin dashboard.
-  const plan = usePlans().find((p) => p.id === planId);
+  // The current price, as set in the admin dashboard. Looked up among every
+  // plan so the receipt still shows if the admin hides the plan meanwhile.
+  const plan = useAllPlans().find((p) => p.id === planId);
   const user = useAuth((s) => s.user);
   const activate = useSubscriptionStore((s) => s.activate);
 
@@ -65,6 +66,22 @@ export default function Checkout() {
   }, [phase]);
 
   if (!user || !plan || plan.price === 0) return null;
+
+  // A hidden plan or an offer that ended can't be bought any more.
+  if (phase === 'form' && !isAvailable(plan)) {
+    return (
+      <Screen>
+        <Header showBack title={t('pay.title')} />
+        <Card style={{ flexDirection: 'row', gap: 12, alignItems: 'center', marginTop: 20 }}>
+          <Icon name="alert-circle" size={22} color="#EF4444" />
+          <Text variant="body" style={{ flex: 1 }}>
+            {t('sub.unavailable')}
+          </Text>
+        </Card>
+        <Button label={t('common.back')} variant="secondary" onPress={() => router.back()} style={{ marginTop: 16 }} />
+      </Screen>
+    );
+  }
 
   const errors = validateCard(card);
   const brand = cardBrand(card.number);
@@ -214,7 +231,7 @@ export default function Checkout() {
           {t('pay.summary')}
         </Text>
         <Row label={t('pay.plan')} value={plan.name[locale]} />
-        <Row label={t('pay.period')} value={plan.name[locale]} />
+        <Row label={t('pay.period')} value={plan.custom ? durationLabel(plan, locale) : plan.name[locale]} />
         <View style={{ height: 1, backgroundColor: colors.border }} />
         <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
           <View>

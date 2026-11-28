@@ -15,7 +15,7 @@ import { useArtisan, useJobHistory } from '@/hooks/queries';
 import { useMyRating } from '@/hooks/useMyRating';
 import { ratingValue } from '@/lib/rating';
 import { useMySubscription } from '@/store/subscription';
-import { planById } from '@/lib/plans';
+import { planNameOf } from '@/lib/plans';
 import { useTabBarSpace } from '@/components/ui/TabBar';
 import { ProfileMenu, type ProfileMenuItem } from '@/components/domain/ProfileMenu';
 
@@ -110,7 +110,7 @@ export default function ArtisanProfile() {
               </Text>
               <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', gap: 8 }}>
                 {featured && <Badge label={t('featured.badge')} variant="warning" icon="star-filled" onDark />}
-                {plan.isPaid && plan.record && <Badge label={planById(plan.record.planId)?.name[locale] ?? t('ad.premium')} variant="info" icon="award" onDark />}
+                {plan.isPaid && plan.record && <Badge label={planNameOf(plan.record, locale) || t('ad.premium')} variant="info" icon="award" onDark />}
                 <Badge label={user.verified ? t('ad.verified') : t('ap.pending')} variant={user.verified ? 'success' : 'warning'} icon="shield" onDark />
               </View>
               <View style={{ flexDirection: 'row', gap: 28, marginTop: 8 }}>

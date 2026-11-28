@@ -122,6 +122,35 @@ export const USERS: AdminUser[] = Array.from({ length: 48 }).map((_, i) => {
   };
 });
 
+/** Demo subscriptions for the artisans above (mock mode only). */
+export interface DemoSubscription {
+  id: string;
+  artisanId: string;
+  planId: string;
+  amount: number;
+  activatedAt: number;
+  expiresAt: number;
+  status: 'active' | 'cancelled';
+  cancelledAt?: number;
+}
+const DEMO_PLAN = [
+  { planId: 'trial', amount: 0, days: 7 },
+  { planId: 'quarter', amount: 12900, days: 90 },
+  { planId: 'half', amount: 23900, days: 180 },
+  { planId: 'year', amount: 44900, days: 365 },
+];
+export const SUBSCRIPTIONS: DemoSubscription[] = USERS.filter((u) => u.role === 'artisan').flatMap((u, i) => {
+  if (i % 5 === 4) return [];
+  const trialAt = u.joinedAt;
+  const trial: DemoSubscription = { id: `s_${u.uid}_t`, artisanId: u.uid, planId: 'trial', amount: 0, activatedAt: trialAt, expiresAt: trialAt + 7 * day, status: 'active' };
+  if (i % 5 === 0) return [trial];
+  const p = DEMO_PLAN[(i % 3) + 1];
+  const at = Math.max(trialAt + 7 * day, Date.now() - rnd(1, p.days + 30) * day);
+  const paid: DemoSubscription = { id: `s_${u.uid}_p`, artisanId: u.uid, planId: p.planId, amount: p.amount, activatedAt: at, expiresAt: at + p.days * day, status: 'active' };
+  if (i % 7 === 3) Object.assign(paid, { status: 'cancelled', cancelledAt: at + 10 * day });
+  return [trial, paid];
+});
+
 export const VERIFICATIONS: VerificationItem[] = Array.from({ length: 8 }).map((_, i) => ({
   id: `v_${i + 1}`,
   artisanId: `u_${rnd(1, 48)}`,

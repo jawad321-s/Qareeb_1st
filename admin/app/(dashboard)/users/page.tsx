@@ -6,15 +6,54 @@ import type { ColumnDef } from '@tanstack/react-table';
 import { CheckCircle2, Lock, Phone, ShieldCheck, ShieldOff, Star, Trash2, UserCheck, UserX, X } from 'lucide-react';
 import { DataTable } from '@/components/ui/data-table';
 import { Badge, Button, FilterTabs, StatusPill } from '@/components/ui/primitives';
-import { USERS, type AdminUser } from '@/lib/mock-data';
-import { timeAgo } from '@/lib/utils';
+import { SUBSCRIPTIONS, USERS, type AdminUser } from '@/lib/mock-data';
+import { formatDay, formatPrice, timeAgo } from '@/lib/utils';
 import { formatPhone } from '@/lib/phone';
 import { useT, type TKey } from '@/lib/i18n';
 import { isLive } from '@/lib/firebase';
-import { useCollection, toAdminUsers } from '@/lib/live-data';
+import { useCollection, toAdminUsers, type LiveDoc } from '@/lib/live-data';
 import { confirmAdminPassword, manageUser, UserActionFailed, type UserAction } from '@/lib/users.service';
 import { useServiceName } from '@/lib/catalog';
 import { Initials, ServiceChips } from '@/components/ui/people';
+import { planLabel, subState, subsByArtisan, usePlanPrices, type SubState } from '@/lib/plans';
+
+/** One subscription as the users page shows it. */
+interface SubRow {
+  id: string;
+  planId: string;
+  name: string;
+  state: SubState;
+  amount: number;
+  activatedAt: number;
+  expiresAt: number;
+  /** When the artisan cancelled it (cancelled ones only, if recorded). */
+  cancelledAt?: number;
+}
+const SUB_TONE: Record<SubState, 'success' | 'info' | 'neutral' | 'danger'> = {
+  active: 'success',
+  trial: 'info',
+  expired: 'neutral',
+  cancelled: 'danger',
+};
+
+/** "until 12 Dec 2026" / "ended 3 Aug 2026" / "cancelled 1 Aug 2026" (empty if unknown). */
+function subWhen(sub: SubRow, t: (k: TKey) => string, locale: 'ar' | 'en'): string {
+  if (sub.state === 'cancelled') return sub.cancelledAt ? t('usub.cancelledOn').replace('{date}', formatDay(sub.cancelledAt, locale)) : '';
+  const key: TKey = sub.state === 'expired' ? 'usub.endedOn' : 'usub.until';
+  return t(key).replace('{date}', formatDay(sub.expiresAt, locale));
+}
+
+/** "فعّال حتى 12 كانون الأول 2026" / "منتهي · انتهى 3 آب 2026". */
+function SubStatus({ sub }: { sub: SubRow }) {
+  const { t, locale } = useT();
+  const when = subWhen(sub, t, locale);
+  return (
+    <span className="inline-flex flex-wrap items-center gap-1.5">
+      <Badge tone={SUB_TONE[sub.state]}>{t(`usub.${sub.state}` as TKey)}</Badge>
+      {when && <span className="text-xs text-muted">{when}</span>}
+    </span>
+  );
+}
 
 type Filter = 'all' | 'customer' | 'artisan' | 'suspended' | 'deleted';
 
@@ -26,6 +65,8 @@ export default function UsersPage() {
   const requests = useCollection('requests');
   const profiles = useCollection('artisanProfiles');
   const complaints = useCollection('complaints');
+  const subscriptions = useCollection('subscriptions');
+  const { custom } = usePlanPrices();
   const loaded = useMemo(
     () => (live ? toAdminUsers(users ?? [], requests ?? [], profiles ?? []) : USERS),
     [live, users, requests, profiles],
@@ -55,6 +96,35 @@ export default function UsersPage() {
     for (const c of complaints ?? []) if (c.targetId) m.set(c.targetId, (m.get(c.targetId) ?? 0) + 1);
     return m;
   }, [complaints]);
+
+  // Each artisan's subscriptions, newest first, with the plan's current name
+  // (an added plan or offer the admin removed keeps the name it was bought under).
+  const subsOf = useMemo(() => {
+    const now = Date.now();
+    const byArtisan = subsByArtisan<LiveDoc>(live ? subscriptions ?? [] : (SUBSCRIPTIONS as unknown as LiveDoc[]));
+    const out = new Map<string, SubRow[]>();
+    for (const [uid, list] of byArtisan) {
+      out.set(
+        uid,
+        list.map((s) => ({
+          id: String(s.id),
+          planId: String(s.planId ?? ''),
+          name: planLabel(String(s.planId ?? ''), locale, custom, s.planName),
+          state: subState(s, now),
+          amount: Number(s.amount) || 0,
+          activatedAt: Number(s.activatedAt) || 0,
+          expiresAt: Number(s.expiresAt) || 0,
+          cancelledAt: s.status === 'cancelled' && Number(s.cancelledAt) > 0 ? Number(s.cancelledAt) : undefined,
+        })),
+      );
+    }
+    return out;
+  }, [live, subscriptions, custom, locale]);
+  // The one that counts now: a running plan if there is one, else the latest.
+  const currentSub = (uid: string) => {
+    const list = subsOf.get(uid);
+    return list?.find((s) => s.state === 'active' || s.state === 'trial') ?? list?.[0];
+  };
 
   const columns = useMemo<ColumnDef<AdminUser, any>[]>(
     () => [
@@ -88,6 +158,24 @@ export default function UsersPage() {
         header: t('col.services'),
         enableSorting: false,
         cell: ({ row }) => <ServiceChips ids={row.original.services} name={serviceName} max={2} />,
+      },
+      {
+        // An artisan's current plan (or the last one) and until when it runs.
+        id: 'subscription',
+        accessorFn: (u) => (u.role === 'artisan' ? currentSub(u.uid)?.name ?? '' : ''),
+        header: t('col.subscription'),
+        enableSorting: false,
+        cell: ({ row }) => {
+          if (row.original.role !== 'artisan') return <span className="text-muted">—</span>;
+          const sub = currentSub(row.original.uid);
+          if (!sub) return <span className="text-xs text-muted">{t('usub.none')}</span>;
+          return (
+            <div className="space-y-1">
+              <p className="font-medium leading-tight">{sub.name}</p>
+              <SubStatus sub={sub} />
+            </div>
+          );
+        },
       },
       { accessorKey: 'city', header: t('col.city') },
       {
@@ -126,12 +214,13 @@ export default function UsersPage() {
         ),
       },
     ],
-    [t, locale, serviceName],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [t, locale, serviceName, subsOf],
   );
 
-  // Customers have no services and aren't verified: their tab leaves those columns out.
+  // Customers have no services, aren't verified and don't subscribe: their tab leaves those columns out.
   const customerColumns = useMemo(
-    () => columns.filter((c) => !['services', 'verified'].includes(c.id ?? (c as { accessorKey?: string }).accessorKey ?? '')),
+    () => columns.filter((c) => !['services', 'subscription', 'verified'].includes(c.id ?? (c as { accessorKey?: string }).accessorKey ?? '')),
     [columns],
   );
 
@@ -154,6 +243,7 @@ export default function UsersPage() {
           user={current}
           serviceName={serviceName}
           complaints={against.get(current.uid) ?? 0}
+          subscriptions={subsOf.get(current.uid) ?? []}
           onClose={() => setSelected(null)}
           onDemoChange={(patch) => setDemo((d) => ({ ...d, [current.uid]: { ...d[current.uid], ...patch } }))}
         />
@@ -172,12 +262,14 @@ function UserPanel({
   user,
   serviceName,
   complaints,
+  subscriptions,
   onClose,
   onDemoChange,
 }: {
   user: AdminUser;
   serviceName: (id: string) => string;
   complaints: number;
+  subscriptions: SubRow[];
   onClose: () => void;
   onDemoChange: (patch: Partial<AdminUser>) => void;
 }) {
@@ -287,6 +379,29 @@ function UserPanel({
                 <p className="text-sm text-muted">{t('users.noServices')}</p>
               )}
             </div>
+          )}
+          {artisan && (
+            <Section title={t('users.sec.subscription')} hint={t('usub.historyHint')}>
+              {subscriptions.length === 0 ? (
+                <p className="text-sm text-muted">{t('usub.noneYet')}</p>
+              ) : (
+                <ul className="space-y-2">
+                  {subscriptions.map((s) => (
+                    <li key={s.id} className="space-y-1 rounded-xl bg-slate-500/5 p-3 text-sm">
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="font-medium">{s.name}</span>
+                        <Badge tone={SUB_TONE[s.state]}>{t(`usub.${s.state}` as TKey)}</Badge>
+                      </div>
+                      <p className="text-xs text-muted">
+                        {t('usub.from')} {formatDay(s.activatedAt, locale)} {t('usub.to')} {formatDay(s.expiresAt, locale)} · {t('usub.paid')}{' '}
+                        {s.amount > 0 ? formatPrice(s.amount) : t('sub.free')}
+                      </p>
+                      {s.cancelledAt && <p className="text-xs text-red-600 dark:text-red-400">{subWhen(s, t, locale)}</p>}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </Section>
           )}
           {deleted && (
             <div className="space-y-1 rounded-xl bg-slate-500/10 p-3 text-sm">

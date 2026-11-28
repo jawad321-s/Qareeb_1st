@@ -15,14 +15,15 @@ import { useTheme } from '@/theme/ThemeProvider';
 import { useT } from '@/i18n';
 import { formatMoney } from '@/lib/format';
 import { confirmAction } from '@/lib/confirm';
-import { PLAN_FEATURES, daysLabel, perMonth, planById, usePlans } from '@/lib/plans';
+import { PLAN_FEATURES, daysLabel, durationLabel, perMonth, planById, planNameOf, usePlans } from '@/lib/plans';
 import { useAuth } from '@/store/auth';
 import { useMySubscription, useSubscriptionStore } from '@/store/subscription';
 
 /**
  * Artisan plans: a one-time 7-day free trial (starts automatically), then
- * prepaid 3-month, 6-month and yearly plans. A paid plan can be cancelled; it
- * ends at once and the amount paid is not refunded.
+ * prepaid 3-month, 6-month and yearly plans, plus any plan or special offer
+ * the admin added in the dashboard (offers first, until they end). A paid plan
+ * can be cancelled; it ends at once and the amount paid is not refunded.
  */
 export default function Subscription() {
   const { colors, gradient } = useTheme();
@@ -38,8 +39,9 @@ export default function Subscription() {
   if (!user) return null;
 
   const paid = plans.filter((p) => p.price > 0);
-  const chosen = plans.find((p) => p.id === selected)!;
-  const current = sub.record ? planById(sub.record.planId) : undefined;
+  // The selection falls back to the first plan if the admin removed or hid it.
+  const chosen = plans.find((p) => p.id === selected && p.price > 0) ?? paid[0];
+  const currentName = planNameOf(sub.record, locale);
   const date = (ts: number) =>
     new Date(ts).toLocaleDateString(locale === 'ar' ? 'ar' : 'en', { year: 'numeric', month: 'long', day: 'numeric' });
 
@@ -68,7 +70,7 @@ export default function Subscription() {
             </Text>
             <Badge label={sub.status === 'trial' ? t('sub.trialLeft') : t('sub.current')} variant="success" icon="check-circle" />
           </View>
-          <Text variant="h2">{current?.name[locale]}</Text>
+          <Text variant="h2">{currentName}</Text>
           <Text variant="caption" tone="muted">
             {t('sub.validUntil')} {date(sub.record!.expiresAt)} · {daysLabel(sub.daysLeft, locale)} {t('sub.left')}
           </Text>
@@ -166,12 +168,24 @@ export default function Subscription() {
                       plan.badge && <Badge label={plan.badge[locale]} variant="warning" icon="award" onDark={onGradient} />
                     )}
                   </View>
+                  {plan.custom && (
+                    <Text variant="caption" style={{ color: onGradient ? 'rgba(255,255,255,0.95)' : colors.muted }}>
+                      {t('sub.duration')}: {durationLabel(plan, locale)}
+                    </Text>
+                  )}
                   <Text variant="display" tone={onGradient ? 'inverse' : 'default'}>
                     {formatMoney(plan.price)}
                   </Text>
-                  <Text variant="caption" style={{ color: onGradient ? 'rgba(255,255,255,0.95)' : colors.muted }}>
-                    ≈ {formatMoney(perMonth(plan))} / {t('sub.month')}
-                  </Text>
+                  {perMonth(plan) > 0 && (
+                    <Text variant="caption" style={{ color: onGradient ? 'rgba(255,255,255,0.95)' : colors.muted }}>
+                      ≈ {formatMoney(perMonth(plan))} / {t('sub.month')}
+                    </Text>
+                  )}
+                  {plan.kind === 'offer' && plan.endsAt && (
+                    <Text variant="caption" style={{ color: onGradient ? 'rgba(255,255,255,0.95)' : colors.muted, fontWeight: '700' }}>
+                      {t('sub.offerUntil')} {date(plan.endsAt)}
+                    </Text>
+                  )}
                 </LinearGradient>
               </Pressable>
             </Animated.View>
@@ -181,10 +195,10 @@ export default function Subscription() {
 
       <View style={{ marginTop: 24 }}>
         <Button
-          label={sub.isPaid ? t('sub.hasActive') : `${t('sub.subscribe')} ${chosen.name[locale]} · ${t('sub.continuePay')}`}
+          label={sub.isPaid || !chosen ? t('sub.hasActive') : `${t('sub.subscribe')} ${chosen.name[locale]} · ${t('sub.continuePay')}`}
           iconRight={sub.isPaid ? 'check' : 'credit-card'}
-          disabled={sub.isPaid}
-          onPress={() => router.push({ pathname: '/(shared)/checkout', params: { plan: chosen.id } })}
+          disabled={sub.isPaid || !chosen}
+          onPress={() => chosen && router.push({ pathname: '/(shared)/checkout', params: { plan: chosen.id } })}
         />
         <Text variant="caption" tone="muted" center style={{ marginTop: 12 }}>
           {t('sub.prepaid')}

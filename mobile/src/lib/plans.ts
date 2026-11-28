@@ -2,7 +2,9 @@ import { useMemo } from 'react';
 import type { Locale } from '@/types';
 import { usePlanPrices } from '@/store/planPrices';
 
-export type PlanId = 'trial' | 'quarter' | 'half' | 'year';
+/** 'trial' | 'quarter' | 'half' | 'year', or the id of a plan or special offer
+ *  the admin added in the dashboard. */
+export type PlanId = string;
 
 export interface Plan {
   id: PlanId;
@@ -15,6 +17,25 @@ export interface Plan {
   months: number;
   highlight: boolean;
   badge?: Record<Locale, string>;
+  /** Added by the admin in the dashboard: a plan, or a special offer that can
+   *  be bought until `endsAt`. */
+  kind?: 'plan' | 'offer';
+  endsAt?: number;
+  /** Shown in the app (the admin can hide an added plan or offer). */
+  active?: boolean;
+  custom?: boolean;
+}
+
+/** A plan or special offer as the admin saves it in settings/plans.custom. */
+export interface CustomPlanDoc {
+  kind: 'plan' | 'offer';
+  nameAr: string;
+  nameEn: string;
+  price: number;
+  durationDays: number;
+  active: boolean;
+  endsAt?: number;
+  createdAt?: number;
 }
 
 const DAY_MS = 24 * 3600_000;
@@ -51,22 +72,88 @@ const BASE_PLANS: Plan[] = [
   },
 ];
 
-/** The plans with the admin's current prices (the free trial stays free). */
-export const getPlans = (): Plan[] => {
-  const prices = usePlanPrices.getState().prices;
-  return BASE_PLANS.map((p) => (p.price > 0 && prices[p.id] ? { ...p, price: prices[p.id] } : p));
-};
+const OFFER_BADGE: Record<Locale, string> = { en: 'Special offer', ar: 'عرض خاص' };
 
-/** Same, re-rendering when the admin changes a price. */
-export function usePlans(): Plan[] {
-  const prices = usePlanPrices((s) => s.prices);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  return useMemo(getPlans, [prices]);
+/** An added plan or offer in the app's plan shape. */
+export function fromCustom(id: string, d: CustomPlanDoc): Plan {
+  return {
+    id,
+    name: { ar: d.nameAr, en: d.nameEn || d.nameAr },
+    durationDays: d.durationDays,
+    price: d.price,
+    // Per-month figure for plans of a month or more.
+    months: d.durationDays >= 28 ? d.durationDays / 30 : 0,
+    highlight: d.kind === 'offer',
+    badge: d.kind === 'offer' ? OFFER_BADGE : undefined,
+    kind: d.kind,
+    endsAt: d.kind === 'offer' ? d.endsAt : undefined,
+    active: d.active,
+    custom: true,
+  };
 }
 
-export const planById = (id: string) => getPlans().find((p) => p.id === id);
+/** Can be bought now: built-in plans always; added ones while shown and, for
+ *  an offer, until it ends. */
+export const isAvailable = (p: Plan, now = Date.now()) =>
+  !p.custom || (p.active !== false && (p.kind !== 'offer' || (p.endsAt ?? 0) > now));
+
+/** Every plan with the admin's current prices (the free trial stays free),
+ *  including added plans that are hidden or offers that ended — so a plan
+ *  someone already bought can still be named. */
+export const getAllPlans = (): Plan[] => {
+  const { prices, custom } = usePlanPrices.getState();
+  const base = BASE_PLANS.map((p) => (p.price > 0 && prices[p.id] ? { ...p, price: prices[p.id] } : p));
+  const added = Object.entries(custom)
+    .sort(([, x], [, y]) => (x.createdAt ?? 0) - (y.createdAt ?? 0))
+    .map(([id, d]) => fromCustom(id, d));
+  return [...base, ...added];
+};
+
+/** The plans an artisan can buy now: offers first, then the regular plans. */
+export const getPlans = (): Plan[] => {
+  const now = Date.now();
+  const all = getAllPlans().filter((p) => isAvailable(p, now));
+  return [...all.filter((p) => p.kind === 'offer'), ...all.filter((p) => p.kind !== 'offer')];
+};
+
+/** Same, re-rendering when the admin changes a price, a plan or an offer. */
+export function usePlans(): Plan[] {
+  const prices = usePlanPrices((s) => s.prices);
+  const custom = usePlanPrices((s) => s.custom);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  return useMemo(getPlans, [prices, custom]);
+}
+
+/** Every plan (see getAllPlans), re-rendering on changes. */
+export function useAllPlans(): Plan[] {
+  const prices = usePlanPrices((s) => s.prices);
+  const custom = usePlanPrices((s) => s.custom);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  return useMemo(getAllPlans, [prices, custom]);
+}
+
+export const planById = (id: string) => getAllPlans().find((p) => p.id === id);
+
+/** The name of the plan a subscription bought: the plan as it is now, else
+ *  the name kept on the subscription (a plan the admin removed later). */
+export const planNameOf = (rec: { planId: string; planName?: Record<Locale, string> } | undefined, locale: Locale) =>
+  rec ? planById(rec.planId)?.name[locale] ?? rec.planName?.[locale] ?? '' : '';
 
 export const planDurationMs = (plan: Plan) => plan.durationDays * DAY_MS;
+
+/** "3 أشهر" / "45 يوماً": the length of an added plan, for its card. */
+export function durationLabel(plan: Plan, locale: Locale): string {
+  const d = plan.durationDays;
+  if (d % 30 === 0 && d >= 30) {
+    const m = d / 30;
+    if (locale === 'en') return `${m} ${m === 1 ? 'month' : 'months'}`;
+    if (m === 1) return 'شهر واحد';
+    if (m === 2) return 'شهران';
+    if (m <= 10) return `${m} أشهر`;
+    return `${m} شهراً`;
+  }
+  return daysLabel(d, locale);
+}
 
 /** Per-month equivalent of a paid plan, in minor units. */
 export const perMonth = (plan: Plan) => (plan.months ? Math.round(plan.price / plan.months) : 0);

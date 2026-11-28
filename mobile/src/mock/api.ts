@@ -229,6 +229,7 @@ export const mockApi = {
   async recordSubscription(_record: {
     artisanId: string;
     planId: string;
+    planName?: { ar: string; en: string };
     amount: number;
     brand?: string;
     last4?: string;

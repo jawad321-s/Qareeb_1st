@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { create } from 'zustand';
 import { kv } from '@/lib/mmkv';
 import { daysUntil, planById, planDurationMs, type PlanId } from '@/lib/plans';
+import type { Locale } from '@/types';
 import type { CardBrand } from '@/lib/payment';
 import { api } from '@/services/api';
 
@@ -12,6 +13,9 @@ const STORE_KEY = 'qareeb.subscriptions.v2';
 /** The artisan's latest plan, plus the receipt of the payment that bought it. */
 export interface SubscriptionRecord {
   planId: PlanId;
+  /** The plan's name when it was bought, so it can still be shown if the
+   *  admin later removes an added plan or offer. */
+  planName?: Record<Locale, string>;
   activatedAt: number;
   expiresAt: number;
   amount: number; // minor units actually charged
@@ -77,7 +81,7 @@ export const useSubscriptionStore = create<SubscriptionState>((set, get) => {
     activate: (uid, input) => {
       const plan = planById(input.planId)!;
       const activatedAt = input.activatedAt ?? Date.now();
-      const rec: SubscriptionRecord = { ...input, activatedAt, expiresAt: activatedAt + planDurationMs(plan) };
+      const rec: SubscriptionRecord = { ...input, planName: plan.name, activatedAt, expiresAt: activatedAt + planDurationMs(plan) };
       save({ byUser: { ...get().byUser, [uid]: rec } });
       record(uid, rec);
       return rec;
